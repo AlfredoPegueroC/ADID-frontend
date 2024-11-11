@@ -30,7 +30,7 @@ export default function LoginPage() {
       localStorage.setItem('refreshToken', data.refresh);
 
       alert('Login successful!');
-      router.push('/principal'); // Redirect to the home page or a protected page
+      router.push('/'); // Redirect to the home page or a protected page
 
     } catch (error) {
       setError(error.message);

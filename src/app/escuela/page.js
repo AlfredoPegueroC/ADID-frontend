@@ -5,7 +5,7 @@ import FormLayout from '@components/layouts/FormLayout'
 export default function EscuelaFormPage(){
   return (
     <FormLayout>
-      <Escuela/>
+      <Escuela title="Registrar escuela"/>
     </FormLayout>
   )
 }

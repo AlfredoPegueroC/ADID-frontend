@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from 'react';
 
-export default function FacultadForm() {
+export default function FacultadForm({title}) {
     const [universidades, setUniversidades] = useState([]);
     const [formData, setFormData] = useState({
         facultadCodigo: '',
@@ -73,7 +73,7 @@ export default function FacultadForm() {
         <div>
             <form id="facultadForm" onSubmit={handleSubmit}>
                 <fieldset>
-                    <legend>Información de la Facultad</legend>
+                    <legend>{title}</legend>
 
                     <label htmlFor="facultadCodigo">Código de la Facultad:</label>
                     <input

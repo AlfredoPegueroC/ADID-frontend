@@ -5,8 +5,8 @@ import FormLayout from '@components/layouts/FormLayout'
 
 export default function FacultadFormPage(){
   return (
-    <FormLayout title="Registrar Facultad">
-      <Facultad/>
+    <FormLayout>
+      <Facultad title="Registrar Facultad"/>
     </FormLayout>
   )
   

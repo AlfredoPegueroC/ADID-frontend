@@ -1,6 +1,6 @@
 "use client";
 
-export default function universidad() {
+export default function universidad({title}) {
   const handleUniversidad = async (e) => {
     e.preventDefault();
 
@@ -54,6 +54,7 @@ export default function universidad() {
   return (
     <div>
       <form id="universidadForm" onSubmit={handleUniversidad}>
+        <legend>{title}</legend>
         <fieldset>
           <label htmlFor="universidadCodigo">Código de la Universidad:</label>
           <input

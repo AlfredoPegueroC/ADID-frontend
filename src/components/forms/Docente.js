@@ -11,7 +11,7 @@ export default function DocenteForm() {
   const [categoriasDocente, setCategoriasDocente] = useState([]);
 
   const [formData, setFormData] = useState({
-    docente_codigo: '',
+    Docentecodigo: '',
     nombre: '',
     apellidos: '',
     sexo: '',
@@ -20,11 +20,11 @@ export default function DocenteForm() {
     telefono: '',
     direccion: '',
     estado: '',
-    universidad_codigo: '',
-    facultad_codigo: '',
-    escuela_codigo: '',
-    tipo_docente_codigo: '',
-    categoria_codigo: ''
+    UniversidadCodigo: '',
+    facultadCodigo: '',
+    escuelaCodigo: '',
+    tipoDocenteCodigo: '',
+    categoriaCodigo: ''
   });
 
   // Fetch dropdown data (universities, faculties, etc.)
@@ -74,7 +74,7 @@ export default function DocenteForm() {
       if (response.ok) {
         alert('Docente creado exitosamente');
         setFormData({
-          docente_codigo: '',
+          Docentecodigo: '',
           nombre: '',
           apellidos: '',
           sexo: '',
@@ -83,18 +83,21 @@ export default function DocenteForm() {
           telefono: '',
           direccion: '',
           estado: '',
-          universidad_codigo: '',
-          facultad_codigo: '',
-          escuela_codigo: '',
-          tipo_docente_codigo: '',
-          categoria_codigo: ''
+          UniversidadCodigo: '',
+          facultadCodigo: '',
+          escuelaCodigo: '',
+          tipoDocenteCodigo: '',
+          categoriaCodigo: ''
         });
       } else {
         const errorData = await response.json();
         alert('Error al crear el docente: ' + JSON.stringify(errorData));
+        console.log(formData);
       }
     } catch (error) {
       alert('Hubo un error al conectar con la API: ' + error.message);
+        console.log(formData);
+
     }
   };
 
@@ -105,12 +108,12 @@ export default function DocenteForm() {
         <fieldset>
           <legend>Información del Docente</legend>
 
-          <label htmlFor="docente_codigo">Código del Docente:</label>
+          <label htmlFor="Docentecodigo">Código del Docente:</label>
           <input
             type="number"
-            id="docente_codigo"
-            name="docente_codigo"
-            value={formData.docente_codigo}
+            id="Docentecodigo"
+            name="Docentecodigo"
+            value={formData.Docentecodigo}
             onChange={handleChange}
             required
           />
@@ -215,11 +218,11 @@ export default function DocenteForm() {
             <option value="Licencia">Licencia</option>
           </select>
 
-          <label htmlFor="universidad_codigo">Universidad:</label>
+          <label htmlFor="UniversidadCodigo">Universidad:</label>
           <select
-            id="universidad_codigo"
-            name="universidad_codigo"
-            value={formData.universidad_codigo}
+            id="UniversidadCodigo"
+            name="UniversidadCodigo"
+            value={formData.UniversidadCodigo}
             onChange={handleChange}
             required
           >
@@ -233,11 +236,11 @@ export default function DocenteForm() {
             ))}
           </select>
 
-          <label htmlFor="facultad_codigo">Facultad:</label>
+          <label htmlFor="facultadCodigo">Facultad:</label>
           <select
-            id="facultad_codigo"
-            name="facultad_codigo"
-            value={formData.facultad_codigo}
+            id="facultadCodigo"
+            name="facultadCodigo"
+            value={formData.facultadCodigo}
             onChange={handleChange}
             required
           >
@@ -251,11 +254,11 @@ export default function DocenteForm() {
             ))}
           </select>
 
-          <label htmlFor="escuela_codigo">Escuela:</label>
+          <label htmlFor="escuelaCodigo">Escuela:</label>
           <select
-            id="escuela_codigo"
-            name="escuela_codigo"
-            value={formData.escuela_codigo}
+            id="escuelaCodigo"
+            name="escuelaCodigo"
+            value={formData.escuelaCodigo}
             onChange={handleChange}
             required
           >
@@ -269,11 +272,11 @@ export default function DocenteForm() {
             ))}
           </select>
 
-          <label htmlFor="tipo_docente_codigo">Tipo de Docente:</label>
+          <label htmlFor="tipoDocenteCodigo">Tipo de Docente:</label>
           <select
-            id="tipo_docente_codigo"
-            name="tipo_docente_codigo"
-            value={formData.tipo_docente_codigo}
+            id="tipoDocenteCodigo"
+            name="tipoDocenteCodigo"
+            value={formData.tipoDocenteCodigo}
             onChange={handleChange}
             required
           >
@@ -287,11 +290,11 @@ export default function DocenteForm() {
             ))}
           </select>
 
-          <label htmlFor="categoria_codigo">Categoría de Docente:</label>
+          <label htmlFor="categoriaCodigo">Categoría de Docente:</label>
           <select
-            id="categoria_codigo"
-            name="categoria_codigo"
-            value={formData.categoria_codigo}
+            id="categoriaCodigo"
+            name="categoriaCodigo"
+            value={formData.categoriaCodigo}
             onChange={handleChange}
             required
           >
