@@ -74,7 +74,7 @@ export default function universidad({title}) {
 
           <label htmlFor="estado">Estado:</label>
           <select id="estado" defaultValue="" required>
-            <option value="" disabled selected>
+            <option defaultValue="" disabled selected>
               -- Seleccione --
             </option>
             <option value="Activo">Activo</option>

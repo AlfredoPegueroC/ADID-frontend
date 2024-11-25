@@ -8,7 +8,7 @@ export default function FacultadForm({title}) {
     const [formData, setFormData] = useState({
         facultadCodigo: '',
         nombre: '',
-        universidadCodigo: '',
+        UniversidadCodigo: '',
         estado: ''
     });
 
@@ -56,7 +56,7 @@ export default function FacultadForm({title}) {
                 setFormData({
                     facultadCodigo: '',
                     nombre: '',
-                    universidadCodigo: '',
+                    UniversidadCodigo: '',
                     estado: ''
                 });
             } else {
@@ -95,10 +95,10 @@ export default function FacultadForm({title}) {
                         required
                     />
 
-                    <label htmlFor="universidadCodigo">Universidad:</label>
+                    <label htmlFor="UniversidadCodigo">Universidad:</label>
                     <select
-                        id="universidadCodigo"
-                        value={formData.universidadCodigo}
+                        id="UniversidadCodigo"
+                        value={formData.UniversidadCodigo}
                         onChange={handleInputChange}
                         required
                     >
