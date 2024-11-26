@@ -1,3 +1,5 @@
+@import "bootstrap/dist/css/bootstrap.min.css";
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -22,16 +24,16 @@ body {
   font-family: Arial, Helvetica, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: linear-gradient(to right, #2cc3e9, #2b61a3);
+  /* background: linear-gradient(to right, #2cc3e9, #2b61a3); */
   min-height: 100dvh;
  
 }
 
-.container{
+/* .container{
   display: flex;
   justify-content: center;
   align-items: center;
-}
+} */
 
 * {
   box-sizing: border-box;
