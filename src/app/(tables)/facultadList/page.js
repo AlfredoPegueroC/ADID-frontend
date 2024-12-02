@@ -23,12 +23,16 @@ export default function FacultadList() {
 
         // Merge university names into faculties
         const mergedData = facultadesData.map((facultad) => {
+          let universidadNombre = "Universidad no encontrada"; // Default value
           const universidad = universidadesData.find(
             (uni) => uni.UniversidadCodigo === facultad.UniversidadCodigo
           );
+          if (universidad) {
+            universidadNombre = universidad.nombre;
+          }
           return {
             ...facultad,
-            universidadNombre: universidad ? universidad.nombre : "Universidad no encontrada",
+            universidadNombre,
           };
         });
 

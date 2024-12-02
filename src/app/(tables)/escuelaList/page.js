@@ -26,6 +26,25 @@ export default function escuelaList(){
       })
   }, [])
 
+  const deleteEscuela = (pk) => {
+    const confirm = window.confirm("¿Estás seguro de querer eliminar?");
+    if (confirm) {
+      fetch(`http://localhost:8000/api/escuela/delete/${pk}/`, {
+        method: "DELETE",
+      })
+        .then((response) => {
+          if (response.ok) {
+            setEscuela(escuela.filter((esc) => esc.escuelaCodigo !== pk));
+          } else {
+            alert("Failed to delete facultad.");
+          }
+        })
+        .catch((error) => {
+          console.error("Error deleting facultad:", error);
+        });
+    }
+  };
+
 
   if(loading){
     return <p>Loading...</p>
@@ -67,9 +86,9 @@ export default function escuelaList(){
                   <button className="btn btn-primary btn-sm">Edit</button>
                   <button
                     className="btn btn-danger btn-sm mx-2"
-                    // onClick={() =>
-                    //   deleteUniversidad(universidad.UniversidadCodigo)
-                    // }
+                    onClick={() =>
+                      deleteEscuela(escuela.escuelaCodigo)
+                    }
                   >
                     Delete
                   </button>
