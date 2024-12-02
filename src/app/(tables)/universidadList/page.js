@@ -9,7 +9,7 @@ export default function UniversidadList() {
 
   // Fetch data from the API
   useEffect(() => {
-    fetch("http://localhost:8000/api/universidad") // Replace with your API URL
+    fetch("http://localhost:8000/api/universidad") 
       .then((response) => {
         if (!response.ok) {
           throw new Error("Failed to fetch data");
@@ -27,8 +27,10 @@ export default function UniversidadList() {
   }, []);
 
   const deleteUniversidad = (pk) => {
-    // Send DELETE request to the API
-    fetch(`http://localhost:8000/api/universidad/delete/${pk}/`, {
+    const confirm = window.confirm("estas seguro de querer eliminar?")
+    
+    if(confirm){
+      fetch(`http://localhost:8000/api/universidad/delete/${pk}/`, {
       method: "DELETE",
     })
       .then((response) => {
@@ -44,6 +46,8 @@ export default function UniversidadList() {
       .catch((error) => {
         console.error("Error deleting universidad:", error);
       });
+    }
+    
   };
 
   // Display loading or error states
@@ -54,6 +58,8 @@ export default function UniversidadList() {
   return (
     <div>
       <Link className="btn btn-primary mt-5" href="/universidad">Nuevo</Link>
+      <Link className="btn btn-success mt-5 ms-2" href="http://127.0.0.1:8000/export/universidad">Exportar</Link>
+
       <table className="table mt-5">
         <thead>
           <tr>

@@ -5,7 +5,7 @@ import Link from 'next/link';
 
 export default function FacultadList(){
   const [categorias, setCategorias] = useState([])
-  const [loading, setLoading] = useState([])
+  const [loading, setLoading] = useState(true)
 
 
   useEffect(() => {
@@ -20,7 +20,7 @@ export default function FacultadList(){
         setCategorias(data)
         setLoading(false)
       })
-      .then((error) => {
+      .catch((error) => {
         console.error("error facultades", error)
         setLoading(false)
       })

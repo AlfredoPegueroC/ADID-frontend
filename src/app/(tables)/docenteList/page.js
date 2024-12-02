@@ -6,7 +6,7 @@ import Link from 'next/link'
 
 export default function docenteList(){
   const [docentes, setDocentes] = useState([])
-  const [loading, setLoading] = useState([])
+  const [loading, setLoading] = useState(true)
 
 
   useEffect(() => {
@@ -21,7 +21,7 @@ export default function docenteList(){
         setDocentes(data)
         setLoading(false)
       })
-      .then(error => {
+      .catch(error => {
         console.error("error docente", error)
         setLoading(false)
       })
@@ -35,7 +35,7 @@ export default function docenteList(){
   return(
     <div>
        <Link className="btn btn-primary mt-5" href="/facultad">Nuevo</Link>
-
+       <Link className="btn btn-success mt-5 ms-2" href="http://127.0.0.1:8000/export/docente">Exportar</Link>
        <table className="table mt-5 w-100">
         <thead>
           <tr>

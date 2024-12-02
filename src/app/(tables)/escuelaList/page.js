@@ -5,7 +5,7 @@ import Link from 'next/link'
 
 export default function escuelaList(){
   const [escuelas, setEscuelas] = useState([])
-  const [loading, setLoading] = useState([])
+  const [loading, setLoading] = useState(true)
 
 
   useEffect(() => {
@@ -20,7 +20,7 @@ export default function escuelaList(){
         setEscuelas(data)
         setLoading(false)
       })
-      .then((error) => {
+      .catch((error) => {
         console.error("error escuela", error)
         setLoading(false)
       })
@@ -35,7 +35,7 @@ export default function escuelaList(){
   return(
     <div>
        <Link className="btn btn-primary mt-5" href="/facultad">Nuevo</Link>
-
+       <Link className="btn btn-success mt-5 ms-2" href="http://127.0.0.1:8000/export/escuela">Exportar</Link>
        <table className="table mt-5">
         <thead>
           <tr>
@@ -51,7 +51,7 @@ export default function escuelaList(){
           {escuelas.length === 0 && (
             <tr>
               <td colSpan="4" className="text-center">
-                No universities found.
+                No escuela found.
               </td>
             </tr>
           )}
