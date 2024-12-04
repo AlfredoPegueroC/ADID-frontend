@@ -1,8 +1,9 @@
 "use client"
-
+import { useRouter } from "next/navigation";
 import { useState, useEffect } from 'react';
 
 export default function EscuelaForm() {
+  const router = useRouter()
   const [universidades, setUniversidades] = useState([]);
   const [facultades, setFacultades] = useState([]);
   const [formData, setFormData] = useState({
@@ -70,6 +71,7 @@ export default function EscuelaForm() {
 
       if (response.ok) {
         alert('Escuela creada exitosamente');
+
         setFormData({
           escuelaCodigo: '',
           nombre: '',
@@ -77,6 +79,7 @@ export default function EscuelaForm() {
           UniversidadCodigo: '',
           facultadCodigo: '',
         });
+        router.push("/escuelaList")
       } else {
         const errorData = await response.json();
         alert('Error al crear la escuela: ' + JSON.stringify(errorData));
@@ -94,15 +97,6 @@ export default function EscuelaForm() {
       <form onSubmit={handleSubmit}>
         <fieldset>
           <legend>Información de la Escuela</legend>
-
-          <label htmlFor="escuelaCodigo">Código de la Escuela:</label>
-          <input
-            type="number"
-            id="escuelaCodigo"
-            value={formData.escuelaCodigo}
-            onChange={handleChange}
-            required
-          />
 
           <label htmlFor="nombre">Nombre de la Escuela:</label>
           <input

@@ -86,16 +86,6 @@ export default function FacultadForm({ title }) {
         <fieldset>
           <legend>{title}</legend>
 
-          <label htmlFor="facultadCodigo">Código de la Facultad:</label>
-          <input
-            type="number"
-            placeholder="Código de la Facultad"
-            id="facultadCodigo"
-            value={formData.facultadCodigo}
-            onChange={handleInputChange}
-            required
-          />
-
           <label htmlFor="nombre">Nombre de la Facultad:</label>
           <input
             type="text"

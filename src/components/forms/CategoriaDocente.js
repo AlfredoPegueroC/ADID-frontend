@@ -1,8 +1,10 @@
-
 'use client';
+
+import { useRouter } from "next/navigation";
 import { useState, useEffect } from 'react';
 
 export default function CategoriaDocenteForm() {
+  const router = useRouter()
   const [formData, setFormData] = useState({
     categoriaCodigo: '',
     nombre: '',
@@ -54,12 +56,8 @@ export default function CategoriaDocenteForm() {
     if (response.ok) {
       const result = await response.json();
       alert('Categoría de Docente creada exitosamente');
-      setFormData({
-        categoriaCodigo: '',
-        nombre: '',
-        estado: '',
-        universidadCodigo: '',
-      });
+      setFormData({categoriaCodigo: '', nombre: '', estado: '', universidadCodigo: '',});
+      router.push("/categoriadocenteList")
     } else {
       const errorData = await response.json();
       alert('Error al crear la Categoría de Docente: ' + JSON.stringify(errorData));
@@ -68,21 +66,9 @@ export default function CategoriaDocenteForm() {
 
   return (
     <div>
-      <h1>Crear Categoría de Docente</h1>
       <form onSubmit={handleSubmit}>
         <fieldset>
           <legend>Información de la Categoría de Docente</legend>
-
-          <label htmlFor="categoriaCodigo">Código de la Categoría:</label>
-          <input
-            type="number"
-            placeholder="Código de la Categoría"
-            id="categoriaCodigo"
-            name="categoriaCodigo"
-            value={formData.categoriaCodigo}
-            onChange={handleChange}
-            required
-          />
 
           <label htmlFor="nombre">Nombre de la Categoría:</label>
           <input

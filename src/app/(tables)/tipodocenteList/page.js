@@ -8,7 +8,7 @@ export default function tipodocenteList() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/facultad")
+    fetch("http://localhost:8000/api/tipodocente")
       .then((response) => {
         if (!response.ok) {
           throw new Error("Failed to fetch data");
@@ -25,13 +25,35 @@ export default function tipodocenteList() {
       });
   }, []);
 
+  const deleteTipo = (pk) => {
+    const confirm = window.confirm("Estás seguro de querer eliminar?");
+    if (confirm) {
+      fetch(`http://localhost:8000/api/tipodocente/delete/${pk}/`, {
+        method: "DELETE",
+      })
+        .then((response) => {
+          if (response.ok) {
+            setTipodocentes(
+              tipodocentes.filter((tipo) => tipo.tipoDocenteCodigo !== pk)
+            );
+            alert("tipo docente fue eliminado exitosamente");
+          } else {
+            alert("Failed to delete");
+          }
+        })
+        .catch((error) => {
+          console.error("error deleting tipo docente", error);
+        });
+    }
+  };
+
   if (loading) {
     return <p>loading...</p>;
   }
 
   return (
     <div>
-      <Link className="btn btn-primary mt-5" href="/facultad">
+      <Link className="btn btn-primary mt-5" href="/tipodocente">
         Nuevo
       </Link>
 
@@ -64,9 +86,9 @@ export default function tipodocenteList() {
                   <button className="btn btn-primary btn-sm">Edit</button>
                   <button
                     className="btn btn-danger btn-sm mx-2"
-                    // onClick={() =>
-                    //   deleteUniversidad(universidad.UniversidadCodigo)
-                    // }
+                    onClick={() =>
+                      deleteTipo(tipodocente.tipoDocenteCodigo)
+                    }
                   >
                     Delete
                   </button>

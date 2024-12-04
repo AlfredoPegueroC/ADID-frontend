@@ -1,9 +1,11 @@
-// pages/docente/create.js
+// Docentes form
 "use client"
 
+import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 
 export default function DocenteForm() {
+  const router = useRouter()
   const [universidades, setUniversidades] = useState([]);
   const [facultades, setFacultades] = useState([]);
   const [escuelas, setEscuelas] = useState([]);
@@ -89,6 +91,7 @@ export default function DocenteForm() {
           tipoDocenteCodigo: '',
           categoriaCodigo: ''
         });
+        router.push("docenteList")
       } else {
         const errorData = await response.json();
         alert('Error al crear el docente: ' + JSON.stringify(errorData));
@@ -103,20 +106,10 @@ export default function DocenteForm() {
 
   return (
     <div>
-      {/* <h1>Crear Docente</h1> */}
+      
       <form onSubmit={handleSubmit}>
         <fieldset>
           <legend>Información del Docente</legend>
-
-          <label htmlFor="Docentecodigo">Código del Docente:</label>
-          <input
-            type="number"
-            id="Docentecodigo"
-            name="Docentecodigo"
-            value={formData.Docentecodigo}
-            onChange={handleChange}
-            required
-          />
 
           <label htmlFor="nombre">Nombre:</label>
           <input

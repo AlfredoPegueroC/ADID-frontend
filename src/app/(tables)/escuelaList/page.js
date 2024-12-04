@@ -53,8 +53,10 @@ export default function escuelaList(){
 
   return(
     <div>
-       <Link className="btn btn-primary mt-5" href="/facultad">Nuevo</Link>
-       <Link className="btn btn-success mt-5 ms-2" href="http://127.0.0.1:8000/export/escuela">Exportar</Link>
+       <Link className="btn btn-primary mt-5" href="/escuela">Nuevo</Link>
+      {escuelas.length > 0 && (
+        <Link className="btn btn-success mt-5 ms-2" href="http://127.0.0.1:8000/export/escuela">Exportar</Link>
+      )}
        <table className="table mt-5">
         <thead>
           <tr>
@@ -81,7 +83,7 @@ export default function escuelaList(){
                 <td>{escuela.nombre}</td>
                 <td>{escuela.estado}</td>
                 <td>{escuela.UniversidadCodigo}</td>
-                <td>{escuela.FacultadCodigo}</td>
+                <td>{escuela.facultadCodigo}</td>
                 <td>
                   <button className="btn btn-primary btn-sm">Edit</button>
                   <button

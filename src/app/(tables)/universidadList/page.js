@@ -61,12 +61,16 @@ export default function UniversidadList() {
       <Link className="btn btn-primary mt-5" href="/universidad">
         Nuevo
       </Link>
-      <Link
-        className="btn btn-success mt-5 ms-2"
-        href="http://127.0.0.1:8000/export/universidad"
-      >
-        Exportar
-      </Link>
+
+      {universidades.length > 0 && (
+        <Link
+          className="btn btn-success mt-5 ms-2"
+          href="http://127.0.0.1:8000/export/universidad"
+        >
+          Exportar
+        </Link>
+      )}
+      
 
       <table className="table mt-5">
         <thead>

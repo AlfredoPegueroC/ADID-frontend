@@ -1,8 +1,10 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState, useEffect } from 'react';
 
 export default function TipoDocenteForm() {
+  const router = useRouter()
   const [formData, setFormData] = useState({
     tipoDocenteCodigo: '',
     nombre: '',
@@ -55,6 +57,7 @@ export default function TipoDocenteForm() {
       const result = await response.json();
       alert('Tipo de Docente creado exitosamente');
       setFormData({ tipoDocenteCodigo: '', nombre: '', estado: '', universidadCodigo: '' });
+      router.push("/tipodocenteList")
     } else {
       const errorData = await response.json();
       alert('Error al crear el Tipo de Docente: ' + JSON.stringify(errorData));
@@ -63,21 +66,9 @@ export default function TipoDocenteForm() {
 
   return (
     <div>
-      <h1>Crear Tipo de Docente</h1>
       <form onSubmit={handleSubmit}>
         <fieldset>
           <legend>Información del Tipo de Docente</legend>
-
-          <label htmlFor="tipoDocenteCodigo">Tipo de Docente (Código):</label>
-          <input
-            type="number"
-            placeholder="Código del Tipo de Docente"
-            id="tipoDocenteCodigo"
-            name="tipoDocenteCodigo"
-            value={formData.tipoDocenteCodigo}
-            onChange={handleChange}
-            required
-          />
 
           <label htmlFor="nombre">Nombre del Tipo de Docente:</label>
           <input

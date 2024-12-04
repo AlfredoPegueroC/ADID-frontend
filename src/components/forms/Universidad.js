@@ -1,4 +1,5 @@
 "use client";
+import { Alert } from 'bootstrap/dist/js/bootstrap.bundle';
 import { useRouter } from 'next/navigation';
 
 export default function universidad({title}) {
@@ -28,7 +29,7 @@ export default function universidad({title}) {
           )
           if (response.ok) {
             const result = await response.json();
-            console.log("Universidad creada con éxito: " + JSON.stringify(result));
+            alert("Universidad creada con éxito: " + JSON.stringify(result));
             router.push('/universidadList');
 
           } else {

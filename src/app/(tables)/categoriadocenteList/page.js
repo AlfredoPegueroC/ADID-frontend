@@ -26,13 +26,32 @@ export default function FacultadList(){
       })
   },[])
 
+  const deleteCategoria = (pk) => {
+    const confirm = window.confirm("¿Estás seguro de querer eliminar?")
+    if(confirm){
+      fetch(`http://localhost:8000/api/categoriadocente/delete/${pk}/`, {method: "DELETE"})
+      .then((response) => {
+        if(response.ok){
+          setCategorias(categorias.filter((cat) => cat.categoriaCodigo !== pk))
+          alert("facultad fue eliminado exitosamente") // need to customize in a modal component
+        } else{
+          alert("Failed to delete categoria")
+        }
+      })
+      .catch((error) => {
+        console.error("Error deleting categoria", error)
+      })
+    }
+  }
+
+
   if(loading){
     return <p>Loading...</p>
   }
 
   return (
     <div>
-       <Link className="btn btn-primary mt-5" href="/facultad">Nuevo</Link>
+       <Link className="btn btn-primary mt-5" href="/categoriadocente">Nuevo</Link>
 
        <table className="table mt-5">
         <thead>
@@ -63,9 +82,9 @@ export default function FacultadList(){
                   <button className="btn btn-primary btn-sm">Edit</button>
                   <button
                     className="btn btn-danger btn-sm mx-2"
-                    // onClick={() =>
-                    //   deleteUniversidad(universidad.UniversidadCodigo)
-                    // }
+                    onClick={() =>
+                      deleteCategoria(categoria.categoriaCodigo)
+                    }
                   >
                     Delete
                   </button>

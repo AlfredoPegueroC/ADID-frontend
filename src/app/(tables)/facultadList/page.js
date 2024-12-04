@@ -56,6 +56,7 @@ export default function FacultadList() {
         .then((response) => {
           if (response.ok) {
             setFacultades(facultades.filter((fac) => fac.facultadCodigo !== pk));
+            alert("facultad fue eliminado exitosamente") // need to customize in a modal component
           } else {
             alert("Failed to delete facultad.");
           }
@@ -75,12 +76,16 @@ export default function FacultadList() {
       <Link className="btn btn-primary mt-5" href="/facultad">
         Nuevo
       </Link>
+      {facultades.length > 0 && (
+
       <Link
         className="btn btn-success mt-5 ms-2"
         href="http://127.0.0.1:8000/export/facultad"
       >
         Exportar
       </Link>
+      )}
+      
       <table className="table mt-5">
         <thead>
           <tr>

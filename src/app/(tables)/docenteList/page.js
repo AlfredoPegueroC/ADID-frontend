@@ -27,6 +27,24 @@ export default function docenteList(){
       })
   },[])
 
+  const deleteDocente = (pk) => {
+    const confirm = window.confirm("¿Estás seguro de querer eliminar?")
+    if(confirm){
+      fetch(`http://localhost:8000/api/docente/delete/${pk}/`, {method: "DELETE"})
+      .then((response) => {
+        if(response.ok){
+          setDocentes(docentes.filter(doc =>doc.Docentecodigo !== pk))
+          alert("facultad fue eliminado exitosamente") // need to customize in a modal component
+        }else{
+          alert("Failed to delete categoria")
+        }
+      })
+      .catch((error) => {
+        console.error("Error deleting categoria", error)
+      })
+    }
+  }
+
   if(loading){
     return <p>Loading...</p>
   }
@@ -34,8 +52,11 @@ export default function docenteList(){
 
   return(
     <div>
-       <Link className="btn btn-primary mt-5" href="/facultad">Nuevo</Link>
-       <Link className="btn btn-success mt-5 ms-2" href="http://127.0.0.1:8000/export/docente">Exportar</Link>
+       <Link className="btn btn-primary mt-5" href="/docente">Nuevo</Link>
+       {docentes.length > 0 && (
+        <Link className="btn btn-success mt-5 ms-2" href="http://127.0.0.1:8000/export/docente">Exportar</Link>
+       )}
+
        <table className="table mt-5 w-100">
         <thead>
           <tr>
@@ -85,9 +106,9 @@ export default function docenteList(){
                   <button className="btn btn-primary btn-sm">Edit</button>
                   <button
                     className="btn btn-danger btn-sm mx-2"
-                    // onClick={() =>
-                    //   deleteUniversidad(universidad.UniversidadCodigo)
-                    // }
+                    onClick={() =>
+                      deleteDocente(docente.Docentecodigo)
+                    }
                   >
                     Delete
                   </button>
