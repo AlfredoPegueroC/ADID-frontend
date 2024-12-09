@@ -4,13 +4,30 @@ import Link from "next/link"
 // import styles from "./page.module.css";
 
 
+import { useEffect, useState } from 'react';
+
 export default function Home() {
+  const [asignacionData, setAsignacionData] = useState([]);
+  
+  useEffect(() => {
+    // Fetch the asignacionDocente data from the Django API
+    fetch('http://127.0.0.1:8000/api/asignacion')
+      .then((response) => response.json())
+      .then((data) => setAsignacionData(data))
+      .catch((error) => console.error('Error fetching data:', error));
+  }, []);
+
   return (
     <div>
        <Link className="btn btn-primary mt-5" href="/facultad">Import</Link>
-       <Link className="btn btn-success mt-5 ms-2" href="/facultad">Export</Link>
 
-       <table className="table mt-5">
+       {asignacionData.length > 0 && (
+        <Link className="btn btn-success mt-5 ms-2" href="http://127.0.0.1:8000/export/asignacionDocenteExport">Export</Link>
+       )}
+       
+
+      <h3 className="mt-5">Asignacion Docente</h3>
+      <table className="table mt-5">
         <thead>
           <tr>
             <th scope="col">NRC</th>
@@ -29,41 +46,40 @@ export default function Home() {
             <th scope="col">Horario</th>
             <th scope="col">Dias</th>
             <th scope="col">Credito</th>
-            <th scope="col">Acción</th>
-            <th scope="col">Modificaciones</th>
           </tr>
         </thead>
         <tbody>
-          {/* {categorias.length === 0 && (
+          {asignacionData.length === 0 ? (
             <tr>
-              <td colSpan="4" className="text-center">
-                No universities found.
+              <td colSpan="16" className="text-center">
+                No records found.
               </td>
             </tr>
-          )}
-          {categorias.length > 0 &&
-            categorias.map((categoria, index) => (
-              <tr key={categoria.categoriaCodigo}>
-                <th scope="row">{index + 1}</th>
-                <td>{categoria.nombre}</td>
-                <td>{categoria.estado}</td>
-                <td>{categoria.UniversidadCodigo}</td>
-                <td>
-                  <button className="btn btn-primary btn-sm">Edit</button>
-                  <button
-                    className="btn btn-danger btn-sm mx-2"
-                    // onClick={() =>
-                    //   deleteUniversidad(universidad.UniversidadCodigo)
-                    // }
-                  >
-                    Delete
-                  </button>
-                </td>
+          ) : (
+            asignacionData.map((asignacion, index) => (
+              <tr key={index}>
+                <td>{asignacion.nrc}</td>
+                <td>{asignacion.clave}</td>
+                <td>{asignacion.asignatura}</td>
+                <td>{asignacion.codigo}</td>
+                <td>{asignacion.DocenteCodigo}</td>
+                <td>{asignacion.seccion}</td>
+                <td>{asignacion.modalidad}</td>
+                <td>{asignacion.campus}</td>
+                <td>{asignacion.facultadCodigo}</td>
+                <td>{asignacion.escuelaCodigo}</td>
+                <td>{asignacion.tipo}</td>
+                <td>{asignacion.cupo}</td>
+                <td>{asignacion.inscripto}</td>
+                <td>{asignacion.horario}</td>
+                <td>{asignacion.dias}</td>
+                <td>{asignacion.creditos}</td>
               </tr>
-            ))} */}
+            ))
+          )}
         </tbody>
       </table>
-
     </div>
   );
 }
+

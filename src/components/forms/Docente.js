@@ -100,7 +100,6 @@ export default function DocenteForm() {
     } catch (error) {
       alert('Hubo un error al conectar con la API: ' + error.message);
         console.log(formData);
-
     }
   };
 
