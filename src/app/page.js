@@ -19,14 +19,14 @@ export default function Home() {
 
   return (
     <div>
-       <Link className="btn btn-primary mt-5" href="/facultad">Import</Link>
+       <Link className="btn btn-primary mt-5" href="/import">Import</Link>
 
        {asignacionData.length > 0 && (
         <Link className="btn btn-success mt-5 ms-2" href="http://127.0.0.1:8000/export/asignacionDocenteExport">Export</Link>
        )}
        
 
-      <h3 className="mt-5">Asignacion Docente</h3>
+      {/* <h3 className="mt-5">Asignacion Docente</h3> */}
       <table className="table mt-5">
         <thead>
           <tr>
@@ -46,6 +46,7 @@ export default function Home() {
             <th scope="col">Horario</th>
             <th scope="col">Dias</th>
             <th scope="col">Credito</th>
+            <th scope='col'>Accion</th>
           </tr>
         </thead>
         <tbody>
@@ -74,6 +75,19 @@ export default function Home() {
                 <td>{asignacion.horario}</td>
                 <td>{asignacion.dias}</td>
                 <td>{asignacion.creditos}</td>
+                <td>
+                <Link
+                  href='#'
+                  className="btn btn-primary btn-sm"
+                >
+                  Edit
+                </Link>
+                <button
+                  className="btn btn-danger btn-sm mx-2"          
+                >
+                  Delete
+                </button>
+              </td>
               </tr>
             ))
           )}
