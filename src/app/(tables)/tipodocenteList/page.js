@@ -83,7 +83,7 @@ export default function tipodocenteList() {
                 <td>{tipodocente.estado}</td>
                 <td>{tipodocente.UniversidadCodigo}</td>
                 <td>
-                  <button className="btn btn-primary btn-sm">Edit</button>
+                  <Link className="btn btn-primary btn-sm" href={`/tipoEdit/${tipodocente.tipoDocenteCodigo}`}> Edit</Link>
                   <button
                     className="btn btn-danger btn-sm mx-2"
                     onClick={() =>

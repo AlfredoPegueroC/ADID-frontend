@@ -85,7 +85,7 @@ export default function escuelaList(){
                 <td>{escuela.UniversidadCodigo}</td>
                 <td>{escuela.facultadCodigo}</td>
                 <td>
-                  <button className="btn btn-primary btn-sm">Edit</button>
+                  <Link className="btn btn-primary btn-sm" href={`/escuelaEdit/${escuela.escuelaCodigo}`}>Edit</Link>
                   <button
                     className="btn btn-danger btn-sm mx-2"
                     onClick={() =>

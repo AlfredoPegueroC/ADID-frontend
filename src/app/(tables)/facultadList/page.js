@@ -111,7 +111,7 @@ export default function FacultadList() {
               <td>{facultad.estado}</td>
               <td>{facultad.universidadNombre}</td>
               <td>
-                <button className="btn btn-primary btn-sm">Edit</button>
+                <Link className="btn btn-primary btn-sm" href={`/facultadEdit/${facultad.facultadCodigo}`}>Edit</Link>
                 <button
                   className="btn btn-danger btn-sm mx-2"
                   onClick={() => deleteFacultad(facultad.facultadCodigo)}

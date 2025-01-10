@@ -103,7 +103,7 @@ export default function docenteList(){
                 <td>{docente.tipoDocenteCodigo}</td>
                 <td>{docente.categoriaCodigo}</td>
                 <td>
-                  <button className="btn btn-primary btn-sm">Edit</button>
+                  <Link className="btn btn-primary btn-sm" href={`/docenteEdit/${docente.Docentecodigo}`}>Edit</Link>
                   <button
                     className="btn btn-danger btn-sm mx-2"
                     onClick={() =>
