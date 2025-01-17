@@ -46,7 +46,7 @@ export default function docenteList(){
   }
 
   if(loading){
-    return <p>Loading...</p>
+    return <p>Cargando...</p>
   }
 
 
@@ -57,38 +57,49 @@ export default function docenteList(){
         <Link className="btn btn-success mt-5 ms-2" href="http://127.0.0.1:8000/export/docente">Exportar</Link>
        )}
 
-       <table className="table mt-5 w-100">
+<table className="table mt-5 table-primary "style={{
+        borderRadius: "12px",
+        fontSize: "17px",
+        borderCollapse: "separate",
+        overflow: "hidden",
+        backgroundColor: "#e0f3ff",
+
+      }}>
         <thead>
-          <tr>
-            <th scope="col">#</th>
-            <th scope="col">Nombre</th>
-            <th scope="col">Apellidos</th>
-            <th scope="col">Sexo</th>
-            <th scope="col">Estado Civil</th>
-            <th scope="col">Fecha</th>
-            <th scope="col">Telefono</th>
-            <th scope="col">Dirrecion</th>
-            <th scope="col">Estado</th>
-            <th scope="col">Universidad</th>
-            <th scope="col">Facultad</th>
-            <th scope="col">Escuela</th>
-            <th scope="col">Tipo D.</th>
-            <th scope="col">Categoria</th>
-            <th scope="col">Acción</th>
+        <tr className="table" style={{
+            fontSize: "18px",
+            padding: "12px 15px",
+            textAlign: "center",
+            fontWeight: "bold",
+            opacity: "revert-layer",
+          }}>
+            <th>#</th>
+            <th>Nombre</th>
+            <th>Apellidos</th>
+            <th>Sexo</th>
+            <th>Estado Civil</th>
+            <th>Fecha Nacimiento</th>
+            <th>Teléfono</th>
+            <th>Dirección</th>
+            <th>Estado</th>
+            <th>Universidad</th>
+            <th>Facultad</th>
+            <th>Escuela</th>
+            <th>Tipo D.</th>
+            <th>Categoría</th>
+            <th>Acción</th>
           </tr>
         </thead>
         <tbody>
           {docentes.length === 0 && (
             <tr>
-              <td colSpan="4" className="text-center">
-                No universities found.
-              </td>
+              <td colSpan="15" className="text-center">No se encontraron docentes.</td>
             </tr>
           )}
           {docentes.length > 0 &&
             docentes.map((docente, index) => (
               <tr key={docente.Docentecodigo}>
-                <th scope="row">{index + 1}</th>
+                <th>{index + 1}</th>
                 <td>{docente.nombre}</td>
                 <td>{docente.apellidos}</td>
                 <td>{docente.sexo}</td>
@@ -102,15 +113,13 @@ export default function docenteList(){
                 <td>{docente.escuelaCodigo}</td>
                 <td>{docente.tipoDocenteCodigo}</td>
                 <td>{docente.categoriaCodigo}</td>
-                <td>
-                  <Link className="btn btn-primary btn-sm" href={`/docenteEdit/${docente.Docentecodigo}`}>Edit</Link>
+                <td className="d-flex justify-content-between">
+                  <Link className="btn btn-primary btn-sm" href={`/docenteEdit/${docente.Docentecodigo}`}>Editar</Link>
                   <button
-                    className="btn btn-danger btn-sm mx-2"
-                    onClick={() =>
-                      deleteDocente(docente.Docentecodigo)
-                    }
+                    className="btn btn-danger btn-sm"
+                    onClick={() => deleteDocente(docente.Docentecodigo)}
                   >
-                    Delete
+                    Eliminar
                   </button>
                 </td>
               </tr>

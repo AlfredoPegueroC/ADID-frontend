@@ -47,7 +47,7 @@ export default function escuelaList(){
 
 
   if(loading){
-    return <p>Loading...</p>
+    return <p>Cargando...</p>
   }
 
 
@@ -57,9 +57,24 @@ export default function escuelaList(){
       {escuelas.length > 0 && (
         <Link className="btn btn-success mt-5 ms-2" href="http://127.0.0.1:8000/export/escuela">Exportar</Link>
       )}
-       <table className="table mt-5">
+       
+       <table className="table mt-5 table-primary "style={{
+        borderRadius: "12px",
+        fontSize: "17px",
+        borderCollapse: "separate",
+        overflow: "hidden",
+        backgroundColor: "#e0f3ff",
+
+      }}>
         <thead>
-          <tr>
+        <tr className="table" style={{
+            fontSize: "18px",
+            padding: "12px 15px",
+            textAlign: "center",
+            fontWeight: "bold",
+            opacity: "revert-layer",
+          }}>
+            
             <th scope="col">#</th>
             <th scope="col">Nombre</th>
             <th scope="col">Estado</th>
@@ -85,14 +100,14 @@ export default function escuelaList(){
                 <td>{escuela.UniversidadCodigo}</td>
                 <td>{escuela.facultadCodigo}</td>
                 <td>
-                  <Link className="btn btn-primary btn-sm" href={`/escuelaEdit/${escuela.escuelaCodigo}`}>Edit</Link>
+                  <Link className="btn btn-primary btn-sm" href={`/escuelaEdit/${escuela.escuelaCodigo}`}>Editar</Link>
                   <button
                     className="btn btn-danger btn-sm mx-2"
                     onClick={() =>
                       deleteEscuela(escuela.escuelaCodigo)
                     }
                   >
-                    Delete
+                    Eliminar
                   </button>
                 </td>
               </tr>

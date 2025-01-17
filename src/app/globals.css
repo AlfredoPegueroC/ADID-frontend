@@ -12,6 +12,9 @@
   }
 }
 
+
+
+
 html,
 body {
   max-width: 100vw;
@@ -255,3 +258,39 @@ input[type="submit"]:hover {
       padding: 20px;
   }
 }
+
+.navbar-brand {
+  padding: 0;
+  height: 50px; /* Ajustar la altura del logo y la marca */
+}
+
+.navbar-nav .nav-item {
+  padding-top: 5px; /* Reducir el padding superior */
+  padding-bottom: 5px; /* Reducir el padding inferior */
+}
+
+.navbar-toggler {
+  padding: 5px; /* Reducir el tamaño del botón hamburguesa */
+}
+
+/* Estilo general del contenedor del menú */
+.dropdown-menu {
+  position: absolute;
+  background-color: #FFFFFF;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.1);
+  border-radius: 5px;
+  padding: 10px 0;
+  z-index: 1;
+  min-width: 200px;
+  display: none;
+  margin-top: 10px;
+}
+
+/* Mostrar el menú al hacer hover sobre el contenedor padre */
+.dropdown:hover .dropdown-menu {
+  display: block;
+}
+
+/* Estilo para los elementos de la lista (li) */
+.dropdown-menu li {
+  list-style: none

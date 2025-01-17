@@ -72,9 +72,22 @@ export default function UniversidadList() {
       )}
       
 
-      <table className="table mt-5">
+      <table className="table mt-5 table-primary "style={{
+        borderRadius: "12px",
+        fontSize: "17px",
+        borderCollapse: "separate",
+        overflow: "hidden",
+        backgroundColor: "#e0f3ff",
+
+      }}>
         <thead>
-          <tr>
+          <tr className="table" style={{
+            fontSize: "18px",
+            padding: "12px 15px",
+            textAlign: "center",
+            fontWeight: "bold",
+            opacity: "revert-layer",
+          }}>
             <th scope="col">#</th>
             <th scope="col">Nombre</th>
             <th scope="col">Estado</th>
@@ -99,7 +112,7 @@ export default function UniversidadList() {
                   href={`/universidadEdit/${universidad.UniversidadCodigo}`}
                   className="btn btn-primary btn-sm"
                 >
-                  Edit
+                  Editar
                 </Link>
                 <button
                   className="btn btn-danger btn-sm mx-2"
@@ -107,7 +120,7 @@ export default function UniversidadList() {
                     deleteUniversidad(universidad.UniversidadCodigo)
                   }
                 >
-                  Delete
+                  Eliminar
                 </button>
               </td>
             </tr>

@@ -105,6 +105,20 @@ export default function DocenteForm() {
 
   return (
     <div>
+
+      <img
+            src="/InformacionDocente.png"
+            alt="Logo"
+            style={{ height: "100px",
+               marginLeft: "0px", 
+               paddingRight: "10px", 
+               textAlign: "center",
+               position: "absolute",
+               top: "60%",
+               left: "68%",
+               transform: "translate(-50%, -50px)",
+              }}
+          />
       
       <form onSubmit={handleSubmit}>
         <fieldset>

@@ -1,0 +1,52 @@
+/* Estilos generales para la barra de navegación */
+.navbar {
+    background-color: rgb(15, 77, 164);
+    border-radius: 6px;
+    height: 80px;
+    font-size: 20px;
+    font-weight: bold;
+  }
+  
+  /* Aumentar el espaciado y agregar efectos hover en los enlaces de la navbar */
+  .navbar-nav .nav-link {
+    color: white;
+    transition: color 0.3s ease-in-out;
+  }
+  
+  .navbar-nav .nav-link:hover {
+    color: #ffd700; /* Cambia a dorado cuando el usuario pasa el cursor */
+  }
+  
+  /* Dropdown menu styles */
+  .nav-item .dropdown-menu {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+  }
+  
+  .dropdown-menu .dropdown-item {
+    color: #333;
+  }
+  
+  .dropdown-menu .dropdown-item:hover {
+    background-color: #0f4da4; /* Cambia el fondo al pasar el cursor */
+    color: white;
+  }
+  
+  /* Estilo para los botones de navegación de tamaño pequeño */
+  .navbar-toggler {
+    border: none;
+  }
+  
+  .navbar-toggler-icon {
+    filter: invert(100%);
+  }
+  
+  /* Efectos de hover en los botones de import/export */
+  button {
+    transition: all 0.3s ease-in-out;
+    border-radius: 8px;
+  }
+  
+  button:hover {
+    transform: scale(1.05);
+  }

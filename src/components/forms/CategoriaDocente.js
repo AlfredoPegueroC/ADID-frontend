@@ -66,7 +66,20 @@ export default function CategoriaDocenteForm() {
 
   return (
     <div>
-      <form onSubmit={handleSubmit}>
+      <img
+            src="/DocenteLogo.png"
+            alt="Logo"
+            style={{ height: "100px",
+               marginLeft: "0px", 
+               paddingRight: "10px", 
+               textAlign: "center",
+               position: "absolute",
+               top: "20%",
+               left: "50%",
+               transform: "translate(-50%, -50px)",
+              }}
+          />
+      <form onSubmit={handleSubmit} style={{ marginTop: '95px' }}>
         <fieldset>
           <legend>Información de la Categoría de Docente</legend>
 

@@ -81,63 +81,86 @@ export default function FacultadForm({ title }) {
   };
 
   return (
-    <div>
-      <form id="facultadForm" onSubmit={handleSubmit}>
-        <fieldset>
-          <legend>{title}</legend>
+          <div>
 
-          <label htmlFor="nombre">Nombre de la Facultad:</label>
-          <input
-            type="text"
-            placeholder="Nombre de la Facultad"
-            id="nombre"
-            value={formData.nombre}
-            onChange={handleInputChange}
-            required
-          />
+            {/* Imagen centrada */}
+            <div style={{ textAlign: "center", position: "relative" }}>
+              <img
+                src="/FacultadLogo.png"
+                alt="Logo"
+                style={{
+                  height: "100px",
+                  marginLeft: "0px",
+                  paddingRight: "10px",
+                  textAlign: "center",
+                  position: "absolute",
+                  top: "-60px",
+                  left: "50%",
+                  transform: "translate(-50%, -50px)"
+                }}
+      />
+    </div>
+            
+       <form
+      id="facultadForm"
+      onSubmit={handleSubmit}
+      style={{ marginTop: '100px' }}  // Aquí agregamos el margin-top al formulario
+    >
+      <fieldset>
+        <legend>{title}</legend>
 
-          <label htmlFor="UniversidadCodigo">Universidad:</label>
-          <select
-            id="UniversidadCodigo"
-            value={formData.UniversidadCodigo}
-            onChange={handleInputChange}
-            required
-          >
-            <option value="" disabled>
-              -- Seleccione una Universidad --
-            </option>
-            {universidades.map((universidad) => (
-              <option
-                key={universidad.UniversidadCodigo}
-                value={universidad.UniversidadCodigo}
-              >
-                {universidad.nombre}
-              </option>
-            ))}
-          </select>
-
-          <label htmlFor="estado">Estado:</label>
-          <select
-            id="estado"
-            value={formData.estado}
-            onChange={handleInputChange}
-            required
-          >
-            <option value="" disabled>
-              -- Seleccione --
-            </option>
-            <option value="Activo">Activo</option>
-            <option value="Inactivo">Inactivo</option>
-          </select>
-        </fieldset>
-
+        <label htmlFor="nombre">Nombre de la Facultad:</label>
         <input
-          type="submit"
-          value={isLoading ? "Enviando..." : "Enviar"}
-          className="boton-verde"
-          disabled={isLoading}
+          type="text"
+          placeholder="Nombre de la Facultad"
+          id="nombre"
+          value={formData.nombre}
+          onChange={handleInputChange}
+          required
         />
-      </form>
+
+        <label htmlFor="UniversidadCodigo">Universidad:</label>
+        <select
+          id="UniversidadCodigo"
+          value={formData.UniversidadCodigo}
+          onChange={handleInputChange}
+          required
+        >
+          <option value="" disabled>
+            -- Seleccione una Universidad --
+          </option>
+          {universidades.map((universidad) => (
+            <option
+              key={universidad.UniversidadCodigo}
+              value={universidad.UniversidadCodigo}
+            >
+              {universidad.nombre}
+            </option>
+          ))}
+        </select>
+
+        <label htmlFor="estado">Estado:</label>
+        <select
+          id="estado"
+          value={formData.estado}
+          onChange={handleInputChange}
+          required
+        >
+          <option value="" disabled>
+            -- Seleccione --
+          </option>
+          <option value="Activo">Activo</option>
+          <option value="Inactivo">Inactivo</option>
+        </select>
+      </fieldset>
+
+      <input
+        type="submit"
+        value={isLoading ? "Enviando..." : "Enviar"}
+        className="boton-verde"
+        disabled={isLoading}
+      />
+    </form>
     </div>
   );
 }

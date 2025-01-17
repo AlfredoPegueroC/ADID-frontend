@@ -43,29 +43,48 @@ export default function universidad({title}) {
 
   return (
     <div>
-      <form id="universidadForm" action='/universidadList' onSubmit={handleUniversidad}>
-        <legend>{title}</legend>
-        <fieldset>
-          <label htmlFor="nombre">Nombre de la Universidad:</label>
-          <input
-            type="text"
-            placeholder="Nombre de la Universidad"
-            id="nombre"
-            required
-          ></input>
+        <img
+            src="/LOGO-UASD-e1651335718694.png"
+            alt="Logo"
+            style={{ height: "100px",
+               marginLeft: "0px", 
+               paddingRight: "10px", 
+               textAlign: "center",
+               position: "absolute",
+               top: "20%",
+               left: "50%",
+               transform: "translate(-50%, -50px)",
+              }}
+          />
+      <form
+              id="universidadForm"
+              action='/universidadList'
+              onSubmit={handleUniversidad}
+              style={{ marginTop: '95px' }}  // Aquí se aplica el margin-top
+            >
+              <legend>{title}</legend>
+              <fieldset>
+                <label htmlFor="nombre">Nombre de la Universidad:</label>
+                <input
+                  type="text"
+                  placeholder="Nombre de la Universidad"
+                  id="nombre"
+                  required
+                ></input>
 
-          <label htmlFor="estado">Estado:</label>
-          <select id="estado" defaultValue="" required>
-            <option defaultValue="" disabled selected>
-              -- Seleccione --
-            </option>
-            <option value="Activo">Activo</option>
-            <option value="Inactivo">Inactivo</option>
-          </select>
-        </fieldset>
+                <label htmlFor="estado">Estado:</label>
+                <select id="estado" defaultValue="" required>
+                  <option defaultValue="" disabled selected>
+                    -- Seleccione --
+                  </option>
+                  <option value="Activo">Activo</option>
+                  <option value="Inactivo">Inactivo</option>
+                </select>
+              </fieldset>
 
-        <input type="submit" value="Enviar" className="boton-verde"></input>
-      </form>
+              <input type="submit" value="Enviar" className="boton-verde"></input>
+            </form>
+
     </div>
   );
 }

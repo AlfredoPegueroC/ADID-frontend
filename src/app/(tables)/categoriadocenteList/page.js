@@ -46,16 +46,29 @@ export default function FacultadList(){
 
 
   if(loading){
-    return <p>Loading...</p>
+    return <p>Cargando...</p>
   }
 
   return (
     <div>
        <Link className="btn btn-primary mt-5" href="/categoriadocente">Nuevo</Link>
 
-       <table className="table mt-5">
+       <table className="table mt-5 table-primary "style={{
+        borderRadius: "12px",
+        fontSize: "17px",
+        borderCollapse: "separate",
+        overflow: "hidden",
+        backgroundColor: "#e0f3ff",
+
+      }}>
         <thead>
-          <tr>
+        <tr className="table" style={{
+            fontSize: "18px",
+            padding: "12px 15px",
+            textAlign: "center",
+            fontWeight: "bold",
+            opacity: "revert-layer",
+          }}>
             <th scope="col">#</th>
             <th scope="col">Nombre</th>
             <th scope="col">Estado</th>
@@ -79,14 +92,14 @@ export default function FacultadList(){
                 <td>{categoria.estado}</td>
                 <td>{categoria.UniversidadCodigo}</td>
                 <td>
-                  <button className="btn btn-primary btn-sm">Edit</button>
+                  <button className="btn btn-primary btn-sm">Editar</button>
                   <button
                     className="btn btn-danger btn-sm mx-2"
                     onClick={() =>
                       deleteCategoria(categoria.categoriaCodigo)
                     }
                   >
-                    Delete
+                    Eliminar
                   </button>
                 </td>
               </tr>

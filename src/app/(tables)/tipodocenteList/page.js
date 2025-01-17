@@ -48,7 +48,7 @@ export default function tipodocenteList() {
   };
 
   if (loading) {
-    return <p>loading...</p>;
+    return <p>Cargando...</p>;
   }
 
   return (
@@ -57,9 +57,22 @@ export default function tipodocenteList() {
         Nuevo
       </Link>
 
-      <table className="table mt-5">
+      <table className="table mt-5 table-primary "style={{
+        borderRadius: "12px",
+        fontSize: "17px",
+        borderCollapse: "separate",
+        overflow: "hidden",
+        backgroundColor: "#e0f3ff",
+
+      }}>
         <thead>
-          <tr>
+        <tr className="table" style={{
+            fontSize: "18px",
+            padding: "12px 15px",
+            textAlign: "center",
+            fontWeight: "bold",
+            opacity: "revert-layer",
+          }}>
             <th scope="col">#</th>
             <th scope="col">Nombre</th>
             <th scope="col">Estado</th>
@@ -83,14 +96,14 @@ export default function tipodocenteList() {
                 <td>{tipodocente.estado}</td>
                 <td>{tipodocente.UniversidadCodigo}</td>
                 <td>
-                  <Link className="btn btn-primary btn-sm" href={`/tipoEdit/${tipodocente.tipoDocenteCodigo}`}> Edit</Link>
+                  <Link className="btn btn-primary btn-sm" href={`/tipoEdit/${tipodocente.tipoDocenteCodigo}`}> Editar</Link>
                   <button
                     className="btn btn-danger btn-sm mx-2"
                     onClick={() =>
                       deleteTipo(tipodocente.tipoDocenteCodigo)
                     }
                   >
-                    Delete
+                    Eliminar
                   </button>
                 </td>
               </tr>
