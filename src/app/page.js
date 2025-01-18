@@ -33,7 +33,7 @@ export default function Home() {
     marginRight: "1rem",
   }}
 >
-  Import
+  Importar
 </Link>
 
 {asignacionData.length > 0 && (
@@ -58,11 +58,12 @@ export default function Home() {
   className="btn btn-info mt-5 ms-2"
   onClick={toggleDetails}
   style={{
-    padding: "10px 20px",        // Ajusta el tamaño del botón
+    padding: "8px 10px",        // Ajusta el tamaño del botón
     fontSize: "16px",            // Tamaño de la fuente
     borderRadius: "1rem",        // Bordes redondeados
     textDecoration: "none",     // Asegura que el texto no esté subrayado
     cursor: "pointer",          // Cambia el cursor al pasar por encima
+    backgroundColor: "##66B2FF",
     
   }}
 >
