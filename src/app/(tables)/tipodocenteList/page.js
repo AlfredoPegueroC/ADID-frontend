@@ -8,22 +8,40 @@ export default function tipodocenteList() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/tipodocente")
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Failed to fetch data");
-        }
-        return response.json();
-      })
-      .then((data) => {
-        setTipodocentes(data);
-        setLoading(false);
-      })
-      .catch((error) => {
+    async function fetchData(){
+      try {
+        const tipoResponse = await fetch("http://localhost:8000/api/tipodocente");
+        if(!tipoResponse.ok){throw new Error("Failed to fetch data")}
+        const tipoData = await tipoResponse.json();
+
+        const universidadResponse = await fetch("http://localhost:8000/api/universidad");
+        if(!universidadResponse.ok){throw new Error("Failed to fetch data")}
+        const universidadData = await universidadResponse.json();
+
+        const mergedData = tipoData.map((tipo) => {
+          let universidadNombre = "Universidad no encontrada";
+          const universidad = universidadData.find(
+            (uni) => uni.UniversidadCodigo === tipo.UniversidadCodigo
+          );
+          if(universidad){
+            universidadNombre = universidad.nombre;
+          }
+          return {
+            ...tipo,
+            universidadNombre,
+          };
+
+        })
+        setTipodocentes(mergedData);
+
+      }catch(error){
         console.error("error tipo docentes", error);
+       } finally{
         setLoading(false);
-      });
-  }, []);
+       }
+    }
+    fetchData();
+  },[]);
 
   const deleteTipo = (pk) => {
     const confirm = window.confirm("Estás seguro de querer eliminar?");
@@ -81,7 +99,7 @@ export default function tipodocenteList() {
                 <th scope="row">{index + 1}</th>
                 <td>{tipodocente.nombre}</td>
                 <td>{tipodocente.estado}</td>
-                <td>{tipodocente.UniversidadCodigo}</td>
+                <td>{tipodocente.universidadNombre}</td>
                 <td>
                   <Link className="btn btn-primary btn-sm" href={`/tipoEdit/${tipodocente.tipoDocenteCodigo}`}> Edit</Link>
                   <button

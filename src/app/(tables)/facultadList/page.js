@@ -5,7 +5,7 @@ import Link from "next/link";
 
 export default function FacultadList() {
   const [facultades, setFacultades] = useState([]);
-  const [universidades, setUniversidades] = useState([]);
+  // const [universidades, setUniversidades] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -77,13 +77,12 @@ export default function FacultadList() {
         Nuevo
       </Link>
       {facultades.length > 0 && (
-
-      <Link
-        className="btn btn-success mt-5 ms-2"
-        href="http://127.0.0.1:8000/export/facultad"
-      >
-        Exportar
-      </Link>
+        <Link
+          className="btn btn-success mt-5 ms-2"
+          href="http://127.0.0.1:8000/export/facultad"
+        >
+          Exportar
+        </Link>
       )}
       
       <table className="table mt-5">
