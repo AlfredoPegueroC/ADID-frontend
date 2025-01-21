@@ -14,7 +14,7 @@ export default function categoriaEdit({params}){
   useEffect(() => {
     async function fetchData() {
       try {
-        const categoriasResponse = await fetch(`http://localhost:8000/api/categoria/${id}/`);
+        const categoriasResponse = await fetch(`http://localhost:8000/api/categoriadocente/${id}/`);
         if (!categoriasResponse.ok) throw new Error("Failed to fetch categorias");
         const categoriasData = await categoriasResponse.json();
         setCategoria(categoriasData);
@@ -39,7 +39,7 @@ export default function categoriaEdit({params}){
     if (!categoria) return;
 
     try {
-      const response = await fetch(`http://localhost:8000/api/categoria/edit/${id}/`, {
+      const response = await fetch(`http://localhost:8000/api/categoriadocente/edit/${id}/`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -49,7 +49,7 @@ export default function categoriaEdit({params}){
 
       if (response.ok) {
         alert("Categoria updated successfully!");
-        router.push("/categoriaList");
+        router.push("/categoriadocenteList");
       } else {
         alert("Failed to update categoria.");
       }
@@ -79,10 +79,24 @@ export default function categoriaEdit({params}){
           <label htmlFor="nombre" className="form-label">Nombre</label>
           <input type="text" className="form-control" id="nombre" name="nombre" value={categoria.nombre} onChange={handleChange} />
         </div>
+
+
         <div className="mb-3">
-          <label htmlFor="descripcion" className="form-label">Descripcion</label>
-          <input type="text" className="form-control" id="descripcion" name="descripcion" value={categoria.descripcion} onChange={handleChange} />
+          <label htmlFor="estado" className="form-label">Estado</label>
+          <select
+            className="form-control"
+            id="estado"
+            name="estado"
+            value={categoria?.estado || ""}
+            onChange={handleChange}
+          >
+            <option value="Activo">Activo</option>
+            <option value="Inactivo">Inactivo</option>
+          </select>
         </div>
+
+
+
         <div className="mb-3">
           <label htmlFor="universidad" className="form-label">Universidad</label>
           <select className="form-select" id="universidad" name="universidad" value={categoria.universidad} onChange={handleChange}>

@@ -1,5 +1,5 @@
 
-.login-container {
+.login_container {
   width: 50%;
   max-width: 1000px;
   background-color: #fff;
@@ -8,12 +8,12 @@
   overflow: hidden;
 }
 
-.login-box {
+.login_box {
   display: flex;
   height: 500px;
 }
 
-.left-section {
+.left_section {
   background-color: #00a8f3;
   width: 50%;
   display: flex;
@@ -25,12 +25,12 @@
   text-align: center;
 }
 
-.left-section .logo {
+.left_section .logo {
   width: 150px;
   height: auto;
 }
 
-.right-section {
+.right_section {
   width: 50%;
   padding: 40px;
   display: flex;
@@ -38,36 +38,36 @@
   justify-content: center;
 }
 
-.right-section h2 {
+.right_section h2 {
   margin-bottom: 20px;
   color: #0072ff;
 }
 
-form {
+ .form {
   display: flex;
   flex-direction: column;
 }
 
-form label {
+.form label {
   margin-bottom: 8px;
   color: #333;
 }
 
-form input {
+.form input {
   margin-bottom: 20px;
   padding: 10px;
-  border: 1px solid #ddd;
+  border: 1px solid #661919;
   border-radius: 4px;
   font-size: 16px;
 }
 
-form a {
+.form a {
   color: #0072ff;
   text-decoration: none;
   margin-bottom: 20px;
 }
 
-form .login-btn {
+.form .login_btn {
   padding: 12px;
   background-color: #0072ff;
   color: white;
@@ -78,7 +78,7 @@ form .login-btn {
   transition: background-color 0.3s ease;
 }
 
-form .login-btn:hover {
+.form .login_btn:hover {
   background-color: #005bb5;
 }
 
@@ -88,4 +88,4 @@ form .login-btn:hover {
 
 .separacion{
   margin-top: 32.3px;
-}
+} 

@@ -96,7 +96,14 @@ export default function FacultadList() {
                 <td>{categoria.estado}</td>
                 <td>{categoria.universidadNombre}</td>
                 <td>
-                  <button className="btn btn-primary btn-sm">Edit</button>
+
+
+                <Link
+                  href={`/categoriaEdit/${categoria.categoriaCodigo}`}
+                  className="btn btn-primary btn-sm"
+                >
+                  Edit
+                </Link>
                   <button
                     className="btn btn-danger btn-sm mx-2"
                     onClick={() => deleteCategoria(categoria.categoriaCodigo)}
