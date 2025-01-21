@@ -2,17 +2,21 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import Pagination from "@components/Pagination";
 
 export default function EscuelaList() {
   const [escuelas, setEscuelas] = useState([]);
   const [loading, setLoading] = useState(true);
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000/api";
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
+  // const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000/api";
 
   useEffect(() => {
     async function fetchData() {
       try {
         // Fetch escuela data
-        const escuelaResponse = await fetch(`http://localhost:8000/api/escuela`);
+        const escuelaResponse = await fetch(`http://localhost:8000/api/escuela?page=${page}`);
         if (!escuelaResponse.ok) throw new Error("Failed to fetch escuelas");
         const escuelaData = await escuelaResponse.json();
 
@@ -27,12 +31,12 @@ export default function EscuelaList() {
         const universidadData = await universidadResponse.json();
 
         // Merge data
-        const mergedData = escuelaData.map((escuela) => {
-          const facultad = facultadData.find((fac) => fac.facultadCodigo === escuela.facultadCodigo) || {
+        const mergedData = escuelaData.results.map((escuela) => {
+          const facultad = facultadData.results.find((fac) => fac.facultadCodigo === escuela.facultadCodigo) || {
             nombre: "Facultad no encontrada",
           };
 
-          const universidad = universidadData.find(
+          const universidad = universidadData.results.find(
             (uni) => uni.UniversidadCodigo === escuela.UniversidadCodigo
           ) || {
             nombre: "Universidad no encontrada",
@@ -46,6 +50,8 @@ export default function EscuelaList() {
         });
 
         setEscuelas(mergedData);
+        setTotalPages(Math.ceil(escuelaData.count / 10));
+
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -54,12 +60,12 @@ export default function EscuelaList() {
     }
 
     fetchData();
-  }, [API_BASE_URL]);
+  }, [page]);
 
   const deleteEscuela = (pk) => {
     const confirm = window.confirm("¿Estás seguro de querer eliminar?");
     if (confirm) {
-      fetch(`${API_BASE_URL}/escuela/delete/${pk}/`, {
+      fetch(`http://localhost:8000/api/escuela/delete/${pk}/`, {
         method: "DELETE",
       })
         .then((response) => {
@@ -80,13 +86,21 @@ export default function EscuelaList() {
     return <p>Loading...</p>; 
   }
 
+  const handlePagination = (direction) => {
+    if (direction === "next" && page < totalPages) {
+      setPage(page + 1);
+    } else if (direction === "prev" && page > 1) {
+      setPage(page - 1);
+    }
+  };
+
   return (
     <div>
       <Link className="btn btn-primary mt-5" href="/escuela">
         Nuevo
       </Link>
       {escuelas.length > 0 && (
-        <Link className="btn btn-success mt-5 ms-2" href={`${API_BASE_URL}/export/escuela`}>
+        <Link className="btn btn-success mt-5 ms-2" href={`http://localhost:8000/api/export/escuela`}>
           Exportar
         </Link>
       )}
@@ -132,6 +146,8 @@ export default function EscuelaList() {
           )}
         </tbody>
       </table>
+
+      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
     </div>
   );
 }

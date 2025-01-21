@@ -2,10 +2,13 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import Pagination from "@components/Pagination";
 
 export default function tipodocenteList() {
   const [tipodocentes, setTipodocentes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     async function fetchData(){
@@ -18,9 +21,9 @@ export default function tipodocenteList() {
         if(!universidadResponse.ok){throw new Error("Failed to fetch data")}
         const universidadData = await universidadResponse.json();
 
-        const mergedData = tipoData.map((tipo) => {
+        const mergedData = tipoData.results.map((tipo) => {
           let universidadNombre = "Universidad no encontrada";
-          const universidad = universidadData.find(
+          const universidad = universidadData.results.find(
             (uni) => uni.UniversidadCodigo === tipo.UniversidadCodigo
           );
           if(universidad){
@@ -33,7 +36,7 @@ export default function tipodocenteList() {
 
         })
         setTipodocentes(mergedData);
-
+        setTotalPages(Math.ceil(tipoData.count / 10));
       }catch(error){
         console.error("error tipo docentes", error);
        } finally{
@@ -41,7 +44,7 @@ export default function tipodocenteList() {
        }
     }
     fetchData();
-  },[]);
+  },[page]);
 
   const deleteTipo = (pk) => {
     const confirm = window.confirm("Estás seguro de querer eliminar?");
@@ -115,6 +118,8 @@ export default function tipodocenteList() {
             ))}
         </tbody>
       </table>
+
+      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
     </div>
   );
 }

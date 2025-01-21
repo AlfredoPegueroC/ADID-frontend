@@ -2,10 +2,13 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Pagination from "@components/Pagination";
 
 export default function DocenteList() {
   const [docentes, setDocentes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     async function fetchData() {
@@ -48,20 +51,20 @@ export default function DocenteList() {
         const categoriaData = await categoriaResponse.json();
 
         // Merge data
-        const mergedData = docenteData.map((docente) => {
-          const universidad = universidadData.find(
+        const mergedData = docenteData.results.map((docente) => {
+          const universidad = universidadData.results.find(
             (uni) => uni.UniversidadCodigo === docente.UniversidadCodigo
           );
-          const facultad = facultadData.find(
+          const facultad = facultadData.results.find(
             (fac) => fac.facultadCodigo === docente.facultadCodigo
           );
-          const escuela = escuelaData.find(
+          const escuela = escuelaData.results.find(
             (esc) => esc.escuelaCodigo === docente.escuelaCodigo
           );
-          const tipo = tipoData.find(
+          const tipo = tipoData.results.find(
             (tip) => tip.tipoDocenteCodigo === docente.tipoDocenteCodigo
           );
-          const categoria = categoriaData.find(
+          const categoria = categoriaData.results.find(
             (cat) => cat.categoriaCodigo === docente.categoriaCodigo
           );
 
@@ -76,6 +79,8 @@ export default function DocenteList() {
         });
 
         setDocentes(mergedData);
+        setTotalPages(Math.ceil(docenteData.count / 10));
+
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -83,7 +88,7 @@ export default function DocenteList() {
       }
     }
     fetchData();
-  }, []);
+  }, [page]);
 
   const deleteDocente = async (pk) => {
     const confirmDelete = window.confirm("¿Estás seguro de querer eliminar?");
@@ -188,6 +193,8 @@ export default function DocenteList() {
           ))}
         </tbody>
       </table>
+
+      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
     </div>
   );
 }

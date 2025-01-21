@@ -57,7 +57,7 @@ export default function Home() {
               </td>
             </tr>
           ) : (
-            asignacionData.map((asignacion, index) => (
+            asignacionData.results.map((asignacion, index) => (
               <tr key={index}>
                 <td>{asignacion.nrc}</td>
                 <td>{asignacion.clave}</td>

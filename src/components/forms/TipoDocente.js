@@ -20,7 +20,7 @@ export default function TipoDocenteForm() {
       try {
         const response = await fetch('http://127.0.0.1:8000/api/universidad');
         const data = await response.json();
-        setUniversidades(data);
+        setUniversidades(data.results);
       } catch (error) {
         console.error('Error fetching universidades:', error);
       }

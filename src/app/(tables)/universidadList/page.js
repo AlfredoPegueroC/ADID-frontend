@@ -2,29 +2,32 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import Pagination from "@components/Pagination";
 
 export default function UniversidadList() {
   const [universidades, setUniversidades] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
-  // Fetch data from the API
   useEffect(() => {
-    fetch("http://localhost:8000/api/universidad")
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Failed to fetch data");
-        }
-        return response.json();
-      })
-      .then((data) => {
-        setUniversidades(data);
+    async function fetchData() {
+      setLoading(true)
+      try {
+        const response = await fetch(`http://localhost:8000/api/universidad?page=${page}`);
+        if (!response.ok) {console.error("Failed to fetch data");}
+        const data = await response.json();
+        setUniversidades(data.results);
+        setTotalPages(Math.ceil(data.count / 10));
         setLoading(false);
-      })
-      .catch((error) => {
-        console.error("Error fetching universidades:", error);
+      }catch (error) {
+        console.error("Error fetching data:", error);
         setLoading(false);
-      });
-  }, []);
+      }
+    }
+
+    fetchData();
+  }, [page]);
 
   const deleteUniversidad = async (pk) => {
     const confirmDelete = window.confirm("¿Estás seguro de querer eliminar?");
@@ -58,21 +61,21 @@ export default function UniversidadList() {
 
   return (
     <div>
-      <Link className="btn btn-primary mt-5" href="/universidad">
-        Nuevo
-      </Link>
-
-      {universidades.length > 0 && (
-        <Link
-          className="btn btn-success mt-5 ms-2"
-          href="http://127.0.0.1:8000/export/universidad"
-        >
-          Exportar
+      <div className="d-flex gap-1 mb-3 mt-3">
+        <Link className="btn btn-primary" href="/universidad">
+          Nuevo
         </Link>
-      )}
-      
+        {universidades.length > 0 && (
+          <Link
+            className="btn btn-success"
+            href="http://127.0.0.1:8000/export/universidad"
+          >
+            Exportar
+          </Link>
+        )}
+      </div>
 
-      <table className="table mt-5">
+      <table className="table mt-3">
         <thead>
           <tr>
             <th scope="col">#</th>
@@ -85,13 +88,13 @@ export default function UniversidadList() {
           {universidades.length === 0 && (
             <tr>
               <td colSpan="4" className="text-center">
-                No universities found.
+                No se encontraron universidades.
               </td>
             </tr>
           )}
           {universidades.map((universidad, index) => (
             <tr key={universidad.UniversidadCodigo}>
-              <th scope="row">{index + 1}</th>
+              <th scope="row">{index + 1 + (page - 1) * 10}</th>
               <td>{universidad.nombre}</td>
               <td>{universidad.estado}</td>
               <td>
@@ -99,7 +102,7 @@ export default function UniversidadList() {
                   href={`/universidadEdit/${universidad.UniversidadCodigo}`}
                   className="btn btn-primary btn-sm"
                 >
-                  Edit
+                  Editar
                 </Link>
                 <button
                   className="btn btn-danger btn-sm mx-2"
@@ -107,13 +110,15 @@ export default function UniversidadList() {
                     deleteUniversidad(universidad.UniversidadCodigo)
                   }
                 >
-                  Delete
+                  Eliminar
                 </button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+
+      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
     </div>
   );
 }

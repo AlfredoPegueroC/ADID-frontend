@@ -2,10 +2,13 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import Pagination from "@components/Pagination";
 
 export default function FacultadList() {
   const [categorias, setCategorias] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     async function fetchData() {
@@ -18,8 +21,8 @@ export default function FacultadList() {
         if (!universidadResponse.ok) throw new Error("Failed to fetch universidad data");
         const universidadData = await universidadResponse.json();
 
-        const mergedData = categoriaData.map((categoria) => {
-          const universidad = universidadData.find(
+        const mergedData = categoriaData.results.map((categoria) => {
+          const universidad = universidadData.results.find(
             (uni) => uni.UniversidadCodigo === categoria.UniversidadCodigo
           );
 
@@ -30,6 +33,8 @@ export default function FacultadList() {
         });
 
         setCategorias(mergedData);
+        setTotalPages(Math.ceil(categoriaData.count / 10));
+
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -38,7 +43,7 @@ export default function FacultadList() {
     }
 
     fetchData();
-  }, []);
+  }, [page]);
 
   const deleteCategoria = (pk) => {
     const confirm = window.confirm("¿Estás seguro de querer eliminar?");
@@ -65,6 +70,15 @@ export default function FacultadList() {
   if (loading) {
     return <p>Loading...</p>;
   }
+
+
+  const handlePagination = (direction) => {
+    if (direction === "next" && page < totalPages) {
+      setPage((prevPage) => prevPage + 1);
+    } else if (direction === "prev" && page > 1) {
+      setPage((prevPage) => prevPage - 1);
+    }
+  };
 
   return (
     <div>
@@ -116,6 +130,8 @@ export default function FacultadList() {
           )}
         </tbody>
       </table>
+
+      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
     </div>
   );
 }

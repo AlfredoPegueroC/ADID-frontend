@@ -21,7 +21,7 @@ export default function FacultadForm({ title }) {
         const response = await fetch("http://127.0.0.1:8000/api/universidad");
         if (!response.ok) throw new Error("Failed to fetch universities");
         const data = await response.json();
-        setUniversidades(data);
+        setUniversidades(data.results);
       } catch (error) {
         console.error("Error loading universities:", error);
         alert("No se pudieron cargar las universidades");

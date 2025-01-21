@@ -2,17 +2,19 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import Pagination from "@components/Pagination";
 
 export default function FacultadList() {
   const [facultades, setFacultades] = useState([]);
-  // const [universidades, setUniversidades] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
+  // Fetch faculties data with pagination
   useEffect(() => {
     async function fetchData() {
       try {
-        // Fetch faculties
-        const facultadesResponse = await fetch("http://localhost:8000/api/facultad");
+        const facultadesResponse = await fetch(`http://localhost:8000/api/facultad?page=${page}`);
         if (!facultadesResponse.ok) throw new Error("Failed to fetch facultades");
         const facultadesData = await facultadesResponse.json();
 
@@ -22,9 +24,9 @@ export default function FacultadList() {
         const universidadesData = await universidadesResponse.json();
 
         // Merge university names into faculties
-        const mergedData = facultadesData.map((facultad) => {
+        const mergedData = facultadesData.results.map((facultad) => {
           let universidadNombre = "Universidad no encontrada"; // Default value
-          const universidad = universidadesData.find(
+          const universidad = universidadesData.results.find(
             (uni) => uni.UniversidadCodigo === facultad.UniversidadCodigo
           );
           if (universidad) {
@@ -37,6 +39,7 @@ export default function FacultadList() {
         });
 
         setFacultades(mergedData);
+        setTotalPages(Math.ceil(facultadesData.count / 10)); // Assuming 10 items per page
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -45,20 +48,21 @@ export default function FacultadList() {
     }
 
     fetchData();
-  }, []);
+  }, [page]);
 
+  // Handle deletion of facultad
   const deleteFacultad = (pk) => {
-    const confirm = window.confirm("¿Estás seguro de querer eliminar?");
-    if (confirm) {
+    const confirmDelete = window.confirm("¿Estás seguro de querer eliminar?");
+    if (confirmDelete) {
       fetch(`http://localhost:8000/api/facultad/delete/${pk}/`, {
         method: "DELETE",
       })
         .then((response) => {
           if (response.ok) {
             setFacultades(facultades.filter((fac) => fac.facultadCodigo !== pk));
-            alert("facultad fue eliminado exitosamente") // need to customize in a modal component
+            alert("Facultad eliminada con éxito");
           } else {
-            alert("Failed to delete facultad.");
+            alert("Error al eliminar la facultad.");
           }
         })
         .catch((error) => {
@@ -67,9 +71,19 @@ export default function FacultadList() {
     }
   };
 
+  // Loading state
   if (loading) {
     return <p>Loading...</p>;
   }
+
+  // Handle page change
+  const handlePagination = (direction) => {
+    if (direction === "next" && page < totalPages) {
+      setPage(page + 1);
+    } else if (direction === "prev" && page > 1) {
+      setPage(page - 1);
+    }
+  };
 
   return (
     <div>
@@ -84,7 +98,7 @@ export default function FacultadList() {
           Exportar
         </Link>
       )}
-      
+
       <table className="table mt-5">
         <thead>
           <tr>
@@ -110,7 +124,9 @@ export default function FacultadList() {
               <td>{facultad.estado}</td>
               <td>{facultad.universidadNombre}</td>
               <td>
-                <Link className="btn btn-primary btn-sm" href={`/facultadEdit/${facultad.facultadCodigo}`}>Edit</Link>
+                <Link className="btn btn-primary btn-sm" href={`/facultadEdit/${facultad.facultadCodigo}`}>
+                  Edit
+                </Link>
                 <button
                   className="btn btn-danger btn-sm mx-2"
                   onClick={() => deleteFacultad(facultad.facultadCodigo)}
@@ -122,6 +138,9 @@ export default function FacultadList() {
           ))}
         </tbody>
       </table>
+
+      {/* Pagination Controls */}
+      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
     </div>
   );
 }

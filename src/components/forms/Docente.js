@@ -41,11 +41,11 @@ export default function DocenteForm() {
       ]);
       const data = await Promise.all(responses.map(res => res.json()));
 
-      setUniversidades(data[0]);
-      setFacultades(data[1]);
-      setEscuelas(data[2]);
-      setTiposDocente(data[3]);
-      setCategoriasDocente(data[4]);
+      setUniversidades(data[0].results);
+      setFacultades(data[1].results);
+      setEscuelas(data[2].results);
+      setTiposDocente(data[3].results);
+      setCategoriasDocente(data[4].results);
     }
 
     fetchData();
