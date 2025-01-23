@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Pagination from "@components/Pagination";
+import Tables from "@/src/components/Tables";
 
 export default function FacultadList() {
   const [categorias, setCategorias] = useState([]);
@@ -71,21 +72,12 @@ export default function FacultadList() {
     return <p>Loading...</p>;
   }
 
-
-  const handlePagination = (direction) => {
-    if (direction === "next" && page < totalPages) {
-      setPage((prevPage) => prevPage + 1);
-    } else if (direction === "prev" && page > 1) {
-      setPage((prevPage) => prevPage - 1);
-    }
-  };
-
   return (
     <div>
       <Link className="btn btn-primary mt-5" href="/categoriadocente">
         Nuevo
       </Link>
-      <table className="table mt-5">
+      <Tables>
         <thead>
           <tr>
             <th scope="col">#</th>
@@ -129,7 +121,7 @@ export default function FacultadList() {
             ))
           )}
         </tbody>
-      </table>
+      </Tables>
 
       <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
     </div>

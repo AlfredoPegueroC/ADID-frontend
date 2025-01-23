@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Pagination from "@components/Pagination";
+import Tables from "@components/Tables";
 
 export default function tipodocenteList() {
   const [tipodocentes, setTipodocentes] = useState([]);
@@ -78,7 +79,7 @@ export default function tipodocenteList() {
         Nuevo
       </Link>
 
-      <table className="table mt-5">
+      <Tables>
         <thead>
           <tr>
             <th scope="col">#</th>
@@ -117,7 +118,7 @@ export default function tipodocenteList() {
               </tr>
             ))}
         </tbody>
-      </table>
+      </Tables>
 
       <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
     </div>

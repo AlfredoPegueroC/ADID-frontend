@@ -5,17 +5,24 @@ import Link from "next/link"
 
 
 import { useEffect, useState } from 'react';
+import Pagination from '@components/Pagination';
+import Tables from "@components/Tables";
 
 export default function Home() {
   const [asignacionData, setAsignacionData] = useState([]);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   
   useEffect(() => {
     // Fetch the asignacionDocente data from the Django API
     fetch('http://127.0.0.1:8000/api/asignacion')
       .then((response) => response.json())
-      .then((data) => setAsignacionData(data))
+      .then((data) => {
+        setAsignacionData(data.results)
+        setTotalPages(Math.ceil(data.count / 10))
+      })
       .catch((error) => console.error('Error fetching data:', error));
-  }, []);
+  }, [page]);
 
   return (
     <div>
@@ -27,7 +34,7 @@ export default function Home() {
        
 
       {/* <h3 className="mt-5">Asignacion Docente</h3> */}
-      <table className="table mt-5">
+      <Tables>
         <thead>
           <tr>
             <th scope="col">NRC</th>
@@ -57,7 +64,7 @@ export default function Home() {
               </td>
             </tr>
           ) : (
-            asignacionData.results.map((asignacion, index) => (
+            asignacionData.map((asignacion, index) => (
               <tr key={index}>
                 <td>{asignacion.nrc}</td>
                 <td>{asignacion.clave}</td>
@@ -92,7 +99,9 @@ export default function Home() {
             ))
           )}
         </tbody>
-      </table>
+      </Tables>
+      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+      
     </div>
   );
 }

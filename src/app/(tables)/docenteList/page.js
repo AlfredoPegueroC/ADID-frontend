@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Pagination from "@components/Pagination";
+import Tables from "@components/Tables";
 
 export default function DocenteList() {
   const [docentes, setDocentes] = useState([]);
@@ -131,7 +132,7 @@ export default function DocenteList() {
         </Link>
       )}
 
-      <table className="table mt-5 w-100">
+      <Tables>
         <thead>
           <tr>
             <th scope="col">#</th>
@@ -192,7 +193,7 @@ export default function DocenteList() {
             </tr>
           ))}
         </tbody>
-      </table>
+      </Tables>
 
       <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
     </div>

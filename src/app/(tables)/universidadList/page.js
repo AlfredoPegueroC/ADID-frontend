@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Pagination from "@components/Pagination";
+import Tables  from "@components/Tables";
 
 export default function UniversidadList() {
   const [universidades, setUniversidades] = useState([]);
@@ -74,49 +75,48 @@ export default function UniversidadList() {
           </Link>
         )}
       </div>
-
-      <table className="table mt-3">
+      <Tables>
         <thead>
-          <tr>
-            <th scope="col">#</th>
-            <th scope="col">Nombre</th>
-            <th scope="col">Estado</th>
-            <th scope="col">Acción</th>
-          </tr>
-        </thead>
-        <tbody>
-          {universidades.length === 0 && (
             <tr>
-              <td colSpan="4" className="text-center">
-                No se encontraron universidades.
-              </td>
+              <th scope="col">#</th>
+              <th scope="col">Nombre</th>
+              <th scope="col">Estado</th>
+              <th scope="col">Acción</th>
             </tr>
-          )}
-          {universidades.map((universidad, index) => (
-            <tr key={universidad.UniversidadCodigo}>
-              <th scope="row">{index + 1 + (page - 1) * 10}</th>
-              <td>{universidad.nombre}</td>
-              <td>{universidad.estado}</td>
-              <td>
-                <Link
-                  href={`/universidadEdit/${universidad.UniversidadCodigo}`}
-                  className="btn btn-primary btn-sm"
-                >
-                  Editar
-                </Link>
-                <button
-                  className="btn btn-danger btn-sm mx-2"
-                  onClick={() =>
-                    deleteUniversidad(universidad.UniversidadCodigo)
-                  }
-                >
-                  Eliminar
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {universidades.length === 0 && (
+              <tr>
+                <td colSpan="4" className="text-center">
+                  No se encontraron universidades.
+                </td>
+              </tr>
+            )}
+            {universidades.map((universidad, index) => (
+              <tr key={universidad.UniversidadCodigo}>
+                <th scope="row">{index + 1 + (page - 1) * 10}</th>
+                <td>{universidad.nombre}</td>
+                <td>{universidad.estado}</td>
+                <td>
+                  <Link
+                    href={`/universidadEdit/${universidad.UniversidadCodigo}`}
+                    className="btn btn-primary btn-sm"
+                  >
+                    Editar
+                  </Link>
+                  <button
+                    className="btn btn-danger btn-sm mx-2"
+                    onClick={() =>
+                      deleteUniversidad(universidad.UniversidadCodigo)
+                    }
+                  >
+                    Eliminar
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+      </Tables>
 
       <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
     </div>
