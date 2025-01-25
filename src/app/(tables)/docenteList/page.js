@@ -5,7 +5,11 @@ import Link from "next/link";
 import Pagination from "@components/Pagination";
 import Tables from "@components/Tables";
 
-export default function DocenteList() {
+// Utils
+import withAuth from "@utils/withAuth";
+import { deleteEntity } from "@utils/delete";
+
+function DocenteList() {
   const [docentes, setDocentes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -91,28 +95,9 @@ export default function DocenteList() {
     fetchData();
   }, [page]);
 
-  const deleteDocente = async (pk) => {
-    const confirmDelete = window.confirm("¿Estás seguro de querer eliminar?");
-    if (confirmDelete) {
-      try {
-        const response = await fetch(
-          `http://localhost:8000/api/docente/delete/${pk}/`,
-          { method: "DELETE" }
-        );
-        if (response.ok) {
-          setDocentes((prevDocentes) =>
-            prevDocentes.filter((doc) => doc.Docentecodigo !== pk)
-          );
-          alert("El docente fue eliminado exitosamente");
-        } else {
-          alert("Error eliminando el docente. Por favor, inténtelo de nuevo.");
-        }
-      } catch (error) {
-        console.error("Error deleting docente:", error);
-        alert("Error al eliminar el docente.");
-      }
-    }
-  };
+  const deleteDocente = (pk) => {
+    deleteEntity("http://localhost:8000/api/docente/delete", pk, setDocentes, "Docentecodigo");
+  }
 
   if (loading) {
     return <p>Loading...</p>;
@@ -199,3 +184,5 @@ export default function DocenteList() {
     </div>
   );
 }
+
+export default withAuth(DocenteList);

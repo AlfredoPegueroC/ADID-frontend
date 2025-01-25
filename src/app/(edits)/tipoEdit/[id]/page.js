@@ -2,8 +2,9 @@
 
 import React, {useState, useEffect} from "react"
 import { useRouter } from "next/navigation"
+import withAuth from "@/src/utils/withAuth"
 
-export default function TipoEdit({params}){
+function TipoEdit({params}){
   const router = useRouter()
   const { id } = React.use(params);
 
@@ -106,3 +107,5 @@ export default function TipoEdit({params}){
   )
 
 }
+
+export default withAuth(TipoEdit)

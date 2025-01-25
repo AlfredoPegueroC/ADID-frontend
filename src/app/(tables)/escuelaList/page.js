@@ -5,7 +5,11 @@ import Link from "next/link";
 import Pagination from "@components/Pagination";
 import Tables from "@components/Tables";
 
-export default function EscuelaList() {
+// Utils
+import withAuth from "@utils/withAuth";
+import { deleteEntity } from "@utils/delete";
+
+function EscuelaList() {
   const [escuelas, setEscuelas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -64,25 +68,8 @@ export default function EscuelaList() {
   }, [page]);
 
   const deleteEscuela = (pk) => {
-    const confirm = window.confirm("¿Estás seguro de querer eliminar?");
-    if (confirm) {
-      fetch(`http://localhost:8000/api/escuela/delete/${pk}/`, {
-        method: "DELETE",
-      })
-        .then((response) => {
-          if (response.ok) {
-            setEscuelas(escuelas.filter((esc) => esc.escuelaCodigo !== pk));
-            alert("Escuela eliminada exitosamente.");
-          } else {
-            alert("Error al eliminar la escuela.");
-          }
-        })
-        .catch((error) => {
-          console.error("Error deleting escuela:", error);
-        });
-    }
-  };
-
+    deleteEntity("http://localhost:8000/api/escuela/delete", pk, setEscuelas, "escuelaCodigo");
+  }
   if (loading) {
     return <p>Loading...</p>; 
   }
@@ -152,3 +139,5 @@ export default function EscuelaList() {
     </div>
   );
 }
+
+export default withAuth(EscuelaList);

@@ -6,6 +6,8 @@
   border-radius: 10px;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
   overflow: hidden;
+  margin:auto;
+  margin-top: 12%; /* Provisional */
 }
 
 .login_box {
@@ -88,4 +90,5 @@
 
 .separacion{
   margin-top: 32.3px;
+  color: #fff;
 } 

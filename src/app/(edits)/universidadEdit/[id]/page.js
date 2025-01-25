@@ -2,8 +2,9 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import withAuth from "@/src/utils/withAuth";
 
-export default function EditUniversidad({params}) {
+function EditUniversidad({params}) {
   const router = useRouter();
 
   const { id } = React.use(params);
@@ -101,3 +102,4 @@ export default function EditUniversidad({params}) {
   );
 }
 
+export default withAuth(EditUniversidad);

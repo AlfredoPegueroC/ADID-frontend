@@ -2,20 +2,23 @@
   --primary-color: #16a1d8;
 }
 
-
 .table_content{
   border-collapse: collapse;
   margin: 25px 0;
-  font-size: 0.9rem;
+  font-size: 13px;
   min-width: 400px;
   width: 100%;
   border-radius: 5px;
   overflow: hidden;
+  color: #000;
+  /* table-layout:auto; */
 }
 .table_content td{
   padding: 5px 15px;
   outline: 1px solid #ddd;
+  
 }
+
 .table_content tr{
   border-bottom: 1px solid #ddd;
 }
@@ -37,4 +40,5 @@
 }
 .table_content tbody tr:last-child{
   border-bottom: 2px solid var(--primary-color);
+  outline: none;
 }

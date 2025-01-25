@@ -1,9 +1,10 @@
+"use client"
+
 import Facultad from '@components/forms/Facultad'
 import FormLayout from '@components/layouts/FormLayout'
+import withAuth from "@/src/utils/withAuth";
 
-
-
-export default function FacultadFormPage(){
+function FacultadFormPage(){
   return (
     <FormLayout>
       <Facultad title="Registrar Facultad"/>
@@ -11,3 +12,5 @@ export default function FacultadFormPage(){
   )
   
 }
+
+export default withAuth(FacultadFormPage);

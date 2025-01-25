@@ -1,10 +1,16 @@
+"use client"
+
 import DocenteForm from "@components/forms/Docente";
 import FormLayout from "@components/layouts/FormLayout";
+import withAuth from "@/src/utils/withAuth";
 
-export default function DocenteFormPage(){
+
+function DocenteFormPage(){
   return (
     <FormLayout>
       <DocenteForm/>
     </FormLayout>
   )
 }
+
+export default withAuth(DocenteFormPage);

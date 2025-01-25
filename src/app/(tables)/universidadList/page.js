@@ -5,7 +5,12 @@ import Link from "next/link";
 import Pagination from "@components/Pagination";
 import Tables  from "@components/Tables";
 
-export default function UniversidadList() {
+// Utils
+import withAuth from "@utils/withAuth";
+import {deleteEntity }from "@utils/delete";
+
+
+function UniversidadList() {
   const [universidades, setUniversidades] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -30,30 +35,8 @@ export default function UniversidadList() {
     fetchData();
   }, [page]);
 
-  const deleteUniversidad = async (pk) => {
-    const confirmDelete = window.confirm("¿Estás seguro de querer eliminar?");
-    if (confirmDelete) {
-      try {
-        const response = await fetch(
-          `http://localhost:8000/api/universidad/delete/${pk}/`,
-          {
-            method: "DELETE",
-          }
-        );
-
-        if (response.ok) {
-          setUniversidades((prevUniversidades) =>
-            prevUniversidades.filter((uni) => uni.UniversidadCodigo !== pk)
-          );
-          alert("Universidad eliminada con éxito.");
-        } else {
-          alert("Error al eliminar la universidad.");
-        }
-      } catch (error) {
-        console.error("Error deleting universidad:", error);
-        alert("Error al eliminar la universidad.");
-      }
-    }
+  const handleDelete = (pk) => {
+    deleteEntity("http://localhost:8000/api/universidad/delete", pk, setUniversidades, "UniversidadCodigo");
   };
 
   if (loading) {
@@ -107,7 +90,7 @@ export default function UniversidadList() {
                   <button
                     className="btn btn-danger btn-sm mx-2"
                     onClick={() =>
-                      deleteUniversidad(universidad.UniversidadCodigo)
+                      handleDelete(universidad.UniversidadCodigo)
                     }
                   >
                     Eliminar
@@ -122,3 +105,5 @@ export default function UniversidadList() {
     </div>
   );
 }
+
+export default withAuth(UniversidadList);

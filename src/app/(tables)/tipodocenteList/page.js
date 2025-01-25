@@ -5,7 +5,11 @@ import Link from "next/link";
 import Pagination from "@components/Pagination";
 import Tables from "@components/Tables";
 
-export default function tipodocenteList() {
+// Utils
+import withAuth from "@utils/withAuth";
+import { deleteEntity } from "@utils/delete";
+
+function tipodocenteList() {
   const [tipodocentes, setTipodocentes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -48,26 +52,8 @@ export default function tipodocenteList() {
   },[page]);
 
   const deleteTipo = (pk) => {
-    const confirm = window.confirm("Estás seguro de querer eliminar?");
-    if (confirm) {
-      fetch(`http://localhost:8000/api/tipodocente/delete/${pk}/`, {
-        method: "DELETE",
-      })
-        .then((response) => {
-          if (response.ok) {
-            setTipodocentes(
-              tipodocentes.filter((tipo) => tipo.tipoDocenteCodigo !== pk)
-            );
-            alert("tipo docente fue eliminado exitosamente");
-          } else {
-            alert("Failed to delete");
-          }
-        })
-        .catch((error) => {
-          console.error("error deleting tipo docente", error);
-        });
-    }
-  };
+    deleteEntity("http://localhost:8000/api/tipodocente/delete", pk, setTipodocentes, "tipoDocenteCodigo");
+  }
 
   if (loading) {
     return <p>loading...</p>;
@@ -124,3 +110,5 @@ export default function tipodocenteList() {
     </div>
   );
 }
+
+export default withAuth(tipodocenteList);

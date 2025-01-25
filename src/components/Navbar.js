@@ -1,9 +1,46 @@
 "use client"
 import Link from "next/link"
+import { useRouter } from "next/navigation";
 
 // import style from "../navbar.module.css"
 
 export default function Navbar(){
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    const refreshToken = localStorage.getItem("refreshToken");
+  
+    if (!refreshToken) {
+      alert("No refresh token found. Please log in again.");
+      return;
+    }
+  
+    try {
+      const response = await fetch("http://127.0.0.1:8000/api/logout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ refresh_token: refreshToken }),
+      });
+  
+      if (response.ok) {
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        alert("Logged out successfully");
+        router.push("/login"); // Redirect to login page
+      } else {
+        const errorData = await response.json();
+        alert(`Error logging out: ${errorData.error || "Unknown error"}`);
+      }
+    } catch (error) {
+      console.error("Logout error:", error);
+      alert("Error logging out");
+    }
+  };
+  
+  
+
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
   <div className="container-fluid mx-5 py-1">
@@ -44,6 +81,7 @@ export default function Navbar(){
         </li>
       </ul>
     </div>
+    <button className="btn btn-outline-light" onClick={handleLogout}>Logout</button>
   </div>
 </nav>
   )

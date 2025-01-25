@@ -2,8 +2,9 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import withAuth from "@/src/utils/withAuth";
 
-export default function EditFacultad({ params }) {
+function EditFacultad({ params }) {
   const router = useRouter();
   const { id } = React.use(params); 
 
@@ -131,3 +132,6 @@ export default function EditFacultad({ params }) {
     </div>
   );
 }
+
+
+export default withAuth(EditFacultad)

@@ -5,7 +5,11 @@ import Link from "next/link";
 import Pagination from "@components/Pagination";
 import Tables from "@/src/components/Tables";
 
-export default function FacultadList() {
+// Utils
+import withAuth from "@utils/withAuth";
+import { deleteEntity } from "@utils/delete";
+
+function FacultadList() {
   const [categorias, setCategorias] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -47,26 +51,8 @@ export default function FacultadList() {
   }, [page]);
 
   const deleteCategoria = (pk) => {
-    const confirm = window.confirm("¿Estás seguro de querer eliminar?");
-    if (confirm) {
-      fetch(`http://localhost:8000/api/categoriadocente/delete/${pk}/`, {
-        method: "DELETE",
-      })
-        .then((response) => {
-          if (response.ok) {
-            setCategorias((prevCategorias) =>
-              prevCategorias.filter((cat) => cat.categoriaCodigo !== pk)
-            );
-            alert("Categoría eliminada exitosamente.");
-          } else {
-            alert("No se pudo eliminar la categoría.");
-          }
-        })
-        .catch((error) => {
-          console.error("Error deleting categoría:", error);
-        });
-    }
-  };
+    deleteEntity("http://localhost:8000/api/categoriaDocente/delete", pk, setCategorias, "categoriaCodigo");
+  }
 
   if (loading) {
     return <p>Loading...</p>;
@@ -103,7 +89,6 @@ export default function FacultadList() {
                 <td>{categoria.universidadNombre}</td>
                 <td>
 
-
                 <Link
                   href={`/categoriaEdit/${categoria.categoriaCodigo}`}
                   className="btn btn-primary btn-sm"
@@ -127,3 +112,5 @@ export default function FacultadList() {
     </div>
   );
 }
+
+export default withAuth(FacultadList);

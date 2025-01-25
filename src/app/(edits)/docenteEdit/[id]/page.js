@@ -2,8 +2,9 @@
 
 import React, {useState, useEffect} from "react"
 import { useRouter } from "next/navigation"
+import withAuth from "@/src/utils/withAuth"
 
-export default function DocenteEdit({params}){
+function DocenteEdit({params}){
   const router = useRouter()
   const { id } = React.use(params)
 
@@ -240,3 +241,5 @@ export default function DocenteEdit({params}){
     </div>
   )
 }
+
+export default withAuth(DocenteEdit)

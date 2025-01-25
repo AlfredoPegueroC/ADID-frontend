@@ -1,15 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Styles from "@styles/login.module.css";
-
 
 export default function LoginPage() {
   const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
+
+  // Redirect if already logged in
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      router.push("/");
+    }
+  }, [router]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -23,7 +30,7 @@ export default function LoginPage() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.detail || "Login failed. Please check your credentials.");
+        throw new Error(errorData.error || "Login failed. Please check your credentials.");
       }
 
       const data = await response.json();
@@ -39,7 +46,7 @@ export default function LoginPage() {
 
   return (
     <div className={Styles.login_container}>
-      <div className={Styles.login_box }>
+      <div className={Styles.login_box}>
         <div className={Styles.left_section}>
           <h2 className={Styles.separacion}>FACULTAD DE CIENCIAS UASD</h2>
         </div>
@@ -76,4 +83,3 @@ export default function LoginPage() {
     </div>
   );
 }
-

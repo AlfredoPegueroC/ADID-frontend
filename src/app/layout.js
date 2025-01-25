@@ -4,8 +4,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import Navbar from "@components/Navbar";
 import { useEffect } from "react";
-
-
+import { usePathname } from "next/navigation";
 
 
 const geistSans = localFont({
@@ -20,14 +19,16 @@ const geistMono = localFont({
 });
 
 export default function RootLayout({ children }) {
-
+  const isLoginPage = usePathname() === '/login';
+  
+  const backgroundClass = isLoginPage ? "login-bg" : "";
   useEffect(() => {
     import("bootstrap/dist/js/bootstrap.bundle")
   }, [])
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <Navbar/>
+      <body className={`${geistSans.variable} ${geistMono.variable} ${backgroundClass}`}>
+        {!isLoginPage && <Navbar/>}
         <div className="container-fluid px-5">
           {children}
         </div>

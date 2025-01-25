@@ -2,8 +2,9 @@
 
 import React, {useState, useEffect} from "react"
 import {useRouter} from "next/navigation" 
+import withAuth from "@/src/utils/withAuth"
 
-export default function categoriaEdit({params}){
+function categoriaEdit({params}){
   const router = useRouter()
   const {id} = React.use(params)
 
@@ -95,8 +96,6 @@ export default function categoriaEdit({params}){
           </select>
         </div>
 
-
-
         <div className="mb-3">
           <label htmlFor="universidad" className="form-label">Universidad</label>
           <select className="form-select" id="universidad" name="universidad" value={categoria.universidad} onChange={handleChange}>
@@ -113,3 +112,5 @@ export default function categoriaEdit({params}){
   )
 
 }
+
+export default withAuth(categoriaEdit)

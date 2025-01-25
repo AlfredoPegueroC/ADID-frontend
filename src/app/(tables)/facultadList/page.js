@@ -5,7 +5,12 @@ import Link from "next/link";
 import Pagination from "@components/Pagination";
 import Tables from "@/src/components/Tables";
 
-export default function FacultadList() {
+// Utils
+import withAuth from "@utils/withAuth";
+import { deleteEntity } from "@utils/delete";
+
+
+function FacultadList() {
   const [facultades, setFacultades] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -51,26 +56,10 @@ export default function FacultadList() {
     fetchData();
   }, [page]);
 
-  // Handle deletion of facultad
+
   const deleteFacultad = (pk) => {
-    const confirmDelete = window.confirm("¿Estás seguro de querer eliminar?");
-    if (confirmDelete) {
-      fetch(`http://localhost:8000/api/facultad/delete/${pk}/`, {
-        method: "DELETE",
-      })
-        .then((response) => {
-          if (response.ok) {
-            setFacultades(facultades.filter((fac) => fac.facultadCodigo !== pk));
-            alert("Facultad eliminada con éxito");
-          } else {
-            alert("Error al eliminar la facultad.");
-          }
-        })
-        .catch((error) => {
-          console.error("Error deleting facultad:", error);
-        });
-    }
-  };
+    deleteEntity("http://localhost:8000/api/facultad/delete", pk, setFacultades, "facultadCodigo");
+  }
 
   // Loading state
   if (loading) {
@@ -145,3 +134,5 @@ export default function FacultadList() {
     </div>
   );
 }
+
+export default withAuth(FacultadList);

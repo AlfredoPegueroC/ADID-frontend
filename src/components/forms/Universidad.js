@@ -1,5 +1,6 @@
 "use client";
-import { Alert } from 'bootstrap/dist/js/bootstrap.bundle';
+
+// import { Alert } from 'bootstrap/dist/js/bootstrap.bundle';
 import { useRouter } from 'next/navigation';
 
 export default function universidad({title}) {
