@@ -1,11 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import withAuth from "@/src/utils/withAuth";
 
-function ImportPage() {
+export default function ImportPage() {
   const [file, setFile] = useState(null);
-  const [period, setPeriod] = useState("");  // New state for the period
+  const [period, setPeriod] = useState("");
   const [message, setMessage] = useState("");
 
   // Handle file input change
@@ -34,7 +33,7 @@ function ImportPage() {
 
     const formData = new FormData();
     formData.append("excel_file", file);
-    formData.append("period", period); // Add period to FormData
+    formData.append("period", period);
 
     try {
       const response = await fetch("http://localhost:8000/import/asignacion", {
@@ -56,11 +55,11 @@ function ImportPage() {
 
   return (
     <div>
-      <h3 className="mt-5">Import Excel File</h3>
-      <form onSubmit={handleSubmit}>
-        <div>
+      <form onSubmit={handleSubmit} className="form-group">
+        <div className="form-group">
           <input
             type="file"
+            className="form-control"
             onChange={handleFileChange}
             accept=".xls,.xlsx"
             required
@@ -75,12 +74,9 @@ function ImportPage() {
             required
           />
         </div>
-        <button type="submit">Upload</button>
+        <button type="submit" className="btn btn-primary">Upload</button>
       </form>
-
-      {message && <p>{message}</p>}
+      {message && <p className="alert alert-info mt-3">{message}</p>}
     </div>
   );
 }
-
-export default withAuth(ImportPage);

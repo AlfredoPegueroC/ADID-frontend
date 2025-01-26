@@ -4,11 +4,13 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Pagination from "@components/Pagination";
 import Tables from "@/src/components/Tables";
+import ImportExcel from '@components/forms/Import'; 
+import Modal from "@components/Modal";
+
 
 // Utils
 import withAuth from "@utils/withAuth";
 import { deleteEntity } from "@utils/delete";
-
 
 function FacultadList() {
   const [facultades, setFacultades] = useState([]);
@@ -16,17 +18,24 @@ function FacultadList() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  // Fetch faculties data with pagination
+  const Api_import_URL = "http://localhost:8000/import/facultad";
+
   useEffect(() => {
     async function fetchData() {
       try {
-        const facultadesResponse = await fetch(`http://localhost:8000/api/facultad?page=${page}`);
-        if (!facultadesResponse.ok) throw new Error("Failed to fetch facultades");
+        const facultadesResponse = await fetch(
+          `http://localhost:8000/api/facultad?page=${page}`
+        );
+        if (!facultadesResponse.ok)
+          throw new Error("Failed to fetch facultades");
         const facultadesData = await facultadesResponse.json();
 
         // Fetch universities
-        const universidadesResponse = await fetch("http://localhost:8000/api/universidad");
-        if (!universidadesResponse.ok) throw new Error("Failed to fetch universidades");
+        const universidadesResponse = await fetch(
+          "http://localhost:8000/api/universidad"
+        );
+        if (!universidadesResponse.ok)
+          throw new Error("Failed to fetch universidades");
         const universidadesData = await universidadesResponse.json();
 
         // Merge university names into faculties
@@ -56,25 +65,22 @@ function FacultadList() {
     fetchData();
   }, [page]);
 
-
   const deleteFacultad = (pk) => {
-    deleteEntity("http://localhost:8000/api/facultad/delete", pk, setFacultades, "facultadCodigo");
-  }
+    deleteEntity(
+      "http://localhost:8000/api/facultad/delete",
+      pk,
+      setFacultades,
+      "facultadCodigo"
+    );
+  };
+
+
 
   // Loading state
   if (loading) {
     return <p>Loading...</p>;
   }
-
-  // Handle page change
-  const handlePagination = (direction) => {
-    if (direction === "next" && page < totalPages) {
-      setPage(page + 1);
-    } else if (direction === "prev" && page > 1) {
-      setPage(page - 1);
-    }
-  };
-
+  
   return (
     <div>
       <Link className="btn btn-primary mt-5" href="/facultad">
@@ -88,6 +94,15 @@ function FacultadList() {
           Exportar
         </Link>
       )}
+    
+      <button type="button" className="btn btn-warning mt-5 ms-2" data-bs-toggle="modal" data-bs-target="#Modal">
+        Importar
+      </button>
+
+      {/* Modal components */}
+      <Modal title="Importar Facultad">
+        <ImportExcel importURL={Api_import_URL} />
+      </Modal>
 
       <Tables>
         <thead>
@@ -114,7 +129,10 @@ function FacultadList() {
               <td>{facultad.estado}</td>
               <td>{facultad.universidadNombre}</td>
               <td>
-                <Link className="btn btn-primary btn-sm" href={`/facultadEdit/${facultad.facultadCodigo}`}>
+                <Link
+                  className="btn btn-primary btn-sm"
+                  href={`/facultadEdit/${facultad.facultadCodigo}`}
+                >
                   Edit
                 </Link>
                 <button

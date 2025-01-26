@@ -18,7 +18,7 @@ export default function Pagination({ page, totalPages, onPageChange }){
       >
         Anterior
       </button>
-      <span>
+      <span className="text-dark">
         Página {page} de {totalPages}
       </span>
       <button

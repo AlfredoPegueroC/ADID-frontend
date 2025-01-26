@@ -7,11 +7,13 @@ import { useRouter } from "next/navigation";
 export default function Navbar(){
   const router = useRouter();
 
+
   const handleLogout = async () => {
     const refreshToken = localStorage.getItem("refreshToken");
   
     if (!refreshToken) {
-      alert("No refresh token found. Please log in again.");
+      alert("No refresh token found. Redirecting to login.");
+      router.push("/login");
       return;
     }
   
@@ -27,20 +29,23 @@ export default function Navbar(){
       if (response.ok) {
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
-        alert("Logged out successfully");
-        router.push("/login"); // Redirect to login page
+        router.push("/login");
       } else {
         const errorData = await response.json();
-        alert(`Error logging out: ${errorData.error || "Unknown error"}`);
+        if (errorData.error === "Invalid or expired token") {
+          localStorage.clear();
+          alert("Session expired. Redirecting to login.");
+          router.push("/login");
+        } else {
+          alert(`Logout failed: ${errorData.error}`);
+        }
       }
     } catch (error) {
       console.error("Logout error:", error);
-      alert("Error logging out");
+      alert("Error logging out.");
     }
   };
   
-  
-
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
   <div className="container-fluid mx-5 py-1">

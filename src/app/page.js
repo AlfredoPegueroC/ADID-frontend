@@ -2,8 +2,15 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+// Components
 import Pagination from "@components/Pagination";
 import Tables from "@components/Tables";
+import Modal from "../components/Modal";
+
+// Forms
+import ImportPage from "../components/forms/ImportAsignacion";
+
+// Utils
 import withAuth from "@utils/withAuth";
 
 function AsignacionDocenteList() {
@@ -11,6 +18,8 @@ function AsignacionDocenteList() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+
+  const Api_import_URL = "http://localhost:8000/import/asignacion";
 
   useEffect(() => {
     async function fetchData() {
@@ -103,9 +112,9 @@ function AsignacionDocenteList() {
 
   return (
     <div>
-      <Link className="btn btn-primary mt-5" href="/import">
+      <button type="button" className="btn btn-primary mt-5" data-bs-toggle="modal" data-bs-target="#Modal">
         Nueva Asignación
-      </Link>
+      </button>
       {asignaciones.length > 0 && (
         <Link
           className="btn btn-success mt-5 ms-2"
@@ -115,6 +124,14 @@ function AsignacionDocenteList() {
         </Link>
       )}
       
+      
+
+      {/* Modal components */}
+      <Modal title="Importar Asignación">
+        <ImportPage importURL={Api_import_URL} />
+      </Modal>
+
+
 
       <Tables>
         <thead>
