@@ -5,10 +5,11 @@ import Link from "next/link";
 // Components
 import Pagination from "@components/Pagination";
 import Tables from "@components/Tables";
-import Modal from "../components/Modal";
+import Modal from "@components/Modal";
 
+import { deleteEntity } from "@utils/delete";
 // Forms
-import ImportPage from "../components/forms/ImportAsignacion";
+import ImportPage from "@components/forms/ImportAsignacion";
 
 // Utils
 import withAuth from "@utils/withAuth";
@@ -21,79 +22,81 @@ function AsignacionDocenteList() {
 
   const Api_import_URL = "http://localhost:8000/import/asignacion";
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        // Fetch main data for AsignacionDocente
-        const asignacionResponse = await fetch("http://localhost:8000/api/asignacion");
-        if (!asignacionResponse.ok) {
-          throw new Error("Failed to fetch asignaciones");
-        }
-        const asignacionData = await asignacionResponse.json();
-
-        // Fetch related data
-        const facultadResponse = await fetch("http://localhost:8000/api/facultad");
-        if (!facultadResponse.ok) {
-          throw new Error("Failed to fetch facultades");
-        }
-        const facultadData = await facultadResponse.json();
-
-        const escuelaResponse = await fetch("http://localhost:8000/api/escuela");
-        if (!escuelaResponse.ok) { 
-          throw new Error("Failed to fetch escuelas");
-        }
-        const escuelaData = await escuelaResponse.json();
-
-        const docenteResponse = await fetch("http://localhost:8000/api/docente");
-        if (!docenteResponse.ok) {
-          throw new Error("Failed to fetch docentes");
-        }
-        const docenteData = await docenteResponse.json();
-
-        // Merge data
-        const mergedData = asignacionData.results.map((asignacion) => {
-          const facultad = facultadData.results.find(
-            (fac) => fac.facultadCodigo === asignacion.facultadCodigo
-          );
-          const escuela = escuelaData.results.find(
-            (esc) => esc.escuelaCodigo === asignacion.escuelaCodigo
-          );
-          const docente = docenteData.results.find(
-            (doc) => doc.Docentecodigo === asignacion.DocenteCodigo
-          );
-
-          return {
-            ...asignacion,
-            facultadNombre: facultad ? facultad.nombre : "N/A",
-            escuelaNombre: escuela ? escuela.nombre : "N/A",
-            docenteNombre: docente ? `${docente.nombre} ${docente.apellidos}` : "N/A",
-          };
-        });
-
-        setAsignaciones(mergedData);
-        setTotalPages(Math.ceil(asignacionData.count / 10));
-
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      } finally {
-        setLoading(false);
+  const fetchData = async () => {
+    try {
+      // Fetch main data for AsignacionDocente
+      const asignacionResponse = await fetch("http://localhost:8000/api/asignacion");
+      if (!asignacionResponse.ok) {
+        throw new Error("Failed to fetch asignaciones");
       }
-    }
+      const asignacionData = await asignacionResponse.json();
+      console.log("Asignaciones data:", asignacionData);
 
+      // Fetch related data
+      const facultadResponse = await fetch("http://localhost:8000/api/facultad");
+      if (!facultadResponse.ok) {
+        throw new Error("Failed to fetch facultades");
+      }
+      const facultadData = await facultadResponse.json();
+
+      const escuelaResponse = await fetch("http://localhost:8000/api/escuela");
+      if (!escuelaResponse.ok) { 
+        throw new Error("Failed to fetch escuelas");
+      }
+      const escuelaData = await escuelaResponse.json();
+
+      const docenteResponse = await fetch("http://localhost:8000/api/docente");
+      if (!docenteResponse.ok) {
+        throw new Error("Failed to fetch docentes");
+      }
+      const docenteData = await docenteResponse.json();
+
+      // Merge data
+      const mergedData = asignacionData.results.map((asignacion) => {
+        const facultad = facultadData.results.find(
+          (fac) => fac.facultadCodigo === asignacion.facultadCodigo
+        );
+        const escuela = escuelaData.results.find(
+          (esc) => esc.escuelaCodigo === asignacion.escuelaCodigo
+        );
+        const docente = docenteData.results.find(
+          (doc) => doc.Docentecodigo === asignacion.DocenteCodigo
+        );
+
+        return {
+          ...asignacion,
+          facultadNombre: facultad ? facultad.nombre : "N/A",
+          escuelaNombre: escuela ? escuela.nombre : "N/A",
+          docenteNombre: docente ? `${docente.nombre} ${docente.apellidos}` : "N/A",
+        };
+      });
+
+      setAsignaciones(mergedData);
+      setTotalPages(Math.ceil(asignacionData.count / 10));
+
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+
+  useEffect(() => {
     fetchData();
   }, [page]);
 
-  const deleteAsignacion = async (nrc) => {
+  const deleteAsignacion = async (pk) => {
     const confirmDelete = window.confirm("¿Estás seguro de querer eliminar?");
     if (confirmDelete) {
       try {
         const response = await fetch(
-          `http://localhost:8000/api/asignacion/delete/${nrc}/`,
+          `http://localhost:8000/api/asignacionDocente/delete/${pk}/`,
           { method: "DELETE" }
         );
         if (response.ok) {
           setAsignaciones((prevAsignaciones) =>
-            prevAsignaciones.filter((asignacion) => asignacion.nrc !== nrc)
+            prevAsignaciones.filter((asignacion) => asignacion.ADIDcodigo !== pk)
           );
           alert("La asignación fue eliminada exitosamente");
         } else {
@@ -105,6 +108,11 @@ function AsignacionDocenteList() {
       }
     }
   };
+ const handleDelete = (pk) => {
+    deleteEntity("http://localhost:8000/api/asignacionDocente/delete", pk, setAsignaciones, "ADIDCodigo");
+  };
+
+
 
   if (loading) {
     return <p>Loading...</p>;
@@ -124,14 +132,10 @@ function AsignacionDocenteList() {
         </Link>
       )}
       
-      
-
       {/* Modal components */}
       <Modal title="Importar Asignación">
-        <ImportPage importURL={Api_import_URL} />
+        <ImportPage importURL={Api_import_URL} onSuccess={fetchData} />
       </Modal>
-
-
 
       <Tables>
         <thead>
@@ -160,12 +164,12 @@ function AsignacionDocenteList() {
           {asignaciones.length === 0 && (
             <tr>
               <td colSpan="16" className="text-center">
-                No asignaciones found.
+                No asignaciones encontradas.
               </td>
             </tr>
           )}
           {asignaciones.map((asignacion, index) => (
-            <tr key={asignacion.nrc}>
+            <tr key={asignacion.ADIDcodigo}>
               <td>{asignacion.nrc}</td>
               <td>{asignacion.clave}</td>
               <td>{asignacion.asignatura}</td>
@@ -186,13 +190,13 @@ function AsignacionDocenteList() {
               <td>
                 <Link
                   className="btn btn-primary btn-sm"
-                  href={`/asignacionEdit/${asignacion.nrc}`}
+                  href={`/asignacionEdit/${asignacion.ADIDcodigo}`}
                 >
                   Editar
                 </Link>
                 <button
                   className="btn btn-danger btn-sm mx-2"
-                  onClick={() => deleteAsignacion(asignacion.nrc)}
+                  onClick={() => handleDelete(asignacion.ADIDcodigo)}
                 >
                   Eliminar
                 </button>

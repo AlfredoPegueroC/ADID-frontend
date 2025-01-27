@@ -2,8 +2,11 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+// Components
 import Pagination from "@components/Pagination";
 import Tables from "@components/Tables";
+import Modal from "@components/Modal";
+import ImportExcel from '@components/forms/Import';
 
 // Utils
 import withAuth from "@utils/withAuth";
@@ -15,83 +18,86 @@ function DocenteList() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        // Fetch main data
-        const docenteResponse = await fetch("http://localhost:8000/api/docente");
-        if (!docenteResponse.ok) {
-          throw new Error("Failed to fetch docentes");
-        }
-        const docenteData = await docenteResponse.json();
-
-        const universidadResponse = await fetch("http://localhost:8000/api/universidad");
-        if (!universidadResponse.ok) { 
-          throw new Error("Failed to fetch universidades");
-        }
-        const universidadData = await universidadResponse.json();
-
-        const facultadResponse = await fetch("http://localhost:8000/api/facultad");
-        if (!facultadResponse.ok) {
-          throw new Error("Failed to fetch facultades");
-        }
-        const facultadData = await facultadResponse.json();
-
-        const escuelaResponse = await fetch("http://localhost:8000/api/escuela");
-        if (!escuelaResponse.ok) { 
-          throw new Error("Failed to fetch escuelas");
-        }
-        const escuelaData = await escuelaResponse.json();
-
-        const tipoResponse = await fetch("http://localhost:8000/api/tipodocente");
-        if (!tipoResponse.ok) { 
-          throw new Error("Failed to fetch tipos");
-        }
-        const tipoData = await tipoResponse.json();
-
-        const categoriaResponse = await fetch("http://localhost:8000/api/categoriaDocente");
-        if (!categoriaResponse.ok) { 
-          throw new Error("Failed to fetch categorias");
-        }
-        const categoriaData = await categoriaResponse.json();
-
-        // Merge data
-        const mergedData = docenteData.results.map((docente) => {
-          const universidad = universidadData.results.find(
-            (uni) => uni.UniversidadCodigo === docente.UniversidadCodigo
-          );
-          const facultad = facultadData.results.find(
-            (fac) => fac.facultadCodigo === docente.facultadCodigo
-          );
-          const escuela = escuelaData.results.find(
-            (esc) => esc.escuelaCodigo === docente.escuelaCodigo
-          );
-          const tipo = tipoData.results.find(
-            (tip) => tip.tipoDocenteCodigo === docente.tipoDocenteCodigo
-          );
-          const categoria = categoriaData.results.find(
-            (cat) => cat.categoriaCodigo === docente.categoriaCodigo
-          );
-
-          return {
-            ...docente,
-            universidadNombre: universidad ? universidad.nombre : "N/A",
-            facultadNombre: facultad ? facultad.nombre : "N/A",
-            escuelaNombre: escuela ? escuela.nombre : "N/A",
-            tipoNombre: tipo ? tipo.nombre : "N/A",
-            categoriaNombre: categoria ? categoria.nombre : "N/A",
-          };
-        });
-
-        setDocentes(mergedData);
-        setTotalPages(Math.ceil(docenteData.count / 10));
-
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      } finally {
-        setLoading(false);
+  const fetchData = async () => {
+    try {
+      // Fetch main data
+      const docenteResponse = await fetch("http://localhost:8000/api/docente");
+      if (!docenteResponse.ok) {
+        throw new Error("Failed to fetch docentes");
       }
+      const docenteData = await docenteResponse.json();
+
+      const universidadResponse = await fetch("http://localhost:8000/api/universidad");
+      if (!universidadResponse.ok) { 
+        throw new Error("Failed to fetch universidades");
+      }
+      const universidadData = await universidadResponse.json();
+
+      const facultadResponse = await fetch("http://localhost:8000/api/facultad");
+      if (!facultadResponse.ok) {
+        throw new Error("Failed to fetch facultades");
+      }
+      const facultadData = await facultadResponse.json();
+
+      const escuelaResponse = await fetch("http://localhost:8000/api/escuela");
+      if (!escuelaResponse.ok) { 
+        throw new Error("Failed to fetch escuelas");
+      }
+      const escuelaData = await escuelaResponse.json();
+
+      const tipoResponse = await fetch("http://localhost:8000/api/tipodocente");
+      if (!tipoResponse.ok) { 
+        throw new Error("Failed to fetch tipos");
+      }
+      const tipoData = await tipoResponse.json();
+
+      const categoriaResponse = await fetch("http://localhost:8000/api/categoriaDocente");
+      if (!categoriaResponse.ok) { 
+        throw new Error("Failed to fetch categorias");
+      }
+      const categoriaData = await categoriaResponse.json();
+
+      // Merge data
+      const mergedData = docenteData.results.map((docente) => {
+        const universidad = universidadData.results.find(
+          (uni) => uni.UniversidadCodigo === docente.UniversidadCodigo
+        );
+        const facultad = facultadData.results.find(
+          (fac) => fac.facultadCodigo === docente.facultadCodigo
+        );
+        const escuela = escuelaData.results.find(
+          (esc) => esc.escuelaCodigo === docente.escuelaCodigo
+        );
+        const tipo = tipoData.results.find(
+          (tip) => tip.tipoDocenteCodigo === docente.tipoDocenteCodigo
+        );
+        const categoria = categoriaData.results.find(
+          (cat) => cat.categoriaCodigo === docente.categoriaCodigo
+        );
+
+        return {
+          ...docente,
+          universidadNombre: universidad ? universidad.nombre : "N/A",
+          facultadNombre: facultad ? facultad.nombre : "N/A",
+          escuelaNombre: escuela ? escuela.nombre : "N/A",
+          tipoNombre: tipo ? tipo.nombre : "N/A",
+          categoriaNombre: categoria ? categoria.nombre : "N/A",
+        };
+      });
+
+      setDocentes(mergedData);
+      setTotalPages(Math.ceil(docenteData.count / 10));
+
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      setLoading(false);
     }
+  }
+
+
+
+  useEffect(() => {
     fetchData();
   }, [page]);
 
@@ -116,6 +122,11 @@ function DocenteList() {
           Exportar
         </Link>
       )}
+
+      <button type="button" className="btn btn-warning mt-5 ms-2" data-bs-toggle="modal" data-bs-target="#Modal">Importar</button>
+      <Modal title="Importar Docente">
+        <ImportExcel importURL="http://localhost:8000/import/docente" onSuccess={fetchData} />
+      </Modal>
 
       <Tables>
         <thead>

@@ -2,6 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
+
+// Components
 import Pagination from "@components/Pagination";
 import Tables from "@/src/components/Tables";
 import ImportExcel from '@components/forms/Import'; 
@@ -20,48 +22,49 @@ function FacultadList() {
 
   const Api_import_URL = "http://localhost:8000/import/facultad";
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const facultadesResponse = await fetch(
-          `http://localhost:8000/api/facultad?page=${page}`
+
+  const fetchData = async () => {
+    try {
+      const facultadesResponse = await fetch(
+        `http://localhost:8000/api/facultad?page=${page}`
+      );
+      if (!facultadesResponse.ok)
+        throw new Error("Failed to fetch facultades");
+      const facultadesData = await facultadesResponse.json();
+
+      // Fetch universities
+      const universidadesResponse = await fetch(
+        "http://localhost:8000/api/universidad"
+      );
+      if (!universidadesResponse.ok)
+        throw new Error("Failed to fetch universidades");
+      const universidadesData = await universidadesResponse.json();
+
+      // Merge university names into faculties
+      const mergedData = facultadesData.results.map((facultad) => {
+        let universidadNombre = "Universidad no encontrada"; // Default value
+        const universidad = universidadesData.results.find(
+          (uni) => uni.UniversidadCodigo === facultad.UniversidadCodigo
         );
-        if (!facultadesResponse.ok)
-          throw new Error("Failed to fetch facultades");
-        const facultadesData = await facultadesResponse.json();
+        if (universidad) {
+          universidadNombre = universidad.nombre;
+        }
+        return {
+          ...facultad,
+          universidadNombre,
+        };
+      });
 
-        // Fetch universities
-        const universidadesResponse = await fetch(
-          "http://localhost:8000/api/universidad"
-        );
-        if (!universidadesResponse.ok)
-          throw new Error("Failed to fetch universidades");
-        const universidadesData = await universidadesResponse.json();
-
-        // Merge university names into faculties
-        const mergedData = facultadesData.results.map((facultad) => {
-          let universidadNombre = "Universidad no encontrada"; // Default value
-          const universidad = universidadesData.results.find(
-            (uni) => uni.UniversidadCodigo === facultad.UniversidadCodigo
-          );
-          if (universidad) {
-            universidadNombre = universidad.nombre;
-          }
-          return {
-            ...facultad,
-            universidadNombre,
-          };
-        });
-
-        setFacultades(mergedData);
-        setTotalPages(Math.ceil(facultadesData.count / 10)); // Assuming 10 items per page
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      } finally {
-        setLoading(false);
-      }
+      setFacultades(mergedData);
+      setTotalPages(Math.ceil(facultadesData.count / 10)); // Assuming 10 items per page
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      setLoading(false);
     }
+  }
 
+  useEffect(() => {
     fetchData();
   }, [page]);
 
@@ -80,6 +83,8 @@ function FacultadList() {
   if (loading) {
     return <p>Loading...</p>;
   }
+
+
   
   return (
     <div>
@@ -101,7 +106,7 @@ function FacultadList() {
 
       {/* Modal components */}
       <Modal title="Importar Facultad">
-        <ImportExcel importURL={Api_import_URL} />
+        <ImportExcel importURL={Api_import_URL} onSuccess={fetchData} />
       </Modal>
 
       <Tables>

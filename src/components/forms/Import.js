@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-export default function ImportExcel({ title, importURL }) {
+export default function ImportExcel({ title, importURL, onSuccess }) {
   const [file, setFile] = useState(null);
   const [message, setMessage] = useState("");
 
@@ -14,7 +14,7 @@ export default function ImportExcel({ title, importURL }) {
     event.preventDefault();
 
     if (!file) {
-      setMessage("Please select a file");
+      setMessage("Por favor, Selecionar un arhivo");
       return;
     }
 
@@ -30,9 +30,11 @@ export default function ImportExcel({ title, importURL }) {
       const result = await response.json();
 
       if (response.ok) {
-        setMessage(result.message || "Import successful");
+        setMessage(result.message || "Import successful!");
+        if (onSuccess) onSuccess(); 
+        document.querySelector("#myform").reset() // check this later
       } else {
-        setMessage(result.error || "Error during import");
+        setMessage(result.error || "Error during import.");
       }
     } catch (error) {
       setMessage("An error occurred while uploading the file.");
@@ -42,9 +44,11 @@ export default function ImportExcel({ title, importURL }) {
   return (
     <div>
       <h3 className="mt-5 text-dark">{title}</h3>
-      <form className="form" onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label htmlFor="excel_file">Excel File</label>
+      <form onSubmit={handleSubmit} id="myform">
+        <div className="form-group mb-3">
+          <label htmlFor="excel_file" className="form-label">
+            Seleciona un archivo Excel
+          </label>
           <input
             type="file"
             className="form-control"
@@ -54,10 +58,8 @@ export default function ImportExcel({ title, importURL }) {
           />
         </div>
         <button type="submit" className="btn btn-primary">
-          Import
+          Importar
         </button>
-      
-
       </form>
       {message && <div className="alert alert-info mt-3">{message}</div>}
     </div>

@@ -2,8 +2,11 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+// Components
 import Pagination from "@components/Pagination";
 import Tables from "@components/Tables";
+import ImportExcel from '@components/forms/Import'; 
+import Modal from "@components/Modal";
 
 // Utils
 import withAuth from "@utils/withAuth";
@@ -15,57 +18,59 @@ function EscuelaList() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
+  const Api_import_URL = "http://localhost:8000/import/escuela";
+
   // const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000/api";
+  const fetchData = async () => {
+    try {
+      // Fetch escuela data
+      const escuelaResponse = await fetch(`http://localhost:8000/api/escuela?page=${page}`);
+      if (!escuelaResponse.ok) throw new Error("Failed to fetch escuelas");
+      const escuelaData = await escuelaResponse.json();
+
+      // Fetch facultad data
+      const facultadResponse = await fetch(`http://localhost:8000/api/facultad`);
+      if (!facultadResponse.ok) throw new Error("Failed to fetch facultades");
+      const facultadData = await facultadResponse.json();
+
+      // Fetch universidad data
+      const universidadResponse = await fetch(`http://localhost:8000/api/universidad`);
+      if (!universidadResponse.ok) throw new Error("Failed to fetch universidades");
+      const universidadData = await universidadResponse.json();
+
+      // Merge data
+      const mergedData = escuelaData.results.map((escuela) => {
+        const facultad = facultadData.results.find((fac) => fac.facultadCodigo === escuela.facultadCodigo) || {
+          nombre: "Facultad no encontrada",
+        };
+
+        const universidad = universidadData.results.find(
+          (uni) => uni.UniversidadCodigo === escuela.UniversidadCodigo
+        ) || {
+          nombre: "Universidad no encontrada",
+        };
+
+        return {
+          ...escuela,
+          facultadNombre: facultad.nombre,
+          universidadNombre: universidad.nombre,
+        };
+      });
+
+      setEscuelas(mergedData);
+      setTotalPages(Math.ceil(escuelaData.count / 10));
+
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
-    async function fetchData() {
-      try {
-        // Fetch escuela data
-        const escuelaResponse = await fetch(`http://localhost:8000/api/escuela?page=${page}`);
-        if (!escuelaResponse.ok) throw new Error("Failed to fetch escuelas");
-        const escuelaData = await escuelaResponse.json();
-
-        // Fetch facultad data
-        const facultadResponse = await fetch(`http://localhost:8000/api/facultad`);
-        if (!facultadResponse.ok) throw new Error("Failed to fetch facultades");
-        const facultadData = await facultadResponse.json();
-
-        // Fetch universidad data
-        const universidadResponse = await fetch(`http://localhost:8000/api/universidad`);
-        if (!universidadResponse.ok) throw new Error("Failed to fetch universidades");
-        const universidadData = await universidadResponse.json();
-
-        // Merge data
-        const mergedData = escuelaData.results.map((escuela) => {
-          const facultad = facultadData.results.find((fac) => fac.facultadCodigo === escuela.facultadCodigo) || {
-            nombre: "Facultad no encontrada",
-          };
-
-          const universidad = universidadData.results.find(
-            (uni) => uni.UniversidadCodigo === escuela.UniversidadCodigo
-          ) || {
-            nombre: "Universidad no encontrada",
-          };
-
-          return {
-            ...escuela,
-            facultadNombre: facultad.nombre,
-            universidadNombre: universidad.nombre,
-          };
-        });
-
-        setEscuelas(mergedData);
-        setTotalPages(Math.ceil(escuelaData.count / 10));
-
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
     fetchData();
   }, [page]);
+
 
   const deleteEscuela = (pk) => {
     deleteEntity("http://localhost:8000/api/escuela/delete", pk, setEscuelas, "escuelaCodigo");
@@ -73,14 +78,6 @@ function EscuelaList() {
   if (loading) {
     return <p>Loading...</p>; 
   }
-
-  const handlePagination = (direction) => {
-    if (direction === "next" && page < totalPages) {
-      setPage(page + 1);
-    } else if (direction === "prev" && page > 1) {
-      setPage(page - 1);
-    }
-  };
 
   return (
     <div>
@@ -92,6 +89,15 @@ function EscuelaList() {
           Exportar
         </Link>
       )}
+      <button type="button" className="btn btn-warning mt-5 ms-2" data-bs-toggle="modal" data-bs-target="#Modal">
+        Importar
+      </button>
+
+      <Modal title="Importar Escuela">
+        <ImportExcel importURL={Api_import_URL} onSuccess={fetchData} />
+      </Modal>
+      
+
       <Tables>
         <thead>
           <tr>

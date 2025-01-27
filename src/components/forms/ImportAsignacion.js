@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-export default function ImportPage() {
+export default function ImportPage({onSuccess}) {
   const [file, setFile] = useState(null);
   const [period, setPeriod] = useState("");
   const [message, setMessage] = useState("");
@@ -45,6 +45,7 @@ export default function ImportPage() {
 
       if (response.ok) {
         setMessage(result.message || "Import successful");
+        if (onSuccess) onSuccess();
       } else {
         setMessage(result.error || "Error during import");
       }
