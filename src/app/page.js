@@ -25,7 +25,9 @@ function AsignacionDocenteList() {
   const fetchData = async () => {
     try {
       // Fetch main data for AsignacionDocente
-      const asignacionResponse = await fetch("http://localhost:8000/api/asignacion");
+      const asignacionResponse = await fetch(
+        "http://localhost:8000/api/asignacion"
+      );
       if (!asignacionResponse.ok) {
         throw new Error("Failed to fetch asignaciones");
       }
@@ -33,14 +35,16 @@ function AsignacionDocenteList() {
       console.log("Asignaciones data:", asignacionData);
 
       // Fetch related data
-      const facultadResponse = await fetch("http://localhost:8000/api/facultad");
+      const facultadResponse = await fetch(
+        "http://localhost:8000/api/facultad"
+      );
       if (!facultadResponse.ok) {
         throw new Error("Failed to fetch facultades");
       }
       const facultadData = await facultadResponse.json();
 
       const escuelaResponse = await fetch("http://localhost:8000/api/escuela");
-      if (!escuelaResponse.ok) { 
+      if (!escuelaResponse.ok) {
         throw new Error("Failed to fetch escuelas");
       }
       const escuelaData = await escuelaResponse.json();
@@ -67,52 +71,33 @@ function AsignacionDocenteList() {
           ...asignacion,
           facultadNombre: facultad ? facultad.nombre : "N/A",
           escuelaNombre: escuela ? escuela.nombre : "N/A",
-          docenteNombre: docente ? `${docente.nombre} ${docente.apellidos}` : "N/A",
+          docenteNombre: docente
+            ? `${docente.nombre} ${docente.apellidos}`
+            : "N/A",
         };
       });
 
       setAsignaciones(mergedData);
-      setTotalPages(Math.ceil(asignacionData.count / 10));
-
+      setTotalPages(Math.ceil(asignacionData.count / 30));
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
       setLoading(false);
     }
-  }
-
+  };
 
   useEffect(() => {
     fetchData();
   }, [page]);
 
-  const deleteAsignacion = async (pk) => {
-    const confirmDelete = window.confirm("¿Estás seguro de querer eliminar?");
-    if (confirmDelete) {
-      try {
-        const response = await fetch(
-          `http://localhost:8000/api/asignacionDocente/delete/${pk}/`,
-          { method: "DELETE" }
-        );
-        if (response.ok) {
-          setAsignaciones((prevAsignaciones) =>
-            prevAsignaciones.filter((asignacion) => asignacion.ADIDcodigo !== pk)
-          );
-          alert("La asignación fue eliminada exitosamente");
-        } else {
-          alert("Error eliminando la asignación. Por favor, inténtelo de nuevo.");
-        }
-      } catch (error) {
-        console.error("Error deleting asignacion:", error);
-        alert("Error al eliminar la asignación.");
-      }
-    }
+  const handleDelete = (pk) => {
+    deleteEntity(
+      "http://localhost:8000/api/asignacionDocente/delete",
+      pk,
+      setAsignaciones,
+      "ADIDcodigo"
+    );
   };
- const handleDelete = (pk) => {
-    deleteEntity("http://localhost:8000/api/asignacionDocente/delete", pk, setAsignaciones, "ADIDCodigo");
-  };
-
-
 
   if (loading) {
     return <p>Loading...</p>;
@@ -120,7 +105,12 @@ function AsignacionDocenteList() {
 
   return (
     <div>
-      <button type="button" className="btn btn-primary mt-5" data-bs-toggle="modal" data-bs-target="#Modal">
+      <button
+        type="button"
+        className="btn btn-primary mt-5"
+        data-bs-toggle="modal"
+        data-bs-target="#Modal"
+      >
         Nueva Asignación
       </button>
       {asignaciones.length > 0 && (
@@ -131,7 +121,7 @@ function AsignacionDocenteList() {
           Exportar
         </Link>
       )}
-      
+
       {/* Modal components */}
       <Modal title="Importar Asignación">
         <ImportPage importURL={Api_import_URL} onSuccess={fetchData} />
@@ -195,6 +185,7 @@ function AsignacionDocenteList() {
                   Editar
                 </Link>
                 <button
+                  type="button"
                   className="btn btn-danger btn-sm mx-2"
                   onClick={() => handleDelete(asignacion.ADIDcodigo)}
                 >
@@ -210,6 +201,5 @@ function AsignacionDocenteList() {
     </div>
   );
 }
-
 
 export default withAuth(AsignacionDocenteList);

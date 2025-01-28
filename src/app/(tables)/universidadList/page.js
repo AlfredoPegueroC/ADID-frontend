@@ -24,7 +24,7 @@ function UniversidadList() {
         if (!response.ok) {console.error("Failed to fetch data");}
         const data = await response.json();
         setUniversidades(data.results);
-        setTotalPages(Math.ceil(data.count / 10));
+        setTotalPages(Math.ceil(data.count / 30));
         setLoading(false);
       }catch (error) {
         console.error("Error fetching data:", error);

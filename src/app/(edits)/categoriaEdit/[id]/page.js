@@ -2,7 +2,10 @@
 
 import React, {useState, useEffect} from "react"
 import {useRouter} from "next/navigation" 
-import withAuth from "@/src/utils/withAuth"
+import FormLayout from "@components/layouts/FormLayout"
+
+// utils
+import withAuth from "@utils/withAuth"
 
 function categoriaEdit({params}){
   const router = useRouter()
@@ -23,7 +26,7 @@ function categoriaEdit({params}){
         const universidadesResponse = await fetch("http://localhost:8000/api/universidad");
         if (!universidadesResponse.ok) throw new Error("Failed to fetch universidades");
         const universidadesData = await universidadesResponse.json();
-        setUniversidades(universidadesData);
+        setUniversidades(universidadesData.results); 
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -73,7 +76,7 @@ function categoriaEdit({params}){
   }
 
   return (
-    <div>
+    <FormLayout>
       <h1>Editar Categoria</h1>
       <form onSubmit={handleSubmit}>
         <div className="mb-3">
@@ -106,9 +109,9 @@ function categoriaEdit({params}){
             ))}
           </select>
         </div>
-        <button type="submit" className="btn btn-primary">Guardar</button>
+        <button type="submit" className="btn btn-primary">Guardar Cambios</button>
       </form>
-    </div>
+    </FormLayout>
   )
 
 }

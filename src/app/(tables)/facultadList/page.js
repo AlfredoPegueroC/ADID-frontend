@@ -56,7 +56,7 @@ function FacultadList() {
       });
 
       setFacultades(mergedData);
-      setTotalPages(Math.ceil(facultadesData.count / 10)); // Assuming 10 items per page
+      setTotalPages(Math.ceil(facultadesData.count / 30)); 
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {

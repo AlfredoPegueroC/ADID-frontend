@@ -41,7 +41,7 @@ function tipodocenteList() {
 
         })
         setTipodocentes(mergedData);
-        setTotalPages(Math.ceil(tipoData.count / 10));
+        setTotalPages(Math.ceil(tipoData.count / 30));
       }catch(error){
         console.error("error tipo docentes", error);
        } finally{

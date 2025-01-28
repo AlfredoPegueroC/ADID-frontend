@@ -2,7 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import withAuth from "@/src/utils/withAuth";
+import FormLayout from "@components/layouts/FormLayout";
+import withAuth from "@utils/withAuth";
 
 function EditFacultad({ params }) {
   const router = useRouter();
@@ -24,7 +25,7 @@ function EditFacultad({ params }) {
         const universidadesResponse = await fetch("http://localhost:8000/api/universidad");
         if (!universidadesResponse.ok) throw new Error("Failed to fetch universidades");
         const universidadesData = await universidadesResponse.json();
-        setUniversidades(universidadesData);
+        setUniversidades(universidadesData.results); // results es donde esta el contenido del json
       } catch (error) {
         console.error("Error fetching data:", error);
         setError("Failed to load data.");
@@ -73,7 +74,7 @@ function EditFacultad({ params }) {
   // if (error) return <p>{error}</p>;
 
   return (
-    <div className="container mt-5">
+    <FormLayout>
       <h1>Edit Facultad</h1>
       <form onSubmit={handleSubmit}>
         <div className="mb-3">
@@ -126,10 +127,10 @@ function EditFacultad({ params }) {
         </div>
 
         <button type="submit" className="btn btn-primary">
-          Submit
+          Guardar Cambios
         </button>
       </form>
-    </div>
+    </FormLayout>
   );
 }
 

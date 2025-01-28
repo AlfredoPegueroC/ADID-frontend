@@ -8,8 +8,8 @@ export const deleteEntity = async (endpoint, pk, setEntities, idKey = "id") => {
       });
 
       if (response.ok) {
-        setEntities((prevEntities) =>
-          prevEntities.filter((entity) => entity[idKey] !== pk)
+        setEntities((prevEntities) => prevEntities.filter((entity) => entity[idKey] !== pk)
+        
       );
         alert("Elemento eliminado con éxito.");
       } else {

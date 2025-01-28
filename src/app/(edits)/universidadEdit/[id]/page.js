@@ -2,7 +2,9 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import withAuth from "@/src/utils/withAuth";
+
+import FormLayout from "@components/layouts/FormLayout";
+import withAuth from "@utils/withAuth";
 
 function EditUniversidad({params}) {
   const router = useRouter();
@@ -69,7 +71,7 @@ function EditUniversidad({params}) {
   if (error) return <p>{error}</p>;
 
   return (
-    <div className="container mt-5">
+    <FormLayout>
       <h1>Edit Universidad</h1>
       <form onSubmit={handleSubmit}>
         <div className="mb-3">
@@ -96,9 +98,9 @@ function EditUniversidad({params}) {
             <option value="Inactivo">Inactivo</option>
           </select>
         </div>
-        <button type="submit" className="btn btn-primary">Save Changes</button>
+        <button type="submit" className="btn btn-primary">Guardar Cambios</button>
       </form>
-    </div>
+    </FormLayout>
   );
 }
 

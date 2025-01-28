@@ -2,7 +2,8 @@
 
 import React, {useState, useEffect} from "react"
 import { useRouter } from "next/navigation"
-import withAuth from "@/src/utils/withAuth"
+import FormLayout from "@components/layouts/FormLayout"
+import withAuth from "@utils/withAuth"
 
 function DocenteEdit({params}){
   const router = useRouter()
@@ -28,27 +29,27 @@ function DocenteEdit({params}){
         const universidadesResponse = await fetch("http://localhost:8000/api/universidad")
         if(!universidadesResponse.ok) throw new Error("Failed to fetch universidades")
         const universidadesData = await universidadesResponse.json()
-        setUniversidades(universidadesData)
+        setUniversidades(universidadesData.results)
 
         const facultadesResponse = await fetch("http://localhost:8000/api/facultad")
         if(!facultadesResponse.ok) throw new Error("Failed to fetch facultades")
         const facultadesData = await facultadesResponse.json()
-        setFacultades(facultadesData)
+        setFacultades(facultadesData.results)
 
         const escuelasResponse = await fetch("http://localhost:8000/api/escuela")
         if(!escuelasResponse.ok) throw new Error("Failed to fetch escuelas")
         const escuelasData = await escuelasResponse.json()
-        setEscuelas(escuelasData)
+        setEscuelas(escuelasData.results)
 
         const tiposResponse = await fetch("http://localhost:8000/api/tipodocente")
         if(!tiposResponse.ok) throw new Error("Failed to fetch tipos")
         const tiposData = await tiposResponse.json()
-        setTipos(tiposData)
+        setTipos(tiposData.results)
 
         const categoriasResponse = await fetch("http://localhost:8000/api/categoriaDocente")
         if(!categoriasResponse.ok) throw new Error("Failed to fetch categorias")
         const categoriasData = await categoriasResponse.json()
-        setCategorias(categoriasData)
+        setCategorias(categoriasData.results)
 
       } catch(error){
         console.error("Error fetching data:", error)
@@ -93,7 +94,7 @@ function DocenteEdit({params}){
   if(loading) return <p>Loading...</p>
 
   return(
-    <div className="container mt-5"> 
+    <FormLayout> 
       <h1>Edit Docente</h1>
       <form onSubmit={handleSubmit}>
         <div className="mb-3">
@@ -235,10 +236,10 @@ function DocenteEdit({params}){
 
 
         <button type="submit" className="btn btn-primary">
-          Submit
+          Guardar Cambios
         </button>
       </form>
-    </div>
+    </FormLayout>
   )
 }
 

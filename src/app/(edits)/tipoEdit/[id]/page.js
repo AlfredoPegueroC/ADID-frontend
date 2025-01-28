@@ -2,7 +2,9 @@
 
 import React, {useState, useEffect} from "react"
 import { useRouter } from "next/navigation"
-import withAuth from "@/src/utils/withAuth"
+
+import FormLayout from "@components/layouts/FormLayout"
+import withAuth from "@utils/withAuth"
 
 function TipoEdit({params}){
   const router = useRouter()
@@ -24,7 +26,7 @@ function TipoEdit({params}){
         const universidadesResponse = await fetch("http://localhost:8000/api/universidad")
         if (!universidadesResponse.ok) throw new Error("Failed to fetch universidades")
         const universidadesData = await universidadesResponse.json()
-        setUniversidades(universidadesData)
+        setUniversidades(universidadesData.results)
       } catch (error) {
         console.error("Error fetching data:", error)
       } finally {
@@ -68,7 +70,7 @@ function TipoEdit({params}){
   if(loading) return <p>Loading...</p>
 
   return (
-    <div>
+    <FormLayout>
       <h1>Edit Tipo</h1>
       {loading ? (
         <p>Loading...</p>
@@ -100,10 +102,10 @@ function TipoEdit({params}){
               ))}
             </select>
           </div>
-          <button type="submit" className="btn btn-primary">Save</button>
+          <button type="submit" className="btn btn-primary">Guardar Cambios</button>
         </form>
       )}
-    </div>
+    </FormLayout>
   )
 
 }

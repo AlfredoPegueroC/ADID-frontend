@@ -58,7 +58,7 @@ function EscuelaList() {
       });
 
       setEscuelas(mergedData);
-      setTotalPages(Math.ceil(escuelaData.count / 10));
+      setTotalPages(Math.ceil(escuelaData.count / 30));
 
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -85,7 +85,7 @@ function EscuelaList() {
         Nuevo
       </Link>
       {escuelas.length > 0 && (
-        <Link className="btn btn-success mt-5 ms-2" href={`http://localhost:8000/api/export/escuela`}>
+        <Link className="btn btn-success mt-5 ms-2" href={`http://localhost:8000/export/escuela`}>
           Exportar
         </Link>
       )}

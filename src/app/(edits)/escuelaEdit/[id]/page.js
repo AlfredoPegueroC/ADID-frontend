@@ -2,7 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import withAuth from "@/src/utils/withAuth";
+import FormLayout from "@components/layouts/FormLayout";
+import withAuth from "@utils/withAuth";
 
 function EditEscuela({ params }) {
   const router = useRouter();
@@ -24,12 +25,12 @@ function EditEscuela({ params }) {
         const facultadesResponse = await fetch("http://localhost:8000/api/facultad");
         if (!facultadesResponse.ok) throw new Error("Failed to fetch facultades");
         const facultadesData = await facultadesResponse.json();
-        setFacultades(facultadesData);
+        setFacultades(facultadesData.results);
 
         const universidadesResponse = await fetch("http://localhost:8000/api/universidad");
         if (!universidadesResponse.ok) throw new Error("Failed to fetch universidades");
         const universidadesData = await universidadesResponse.json();
-        setUniversidades(universidadesData);
+        setUniversidades(universidadesData.results);
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -78,7 +79,7 @@ function EditEscuela({ params }) {
   // if (error) return <p>{error}</p>;
 
   return (
-    <div className="container mt-5">
+    <FormLayout>
       <h1>Edit Escuela</h1>
       <form onSubmit={handleSubmit}>
 
@@ -137,11 +138,11 @@ function EditEscuela({ params }) {
           </select>
         </div>
         <button type="submit" className="btn btn-primary">
-          Submit
+          Guardar Cambios
         </button>
       </form>
 
-    </div>
+    </FormLayout>
 
 
 

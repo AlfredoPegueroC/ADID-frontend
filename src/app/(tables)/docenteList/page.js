@@ -86,7 +86,7 @@ function DocenteList() {
       });
 
       setDocentes(mergedData);
-      setTotalPages(Math.ceil(docenteData.count / 10));
+      setTotalPages(Math.ceil(docenteData.count / 30));
 
     } catch (error) {
       console.error("Error fetching data:", error);

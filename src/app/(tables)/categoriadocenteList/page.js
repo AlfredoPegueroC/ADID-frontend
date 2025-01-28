@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Pagination from "@components/Pagination";
-import Tables from "@/src/components/Tables";
+import Tables from "@components/Tables";
 
 // Utils
 import withAuth from "@utils/withAuth";
@@ -38,7 +38,7 @@ function FacultadList() {
         });
 
         setCategorias(mergedData);
-        setTotalPages(Math.ceil(categoriaData.count / 10));
+        setTotalPages(Math.ceil(categoriaData.count / 30));
 
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -51,7 +51,7 @@ function FacultadList() {
   }, [page]);
 
   const deleteCategoria = (pk) => {
-    deleteEntity("http://localhost:8000/api/categoriaDocente/delete", pk, setCategorias, "categoriaCodigo");
+    deleteEntity("http://localhost:8000/api/categoriadocente/delete", pk, setCategorias, "categoriaCodigo");
   }
 
   if (loading) {
