@@ -107,7 +107,7 @@ function UniversidadList() {
         </tbody>
       </Tables>
 
-      {universidades.length > 0 && (
+      {totalPages.length > 0 && (
         <Pagination
           page={page}
           totalPages={totalPages}

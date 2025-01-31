@@ -209,7 +209,7 @@ function DocenteList() {
         </tbody>
       </Tables>
 
-      {docentes.length > 0 && (
+      {totalPages.length > 0 && (
         <Pagination
           page={page}
           totalPages={totalPages}

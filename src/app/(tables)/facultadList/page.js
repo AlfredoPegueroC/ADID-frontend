@@ -149,7 +149,7 @@ function FacultadList() {
       </Tables>
 
       {/* Pagination Controls */}
-      {facultades.length > 0 && (
+      {totalPages.length > 0 && (
         <Pagination
           page={page}
           totalPages={totalPages}

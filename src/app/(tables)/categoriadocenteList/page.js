@@ -119,7 +119,7 @@ function FacultadList() {
         </tbody>
       </Tables>
 
-      {categorias.length > 0 && (
+      {totalPages.length > 0 && (
         <Pagination
           page={page}
           totalPages={totalPages}

@@ -76,18 +76,20 @@ function periodoList() {
     return <p>Loading...</p>;
   }
 
-
   return (
     <div>
-    
-    
-      <button type="button" className="btn btn-primary mt-5" data-bs-toggle="modal" data-bs-target="#Modal">
+      <button
+        type="button"
+        className="btn btn-primary mt-5"
+        data-bs-toggle="modal"
+        data-bs-target="#Modal"
+      >
         Nuevo Periodo
       </button>
 
       {/* Modal components */}
       <Modal title="Importar Facultad">
-        <Periodo title="Periodo Academico"/>
+        <Periodo title="Periodo Academico" />
       </Modal>
 
       <Tables>
@@ -133,10 +135,15 @@ function periodoList() {
         </tbody>
       </Tables>
 
-      {periodos.length > 0 &&  <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />}
-     
+      {totalPages.length > 0 && (
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
+        />
+      )}
     </div>
   );
 }
 
-export default withAuth(periodoList)
+export default withAuth(periodoList);

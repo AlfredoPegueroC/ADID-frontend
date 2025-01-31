@@ -122,7 +122,7 @@ function tipodocenteList() {
         </tbody>
       </Tables>
 
-      {tipodocentes.length > 0 && (
+      {totalPages.length > 0 && (
         <Pagination
           page={page}
           totalPages={totalPages}
