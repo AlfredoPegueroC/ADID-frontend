@@ -16,14 +16,22 @@ function tipodocenteList() {
   const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
-    async function fetchData(){
+    async function fetchData() {
       try {
-        const tipoResponse = await fetch("http://localhost:8000/api/tipodocente");
-        if(!tipoResponse.ok){throw new Error("Failed to fetch data")}
+        const tipoResponse = await fetch(
+          "http://localhost:8000/api/tipodocente"
+        );
+        if (!tipoResponse.ok) {
+          throw new Error("Failed to fetch data");
+        }
         const tipoData = await tipoResponse.json();
 
-        const universidadResponse = await fetch("http://localhost:8000/api/universidad");
-        if(!universidadResponse.ok){throw new Error("Failed to fetch data")}
+        const universidadResponse = await fetch(
+          "http://localhost:8000/api/universidad"
+        );
+        if (!universidadResponse.ok) {
+          throw new Error("Failed to fetch data");
+        }
         const universidadData = await universidadResponse.json();
 
         const mergedData = tipoData.results.map((tipo) => {
@@ -31,29 +39,33 @@ function tipodocenteList() {
           const universidad = universidadData.results.find(
             (uni) => uni.UniversidadCodigo === tipo.UniversidadCodigo
           );
-          if(universidad){
+          if (universidad) {
             universidadNombre = universidad.nombre;
           }
           return {
             ...tipo,
             universidadNombre,
           };
-
-        })
+        });
         setTipodocentes(mergedData);
         setTotalPages(Math.ceil(tipoData.count / 30));
-      }catch(error){
+      } catch (error) {
         console.error("error tipo docentes", error);
-       } finally{
+      } finally {
         setLoading(false);
-       }
+      }
     }
     fetchData();
-  },[page]);
+  }, [page]);
 
   const deleteTipo = (pk) => {
-    deleteEntity("http://localhost:8000/api/tipodocente/delete", pk, setTipodocentes, "tipoDocenteCodigo");
-  }
+    deleteEntity(
+      "http://localhost:8000/api/tipodocente/delete",
+      pk,
+      setTipodocentes,
+      "tipoDocenteCodigo"
+    );
+  };
 
   if (loading) {
     return <p>loading...</p>;
@@ -91,12 +103,16 @@ function tipodocenteList() {
                 <td>{tipodocente.estado}</td>
                 <td>{tipodocente.universidadNombre}</td>
                 <td>
-                  <Link className="btn btn-primary btn-sm" href={`/tipoEdit/${tipodocente.tipoDocenteCodigo}`}> Edit</Link>
+                  <Link
+                    className="btn btn-primary btn-sm"
+                    href={`/tipoEdit/${tipodocente.tipoDocenteCodigo}`}
+                  >
+                    {" "}
+                    Edit
+                  </Link>
                   <button
                     className="btn btn-danger btn-sm mx-2"
-                    onClick={() =>
-                      deleteTipo(tipodocente.tipoDocenteCodigo)
-                    }
+                    onClick={() => deleteTipo(tipodocente.tipoDocenteCodigo)}
                   >
                     Delete
                   </button>
@@ -106,7 +122,13 @@ function tipodocenteList() {
         </tbody>
       </Tables>
 
-      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+      {tipodocentes.length > 0 && (
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
+        />
+      )}
     </div>
   );
 }

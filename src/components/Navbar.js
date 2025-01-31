@@ -114,6 +114,7 @@ export default function Navbar() {
                     Docente
                   </Link>
                 </li>
+                
               </ul>
             </li>
             <li className="nav-item dropdown">
@@ -155,6 +156,11 @@ export default function Navbar() {
                 <li>
                   <Link className="dropdown-item" href="/docenteList">
                     Docente
+                  </Link>
+                </li>
+                <li>
+                  <Link className="dropdown-item" href="/periodoList">
+                    Periodo Academico
                   </Link>
                 </li>
               </ul>

@@ -5,7 +5,7 @@ import Link from "next/link";
 // Components
 import Pagination from "@components/Pagination";
 import Tables from "@components/Tables";
-import ImportExcel from '@components/forms/Import'; 
+import ImportExcel from "@components/forms/Import";
 import Modal from "@components/Modal";
 
 // Utils
@@ -24,23 +24,32 @@ function EscuelaList() {
   const fetchData = async () => {
     try {
       // Fetch escuela data
-      const escuelaResponse = await fetch(`http://localhost:8000/api/escuela?page=${page}`);
+      const escuelaResponse = await fetch(
+        `http://localhost:8000/api/escuela?page=${page}`
+      );
       if (!escuelaResponse.ok) throw new Error("Failed to fetch escuelas");
       const escuelaData = await escuelaResponse.json();
 
       // Fetch facultad data
-      const facultadResponse = await fetch(`http://localhost:8000/api/facultad`);
+      const facultadResponse = await fetch(
+        `http://localhost:8000/api/facultad`
+      );
       if (!facultadResponse.ok) throw new Error("Failed to fetch facultades");
       const facultadData = await facultadResponse.json();
 
       // Fetch universidad data
-      const universidadResponse = await fetch(`http://localhost:8000/api/universidad`);
-      if (!universidadResponse.ok) throw new Error("Failed to fetch universidades");
+      const universidadResponse = await fetch(
+        `http://localhost:8000/api/universidad`
+      );
+      if (!universidadResponse.ok)
+        throw new Error("Failed to fetch universidades");
       const universidadData = await universidadResponse.json();
 
       // Merge data
       const mergedData = escuelaData.results.map((escuela) => {
-        const facultad = facultadData.results.find((fac) => fac.facultadCodigo === escuela.facultadCodigo) || {
+        const facultad = facultadData.results.find(
+          (fac) => fac.facultadCodigo === escuela.facultadCodigo
+        ) || {
           nombre: "Facultad no encontrada",
         };
 
@@ -59,24 +68,27 @@ function EscuelaList() {
 
       setEscuelas(mergedData);
       setTotalPages(Math.ceil(escuelaData.count / 30));
-
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
     fetchData();
   }, [page]);
 
-
   const deleteEscuela = (pk) => {
-    deleteEntity("http://localhost:8000/api/escuela/delete", pk, setEscuelas, "escuelaCodigo");
-  }
+    deleteEntity(
+      "http://localhost:8000/api/escuela/delete",
+      pk,
+      setEscuelas,
+      "escuelaCodigo"
+    );
+  };
   if (loading) {
-    return <p>Loading...</p>; 
+    return <p>Loading...</p>;
   }
 
   return (
@@ -85,18 +97,25 @@ function EscuelaList() {
         Nuevo
       </Link>
       {escuelas.length > 0 && (
-        <Link className="btn btn-success mt-5 ms-2" href={`http://localhost:8000/export/escuela`}>
+        <Link
+          className="btn btn-success mt-5 ms-2"
+          href={`http://localhost:8000/export/escuela`}
+        >
           Exportar
         </Link>
       )}
-      <button type="button" className="btn btn-warning mt-5 ms-2" data-bs-toggle="modal" data-bs-target="#Modal">
+      <button
+        type="button"
+        className="btn btn-warning mt-5 ms-2"
+        data-bs-toggle="modal"
+        data-bs-target="#Modal"
+      >
         Importar
       </button>
 
       <Modal title="Importar Escuela">
         <ImportExcel importURL={Api_import_URL} onSuccess={fetchData} />
       </Modal>
-      
 
       <Tables>
         <thead>
@@ -125,7 +144,10 @@ function EscuelaList() {
                 <td>{escuela.universidadNombre}</td>
                 <td>{escuela.facultadNombre}</td>
                 <td>
-                  <Link className="btn btn-primary btn-sm" href={`/escuelaEdit/${escuela.escuelaCodigo}`}>
+                  <Link
+                    className="btn btn-primary btn-sm"
+                    href={`/escuelaEdit/${escuela.escuelaCodigo}`}
+                  >
                     Edit
                   </Link>
                   <button
@@ -141,7 +163,13 @@ function EscuelaList() {
         </tbody>
       </Tables>
 
-      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+      {escuelas.length > 0 && (
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
+        />
+      )}
     </div>
   );
 }

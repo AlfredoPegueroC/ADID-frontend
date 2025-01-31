@@ -18,12 +18,18 @@ function FacultadList() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const categoriaResponse = await fetch("http://localhost:8000/api/categoriaDocente");
-        if (!categoriaResponse.ok) throw new Error("Failed to fetch categoriaDocente data");
+        const categoriaResponse = await fetch(
+          "http://localhost:8000/api/categoriaDocente"
+        );
+        if (!categoriaResponse.ok)
+          throw new Error("Failed to fetch categoriaDocente data");
         const categoriaData = await categoriaResponse.json();
 
-        const universidadResponse = await fetch("http://localhost:8000/api/universidad");
-        if (!universidadResponse.ok) throw new Error("Failed to fetch universidad data");
+        const universidadResponse = await fetch(
+          "http://localhost:8000/api/universidad"
+        );
+        if (!universidadResponse.ok)
+          throw new Error("Failed to fetch universidad data");
         const universidadData = await universidadResponse.json();
 
         const mergedData = categoriaData.results.map((categoria) => {
@@ -33,13 +39,14 @@ function FacultadList() {
 
           return {
             ...categoria,
-            universidadNombre: universidad ? universidad.nombre : "Universidad no encontrada",
+            universidadNombre: universidad
+              ? universidad.nombre
+              : "Universidad no encontrada",
           };
         });
 
         setCategorias(mergedData);
         setTotalPages(Math.ceil(categoriaData.count / 30));
-
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -51,8 +58,13 @@ function FacultadList() {
   }, [page]);
 
   const deleteCategoria = (pk) => {
-    deleteEntity("http://localhost:8000/api/categoriadocente/delete", pk, setCategorias, "categoriaCodigo");
-  }
+    deleteEntity(
+      "http://localhost:8000/api/categoriadocente/delete",
+      pk,
+      setCategorias,
+      "categoriaCodigo"
+    );
+  };
 
   if (loading) {
     return <p>Loading...</p>;
@@ -88,13 +100,12 @@ function FacultadList() {
                 <td>{categoria.estado}</td>
                 <td>{categoria.universidadNombre}</td>
                 <td>
-
-                <Link
-                  href={`/categoriaEdit/${categoria.categoriaCodigo}`}
-                  className="btn btn-primary btn-sm"
-                >
-                  Edit
-                </Link>
+                  <Link
+                    href={`/categoriaEdit/${categoria.categoriaCodigo}`}
+                    className="btn btn-primary btn-sm"
+                  >
+                    Edit
+                  </Link>
                   <button
                     className="btn btn-danger btn-sm mx-2"
                     onClick={() => deleteCategoria(categoria.categoriaCodigo)}
@@ -108,7 +119,13 @@ function FacultadList() {
         </tbody>
       </Tables>
 
-      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+      {categorias.length > 0 && (
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
+        />
+      )}
     </div>
   );
 }

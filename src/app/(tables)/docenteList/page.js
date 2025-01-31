@@ -6,7 +6,7 @@ import Link from "next/link";
 import Pagination from "@components/Pagination";
 import Tables from "@components/Tables";
 import Modal from "@components/Modal";
-import ImportExcel from '@components/forms/Import';
+import ImportExcel from "@components/forms/Import";
 
 // Utils
 import withAuth from "@utils/withAuth";
@@ -27,32 +27,38 @@ function DocenteList() {
       }
       const docenteData = await docenteResponse.json();
 
-      const universidadResponse = await fetch("http://localhost:8000/api/universidad");
-      if (!universidadResponse.ok) { 
+      const universidadResponse = await fetch(
+        "http://localhost:8000/api/universidad"
+      );
+      if (!universidadResponse.ok) {
         throw new Error("Failed to fetch universidades");
       }
       const universidadData = await universidadResponse.json();
 
-      const facultadResponse = await fetch("http://localhost:8000/api/facultad");
+      const facultadResponse = await fetch(
+        "http://localhost:8000/api/facultad"
+      );
       if (!facultadResponse.ok) {
         throw new Error("Failed to fetch facultades");
       }
       const facultadData = await facultadResponse.json();
 
       const escuelaResponse = await fetch("http://localhost:8000/api/escuela");
-      if (!escuelaResponse.ok) { 
+      if (!escuelaResponse.ok) {
         throw new Error("Failed to fetch escuelas");
       }
       const escuelaData = await escuelaResponse.json();
 
       const tipoResponse = await fetch("http://localhost:8000/api/tipodocente");
-      if (!tipoResponse.ok) { 
+      if (!tipoResponse.ok) {
         throw new Error("Failed to fetch tipos");
       }
       const tipoData = await tipoResponse.json();
 
-      const categoriaResponse = await fetch("http://localhost:8000/api/categoriaDocente");
-      if (!categoriaResponse.ok) { 
+      const categoriaResponse = await fetch(
+        "http://localhost:8000/api/categoriaDocente"
+      );
+      if (!categoriaResponse.ok) {
         throw new Error("Failed to fetch categorias");
       }
       const categoriaData = await categoriaResponse.json();
@@ -87,23 +93,25 @@ function DocenteList() {
 
       setDocentes(mergedData);
       setTotalPages(Math.ceil(docenteData.count / 30));
-
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
       setLoading(false);
     }
-  }
-
-
+  };
 
   useEffect(() => {
     fetchData();
   }, [page]);
 
   const deleteDocente = (pk) => {
-    deleteEntity("http://localhost:8000/api/docente/delete", pk, setDocentes, "Docentecodigo");
-  }
+    deleteEntity(
+      "http://localhost:8000/api/docente/delete",
+      pk,
+      setDocentes,
+      "Docentecodigo"
+    );
+  };
 
   if (loading) {
     return <p>Loading...</p>;
@@ -123,9 +131,19 @@ function DocenteList() {
         </Link>
       )}
 
-      <button type="button" className="btn btn-warning mt-5 ms-2" data-bs-toggle="modal" data-bs-target="#Modal">Importar</button>
+      <button
+        type="button"
+        className="btn btn-warning mt-5 ms-2"
+        data-bs-toggle="modal"
+        data-bs-target="#Modal"
+      >
+        Importar
+      </button>
       <Modal title="Importar Docente">
-        <ImportExcel importURL="http://localhost:8000/import/docente" onSuccess={fetchData} />
+        <ImportExcel
+          importURL="http://localhost:8000/import/docente"
+          onSuccess={fetchData}
+        />
       </Modal>
 
       <Tables>
@@ -191,7 +209,13 @@ function DocenteList() {
         </tbody>
       </Tables>
 
-      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+      {docentes.length > 0 && (
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
+        />
+      )}
     </div>
   );
 }

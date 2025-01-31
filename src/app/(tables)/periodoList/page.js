@@ -3,57 +3,57 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 
-// Components
 import Pagination from "@components/Pagination";
-import Tables from "@/src/components/Tables";
-import ImportExcel from "@components/forms/Import";
+import Tables from "@components/Tables";
 import Modal from "@components/Modal";
+
+import Periodo from "@components/forms/Periodo";
 
 // Utils
 import withAuth from "@utils/withAuth";
 import { deleteEntity } from "@utils/delete";
 
-function FacultadList() {
-  const [facultades, setFacultades] = useState([]);
+function periodoList() {
+  const [periodos, setPeriodos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  const Api_import_URL = "http://localhost:8000/import/facultad";
-
   const fetchData = async () => {
     try {
-      const facultadesResponse = await fetch(
-        `http://localhost:8000/api/facultad?page=${page}`
+      const periodoResponse = await fetch(
+        `http://localhost:8000/api/periodoacademico?page=${page}`
       );
-      if (!facultadesResponse.ok) throw new Error("Failed to fetch facultades");
-      const facultadesData = await facultadesResponse.json();
+      if (!periodoResponse.ok)
+        throw new Error("Fallo la busqueda de datos de periodo");
+      const periodoData = await periodoResponse.json();
 
       const universidadesResponse = await fetch(
         "http://localhost:8000/api/universidad"
       );
+
       if (!universidadesResponse.ok)
         throw new Error("Failed to fetch universidades");
       const universidadesData = await universidadesResponse.json();
 
-      const mergedData = facultadesData.results.map((facultad) => {
+      const mergedData = periodoData.results.map((periodo) => {
         let universidadNombre = "Universidad no encontrada"; // Default value
         const universidad = universidadesData.results.find(
-          (uni) => uni.UniversidadCodigo === facultad.UniversidadCodigo
+          (uni) => uni.UniversidadCodigo === periodo.UniversidadCodigo
         );
         if (universidad) {
           universidadNombre = universidad.nombre;
         }
         return {
-          ...facultad,
+          ...periodo,
           universidadNombre,
         };
       });
 
-      setFacultades(mergedData);
-      setTotalPages(Math.ceil(facultadesData.count / 30));
+      setPeriodos(mergedData);
+      setTotalPages(Math.ceil(periodoData.count / 30));
     } catch (error) {
-      console.error("Error fetching data:", error);
+      console.error("Error feaching data", error);
     } finally {
       setLoading(false);
     }
@@ -65,44 +65,29 @@ function FacultadList() {
 
   const deleteFacultad = (pk) => {
     deleteEntity(
-      "http://localhost:8000/api/facultad/delete",
+      "http://localhost:8000/api/periodoacademico/delete",
       pk,
-      setFacultades,
-      "facultadCodigo"
+      setPeriodos,
+      "periodoAcademicoCodigo"
     );
   };
 
-  // Loading state
   if (loading) {
     return <p>Loading...</p>;
   }
 
+
   return (
     <div>
-      <Link className="btn btn-primary mt-5" href="/facultad">
-        Nuevo
-      </Link>
-      {facultades.length > 0 && (
-        <Link
-          className="btn btn-success mt-5 ms-2"
-          href="http://127.0.0.1:8000/export/facultad"
-        >
-          Exportar
-        </Link>
-      )}
-
-      <button
-        type="button"
-        className="btn btn-warning mt-5 ms-2"
-        data-bs-toggle="modal"
-        data-bs-target="#Modal"
-      >
-        Importar
+    
+    
+      <button type="button" className="btn btn-primary mt-5" data-bs-toggle="modal" data-bs-target="#Modal">
+        Nuevo Periodo
       </button>
 
       {/* Modal components */}
       <Modal title="Importar Facultad">
-        <ImportExcel importURL={Api_import_URL} onSuccess={fetchData} />
+        <Periodo title="Periodo Academico"/>
       </Modal>
 
       <Tables>
@@ -116,29 +101,29 @@ function FacultadList() {
           </tr>
         </thead>
         <tbody>
-          {facultades.length === 0 && (
+          {periodos.length === 0 && (
             <tr>
               <td colSpan="5" className="text-center">
-                No faculties found.
+                No se ha Encontrado Periodo Academico.
               </td>
             </tr>
           )}
-          {facultades.map((facultad, index) => (
-            <tr key={facultad.facultadCodigo}>
+          {periodos.map((periodo, index) => (
+            <tr key={periodo.periodoAcademicoCodigo}>
               <th scope="row">{index + 1}</th>
-              <td>{facultad.nombre}</td>
-              <td>{facultad.estado}</td>
-              <td>{facultad.universidadNombre}</td>
+              <td>{periodo.nombre}</td>
+              <td>{periodo.estado}</td>
+              <td>{periodo.universidadNombre}</td>
               <td>
                 <Link
                   className="btn btn-primary btn-sm"
-                  href={`/facultadEdit/${facultad.facultadCodigo}`}
+                  href={`/periodoEdit/${periodo.periodoAcademicoCodigo}`}
                 >
                   Edit
                 </Link>
                 <button
                   className="btn btn-danger btn-sm mx-2"
-                  onClick={() => deleteFacultad(facultad.facultadCodigo)}
+                  onClick={() => deleteFacultad(periodo.periodoAcademicoCodigo)}
                 >
                   Delete
                 </button>
@@ -148,16 +133,10 @@ function FacultadList() {
         </tbody>
       </Tables>
 
-      {/* Pagination Controls */}
-      {facultades.length > 0 && (
-        <Pagination
-          page={page}
-          totalPages={totalPages}
-          onPageChange={setPage}
-        />
-      )}
+      {periodos.length > 0 &&  <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />}
+     
     </div>
   );
 }
 
-export default withAuth(FacultadList);
+export default withAuth(periodoList)

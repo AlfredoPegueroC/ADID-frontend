@@ -3,12 +3,11 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Pagination from "@components/Pagination";
-import Tables  from "@components/Tables";
+import Tables from "@components/Tables";
 
 // Utils
 import withAuth from "@utils/withAuth";
-import {deleteEntity }from "@utils/delete";
-
+import { deleteEntity } from "@utils/delete";
 
 function UniversidadList() {
   const [universidades, setUniversidades] = useState([]);
@@ -18,15 +17,19 @@ function UniversidadList() {
 
   useEffect(() => {
     async function fetchData() {
-      setLoading(true)
+      setLoading(true);
       try {
-        const response = await fetch(`http://localhost:8000/api/universidad?page=${page}`);
-        if (!response.ok) {console.error("Failed to fetch data");}
+        const response = await fetch(
+          `http://localhost:8000/api/universidad?page=${page}`
+        );
+        if (!response.ok) {
+          console.error("Failed to fetch data");
+        }
         const data = await response.json();
         setUniversidades(data.results);
         setTotalPages(Math.ceil(data.count / 30));
         setLoading(false);
-      }catch (error) {
+      } catch (error) {
         console.error("Error fetching data:", error);
         setLoading(false);
       }
@@ -36,7 +39,12 @@ function UniversidadList() {
   }, [page]);
 
   const handleDelete = (pk) => {
-    deleteEntity("http://localhost:8000/api/universidad/delete", pk, setUniversidades, "UniversidadCodigo");
+    deleteEntity(
+      "http://localhost:8000/api/universidad/delete",
+      pk,
+      setUniversidades,
+      "UniversidadCodigo"
+    );
   };
 
   if (loading) {
@@ -60,48 +68,52 @@ function UniversidadList() {
       </div>
       <Tables>
         <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Nombre</th>
+            <th scope="col">Estado</th>
+            <th scope="col">Acción</th>
+          </tr>
+        </thead>
+        <tbody>
+          {universidades.length === 0 && (
             <tr>
-              <th scope="col">#</th>
-              <th scope="col">Nombre</th>
-              <th scope="col">Estado</th>
-              <th scope="col">Acción</th>
+              <td colSpan="4" className="text-center">
+                No se encontraron universidades.
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {universidades.length === 0 && (
-              <tr>
-                <td colSpan="4" className="text-center">
-                  No se encontraron universidades.
-                </td>
-              </tr>
-            )}
-            {universidades.map((universidad, index) => (
-              <tr key={universidad.UniversidadCodigo}>
-                <th scope="row">{index + 1 + (page - 1) * 10}</th>
-                <td>{universidad.nombre}</td>
-                <td>{universidad.estado}</td>
-                <td>
-                  <Link
-                    href={`/universidadEdit/${universidad.UniversidadCodigo}`}
-                    className="btn btn-primary btn-sm"
-                  >
-                    Editar
-                  </Link>
-                  <button
-                    className="btn btn-danger btn-sm mx-2"
-                    onClick={() =>
-                      handleDelete(universidad.UniversidadCodigo)
-                    }
-                  >
-                    Eliminar
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
+          )}
+          {universidades.map((universidad, index) => (
+            <tr key={universidad.UniversidadCodigo}>
+              <th scope="row">{index + 1 + (page - 1) * 10}</th>
+              <td>{universidad.nombre}</td>
+              <td>{universidad.estado}</td>
+              <td>
+                <Link
+                  href={`/universidadEdit/${universidad.UniversidadCodigo}`}
+                  className="btn btn-primary btn-sm"
+                >
+                  Editar
+                </Link>
+                <button
+                  className="btn btn-danger btn-sm mx-2"
+                  onClick={() => handleDelete(universidad.UniversidadCodigo)}
+                >
+                  Eliminar
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
       </Tables>
 
-      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+      {universidades.length > 0 && (
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
+        />
+      )}
     </div>
   );
 }

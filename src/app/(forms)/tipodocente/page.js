@@ -2,7 +2,7 @@
 
 import TipoDocenteForm from "@components/forms/TipoDocente";
 import FormLayout from "@components/layouts/FormLayout";
-import withAuth from "@/src/utils/withAuth";
+import withAuth from "@utils/withAuth";
 
 function TipoDocenteFormPage(){
     return (

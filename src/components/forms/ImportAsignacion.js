@@ -1,20 +1,37 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-export default function ImportPage({onSuccess}) {
+export default function ImportPage({ onSuccess }) {
   const [file, setFile] = useState(null);
-  const [period, setPeriod] = useState("");
+  const [periods, setPeriods] = useState([]); // Array to store period options
+  const [selectedPeriod, setSelectedPeriod] = useState(""); // Track selected period
   const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const periodoResponse = await fetch(
+          "http://localhost:8000/api/periodoacademico"
+        );
+        if (!periodoResponse.ok) throw new Error("Failed to fetch periodo");
+        const periodoData = await periodoResponse.json();
+        setPeriods(periodoData.results);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+    fetchData();
+  }, []);
 
   // Handle file input change
   const handleFileChange = (event) => {
     setFile(event.target.files[0]);
   };
 
-  // Handle period input change
-  const handlePeriodChange = (event) => {
-    setPeriod(event.target.value);
+  // Handle period selection change
+  const handlePeriodSelectChange = (event) => {
+    setSelectedPeriod(event.target.value);
   };
 
   // Handle form submission
@@ -22,18 +39,18 @@ export default function ImportPage({onSuccess}) {
     event.preventDefault();
 
     if (!file) {
-      setMessage("Please select a file");
+      setMessage("Por favor, selecciona un archivo.");
       return;
     }
 
-    if (!period) {
-      setMessage("Please enter a period");
+    if (!selectedPeriod) {
+      setMessage("Elija un periodo.");
       return;
     }
 
     const formData = new FormData();
     formData.append("excel_file", file);
-    formData.append("period", period);
+    formData.append("period", selectedPeriod);
 
     try {
       const response = await fetch("http://localhost:8000/import/asignacion", {
@@ -66,17 +83,34 @@ export default function ImportPage({onSuccess}) {
             required
           />
         </div>
+
         <div>
-          <input
-            type="text"
-            placeholder="Enter period (e.g., 2025-20)"
-            value={period}
-            onChange={handlePeriodChange}
+          <label htmlFor="periodoCodigo">Periodo Académico:</label>
+          <select
+            id="periodoAcademicoCodigo"
+            value={selectedPeriod}
+            onChange={handlePeriodSelectChange}
             required
-          />
+          >
+            <option value="" disabled>
+              -- Seleccione un Periodo --
+            </option>
+            {periods.map((periodo) => (
+              <option
+                key={periodo.periodoAcademicoCodigo}
+                value={periodo.periodoAcademicoCodigo}
+              >
+                {periodo.nombre}
+              </option>
+            ))}
+          </select>
         </div>
-        <button type="submit" className="btn btn-primary">Upload</button>
+
+        <button type="submit" className="btn btn-primary">
+          Subir Excel
+        </button>
       </form>
+
       {message && <p className="alert alert-info mt-3">{message}</p>}
     </div>
   );
