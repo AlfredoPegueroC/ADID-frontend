@@ -19,7 +19,7 @@ function tipodocenteList() {
     async function fetchData() {
       try {
         const tipoResponse = await fetch(
-          "http://localhost:8000/api/tipodocente"
+          `http://localhost:8000/api/tipodocente?page=${page}`
         );
         if (!tipoResponse.ok) {
           throw new Error("Failed to fetch data");

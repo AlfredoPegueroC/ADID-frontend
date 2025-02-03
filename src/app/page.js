@@ -26,7 +26,7 @@ function AsignacionDocenteList() {
     try {
       // Fetch main data for AsignacionDocente
       const asignacionResponse = await fetch(
-        "http://localhost:8000/api/asignacion"
+        `http://localhost:8000/api/asignacion?page=${page}`
       );
       if (!asignacionResponse.ok) {
         throw new Error("Failed to fetch asignaciones");
@@ -78,7 +78,7 @@ function AsignacionDocenteList() {
       });
 
       setAsignaciones(mergedData);
-      setTotalPages(Math.ceil(asignacionData.count / 30));
+      setTotalPages(Math.ceil(asignacionData.count / 10));
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {

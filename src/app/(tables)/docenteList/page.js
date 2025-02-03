@@ -21,7 +21,7 @@ function DocenteList() {
   const fetchData = async () => {
     try {
       // Fetch main data
-      const docenteResponse = await fetch("http://localhost:8000/api/docente");
+      const docenteResponse = await fetch(`http://localhost:8000/api/docente?page=${page}`);
       if (!docenteResponse.ok) {
         throw new Error("Failed to fetch docentes");
       }

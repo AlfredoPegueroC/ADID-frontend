@@ -18,9 +18,7 @@ function FacultadList() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const categoriaResponse = await fetch(
-          "http://localhost:8000/api/categoriaDocente"
-        );
+        const categoriaResponse = await fetch(`http://localhost:8000/api/categoriaDocente?page=${page}`);
         if (!categoriaResponse.ok)
           throw new Error("Failed to fetch categoriaDocente data");
         const categoriaData = await categoriaResponse.json();
