@@ -78,7 +78,7 @@ function AsignacionDocenteList() {
       });
 
       setAsignaciones(mergedData);
-      setTotalPages(Math.ceil(asignacionData.count / 10));
+      setTotalPages(Math.ceil(asignacionData.count / 30));
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
@@ -182,14 +182,14 @@ function AsignacionDocenteList() {
                   className="btn btn-primary btn-sm"
                   href={`/asignacionEdit/${asignacion.ADIDcodigo}`}
                 >
-                  Editar
+                  U
                 </Link>
                 <button
                   type="button"
                   className="btn btn-danger btn-sm mx-2"
                   onClick={() => handleDelete(asignacion.ADIDcodigo)}
                 >
-                  Eliminar
+                  E
                 </button>
               </td>
             </tr>
@@ -197,7 +197,7 @@ function AsignacionDocenteList() {
         </tbody>
       </Tables>
 
-      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+      {totalPages > 1 && <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />}
     </div>
   );
 }

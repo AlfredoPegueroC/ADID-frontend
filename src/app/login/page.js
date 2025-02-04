@@ -51,10 +51,10 @@ export default function LoginPage() {
       <div className={Styles.login_box}>
         <div className={Styles.left_section}>
         <Image
-        src="/images-Photoroom.png" // 
+        src="/images-Photoroom.png"
         alt="Logo de la Facultad de Ciencias"
-        width={200} // Ancho de la imagen
-        height={200} // Alto de la imagen
+        width={200} 
+        height={200} 
       />
           <h2 className={Styles.separacion}>FACULTAD DE CIENCIAS UASD</h2>
         </div>

@@ -103,10 +103,11 @@ function AsignacionEdit({ params }) {
           <input
             type="text"
             className="form-control"
-            name="clave"
+            name="rnc"
             value={asignacion.nrc || ""}
             onChange={handleChange}
             required
+            disabled
           />
         </div>
 

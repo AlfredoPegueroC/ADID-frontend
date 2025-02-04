@@ -167,7 +167,7 @@ export default function DocenteForm() {
                 name="estado_civil"
                 value={formData.estado_civil}
                 onChange={handleChange}
-                className="campo-input"
+                // className="campo-input"
                 required
               >
                 <option value="" disabled>
