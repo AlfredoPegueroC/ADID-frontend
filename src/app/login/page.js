@@ -1,5 +1,4 @@
 "use client";
-import Image from 'next/image';
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -50,12 +49,15 @@ export default function LoginPage() {
     <div className={Styles.login_container}>
       <div className={Styles.login_box}>
         <div className={Styles.left_section}>
+<<<<<<< HEAD
         <Image
         src="/images-Photoroom.png"
         alt="Logo de la Facultad de Ciencias"
         width={200} 
         height={200} 
       />
+=======
+>>>>>>> parent of 8a9eb96 (Cambio)
           <h2 className={Styles.separacion}>FACULTAD DE CIENCIAS UASD</h2>
         </div>
         <div className={Styles.right_section}>
