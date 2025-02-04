@@ -1,13 +1,13 @@
 
 .login_container {
-  width: 50%;
+  width: 65%;
   max-width: 1000px;
   background-color: #fff;
   border-radius: 10px;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
   overflow: hidden;
   margin:auto;
-  margin-top: 12%; /* Provisional */
+  margin-top: 11%; /* Provisional */
 }
 
 .login_box {
@@ -92,3 +92,7 @@
   margin-top: 32.3px;
   color: #fff;
 } 
+
+.input{
+  background-color: #f4f8f9;
+}
