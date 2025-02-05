@@ -1,11 +1,11 @@
 // Docentes form
-"use client"
+"use client";
 
-import { useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 
 export default function DocenteForm() {
-  const router = useRouter()
+  const router = useRouter();
   const [universidades, setUniversidades] = useState([]);
   const [facultades, setFacultades] = useState([]);
   const [escuelas, setEscuelas] = useState([]);
@@ -13,33 +13,33 @@ export default function DocenteForm() {
   const [categoriasDocente, setCategoriasDocente] = useState([]);
 
   const [formData, setFormData] = useState({
-    Docentecodigo: '',
-    nombre: '',
-    apellidos: '',
-    sexo: '',
-    estado_civil: '',
-    fecha_nacimiento: '',
-    telefono: '',
-    direccion: '',
-    estado: '',
-    UniversidadCodigo: '',
-    facultadCodigo: '',
-    escuelaCodigo: '',
-    tipoDocenteCodigo: '',
-    categoriaCodigo: ''
+    Docentecodigo: "",
+    nombre: "",
+    apellidos: "",
+    sexo: "",
+    estado_civil: "",
+    fecha_nacimiento: "",
+    telefono: "",
+    direccion: "",
+    estado: "",
+    UniversidadCodigo: "",
+    facultadCodigo: "",
+    escuelaCodigo: "",
+    tipoDocenteCodigo: "",
+    categoriaCodigo: "",
   });
 
-  // Fetch dropdown data (universities, faculties, etc.)
+
   useEffect(() => {
     async function fetchData() {
       const responses = await Promise.all([
-        fetch('http://127.0.0.1:8000/api/universidad'),
-        fetch('http://127.0.0.1:8000/api/facultad'),
-        fetch('http://127.0.0.1:8000/api/escuela'),
-        fetch('http://127.0.0.1:8000/api/tipodocente'),
-        fetch('http://127.0.0.1:8000/api/categoriaDocente')
+        fetch("http://127.0.0.1:8000/api/universidad"),
+        fetch("http://127.0.0.1:8000/api/facultad"),
+        fetch("http://127.0.0.1:8000/api/escuela"),
+        fetch("http://127.0.0.1:8000/api/tipodocente"),
+        fetch("http://127.0.0.1:8000/api/categoriaDocente"),
       ]);
-      const data = await Promise.all(responses.map(res => res.json()));
+      const data = await Promise.all(responses.map((res) => res.json()));
 
       setUniversidades(data[0].results);
       setFacultades(data[1].results);
@@ -63,49 +63,48 @@ export default function DocenteForm() {
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/docente/create', {
-        method: 'POST',
+      const response = await fetch("http://127.0.0.1:8000/api/docente/create", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),
       });
 
       if (response.ok) {
-        alert('Docente creado exitosamente');
+        alert("Docente creado exitosamente");
         setFormData({
-          Docentecodigo: '',
-          nombre: '',
-          apellidos: '',
-          sexo: '',
-          estado_civil: '',
-          fecha_nacimiento: '',
-          telefono: '',
-          direccion: '',
-          estado: '',
-          UniversidadCodigo: '',
-          facultadCodigo: '',
-          escuelaCodigo: '',
-          tipoDocenteCodigo: '',
-          categoriaCodigo: ''
+          Docentecodigo: "",
+          nombre: "",
+          apellidos: "",
+          sexo: "",
+          estado_civil: "",
+          fecha_nacimiento: "",
+          telefono: "",
+          direccion: "",
+          estado: "",
+          UniversidadCodigo: "",
+          facultadCodigo: "",
+          escuelaCodigo: "",
+          tipoDocenteCodigo: "",
+          categoriaCodigo: "",
         });
-        router.push("docenteList")
+        router.push("docenteList");
       } else {
         const errorData = await response.json();
-        alert('Error al crear el docente: ' + JSON.stringify(errorData));
+        alert("Error al crear el docente: " + JSON.stringify(errorData));
         console.log(formData);
       }
     } catch (error) {
-      alert('Hubo un error al conectar con la API: ' + error.message);
-        console.log(formData);
+      alert("Hubo un error al conectar con la API: " + error.message);
+      console.log(formData);
     }
   };
 
   return (
     <div>
-      
       <form onSubmit={handleSubmit}>
         <fieldset>
           <legend>Información del Docente</legend>
@@ -145,28 +144,6 @@ export default function DocenteForm() {
             <option value="M">Masculino</option>
           </select>
 
-<<<<<<< HEAD
-            <div className="col">
-              <label htmlFor="estado_civil">Estado Civil:</label>
-              <select
-                id="estado_civil"
-                name="estado_civil"
-                value={formData.estado_civil}
-                onChange={handleChange}
-                // className="campo-input"
-                required
-              >
-                <option value="" disabled>
-                  -- Seleccione el estado civil --
-                </option>
-                <option value="S">Soltero</option>
-                <option value="C">Casado</option>
-                <option value="U">Unión Libre</option>
-                <option value="V">Viudo</option>
-              </select>
-            </div>
-          </div>
-=======
           <label htmlFor="estado_civil">Estado Civil:</label>
           <select
             id="estado_civil"
@@ -183,7 +160,6 @@ export default function DocenteForm() {
             <option value="U">Unión Libre</option>
             <option value="V">Viudo</option>
           </select>
->>>>>>> parent of 8a9eb96 (Cambio)
 
           <label htmlFor="fecha_nacimiento">Fecha de Nacimiento:</label>
           <input
@@ -245,7 +221,10 @@ export default function DocenteForm() {
               -- Seleccione una Universidad --
             </option>
             {universidades.map((universidad) => (
-              <option key={universidad.UniversidadCodigo} value={universidad.UniversidadCodigo}>
+              <option
+                key={universidad.UniversidadCodigo}
+                value={universidad.UniversidadCodigo}
+              >
                 {universidad.nombre}
               </option>
             ))}
@@ -263,7 +242,10 @@ export default function DocenteForm() {
               -- Seleccione una Facultad --
             </option>
             {facultades.map((facultad) => (
-              <option key={facultad.facultadCodigo} value={facultad.facultadCodigo}>
+              <option
+                key={facultad.facultadCodigo}
+                value={facultad.facultadCodigo}
+              >
                 {facultad.nombre}
               </option>
             ))}
@@ -299,7 +281,10 @@ export default function DocenteForm() {
               -- Seleccione el Tipo de Docente --
             </option>
             {tiposDocente.map((tipo) => (
-              <option key={tipo.tipoDocenteCodigo} value={tipo.tipoDocenteCodigo}>
+              <option
+                key={tipo.tipoDocenteCodigo}
+                value={tipo.tipoDocenteCodigo}
+              >
                 {tipo.nombre}
               </option>
             ))}
@@ -317,12 +302,14 @@ export default function DocenteForm() {
               -- Seleccione la Categoría de Docente --
             </option>
             {categoriasDocente.map((categoria) => (
-              <option key={categoria.categoriaCodigo} value={categoria.categoriaCodigo}>
+              <option
+                key={categoria.categoriaCodigo}
+                value={categoria.categoriaCodigo}
+              >
                 {categoria.nombre}
               </option>
             ))}
           </select>
-
         </fieldset>
 
         <input type="submit" value="Enviar" />

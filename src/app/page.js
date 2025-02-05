@@ -19,14 +19,18 @@ function AsignacionDocenteList() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [searchQuery, setSearchQuery] = useState("")
 
   const Api_import_URL = "http://localhost:8000/import/asignacion";
 
+
   const fetchData = async () => {
     try {
+      const searchParam = searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : '';
+
       // Fetch main data for AsignacionDocente
       const asignacionResponse = await fetch(
-        `http://localhost:8000/api/asignacion?page=${page}`
+        `http://localhost:8000/api/asignacion?page=${page}${searchParam}`
       );
       if (!asignacionResponse.ok) {
         throw new Error("Failed to fetch asignaciones");
@@ -98,6 +102,14 @@ function AsignacionDocenteList() {
       "ADIDcodigo"
     );
   };
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value); // Update search query as user types, but won't trigger search here
+  };
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault(); // Prevent the form from reloading the page
+    fetchData(); // Trigger search after form submit
+  };
 
   if (loading) {
     return <p>Loading...</p>;
@@ -127,6 +139,19 @@ function AsignacionDocenteList() {
         <ImportPage importURL={Api_import_URL} onSuccess={fetchData} />
       </Modal>
 
+      <form onSubmit={handleSearchSubmit} className="d-flex mb-3">
+        <input
+          type="text"
+          className="form-control me-2"
+          placeholder="Buscar por nombre o estado"
+          value={searchQuery}
+          onChange={handleSearchChange} // This just updates the input value, not triggering search yet
+        />
+        <button className="btn btn-primary" type="submit">
+          Buscar
+        </button>
+      </form>
+      
       <Tables>
         <thead>
           <tr>

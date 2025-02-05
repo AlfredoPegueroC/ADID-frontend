@@ -14,29 +14,34 @@ function UniversidadList() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      // If searchQuery is empty, do not include it in the request URL
+      const searchParam = searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : '';
+
+      const response = await fetch(
+        `http://localhost:8000/api/universidad?page=${page}${searchParam}`
+      );
+      if (!response.ok) {
+        console.error("Failed to fetch data");
+        return;
+      }
+      const data = await response.json();
+      setUniversidades(data.results);
+      setTotalPages(Math.ceil(data.count / 30));
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    async function fetchData() {
-      setLoading(true);
-      try {
-        const response = await fetch(
-          `http://localhost:8000/api/universidad?page=${page}`
-        );
-        if (!response.ok) {
-          console.error("Failed to fetch data");
-        }
-        const data = await response.json();
-        setUniversidades(data.results);
-        setTotalPages(Math.ceil(data.count / 30));
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        setLoading(false);
-      }
-    }
-
     fetchData();
-  }, [page]);
+  }, [page]); 
 
   const handleDelete = (pk) => {
     deleteEntity(
@@ -45,6 +50,15 @@ function UniversidadList() {
       setUniversidades,
       "UniversidadCodigo"
     );
+  };
+
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value); // Update search query as user types, but won't trigger search here
+  };
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault(); // Prevent the form from reloading the page
+    fetchData(); // Trigger search after form submit
   };
 
   if (loading) {
@@ -66,6 +80,21 @@ function UniversidadList() {
           </Link>
         )}
       </div>
+
+      {/* Search Form */}
+      <form onSubmit={handleSearchSubmit} className="d-flex mb-3">
+        <input
+          type="text"
+          className="form-control me-2"
+          placeholder="Buscar por nombre o estado"
+          value={searchQuery}
+          onChange={handleSearchChange} // This just updates the input value, not triggering search yet
+        />
+        <button className="btn btn-primary" type="submit">
+          Buscar
+        </button>
+      </form>
+
       <Tables>
         <thead>
           <tr>
@@ -107,7 +136,7 @@ function UniversidadList() {
         </tbody>
       </Tables>
 
-      {totalPages.length > 0 && (
+      {totalPages > 0 && (
         <Pagination
           page={page}
           totalPages={totalPages}
@@ -119,3 +148,4 @@ function UniversidadList() {
 }
 
 export default withAuth(UniversidadList);
+

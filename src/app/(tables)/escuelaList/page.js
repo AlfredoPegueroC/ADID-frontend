@@ -17,15 +17,18 @@ function EscuelaList() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [searchQuery, setSearchQuery] = useState("")
 
   const Api_import_URL = "http://localhost:8000/import/escuela";
 
   // const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000/api";
   const fetchData = async () => {
     try {
+      const searchParam = searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : '';
+      
       // Fetch escuela data
       const escuelaResponse = await fetch(
-        `http://localhost:8000/api/escuela?page=${page}`
+        `http://localhost:8000/api/escuela?page=${page}${searchParam}`
       );
       if (!escuelaResponse.ok) throw new Error("Failed to fetch escuelas");
       const escuelaData = await escuelaResponse.json();
@@ -87,6 +90,17 @@ function EscuelaList() {
       "escuelaCodigo"
     );
   };
+
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value); // Update search query as user types, but won't trigger search here
+  };
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault(); // Prevent the form from reloading the page
+    fetchData(); // Trigger search after form submit
+  };
+
+
   if (loading) {
     return <p>Loading...</p>;
   }
@@ -116,6 +130,19 @@ function EscuelaList() {
       <Modal title="Importar Escuela">
         <ImportExcel importURL={Api_import_URL} onSuccess={fetchData} />
       </Modal>
+
+      <form onSubmit={handleSearchSubmit} className="d-flex mb-3">
+        <input
+          type="text"
+          className="form-control me-2"
+          placeholder="Buscar por nombre o estado"
+          value={searchQuery}
+          onChange={handleSearchChange} // This just updates the input value, not triggering search yet
+        />
+        <button className="btn btn-primary" type="submit">
+          Buscar
+        </button>
+      </form>
 
       <Tables>
         <thead>

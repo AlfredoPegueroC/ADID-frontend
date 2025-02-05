@@ -14,47 +14,52 @@ function tipodocenteList() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [searchQuery, setSearchQuery] = useState("")
+
+
+  const fetchData = async () => {
+    try {
+      const searchParam = searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : '';
+
+      const tipoResponse = await fetch(
+        `http://localhost:8000/api/tipodocente?page=${page}${searchParam}`
+      );
+      if (!tipoResponse.ok) {
+        throw new Error("Failed to fetch data");
+      }
+      const tipoData = await tipoResponse.json();
+
+      const universidadResponse = await fetch(
+        "http://localhost:8000/api/universidad"
+      );
+      if (!universidadResponse.ok) {
+        throw new Error("Failed to fetch data");
+      }
+      const universidadData = await universidadResponse.json();
+
+      const mergedData = tipoData.results.map((tipo) => {
+        let universidadNombre = "Universidad no encontrada";
+        const universidad = universidadData.results.find(
+          (uni) => uni.UniversidadCodigo === tipo.UniversidadCodigo
+        );
+        if (universidad) {
+          universidadNombre = universidad.nombre;
+        }
+        return {
+          ...tipo,
+          universidadNombre,
+        };
+      });
+      setTipodocentes(mergedData);
+      setTotalPages(Math.ceil(tipoData.count / 30));
+    } catch (error) {
+      console.error("error tipo docentes", error);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
-    async function fetchData() {
-      try {
-        const tipoResponse = await fetch(
-          `http://localhost:8000/api/tipodocente?page=${page}`
-        );
-        if (!tipoResponse.ok) {
-          throw new Error("Failed to fetch data");
-        }
-        const tipoData = await tipoResponse.json();
-
-        const universidadResponse = await fetch(
-          "http://localhost:8000/api/universidad"
-        );
-        if (!universidadResponse.ok) {
-          throw new Error("Failed to fetch data");
-        }
-        const universidadData = await universidadResponse.json();
-
-        const mergedData = tipoData.results.map((tipo) => {
-          let universidadNombre = "Universidad no encontrada";
-          const universidad = universidadData.results.find(
-            (uni) => uni.UniversidadCodigo === tipo.UniversidadCodigo
-          );
-          if (universidad) {
-            universidadNombre = universidad.nombre;
-          }
-          return {
-            ...tipo,
-            universidadNombre,
-          };
-        });
-        setTipodocentes(mergedData);
-        setTotalPages(Math.ceil(tipoData.count / 30));
-      } catch (error) {
-        console.error("error tipo docentes", error);
-      } finally {
-        setLoading(false);
-      }
-    }
     fetchData();
   }, [page]);
 
@@ -67,6 +72,14 @@ function tipodocenteList() {
     );
   };
 
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value)
+  }
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault()
+    fetchData()
+  }
   if (loading) {
     return <p>loading...</p>;
   }
@@ -76,6 +89,19 @@ function tipodocenteList() {
       <Link className="btn btn-primary mt-5" href="/tipodocente">
         Nuevo
       </Link>
+
+      <form onSubmit={handleSearchSubmit} className="d-flex mb-3">
+        <input
+          type="text"
+          className="form-control me-2"
+          placeholder="Buscar por nombre o estado"
+          value={searchQuery}
+          onChange={handleSearchChange} // This just updates the input value, not triggering search yet
+        />
+        <button className="btn btn-primary" type="submit">
+          Buscar
+        </button>
+      </form>
 
       <Tables>
         <thead>

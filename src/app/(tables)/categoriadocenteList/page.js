@@ -14,44 +14,49 @@ function FacultadList() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [searchQuery, setSearchQuery] = useState("")
+
+
+  const fetchData = async () => {
+    try {
+      const searchParam = searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : '';
+
+      const categoriaResponse = await fetch(`http://localhost:8000/api/categoriaDocente?page=${page}${searchParam}`);
+      if (!categoriaResponse.ok)
+        throw new Error("Failed to fetch categoriaDocente data");
+      const categoriaData = await categoriaResponse.json();
+
+      const universidadResponse = await fetch(
+        "http://localhost:8000/api/universidad"
+      );
+      if (!universidadResponse.ok)
+        throw new Error("Failed to fetch universidad data");
+      const universidadData = await universidadResponse.json();
+
+      const mergedData = categoriaData.results.map((categoria) => {
+        const universidad = universidadData.results.find(
+          (uni) => uni.UniversidadCodigo === categoria.UniversidadCodigo
+        );
+
+        return {
+          ...categoria,
+          universidadNombre: universidad
+            ? universidad.nombre
+            : "Universidad no encontrada",
+        };
+      });
+
+      setCategorias(mergedData);
+      setTotalPages(Math.ceil(categoriaData.count / 30));
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
 
   useEffect(() => {
-    async function fetchData() {
-      try {
-        const categoriaResponse = await fetch(`http://localhost:8000/api/categoriaDocente?page=${page}`);
-        if (!categoriaResponse.ok)
-          throw new Error("Failed to fetch categoriaDocente data");
-        const categoriaData = await categoriaResponse.json();
-
-        const universidadResponse = await fetch(
-          "http://localhost:8000/api/universidad"
-        );
-        if (!universidadResponse.ok)
-          throw new Error("Failed to fetch universidad data");
-        const universidadData = await universidadResponse.json();
-
-        const mergedData = categoriaData.results.map((categoria) => {
-          const universidad = universidadData.results.find(
-            (uni) => uni.UniversidadCodigo === categoria.UniversidadCodigo
-          );
-
-          return {
-            ...categoria,
-            universidadNombre: universidad
-              ? universidad.nombre
-              : "Universidad no encontrada",
-          };
-        });
-
-        setCategorias(mergedData);
-        setTotalPages(Math.ceil(categoriaData.count / 30));
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
     fetchData();
   }, [page]);
 
@@ -64,6 +69,14 @@ function FacultadList() {
     );
   };
 
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value); // Update search query as user types, but won't trigger search here
+  };
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault(); // Prevent the form from reloading the page
+    fetchData(); // Trigger search after form submit
+  };
   if (loading) {
     return <p>Loading...</p>;
   }
@@ -73,6 +86,20 @@ function FacultadList() {
       <Link className="btn btn-primary mt-5" href="/categoriadocente">
         Nuevo
       </Link>
+
+      <form onSubmit={handleSearchSubmit} className="d-flex mb-3">
+        <input
+          type="text"
+          className="form-control me-2"
+          placeholder="Buscar por nombre o estado"
+          value={searchQuery}
+          onChange={handleSearchChange} // This just updates the input value, not triggering search yet
+        />
+        <button className="btn btn-primary" type="submit">
+          Buscar
+        </button>
+      </form>
+
       <Tables>
         <thead>
           <tr>
