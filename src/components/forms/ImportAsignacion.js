@@ -98,7 +98,7 @@ export default function ImportPage({ onSuccess }) {
             {periods.map((periodo) => (
               <option
                 key={periodo.periodoAcademicoCodigo}
-                value={periodo.periodoAcademicoCodigo}
+                value={periodo.nombre}
               >
                 {periodo.nombre}
               </option>
