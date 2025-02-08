@@ -65,7 +65,7 @@ function Home() {
               <tr key={asig.period}>
                 <td>{asig.period}</td>
                 <td>
-                  <Link href={`/universidadEdit`} className="btn btn-primary btn-sm">
+                  <Link href={`/test/${asig.period}`} className="btn btn-primary btn-sm">
                     ver
                   </Link>
                   <button className="btn btn-light btn-sm ms-2">
