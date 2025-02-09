@@ -92,6 +92,8 @@ function periodoList() {
 
   return (
     <div>
+      <h1 className="text-dark">Lista Periodo</h1>
+
       <button
         type="button"
         className="btn btn-primary mt-5"

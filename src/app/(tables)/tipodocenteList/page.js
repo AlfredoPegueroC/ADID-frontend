@@ -86,6 +86,9 @@ function tipodocenteList() {
 
   return (
     <div>
+      <h1 className="text-dark">Lista lista Tipo docente</h1>
+
+
       <Link className="btn btn-primary mt-5" href="/tipodocente">
         Nuevo
       </Link>

@@ -83,6 +83,8 @@ function FacultadList() {
 
   return (
     <div>
+      <h1 className="text-dark">Lista Categoría docente</h1>
+
       <Link className="btn btn-primary mt-5" href="/categoriadocente">
         Nuevo
       </Link>

@@ -131,6 +131,8 @@ function DocenteList() {
 
   return (
     <div>
+      <h1 className="text-dark">Lista Docente</h1>
+
       <Link className="btn btn-primary mt-5" href="/docente">
         Nuevo
       </Link>

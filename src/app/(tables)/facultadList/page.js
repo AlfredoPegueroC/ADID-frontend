@@ -92,6 +92,8 @@ function FacultadList() {
 
   return (
     <div>
+      <h1 className="text-dark">Lista Facultad</h1>
+
       <Link className="btn btn-primary mt-5" href="/facultad">
         Nuevo
       </Link>

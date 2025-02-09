@@ -107,6 +107,8 @@ function EscuelaList() {
 
   return (
     <div>
+      <h1 className="text-dark">Lista Escuela</h1>
+
       <Link className="btn btn-primary mt-5" href="/escuela">
         Nuevo
       </Link>

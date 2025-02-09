@@ -5,35 +5,32 @@ import Link from "next/link";
 // Components
 import Pagination from "@components/Pagination";
 import Tables from "@components/Tables";
-import Modal from "@components/Modal";
 
 import { deleteEntity } from "@utils/delete";
-// Forms
-import ImportPage from "@components/forms/ImportAsignacion";
 
 // Utils
 import withAuth from "@utils/withAuth";
 
-function principal({params}) {
-  
-  const {periodo} = React.use(params)
+function principal({ params }) {
+  const { periodo } = React.use(params);
 
   const [asignaciones, setAsignaciones] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [searchQuery, setSearchQuery] = useState("")
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const Api_import_URL = "http://localhost:8000/import/asignacion";
-
+  // const Api_import_URL = "http://localhost:8000/import/asignacion";
 
   const fetchData = async () => {
     try {
-      // const searchParam = searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : '';
+      const searchParam = searchQuery
+        ? `&search=${encodeURIComponent(searchQuery)}`
+        : "";
 
       // Fetch main data for AsignacionDocente
       const asignacionResponse = await fetch(
-        `http://localhost:8000/api/asignacion?page=${page}&period=${periodo}`
+        `http://localhost:8000/api/asignacion_frontend?page=${page}&period=${periodo}${searchParam}`
       );
       if (!asignacionResponse.ok) {
         throw new Error("Failed to fetch asignaciones");
@@ -84,7 +81,7 @@ function principal({params}) {
         };
       });
 
-      setAsignaciones(mergedData);
+      setAsignaciones(asignacionData.results);
       setTotalPages(Math.ceil(asignacionData.count / 30));
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -106,12 +103,12 @@ function principal({params}) {
     );
   };
   const handleSearchChange = (e) => {
-    setSearchQuery(e.target.value); // Update search query as user types, but won't trigger search here
+    setSearchQuery(e.target.value);
   };
 
   const handleSearchSubmit = (e) => {
-    e.preventDefault(); // Prevent the form from reloading the page
-    fetchData(); // Trigger search after form submit
+    e.preventDefault();
+    fetchData();
   };
 
   if (loading) {
@@ -120,27 +117,12 @@ function principal({params}) {
 
   return (
     <div>
-      <button
-        type="button"
-        className="btn btn-primary mt-5"
-        data-bs-toggle="modal"
-        data-bs-target="#Modal"
+      <Link
+        className="btn btn-success mt-5 ms-2"
+        href={`http://127.0.0.1:8000/export/asignacionDocenteExport?period=${periodo}`}
       >
-        Nueva Asignación
-      </button>
-      {asignaciones.length > 0 && (
-        <Link
-          className="btn btn-success mt-5 ms-2"
-          href="http://127.0.0.1:8000/export/asignacionDocenteExport"
-        >
-          Exportar
-        </Link>
-      )}
-
-      {/* Modal components */}
-      <Modal title="Importar Asignación">
-        <ImportPage importURL={Api_import_URL} onSuccess={fetchData} />
-      </Modal>
+        Exportar
+      </Link>
 
       <form onSubmit={handleSearchSubmit} className="d-flex mb-3">
         <input
@@ -154,7 +136,7 @@ function principal({params}) {
           Buscar
         </button>
       </form>
-      
+
       <Tables>
         <thead>
           <tr>
@@ -192,12 +174,12 @@ function principal({params}) {
               <td>{asignacion.clave}</td>
               <td>{asignacion.asignatura}</td>
               <td>{asignacion.codigo}</td>
-              <td>{asignacion.docenteNombre}</td>
+              <td>{asignacion.docente_nombre_completo}</td>
               <td>{asignacion.seccion}</td>
               <td>{asignacion.modalidad}</td>
               <td>{asignacion.campus}</td>
-              <td>{asignacion.facultadNombre}</td>
-              <td>{asignacion.escuelaNombre}</td>
+              <td>{asignacion.facultadCodigo}</td>
+              <td>{asignacion.escuelaCodigo}</td>
               <td>{asignacion.tipo}</td>
               <td>{asignacion.cupo}</td>
               <td>{asignacion.inscripto}</td>
@@ -225,7 +207,13 @@ function principal({params}) {
         </tbody>
       </Tables>
 
-      {totalPages > 1 && <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />}
+      {totalPages > 1 && (
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
+        />
+      )}
     </div>
   );
 }
