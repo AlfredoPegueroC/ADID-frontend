@@ -14,7 +14,6 @@ function Home() {
   const Api_import_URL = "http://localhost:8000/import/asignacion";
 
   const fetchData = async () => {
-    setLoading(true);
     let allAsignaciones = [];
     let nextUrl = "http://localhost:8000/api/asignacion";
 
@@ -70,11 +69,8 @@ function Home() {
   return (
     <div>
 
-      <h3 className="text-black mt-5">Selección de Asignación por Período</h3>
 
-      <Modal title="Importar Asignación">
-        <ImportPage importURL={Api_import_URL} />
-      </Modal>
+      <h3 className="text-black mt-5">Selección de Asignación por Período</h3>
       <button
         type="button"
         className="btn btn-primary mt-5"
@@ -83,6 +79,10 @@ function Home() {
       >
         Nueva Asignación
       </button>
+      <Modal title="Importar Asignación">
+        <ImportPage importURL={Api_import_URL} onSuccess={fetchData} />
+      </Modal>
+      
       <Tables>
         <thead>
           <tr>
