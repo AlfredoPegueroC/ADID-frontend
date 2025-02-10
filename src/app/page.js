@@ -70,11 +70,10 @@ function Home() {
   return (
     <div>
 
-
       <h3 className="text-black mt-5">Selección de Asignación por Período</h3>
 
       <Modal title="Importar Asignación">
-        <ImportPage importURL={Api_import_URL} onSuccess={fetchData} />
+        <ImportPage importURL={Api_import_URL} />
       </Modal>
       <button
         type="button"
