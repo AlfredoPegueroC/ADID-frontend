@@ -2,7 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-export default function periodo({ title }) {
+
+export default function Periodo({ title, onSuccess }) {
   const router = useRouter();
   const [universidades, setUniversidades] = useState([]);
   const [formData, setFormData] = useState({
@@ -15,19 +16,20 @@ export default function periodo({ title }) {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    async function cargarUniversidades() {
-      try {
-        const response = await fetch("http://127.0.0.1:8000/api/universidad");
-        if (!response.ok) throw new Error("Failed to fetch universities");
-        const data = await response.json();
-        setUniversidades(data.results);
-      } catch (error) {
-        console.error("Error loading universities:", error);
-        alert("No se pudieron cargar las universidades");
-      }
-    }
     cargarUniversidades();
   }, []);
+
+  async function cargarUniversidades() {
+    try {
+      const response = await fetch("http://127.0.0.1:8000/api/universidad");
+      if (!response.ok) throw new Error("Failed to fetch universities");
+      const data = await response.json();
+      setUniversidades(data.results);
+    } catch (error) {
+      console.error("Error loading universities:", error);
+      alert("No se pudieron cargar las universidades");
+    }
+  }
 
   const handleInputChange = (e) => {
     const { id, value } = e.target;
@@ -41,6 +43,12 @@ export default function periodo({ title }) {
     e.preventDefault();
     setLoading(true);
 
+    if (!formData.UniversidadCodigo) {
+      alert("Por favor, seleccione una universidad.");
+      setLoading(false);
+      return;
+    }
+
     try {
       const response = await fetch(
         "http://127.0.0.1:8000/api/periodoacademico/create",
@@ -52,41 +60,44 @@ export default function periodo({ title }) {
           body: JSON.stringify(formData),
         }
       );
+
       if (response.ok) {
-        alert("Periodo Academico creada exitosamente");
+        alert("Periodo Académico creado exitosamente");
         setFormData({
           periodoAcademicoCodigo: "",
           nombre: "",
           estado: "",
           UniversidadCodigo: "",
         });
-        router.push("/periodoList");
+
+        onSuccess();
+
       } else {
         const errorData = await response.json();
         alert(
-            `Error al crear la Periodo: ${
+          `Error al crear el periodo: ${
             errorData.detail || "Error desconocido"
           }`
         );
       }
     } catch (error) {
-      console.error("Error creating Periodo:", error);
-      alert("Hubo un problema al crear la Periodo");
+      console.error("Error creating periodo:", error);
+      alert("Hubo un problema al crear el periodo");
     } finally {
       setLoading(false);
     }
   };
 
-  return(
+  return (
     <div>
       <form id="periodoForm" onSubmit={handleSubmit}>
         <fieldset>
           <legend>{title}</legend>
 
-          <label htmlFor="nombre">Nombre de la periodo:</label>
+          <label htmlFor="nombre">Nombre del periodo:</label>
           <input
             type="text"
-            placeholder="Nombre de la periodo"
+            placeholder="Nombre del periodo"
             id="nombre"
             value={formData.nombre}
             onChange={handleInputChange}
@@ -136,5 +147,5 @@ export default function periodo({ title }) {
         />
       </form>
     </div>
-  )
+  );
 }
