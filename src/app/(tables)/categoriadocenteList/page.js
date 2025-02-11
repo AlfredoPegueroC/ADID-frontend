@@ -88,7 +88,7 @@ function FacultadList() {
       <Link className="btn btn-primary mt-5" href="/categoriadocente">
         Nuevo
       </Link>
-      {/* CONVERTIR EN COMPONENTE */}
+
       <form onSubmit={handleSearchSubmit} className="d-flex mb-3">
         <input
           type="text"

@@ -2,6 +2,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import styles from "@styles/Notificacion.module.css"; // Importa el archivo CSS
 
 export default function FacultadForm({ title }) {
   const router = useRouter();
@@ -39,6 +40,15 @@ export default function FacultadForm({ title }) {
     }));
   };
 
+  // Display success message
+  const alertSuccess = (message) => {
+    const alertDiv = document.createElement("div");
+    alertDiv.className = styles.alertaExito;
+    alertDiv.textContent = message;
+    document.body.appendChild(alertDiv);
+    setTimeout(() => alertDiv.remove(), 5000); // Remove alert after 5 seconds
+  };
+
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -56,14 +66,15 @@ export default function FacultadForm({ title }) {
       );
 
       if (response.ok) {
-        alert("Facultad creada exitosamente");
+        alertSuccess("Facultad creada exitosamente");
         setFormData({
           facultadCodigo: "",
           nombre: "",
           UniversidadCodigo: "",
           estado: "",
         });
-        router.push("/facultadList"); // Redirect after success
+        // Retraso de 2 segundos antes de la redirección
+        setTimeout(() => router.push("/facultadList"), 2000);
       } else {
         const errorData = await response.json();
         alert(

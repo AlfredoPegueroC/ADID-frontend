@@ -1,9 +1,10 @@
 "use client"
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from 'react';
+import styles from "@styles/Notificacion.module.css"; // Importa el archivo CSS
 
 export default function EscuelaForm() {
-  const router = useRouter()
+  const router = useRouter();
   const [universidades, setUniversidades] = useState([]);
   const [facultades, setFacultades] = useState([]);
   const [formData, setFormData] = useState({
@@ -70,8 +71,7 @@ export default function EscuelaForm() {
       });
 
       if (response.ok) {
-        alert('Escuela creada exitosamente');
-
+        alertSuccess('Escuela creada exitosamente');
         setFormData({
           escuelaCodigo: '',
           nombre: '',
@@ -79,17 +79,30 @@ export default function EscuelaForm() {
           UniversidadCodigo: '',
           facultadCodigo: '',
         });
-        router.push("/escuelaList")
+        setTimeout(() => router.push("/escuelaList"), 5000); // Retraso de 5 segundos
       } else {
         const errorData = await response.json();
-        alert('Error al crear la escuela: ' + JSON.stringify(errorData));
-      console.log(dataToSend)
-        
+        alertError('Error al crear la escuela: ' + JSON.stringify(errorData));
       }
     } catch (error) {
-      alert('Error al enviar el formulario: ' + error.message);
-      console.log(dataToSend)
+      alertError('Error al enviar el formulario: ' + error.message);
     }
+  };
+
+  const alertSuccess = (message) => {
+    const alertDiv = document.createElement("div");
+    alertDiv.className = styles.alertaExito; // Aplicando el estilo de éxito
+    alertDiv.textContent = message;
+    document.body.appendChild(alertDiv);
+    setTimeout(() => alertDiv.remove(), 5000); // Elimina la alerta después de 5 segundos
+  };
+
+  const alertError = (message) => {
+    const alertDiv = document.createElement("div");
+    alertDiv.className = styles.alertaError; // Aplicando el estilo de error
+    alertDiv.textContent = message;
+    document.body.appendChild(alertDiv);
+    setTimeout(() => alertDiv.remove(), 5000); // Elimina la alerta después de 5 segundos
   };
 
   return (

@@ -1,9 +1,7 @@
-"use client";
-
-// import { Alert } from 'bootstrap/dist/js/bootstrap.bundle';
 import { useRouter } from "next/navigation";
+import styles from "@styles/Notificacion.module.css"; // Importa el archivo CSS
 
-export default function universidad({ title }) {
+export default function Universidad({ title }) {
   const router = useRouter();
 
   const handleUniversidad = async (e) => {
@@ -11,7 +9,6 @@ export default function universidad({ title }) {
     const nombre = document.getElementById("nombre").value;
     const estado = document.getElementById("estado").value;
 
-    // Construir el objeto de datos
     const data = {
       nombre: nombre,
       estado: estado,
@@ -30,15 +27,35 @@ export default function universidad({ title }) {
       );
       if (response.ok) {
         const result = await response.json();
-        alert("Universidad creada con éxito: " + JSON.stringify(result));
-        router.push("/universidadList");
+        alertSuccess("Universidad creada con éxito: " + result.nombre);
+        setTimeout(() => {
+          router.push("/universidadList");
+        }, 5000); // 3000 ms = 5 segundos de espera antes de redirigir
       } else {
         const error = await response.json();
-        alert("Error al crear la universidad: " + JSON.stringify(error));
+        alertError("Error al crear la universidad: " + error.message);
       }
     } catch (error) {
-      alert("Hubo un error al conectar con la API: " + error.message);
+      alertError("Hubo un error al conectar con la API: " + error.message);
     }
+  };
+
+  // Función para mostrar el mensaje de éxito
+  const alertSuccess = (message) => {
+    const alertDiv = document.createElement("div");
+    alertDiv.className = styles.alertaExito;
+    alertDiv.textContent = message;
+    document.body.appendChild(alertDiv);
+    setTimeout(() => alertDiv.remove(), 5000); // Se elimina el mensaje después de 5 segundos
+  };
+
+  // Función para mostrar el mensaje de error
+  const alertError = (message) => {
+    const alertDiv = document.createElement("div");
+    alertDiv.className = styles.alertaError;
+    alertDiv.textContent = message;
+    document.body.appendChild(alertDiv);
+    setTimeout(() => alertDiv.remove(), 5000); // Se elimina el mensaje después de 5 segundos
   };
 
   return (
@@ -56,11 +73,11 @@ export default function universidad({ title }) {
             placeholder="Nombre de la Universidad"
             id="nombre"
             required
-          ></input>
+          />
 
           <label htmlFor="estado">Estado:</label>
           <select id="estado" defaultValue="" required>
-            <option defaultValue="" disabled selected>
+            <option defaultValue="" disabled>
               -- Seleccione --
             </option>
             <option value="Activo">Activo</option>
@@ -68,7 +85,7 @@ export default function universidad({ title }) {
           </select>
         </fieldset>
 
-        <input type="submit" value="Enviar" className="boton-verde"></input>
+        <input type="submit" value="Enviar" className={styles.botonVerde} />
       </form>
     </div>
   );

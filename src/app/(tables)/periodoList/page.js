@@ -105,7 +105,7 @@ function periodoList() {
 
       {/* Modal components */}
       <Modal title="Importar Facultad">
-        <Periodo title="Periodo Academico" onSuccess={fetchData} />
+        <Periodo title="Periodo Academico" />
       </Modal>
 
       <form onSubmit={handleSearchSubmit} className="d-flex mb-3">

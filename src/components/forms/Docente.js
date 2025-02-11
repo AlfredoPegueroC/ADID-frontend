@@ -1,8 +1,9 @@
-// Docentes form
 "use client";
 
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import styles from "@styles/Notificacion.module.css"; // Importa el archivo CSS
+
 
 export default function DocenteForm() {
   const router = useRouter();
@@ -11,6 +12,9 @@ export default function DocenteForm() {
   const [escuelas, setEscuelas] = useState([]);
   const [tiposDocente, setTiposDocente] = useState([]);
   const [categoriasDocente, setCategoriasDocente] = useState([]);
+  const [isLoading, setIsLoading] = useState(true); // Loading state
+  const [errorMessage, setErrorMessage] = useState(""); // Error state
+  const [successMessage, setSuccessMessage] = useState(""); // Success message state
 
   const [formData, setFormData] = useState({
     Docentecodigo: "",
@@ -29,29 +33,35 @@ export default function DocenteForm() {
     categoriaCodigo: "",
   });
 
-
   useEffect(() => {
     async function fetchData() {
-      const responses = await Promise.all([
-        fetch("http://127.0.0.1:8000/api/universidad"),
-        fetch("http://127.0.0.1:8000/api/facultad"),
-        fetch("http://127.0.0.1:8000/api/escuela"),
-        fetch("http://127.0.0.1:8000/api/tipodocente"),
-        fetch("http://127.0.0.1:8000/api/categoriaDocente"),
-      ]);
-      const data = await Promise.all(responses.map((res) => res.json()));
+      setIsLoading(true); // Set loading to true while fetching data
+      try {
+        const responses = await Promise.all([
+          fetch("http://127.0.0.1:8000/api/universidad"),
+          fetch("http://127.0.0.1:8000/api/facultad"),
+          fetch("http://127.0.0.1:8000/api/escuela"),
+          fetch("http://127.0.0.1:8000/api/tipodocente"),
+          fetch("http://127.0.0.1:8000/api/categoriaDocente"),
+        ]);
+        const data = await Promise.all(responses.map((res) => res.json()));
 
-      setUniversidades(data[0].results);
-      setFacultades(data[1].results);
-      setEscuelas(data[2].results);
-      setTiposDocente(data[3].results);
-      setCategoriasDocente(data[4].results);
+        setUniversidades(data[0].results);
+        setFacultades(data[1].results);
+        setEscuelas(data[2].results);
+        setTiposDocente(data[3].results);
+        setCategoriasDocente(data[4].results);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setErrorMessage("Error al cargar los datos, por favor intenta de nuevo.");
+      } finally {
+        setIsLoading(false); // Set loading to false after data is fetched
+      }
     }
 
     fetchData();
   }, []);
 
-  // Handle form field changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
@@ -60,9 +70,10 @@ export default function DocenteForm() {
     }));
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSuccessMessage(""); // Reset success message on form submission
+    setErrorMessage(""); // Reset error message on form submission
 
     try {
       const response = await fetch("http://127.0.0.1:8000/api/docente/create", {
@@ -74,7 +85,7 @@ export default function DocenteForm() {
       });
 
       if (response.ok) {
-        alert("Docente creado exitosamente");
+        setSuccessMessage("Docente creado exitosamente");
         setFormData({
           Docentecodigo: "",
           nombre: "",
@@ -91,20 +102,26 @@ export default function DocenteForm() {
           tipoDocenteCodigo: "",
           categoriaCodigo: "",
         });
-        router.push("docenteList");
+        setTimeout(() => {
+          router.push("docenteList");
+        }, 2000); // Redirect after 2 seconds
       } else {
         const errorData = await response.json();
-        alert("Error al crear el docente: " + JSON.stringify(errorData));
-        console.log(formData);
+        setErrorMessage("Error al crear el docente: " + JSON.stringify(errorData));
       }
     } catch (error) {
-      alert("Hubo un error al conectar con la API: " + error.message);
-      console.log(formData);
+      setErrorMessage("Hubo un error al conectar con la API: " + error.message);
     }
   };
 
+  if (isLoading) {
+    return <div>Cargando datos...</div>; // Mostrar indicador de carga
+  }
+
   return (
     <div>
+      {errorMessage && <div className={styles.error}>{errorMessage}</div>}
+      {successMessage && <div className={styles.success}>{successMessage}</div>}
       <form onSubmit={handleSubmit}>
         <fieldset>
           <legend>Información del Docente</legend>

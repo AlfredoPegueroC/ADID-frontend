@@ -2,9 +2,10 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from 'react';
+import styles from "@styles/Notificacion.module.css"; // Importa el archivo de estilos para las alertas
 
 export default function TipoDocenteForm() {
-  const router = useRouter()
+  const router = useRouter();
   const [formData, setFormData] = useState({
     tipoDocenteCodigo: '',
     nombre: '',
@@ -37,6 +38,15 @@ export default function TipoDocenteForm() {
     });
   };
 
+  // Function to display success alert
+  const alertSuccess = (message) => {
+    const alertDiv = document.createElement("div");
+    alertDiv.className = styles.alertaExito;  // Estilo para la alerta de éxito
+    alertDiv.textContent = message;
+    document.body.appendChild(alertDiv);
+    setTimeout(() => alertDiv.remove(), 5000);  // Eliminar la alerta después de 5 segundos
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -46,18 +56,18 @@ export default function TipoDocenteForm() {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        tipoDocenteCodigo: formData.tipoDocenteCodigo, // Include tipoDocenteCodigo as number
+        tipoDocenteCodigo: formData.tipoDocenteCodigo,
         nombre: formData.nombre,
         estado: formData.estado,
-        UniversidadCodigo: formData.universidadCodigo, // This is the ID of the selected university
+        UniversidadCodigo: formData.universidadCodigo,
       }),
     });
 
     if (response.ok) {
       const result = await response.json();
-      alert('Tipo de Docente creado exitosamente');
+      alertSuccess('Tipo de Docente creado exitosamente');
       setFormData({ tipoDocenteCodigo: '', nombre: '', estado: '', universidadCodigo: '' });
-      router.push("/tipodocenteList")
+      setTimeout(() => router.push("/tipodocenteList"), 2000);  // Redirigir después de 2 segundos
     } else {
       const errorData = await response.json();
       alert('Error al crear el Tipo de Docente: ' + JSON.stringify(errorData));
