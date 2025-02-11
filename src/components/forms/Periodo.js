@@ -2,6 +2,10 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+
+import Notification from "../Notification";
+
+
 export default function periodo({ title }) {
   const router = useRouter();
   const [universidades, setUniversidades] = useState([]);
@@ -53,25 +57,23 @@ export default function periodo({ title }) {
         }
       );
       if (response.ok) {
-        alert("Periodo Academico creada exitosamente");
+        router.push("/periodoList");
+        Notification.alertSuccess("Universidad creada con éxito: " + result.nombre);
         setFormData({
           periodoAcademicoCodigo: "",
           nombre: "",
           estado: "",
           UniversidadCodigo: "",
         });
-        router.push("/periodoList");
+        
       } else {
-        const errorData = await response.json();
-        alert(
-            `Error al crear la Periodo: ${
-            errorData.detail || "Error desconocido"
-          }`
-        );
+        const error = await response.json();
+          Notification.alertError("Error al crear la universidad: " + error.message);
+       
       }
     } catch (error) {
-      console.error("Error creating Periodo:", error);
-      alert("Hubo un problema al crear la Periodo");
+      Notification.alertError("Error al crear la universidad: " + error.message);
+     
     } finally {
       setLoading(false);
     }

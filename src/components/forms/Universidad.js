@@ -1,5 +1,8 @@
 import { useRouter } from "next/navigation";
-import styles from "@styles/Notificacion.module.css"; // Importa el archivo CSS
+import styles from "@styles/Notificacion.module.css";
+
+import Notification from "../Notification";
+
 
 export default function Universidad({ title }) {
   const router = useRouter();
@@ -27,36 +30,17 @@ export default function Universidad({ title }) {
       );
       if (response.ok) {
         const result = await response.json();
-        alertSuccess("Universidad creada con éxito: " + result.nombre);
-        setTimeout(() => {
-          router.push("/universidadList");
-        }, 5000); // 3000 ms = 5 segundos de espera antes de redirigir
+        router.push("/universidadList");
+        Notification.alertSuccess("Universidad creada con éxito: " + result.nombre);
       } else {
         const error = await response.json();
-        alertError("Error al crear la universidad: " + error.message);
+        Notification.alertError("Error al crear la universidad: " + error.message);
       }
     } catch (error) {
-      alertError("Hubo un error al conectar con la API: " + error.message);
+      Notification.alertError("Hubo un error al conectar con la API: " + error.message);
     }
   };
 
-  // Función para mostrar el mensaje de éxito
-  const alertSuccess = (message) => {
-    const alertDiv = document.createElement("div");
-    alertDiv.className = styles.alertaExito;
-    alertDiv.textContent = message;
-    document.body.appendChild(alertDiv);
-    setTimeout(() => alertDiv.remove(), 5000); // Se elimina el mensaje después de 5 segundos
-  };
-
-  // Función para mostrar el mensaje de error
-  const alertError = (message) => {
-    const alertDiv = document.createElement("div");
-    alertDiv.className = styles.alertaError;
-    alertDiv.textContent = message;
-    document.body.appendChild(alertDiv);
-    setTimeout(() => alertDiv.remove(), 5000); // Se elimina el mensaje después de 5 segundos
-  };
 
   return (
     <div>

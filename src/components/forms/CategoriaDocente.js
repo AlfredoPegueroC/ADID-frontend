@@ -2,7 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from 'react';
-import styles from "@styles/Notificacion.module.css"; // Asegúrate de importar el archivo CSS
+import Notification from "../Notification";
+
 
 export default function CategoriaDocenteForm() {
   const router = useRouter();
@@ -65,12 +66,13 @@ export default function CategoriaDocenteForm() {
 
     if (response.ok) {
       const result = await response.json();
-      alertSuccess('Categoría de Docente creada exitosamente');
+      
       setFormData({ categoriaCodigo: '', nombre: '', estado: '', universidadCodigo: '' });
-      setTimeout(() => router.push("/categoriadocenteList"), 2000); // Redirect after 2 seconds
+      router.push("/categoriadocenteList") // Redirect after 2 seconds
+      Notification.alertSuccess('Categoría de Docente creada exitosamente');
     } else {
       const errorData = await response.json();
-      alert('Error al crear la Categoría de Docente: ' + JSON.stringify(errorData));
+      Notification.alertError('Error al crear la Categoría de Docente: ' + JSON.stringify(errorData));
     }
   };
 

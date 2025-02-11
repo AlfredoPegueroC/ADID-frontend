@@ -52,4 +52,11 @@
   background-color: #218838;
 }
 
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
 
+.fade-out {
+  animation: fadeOut 0.5s forwards;
+}

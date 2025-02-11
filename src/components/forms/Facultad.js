@@ -2,7 +2,8 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import styles from "@styles/Notificacion.module.css"; // Importa el archivo CSS
+import Notification from "../Notification";
+
 
 export default function FacultadForm({ title }) {
   const router = useRouter();
@@ -40,15 +41,6 @@ export default function FacultadForm({ title }) {
     }));
   };
 
-  // Display success message
-  const alertSuccess = (message) => {
-    const alertDiv = document.createElement("div");
-    alertDiv.className = styles.alertaExito;
-    alertDiv.textContent = message;
-    document.body.appendChild(alertDiv);
-    setTimeout(() => alertDiv.remove(), 5000); // Remove alert after 5 seconds
-  };
-
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -66,26 +58,22 @@ export default function FacultadForm({ title }) {
       );
 
       if (response.ok) {
-        alertSuccess("Facultad creada exitosamente");
+       
         setFormData({
           facultadCodigo: "",
           nombre: "",
           UniversidadCodigo: "",
           estado: "",
         });
-        // Retraso de 2 segundos antes de la redirección
-        setTimeout(() => router.push("/facultadList"), 2000);
+        router.push("/facultadList")
+        Notification.alertSuccess("Facultad creada exitosamente");
       } else {
-        const errorData = await response.json();
-        alert(
-          `Error al crear la facultad: ${
-            errorData.detail || "Error desconocido"
-          }`
-        );
+        const error = await response.json();
+        Notification.alertError("Error al crear la universidad: " + error.message)
       }
     } catch (error) {
       console.error("Error creating faculty:", error);
-      alert("Hubo un problema al crear la facultad");
+      Notification.alertError("Error al crear la universidad: " + error.message);
     } finally {
       setIsLoading(false); // Stop loading
     }

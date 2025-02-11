@@ -2,7 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from 'react';
-import styles from "@styles/Notificacion.module.css"; // Importa el archivo de estilos para las alertas
+
+import Notification from "../Notification";
 
 export default function TipoDocenteForm() {
   const router = useRouter();
@@ -38,15 +39,6 @@ export default function TipoDocenteForm() {
     });
   };
 
-  // Function to display success alert
-  const alertSuccess = (message) => {
-    const alertDiv = document.createElement("div");
-    alertDiv.className = styles.alertaExito;  // Estilo para la alerta de éxito
-    alertDiv.textContent = message;
-    document.body.appendChild(alertDiv);
-    setTimeout(() => alertDiv.remove(), 5000);  // Eliminar la alerta después de 5 segundos
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -65,12 +57,12 @@ export default function TipoDocenteForm() {
 
     if (response.ok) {
       const result = await response.json();
-      alertSuccess('Tipo de Docente creado exitosamente');
+      Notification.alertSuccess('Tipo de Docente creado exitosamente');
       setFormData({ tipoDocenteCodigo: '', nombre: '', estado: '', universidadCodigo: '' });
-      setTimeout(() => router.push("/tipodocenteList"), 2000);  // Redirigir después de 2 segundos
+      router.push("/tipodocenteList") // Redirigir después de 2 segundos
     } else {
       const errorData = await response.json();
-      alert('Error al crear el Tipo de Docente: ' + JSON.stringify(errorData));
+      Notification.alertError('Error al crear el Tipo de Docente: ' + JSON.stringify(errorData));
     }
   };
 

@@ -1,7 +1,8 @@
 "use client"
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from 'react';
-import styles from "@styles/Notificacion.module.css"; // Importa el archivo CSS
+import Notification from "../Notification";
+
 
 export default function EscuelaForm() {
   const router = useRouter();
@@ -71,7 +72,6 @@ export default function EscuelaForm() {
       });
 
       if (response.ok) {
-        alertSuccess('Escuela creada exitosamente');
         setFormData({
           escuelaCodigo: '',
           nombre: '',
@@ -79,31 +79,18 @@ export default function EscuelaForm() {
           UniversidadCodigo: '',
           facultadCodigo: '',
         });
-        setTimeout(() => router.push("/escuelaList"), 5000); // Retraso de 5 segundos
+       router.push("/escuelaList")
+       Notification.alertSuccess('Escuela creada exitosamente');
       } else {
         const errorData = await response.json();
-        alertError('Error al crear la escuela: ' + JSON.stringify(errorData));
+        Notification.alertError('Error al crear la escuela: ' + JSON.stringify(errorData));
       }
     } catch (error) {
-      alertError('Error al enviar el formulario: ' + error.message);
+      Notification.alertError('Error al enviar el formulario: ' + error.message);
     }
   };
 
-  const alertSuccess = (message) => {
-    const alertDiv = document.createElement("div");
-    alertDiv.className = styles.alertaExito; // Aplicando el estilo de éxito
-    alertDiv.textContent = message;
-    document.body.appendChild(alertDiv);
-    setTimeout(() => alertDiv.remove(), 5000); // Elimina la alerta después de 5 segundos
-  };
-
-  const alertError = (message) => {
-    const alertDiv = document.createElement("div");
-    alertDiv.className = styles.alertaError; // Aplicando el estilo de error
-    alertDiv.textContent = message;
-    document.body.appendChild(alertDiv);
-    setTimeout(() => alertDiv.remove(), 5000); // Elimina la alerta después de 5 segundos
-  };
+ 
 
   return (
     <div>

@@ -2,7 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import styles from "@styles/Notificacion.module.css"; // Importa el archivo CSS
+import Notification from "../Notification";
+
 
 
 export default function DocenteForm() {
@@ -85,7 +86,8 @@ export default function DocenteForm() {
       });
 
       if (response.ok) {
-        setSuccessMessage("Docente creado exitosamente");
+          
+        
         setFormData({
           Docentecodigo: "",
           nombre: "",
@@ -102,15 +104,15 @@ export default function DocenteForm() {
           tipoDocenteCodigo: "",
           categoriaCodigo: "",
         });
-        setTimeout(() => {
-          router.push("docenteList");
-        }, 2000); // Redirect after 2 seconds
+      
+        router.push("docenteList");
+        Notification.alertSuccess("Universidad creada con éxito: " + result.nombre);
       } else {
         const errorData = await response.json();
-        setErrorMessage("Error al crear el docente: " + JSON.stringify(errorData));
+        Notification.alertError("Error al crear el docente: " + JSON.stringify(errorData));
       }
     } catch (error) {
-      setErrorMessage("Hubo un error al conectar con la API: " + error.message);
+       Notification.alertError("Hubo un error al conectar con la API: " + error.message);
     }
   };
 
