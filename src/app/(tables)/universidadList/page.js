@@ -6,6 +6,7 @@ import Link from "next/link";
 import Pagination from "@components/Pagination";
 import Tables from "@components/Tables";
 import Search from "@components/search";
+import isLoading from "@components/Loading";
 // Utils
 import withAuth from "@utils/withAuth";
 import { deleteEntity } from "@utils/delete";
@@ -63,9 +64,13 @@ function UniversidadList() {
     e.preventDefault();
     fetchData();
   };
-
+  
   if (loading) {
-    return <p>Loading...</p>;
+    return (
+      <div className="spinner-container ">
+        <div className="spinner"></div>
+      </div>
+    );
   }
 
   return (
@@ -90,7 +95,7 @@ function UniversidadList() {
         SearchChange={handleSearchChange}
         searchQuery={searchQuery}
       />
-      
+
       <Tables>
         <thead>
           <tr>

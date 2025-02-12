@@ -81,7 +81,11 @@ function FacultadList() {
     fetchData(); // Trigger search after form submit
   };
   if (loading) {
-    return <p>Loading...</p>;
+    return (
+      <div className="spinner-container ">
+        <div className="spinner"></div>
+      </div>
+    );
   }
 
   return (

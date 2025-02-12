@@ -87,7 +87,11 @@ function periodoList() {
 
 
   if (loading) {
-    return <p>Loading...</p>;
+    return (
+      <div className="spinner-container ">
+        <div className="spinner"></div>
+      </div>
+    );
   }
 
   return (

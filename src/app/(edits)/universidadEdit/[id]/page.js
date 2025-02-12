@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import FormLayout from "@components/layouts/FormLayout";
 import withAuth from "@utils/withAuth";
 
-function EditUniversidad({params}) {
+function EditUniversidad({ params }) {
   const router = useRouter();
 
   const { id } = React.use(params);
@@ -16,14 +16,12 @@ function EditUniversidad({params}) {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-  
     fetch(`http://localhost:8000/api/universidad/${id}/`)
       .then((response) => {
         if (!response.ok) {
-          console.log("faild")
-
+          console.log("faild");
         }
-        console.log("working")
+        console.log("working");
         return response.json();
       })
       .then((data) => {
@@ -42,13 +40,16 @@ function EditUniversidad({params}) {
     if (!universidad) return;
 
     try {
-      const response = await fetch(`http://localhost:8000/api/universidad/edit/${id}/`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(universidad),
-      });
+      const response = await fetch(
+        `http://localhost:8000/api/universidad/edit/${id}/`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(universidad),
+        }
+      );
 
       if (response.ok) {
         alert("Universidad updated successfully!");
@@ -67,15 +68,22 @@ function EditUniversidad({params}) {
     setUniversidad({ ...universidad, [name]: value });
   };
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>{error}</p>;
+  if (loading) {
+    return (
+      <div className="spinner-container ">
+        <div className="spinner"></div>
+      </div>
+    );
+  }
 
   return (
     <FormLayout>
       <h1>Edit Universidad</h1>
       <form onSubmit={handleSubmit}>
         <div className="mb-3">
-          <label htmlFor="nombre" className="form-label">Nombre</label>
+          <label htmlFor="nombre" className="form-label">
+            Nombre
+          </label>
           <input
             type="text"
             className="form-control"
@@ -86,7 +94,9 @@ function EditUniversidad({params}) {
           />
         </div>
         <div className="mb-3">
-          <label htmlFor="estado" className="form-label">Estado</label>
+          <label htmlFor="estado" className="form-label">
+            Estado
+          </label>
           <select
             className="form-control"
             id="estado"
@@ -98,7 +108,9 @@ function EditUniversidad({params}) {
             <option value="Inactivo">Inactivo</option>
           </select>
         </div>
-        <button type="submit" className="btn btn-primary">Guardar Cambios</button>
+        <button type="submit" className="btn btn-primary">
+          Guardar Cambios
+        </button>
       </form>
     </FormLayout>
   );

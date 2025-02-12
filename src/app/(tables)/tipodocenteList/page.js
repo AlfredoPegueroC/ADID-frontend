@@ -83,8 +83,13 @@ function tipodocenteList() {
     e.preventDefault();
     fetchData();
   };
+  
   if (loading) {
-    return <p>loading...</p>;
+    return (
+      <div className="spinner-container ">
+        <div className="spinner"></div>
+      </div>
+    );
   }
 
   return (

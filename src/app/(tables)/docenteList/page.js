@@ -130,7 +130,11 @@ function DocenteList() {
   };
 
   if (loading) {
-    return <p>Loading...</p>;
+    return (
+      <div className="spinner-container ">
+        <div className="spinner"></div>
+      </div>
+    );
   }
 
   return (
@@ -152,7 +156,6 @@ function DocenteList() {
         <button
           type="button"
           className="btn btn-warning"
-
           data-bs-toggle="modal"
           data-bs-target="#Modal"
         >

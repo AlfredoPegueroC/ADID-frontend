@@ -91,7 +91,14 @@ function DocenteEdit({params}){
     setDocente({...docente, [name]: value})
   }
 
-  if(loading) return <p>Loading...</p>
+  if (loading) {
+    return (
+      <div className="spinner-container ">
+        <div className="spinner"></div>
+      </div>
+    );
+  }
+
 
   return(
     <FormLayout> 

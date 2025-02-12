@@ -79,16 +79,21 @@ function FacultadList() {
   };
 
   const handleSearchChange = (e) => {
-    setSearchQuery(e.target.value); // Update search query as user types, but won't trigger search here
+    setSearchQuery(e.target.value);
   };
 
   const handleSearchSubmit = (e) => {
-    e.preventDefault(); // Prevent the form from reloading the page
-    fetchData(); // Trigger search after form submit
+    e.preventDefault(); 
+    fetchData(); 
   };
-  // Loading state
+ 
+
   if (loading) {
-    return <p>Loading...</p>;
+    return (
+      <div className="spinner-container ">
+        <div className="spinner"></div>
+      </div>
+    );
   }
 
   return (
