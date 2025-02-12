@@ -1,42 +1,58 @@
 .alertaExito {
   margin-top: 2rem;
-  background-color: #d0e4fc; /* Blanco */
-  color: #2d3436; /* Gris muy oscuro */
+  background-color: #2dcc70;
+  color: #fcfefc;
   padding: 15px 10px;
   margin: 20px auto; /* Centra la alerta horizontalmente */
   border: none;
-  border-left: 6px solid #b08d57; /* Madera cálida */
+  border-left: 6px solid #27ae60;
   border-radius: 10px;
   font-weight: 500;
-  font-size: 16px;
+  font-size: 18px;
   text-align: left;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   position: relative;
   display: flex;
   align-items: center;
-  width: 2rem; /* Ajusta la anchura al 40% del contenedor padre */
-  max-width: 600px; /* Ancho máximo de 600px */
-  min-width: 300px; /* Ancho mínimo de 300px */
+  width: 10cm; /* Ancho de 13 cm */
+  height: 2cm; /* Alto de 3 cm */
+  max-width: none; /* Sin máximo de ancho */
+  min-width: none; /* Sin mínimo de ancho */
 }
-
-
-
 .alertaExito::before {
   content: '✔'; /* Icono de éxito */
-  font-size: 20px; /* Tamaño del icono */
-  color: #27ae60; /* Color del icono */
+  font-size: 24px; /* Tamaño del icono */
+  color: #fcfefc;/* Color del icono */
   margin-right: 10px; /* Espacio entre el icono y el texto */
 }
 
 .alertaError {
-  background-color: #f8d7da;
-  color: #721c24;
-  padding: 10px;
-  margin: 10px 0;
-  border: 1px solid #f5c6cb;
-  border-radius: 5px;
-  font-weight: bold;
-  text-align: center;
+  margin-top: 2rem;
+  background-color: #f74a41;
+  color: #fcfefc;
+  padding: 15px 10px;
+  margin: 20px auto; /* Centra la alerta horizontalmente */
+  border: none;
+  border-left: 6px solid #754a46;
+  border-radius: 10px;
+  font-weight: 500;
+  font-size: 18px;
+  text-align: left;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 10cm; /* Ancho de 13 cm */
+  height: 2cm; /* Alto de 3 cm */
+  max-width: none; /* Sin máximo de ancho */
+  min-width: none; /* Sin mínimo de ancho */
+}
+
+.alertaError::before {
+  content: '⚠️'; /* Icono de éxito */
+  font-size: 24px; /* Tamaño del icono */
+  color: #fcfefc;/* Color del icono */
+  margin-right: 10px; /* Espacio entre el icono y el texto */
 }
 
 .botonVerde {

@@ -5,7 +5,7 @@ function alertSuccess(message) {
   alertDiv.className = styles.alertaExito;
   alertDiv.textContent = message;
   document.body.appendChild(alertDiv);
-  setTimeout(() => alertDiv.remove(), 2000);
+  setTimeout(() => alertDiv.remove(), 4000);
 };
 
 function alertError(message){
@@ -13,7 +13,7 @@ function alertError(message){
   alertDiv.className = styles.alertaError;
   alertDiv.textContent = message;
   document.body.appendChild(alertDiv);
-  setTimeout(() => {alertDiv.remove()}, 2000); 
+  setTimeout(() => {alertDiv.remove()}, 4000); 
 };
 
 export default{ alertSuccess, alertError}

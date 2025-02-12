@@ -171,7 +171,7 @@ export default function EscuelaForm() {
               </option>
             ))}
           </select>
-        </div>
+         </div>
 
         <button type="submit" className={Styles.btn}>
           Enviar
