@@ -7,6 +7,7 @@ import Pagination from "@components/Pagination";
 import Tables from "@components/Tables";
 import Modal from "@components/Modal";
 import ImportExcel from "@components/forms/Import";
+import Search from "@components/search";
 
 // Utils
 import withAuth from "@utils/withAuth";
@@ -17,13 +18,17 @@ function DocenteList() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [searchQuery, setSearchQuery] = useState("")
+  const [searchQuery, setSearchQuery] = useState("");
 
   const fetchData = async () => {
     try {
-      const searchParam = searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : '';
+      const searchParam = searchQuery
+        ? `&search=${encodeURIComponent(searchQuery)}`
+        : "";
       // Fetch main data
-      const docenteResponse = await fetch(`http://localhost:8000/api/docente?page=${page}${searchParam}`);
+      const docenteResponse = await fetch(
+        `http://localhost:8000/api/docente?page=${page}${searchParam}`
+      );
       if (!docenteResponse.ok) {
         throw new Error("Failed to fetch docentes");
       }
@@ -115,7 +120,6 @@ function DocenteList() {
     );
   };
 
-  
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value); // Update search query as user types, but won't trigger search here
   };
@@ -130,29 +134,32 @@ function DocenteList() {
   }
 
   return (
-    <div>
+    <div className="mt-5">
       <h1 className="text-dark">Lista Docente</h1>
-
-      <Link className="btn btn-primary mt-5" href="/docente">
-        Nuevo
-      </Link>
-      {docentes.length > 0 && (
-        <Link
-          className="btn btn-success mt-5 ms-2"
-          href="http://127.0.0.1:8000/export/docente"
-        >
-          Exportar
+      <div className="d-flex gap-2 mb-3 mt-3">
+        <Link className="btn btn-primary" href="/docente">
+          Nuevo
         </Link>
-      )}
+        {docentes.length > 0 && (
+          <Link
+            className="btn btn-success"
+            href="http://127.0.0.1:8000/export/docente"
+          >
+            Exportar
+          </Link>
+        )}
 
-      <button
-        type="button"
-        className="btn btn-warning mt-5 ms-2"
-        data-bs-toggle="modal"
-        data-bs-target="#Modal"
-      >
-        Importar
-      </button>
+        <button
+          type="button"
+          className="btn btn-warning"
+
+          data-bs-toggle="modal"
+          data-bs-target="#Modal"
+        >
+          Importar
+        </button>
+      </div>
+
       <Modal title="Importar Docente">
         <ImportExcel
           importURL="http://localhost:8000/import/docente"
@@ -160,18 +167,11 @@ function DocenteList() {
         />
       </Modal>
 
-      <form onSubmit={handleSearchSubmit} className="d-flex mb-3">
-        <input
-          type="text"
-          className="form-control me-2"
-          placeholder="Buscar por nombre o estado"
-          value={searchQuery}
-          onChange={handleSearchChange} // This just updates the input value, not triggering search yet
-        />
-        <button className="btn btn-primary" type="submit">
-          Buscar
-        </button>
-      </form>
+      <Search
+        SearchSubmit={handleSearchSubmit}
+        SearchChange={handleSearchChange}
+        searchQuery={searchQuery}
+      />
 
       <Tables>
         <thead>

@@ -5,6 +5,7 @@ import Link from "next/link";
 // Components
 import Pagination from "@components/Pagination";
 import Tables from "@components/Tables";
+import Search from "@components/search";
 
 import { deleteEntity } from "@utils/delete";
 
@@ -124,18 +125,11 @@ function principal({ params }) {
         Exportar
       </Link>
 
-      <form onSubmit={handleSearchSubmit} className="d-flex mb-3">
-        <input
-          type="text"
-          className="form-control me-2"
-          placeholder="Buscar por nombre o estado"
-          value={searchQuery}
-          onChange={handleSearchChange} // This just updates the input value, not triggering search yet
-        />
-        <button className="btn btn-primary" type="submit">
-          Buscar
-        </button>
-      </form>
+      <Search
+        SearchSubmit={handleSearchSubmit}
+        SearchChange={handleSearchChange}
+        searchQuery={searchQuery}
+      />
 
       <Tables>
         <thead>

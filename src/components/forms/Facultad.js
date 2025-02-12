@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Notification from "../Notification";
 
+import Styles from "@styles/form.module.css";
 
 export default function FacultadForm({ title }) {
   const router = useRouter();
@@ -58,33 +59,36 @@ export default function FacultadForm({ title }) {
       );
 
       if (response.ok) {
-       
         setFormData({
           facultadCodigo: "",
           nombre: "",
           UniversidadCodigo: "",
           estado: "",
         });
-        router.push("/facultadList")
+        router.push("/facultadList");
         Notification.alertSuccess("Facultad creada exitosamente");
       } else {
         const error = await response.json();
-        Notification.alertError("Error al crear la universidad: " + error.message)
+        Notification.alertError(
+          "Error al crear la universidad: " + error.message
+        );
       }
     } catch (error) {
       console.error("Error creating faculty:", error);
-      Notification.alertError("Error al crear la universidad: " + error.message);
+      Notification.alertError(
+        "Error al crear la universidad: " + error.message
+      );
     } finally {
       setIsLoading(false); // Stop loading
     }
   };
 
   return (
-    <div>
-      <form id="facultadForm" onSubmit={handleSubmit}>
-        <fieldset>
-          <legend>{title}</legend>
+    <div className={Styles.container}>
+      <form id="facultadForm" onSubmit={handleSubmit} className={Styles.form}>
+        <h1 className={Styles.title}>{title}</h1>
 
+        <div className={Styles.name_group}>
           <label htmlFor="nombre">Nombre de la Facultad:</label>
           <input
             type="text"
@@ -94,7 +98,9 @@ export default function FacultadForm({ title }) {
             onChange={handleInputChange}
             required
           />
+        </div>
 
+        <div className={Styles.name_group}>
           <label htmlFor="UniversidadCodigo">Universidad:</label>
           <select
             id="UniversidadCodigo"
@@ -114,7 +120,9 @@ export default function FacultadForm({ title }) {
               </option>
             ))}
           </select>
+        </div>
 
+        <div className={Styles.name_group}>
           <label htmlFor="estado">Estado:</label>
           <select
             id="estado"
@@ -128,14 +136,16 @@ export default function FacultadForm({ title }) {
             <option value="Activo">Activo</option>
             <option value="Inactivo">Inactivo</option>
           </select>
-        </fieldset>
+        </div>
 
-        <input
+        <button
           type="submit"
+          className={Styles.btn}
           value={isLoading ? "Enviando..." : "Enviar"}
-          className="boton-verde"
           disabled={isLoading}
-        />
+        >
+          Enviar
+        </button>
       </form>
     </div>
   );

@@ -3,8 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import Notification from "../Notification";
-
-
+import Styles from "@styles/form.module.css";
 
 export default function DocenteForm() {
   const router = useRouter();
@@ -14,8 +13,7 @@ export default function DocenteForm() {
   const [tiposDocente, setTiposDocente] = useState([]);
   const [categoriasDocente, setCategoriasDocente] = useState([]);
   const [isLoading, setIsLoading] = useState(true); // Loading state
-  const [errorMessage, setErrorMessage] = useState(""); // Error state
-  const [successMessage, setSuccessMessage] = useState(""); // Success message state
+ 
 
   const [formData, setFormData] = useState({
     Docentecodigo: "",
@@ -54,7 +52,9 @@ export default function DocenteForm() {
         setCategoriasDocente(data[4].results);
       } catch (error) {
         console.error("Error fetching data:", error);
-        setErrorMessage("Error al cargar los datos, por favor intenta de nuevo.");
+        setErrorMessage(
+          "Error al cargar los datos, por favor intenta de nuevo."
+        );
       } finally {
         setIsLoading(false); // Set loading to false after data is fetched
       }
@@ -86,8 +86,6 @@ export default function DocenteForm() {
       });
 
       if (response.ok) {
-          
-        
         setFormData({
           Docentecodigo: "",
           nombre: "",
@@ -104,15 +102,21 @@ export default function DocenteForm() {
           tipoDocenteCodigo: "",
           categoriaCodigo: "",
         });
-      
+
         router.push("docenteList");
-        Notification.alertSuccess("Universidad creada con éxito: " + result.nombre);
+        Notification.alertSuccess(
+          "Universidad creada con éxito: " + result.nombre
+        );
       } else {
         const errorData = await response.json();
-        Notification.alertError("Error al crear el docente: " + JSON.stringify(errorData));
+        Notification.alertError(
+          "Error al crear el docente: " + JSON.stringify(errorData)
+        );
       }
     } catch (error) {
-       Notification.alertError("Hubo un error al conectar con la API: " + error.message);
+      Notification.alertError(
+        "Hubo un error al conectar con la API: " + error.message
+      );
     }
   };
 
@@ -121,75 +125,88 @@ export default function DocenteForm() {
   }
 
   return (
-    <div>
-      {errorMessage && <div className={styles.error}>{errorMessage}</div>}
-      {successMessage && <div className={styles.success}>{successMessage}</div>}
-      <form onSubmit={handleSubmit}>
-        <fieldset>
-          <legend>Información del Docente</legend>
+    <div className={Styles.container}>
+      <form onSubmit={handleSubmit} className={Styles.form}>
+        <h1 className={Styles.title}>Registrar Docente</h1>
 
-          <label htmlFor="nombre">Nombre:</label>
-          <input
-            type="text"
-            id="nombre"
-            name="nombre"
-            value={formData.nombre}
-            onChange={handleChange}
-            required
-          />
+        <div className={Styles.names}>
+          <div className={Styles.name_group}>
+            <label htmlFor="nombre">Nombre:</label>
+            <input
+              type="text"
+              id="nombre"
+              name="nombre"
+              value={formData.nombre}
+              placeholder="Nombre"
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-          <label htmlFor="apellidos">Apellidos:</label>
-          <input
-            type="text"
-            id="apellidos"
-            name="apellidos"
-            value={formData.apellidos}
-            onChange={handleChange}
-            required
-          />
+          <div className={Styles.name_group}>
+            <label htmlFor="apellidos">Apellidos:</label>
+            <input
+              type="text"
+              id="apellidos"
+              name="apellidos"
+              value={formData.apellidos}
+              placeholder="Apellidos"
+              onChange={handleChange}
+              required
+            />
+          </div>
+        </div>
 
-          <label htmlFor="sexo">Sexo:</label>
-          <select
-            id="sexo"
-            name="sexo"
-            value={formData.sexo}
-            onChange={handleChange}
-            required
-          >
-            <option value="" disabled>
-              -- Seleccione el sexo --
-            </option>
-            <option value="F">Femenino</option>
-            <option value="M">Masculino</option>
-          </select>
+        <div className={Styles.names}>
+          <div className={Styles.name_group}>
+            <label htmlFor="sexo">Sexo:</label>
+            <select
+              id="sexo"
+              name="sexo"
+              value={formData.sexo}
+              onChange={handleChange}
+              required
+            >
+              <option value="" disabled>
+                -- Seleccione el sexo --
+              </option>
+              <option value="F">Femenino</option>
+              <option value="M">Masculino</option>
+            </select>
+          </div>
 
-          <label htmlFor="estado_civil">Estado Civil:</label>
-          <select
-            id="estado_civil"
-            name="estado_civil"
-            value={formData.estado_civil}
-            onChange={handleChange}
-            required
-          >
-            <option value="" disabled>
-              -- Seleccione el estado civil --
-            </option>
-            <option value="S">Soltero</option>
-            <option value="C">Casado</option>
-            <option value="U">Unión Libre</option>
-            <option value="V">Viudo</option>
-          </select>
+          <div className={Styles.name_group}>
+            <label htmlFor="estado_civil">Estado Civil:</label>
+            <select
+              id="estado_civil"
+              name="estado_civil"
+              value={formData.estado_civil}
+              onChange={handleChange}
+              required
+            >
+              <option value="" disabled>
+                -- Seleccione el estado civil --
+              </option>
+              <option value="S">Soltero</option>
+              <option value="C">Casado</option>
+              <option value="U">Unión Libre</option>
+              <option value="V">Viudo</option>
+            </select>
+          </div>
 
-          <label htmlFor="fecha_nacimiento">Fecha de Nacimiento:</label>
-          <input
-            type="date"
-            id="fecha_nacimiento"
-            name="fecha_nacimiento"
-            value={formData.fecha_nacimiento}
-            onChange={handleChange}
-            required
-          />
-
+          <div className={Styles.name_group}>
+            <label htmlFor="fecha_nacimiento">Fecha de Nacimiento:</label>
+            <input
+              type="date"
+              id="fecha_nacimiento"
+              name="fecha_nacimiento"
+              value={formData.fecha_nacimiento}
+              onChange={handleChange}
+              required
+            />
+          </div>
+       
+        <div className={Styles.name_group}>
           <label htmlFor="telefono">Teléfono:</label>
           <input
             type="text"
@@ -199,7 +216,9 @@ export default function DocenteForm() {
             onChange={handleChange}
             required
           />
+        </div>
 
+        <div className={Styles.name_group}>
           <label htmlFor="direccion">Dirección:</label>
           <input
             type="text"
@@ -209,7 +228,9 @@ export default function DocenteForm() {
             onChange={handleChange}
             required
           />
+        </div>
 
+        <div className={Styles.name_group}>
           <label htmlFor="estado">Estado:</label>
           <select
             id="estado"
@@ -227,7 +248,9 @@ export default function DocenteForm() {
             <option value="Sabático">Sabático</option>
             <option value="Licencia">Licencia</option>
           </select>
+        </div>
 
+        <div className={Styles.name_group}>
           <label htmlFor="UniversidadCodigo">Universidad:</label>
           <select
             id="UniversidadCodigo"
@@ -248,7 +271,9 @@ export default function DocenteForm() {
               </option>
             ))}
           </select>
+        </div>
 
+        <div className={Styles.name_group}>
           <label htmlFor="facultadCodigo">Facultad:</label>
           <select
             id="facultadCodigo"
@@ -269,7 +294,9 @@ export default function DocenteForm() {
               </option>
             ))}
           </select>
+        </div>
 
+        <div className={Styles.name_group}>
           <label htmlFor="escuelaCodigo">Escuela:</label>
           <select
             id="escuelaCodigo"
@@ -287,7 +314,9 @@ export default function DocenteForm() {
               </option>
             ))}
           </select>
+        </div>
 
+        <div className={Styles.name_group}>
           <label htmlFor="tipoDocenteCodigo">Tipo de Docente:</label>
           <select
             id="tipoDocenteCodigo"
@@ -308,7 +337,9 @@ export default function DocenteForm() {
               </option>
             ))}
           </select>
+        </div>
 
+        <div className={Styles.name_group}>
           <label htmlFor="categoriaCodigo">Categoría de Docente:</label>
           <select
             id="categoriaCodigo"
@@ -329,9 +360,11 @@ export default function DocenteForm() {
               </option>
             ))}
           </select>
-        </fieldset>
-
-        <input type="submit" value="Enviar" />
+        </div>
+        </div>
+        <button type="submit" className={Styles.btn}>
+          Enviar
+        </button>
       </form>
     </div>
   );

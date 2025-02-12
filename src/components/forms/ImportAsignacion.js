@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Styles from "@styles/form.module.css";
+
 
 export default function ImportPage({ onSuccess }) {
   const [file, setFile] = useState(null);
@@ -73,24 +75,32 @@ export default function ImportPage({ onSuccess }) {
 
   return (
     <div>
-      <form onSubmit={handleSubmit} className="form-group">
-        <div className="form-group">
+      <form onSubmit={handleSubmit} className={Styles.form}>
+        <h1 className={Styles.title}>Subir Archivo Excel</h1>
+
+        <div className={Styles.name_group}>
+          <label htmlFor="excel_file" className={Styles.label}>
+            Selecciona un archivo Excel:
+          </label>
           <input
             type="file"
-            className="form-control"
+            className={Styles.archivo}
             onChange={handleFileChange}
             accept=".xls,.xlsx"
             required
           />
         </div>
 
-        <div>
-          <label htmlFor="periodoCodigo">Periodo Académico:</label>
+        <div className={Styles.name_group}>
+          <label htmlFor="periodoAcademicoCodigo" className={Styles.label}>
+            Periodo Académico:
+          </label>
           <select
             id="periodoAcademicoCodigo"
             value={selectedPeriod}
             onChange={handlePeriodSelectChange}
             required
+            className={Styles.input}
           >
             <option value="" disabled>
               -- Seleccione un Periodo --
@@ -106,7 +116,7 @@ export default function ImportPage({ onSuccess }) {
           </select>
         </div>
 
-        <button type="submit" className="btn btn-primary">
+        <button type="submit" className={Styles.btn}>
           Subir Excel
         </button>
       </form>

@@ -3,8 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import Styles from "@styles/form.module.css";
 import Notification from "../Notification";
-
 
 export default function periodo({ title }) {
   const router = useRouter();
@@ -58,49 +58,60 @@ export default function periodo({ title }) {
       );
       if (response.ok) {
         router.push("/periodoList");
-        Notification.alertSuccess("Universidad creada con éxito: " + result.nombre);
+        Notification.alertSuccess(
+          "Universidad creada con éxito: " + result.nombre
+        );
         setFormData({
           periodoAcademicoCodigo: "",
           nombre: "",
           estado: "",
           UniversidadCodigo: "",
         });
-        
       } else {
         const error = await response.json();
-          Notification.alertError("Error al crear la universidad: " + error.message);
-       
+        Notification.alertError(
+          "Error al crear la universidad: " + error.message
+        );
       }
     } catch (error) {
-      Notification.alertError("Error al crear la universidad: " + error.message);
-     
+      Notification.alertError(
+        "Error al crear la universidad: " + error.message
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  return(
+  return (
     <div>
-      <form id="periodoForm" onSubmit={handleSubmit}>
-        <fieldset>
-          <legend>{title}</legend>
+      <form id="periodoForm" onSubmit={handleSubmit} className={Styles.form}>
+        <h1 className={Styles.title}>{title}</h1>
 
-          <label htmlFor="nombre">Nombre de la periodo:</label>
+        <div className={Styles.name_group}>
+          <label htmlFor="nombre" className={Styles.label}>
+            Nombre del periodo:
+          </label>
           <input
             type="text"
-            placeholder="Nombre de la periodo"
+            placeholder="Nombre del periodo"
             id="nombre"
             value={formData.nombre}
             onChange={handleInputChange}
             required
+            className={Styles.input}
           />
+        </div>
 
-          <label htmlFor="UniversidadCodigo">Universidad:</label>
+        <div className={Styles.name_group}>
+          <label htmlFor="UniversidadCodigo" className={Styles.label}>
+            Universidad:
+          </label>
           <select
             id="UniversidadCodigo"
             value={formData.UniversidadCodigo}
             onChange={handleInputChange}
             required
+            className={Styles.input}
           >
             <option value="" disabled>
               -- Seleccione una Universidad --
@@ -114,13 +125,18 @@ export default function periodo({ title }) {
               </option>
             ))}
           </select>
+        </div>
 
-          <label htmlFor="estado">Estado:</label>
+        <div className={Styles.name_group}>
+          <label htmlFor="estado" className={Styles.label}>
+            Estado:
+          </label>
           <select
             id="estado"
             value={formData.estado}
             onChange={handleInputChange}
             required
+            className={Styles.input}
           >
             <option value="" disabled>
               -- Seleccione Estado --
@@ -128,15 +144,12 @@ export default function periodo({ title }) {
             <option value="Abierto">Abierto</option>
             <option value="Cerrado">Cerrado</option>
           </select>
-        </fieldset>
+        </div>
 
-        <input
-          type="submit"
-          value={loading ? "Enviando..." : "Enviar"}
-          className="boton-verde"
-          disabled={loading}
-        />
+        <button type="submit" className={Styles.btn} disabled={loading}>
+          {loading ? "Enviando..." : "Enviar"}
+        </button>
       </form>
     </div>
-  )
+  );
 }

@@ -2,9 +2,10 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
+// Components
 import Pagination from "@components/Pagination";
 import Tables from "@components/Tables";
-
+import Search from "@components/search";
 // Utils
 import withAuth from "@utils/withAuth";
 import { deleteEntity } from "@utils/delete";
@@ -20,7 +21,9 @@ function UniversidadList() {
     setLoading(true);
     try {
       // If searchQuery is empty, do not include it in the request URL
-      const searchParam = searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : '';
+      const searchParam = searchQuery
+        ? `&search=${encodeURIComponent(searchQuery)}`
+        : "";
 
       const response = await fetch(
         `http://localhost:8000/api/universidad?page=${page}${searchParam}`
@@ -41,7 +44,7 @@ function UniversidadList() {
 
   useEffect(() => {
     fetchData();
-  }, [page]); 
+  }, [page]);
 
   const handleDelete = (pk) => {
     deleteEntity(
@@ -53,12 +56,12 @@ function UniversidadList() {
   };
 
   const handleSearchChange = (e) => {
-    setSearchQuery(e.target.value); // Update search query as user types, but won't trigger search here
+    setSearchQuery(e.target.value);
   };
 
   const handleSearchSubmit = (e) => {
-    e.preventDefault(); // Prevent the form from reloading the page
-    fetchData(); // Trigger search after form submit
+    e.preventDefault();
+    fetchData();
   };
 
   if (loading) {
@@ -67,7 +70,7 @@ function UniversidadList() {
 
   return (
     <div>
-      <h1 className="text-dark">Lista Universidad</h1>
+      <h1 className="text-dark mt-5">Lista Universidad</h1>
       <div className="d-flex gap-1 mb-3 mt-3">
         <Link className="btn btn-primary" href="/universidad">
           Nuevo
@@ -82,20 +85,12 @@ function UniversidadList() {
         )}
       </div>
 
-      {/* Search Form */}
-      <form onSubmit={handleSearchSubmit} className="d-flex mb-3">
-        <input
-          type="text"
-          className="form-control me-2"
-          placeholder="Buscar por nombre o estado"
-          value={searchQuery}
-          onChange={handleSearchChange} // This just updates the input value, not triggering search yet
-        />
-        <button className="btn btn-primary" type="submit">
-          Buscar
-        </button>
-      </form>
-
+      <Search
+        SearchSubmit={handleSearchSubmit}
+        SearchChange={handleSearchChange}
+        searchQuery={searchQuery}
+      />
+      
       <Tables>
         <thead>
           <tr>
@@ -149,4 +144,3 @@ function UniversidadList() {
 }
 
 export default withAuth(UniversidadList);
-

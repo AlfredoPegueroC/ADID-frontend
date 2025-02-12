@@ -91,17 +91,21 @@ function periodoList() {
   }
 
   return (
-    <div>
+    <div className="mt-5">
       <h1 className="text-dark">Lista Periodo</h1>
+      <div className="d-flex gap-2 mb-3 mt-3">
 
       <button
         type="button"
-        className="btn btn-primary mt-5"
+        className="btn btn-primary"
         data-bs-toggle="modal"
         data-bs-target="#Modal"
       >
+        
         Nuevo Periodo
       </button>
+      </div>
+
 
       {/* Modal components */}
       <Modal title="Importar Facultad">

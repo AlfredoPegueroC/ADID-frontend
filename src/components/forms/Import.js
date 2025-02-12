@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import Styles from "@styles/form.module.css";
+
 export default function ImportExcel({ title, importURL, onSuccess }) {
   const [file, setFile] = useState(null);
   const [message, setMessage] = useState("");
@@ -31,8 +33,8 @@ export default function ImportExcel({ title, importURL, onSuccess }) {
 
       if (response.ok) {
         setMessage(result.message || "Import successful!");
-        if (onSuccess) onSuccess(); 
-        document.querySelector("#myform").reset() // check this later
+        if (onSuccess) onSuccess();
+        document.querySelector("#myform").reset(); // check this later
       } else {
         setMessage(result.error || "Error during import.");
       }
@@ -43,24 +45,28 @@ export default function ImportExcel({ title, importURL, onSuccess }) {
 
   return (
     <div>
-      <h3 className="mt-5 text-dark">{title}</h3>
-      <form onSubmit={handleSubmit} id="myform">
-        <div className="form-group mb-3">
-          <label htmlFor="excel_file" className="form-label">
-            Seleciona un archivo Excel
+      <h1 className={Styles.title}>Importar Archivo Excel</h1>
+      <form onSubmit={handleSubmit} id="myform" className={Styles.form}>
+        <div className={Styles.name_group}>
+          <label htmlFor="excel_file" className={Styles.label}>
+            Selecciona un archivo Excel
           </label>
           <input
             type="file"
-            className="form-control"
+            className={Styles.archivo}
             id="excel_file"
             name="excel_file"
             onChange={handleFileChange}
+            accept=".xls,.xlsx"
+            required
           />
         </div>
-        <button type="submit" className="btn btn-primary">
+
+        <button type="submit" className={Styles.btn}>
           Importar
         </button>
       </form>
+
       {message && <div className="alert alert-info mt-3">{message}</div>}
     </div>
   );

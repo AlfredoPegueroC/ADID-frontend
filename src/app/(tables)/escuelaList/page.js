@@ -7,6 +7,7 @@ import Pagination from "@components/Pagination";
 import Tables from "@components/Tables";
 import ImportExcel from "@components/forms/Import";
 import Modal from "@components/Modal";
+import Search from "@components/search";
 
 // Utils
 import withAuth from "@utils/withAuth";
@@ -17,15 +18,17 @@ function EscuelaList() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [searchQuery, setSearchQuery] = useState("")
+  const [searchQuery, setSearchQuery] = useState("");
 
   const Api_import_URL = "http://localhost:8000/import/escuela";
 
   // const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000/api";
   const fetchData = async () => {
     try {
-      const searchParam = searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : '';
-      
+      const searchParam = searchQuery
+        ? `&search=${encodeURIComponent(searchQuery)}`
+        : "";
+
       // Fetch escuela data
       const escuelaResponse = await fetch(
         `http://localhost:8000/api/escuela?page=${page}${searchParam}`
@@ -100,51 +103,43 @@ function EscuelaList() {
     fetchData(); // Trigger search after form submit
   };
 
-
   if (loading) {
     return <p>Loading...</p>;
   }
 
   return (
-    <div>
+    <div className="mt-5">
       <h1 className="text-dark">Lista Escuela</h1>
-
-      <Link className="btn btn-primary mt-5" href="/escuela">
-        Nuevo
-      </Link>
-      {escuelas.length > 0 && (
-        <Link
-          className="btn btn-success mt-5 ms-2"
-          href={`http://localhost:8000/export/escuela`}
-        >
-          Exportar
+      <div className="d-flex gap-2 mb-3 mt-3">
+        <Link className="btn btn-primary" href="/escuela">
+          Nuevo
         </Link>
-      )}
-      <button
-        type="button"
-        className="btn btn-warning mt-5 ms-2"
-        data-bs-toggle="modal"
-        data-bs-target="#Modal"
-      >
-        Importar
-      </button>
-
+        {escuelas.length > 0 && (
+          <Link
+            className="btn btn-success"
+            href={`http://localhost:8000/export/escuela`}
+          >
+            Exportar
+          </Link>
+        )}
+        <button
+          type="button"
+          className="btn btn-warning"
+          data-bs-toggle="modal"
+          data-bs-target="#Modal"
+        >
+          Importar
+        </button>
+      </div>
       <Modal title="Importar Escuela">
         <ImportExcel importURL={Api_import_URL} onSuccess={fetchData} />
       </Modal>
 
-      <form onSubmit={handleSearchSubmit} className="d-flex mb-3">
-        <input
-          type="text"
-          className="form-control me-2"
-          placeholder="Buscar por nombre o estado"
-          value={searchQuery}
-          onChange={handleSearchChange} // This just updates the input value, not triggering search yet
-        />
-        <button className="btn btn-primary" type="submit">
-          Buscar
-        </button>
-      </form>
+      <Search
+        SearchSubmit={handleSearchSubmit}
+        SearchChange={handleSearchChange}
+        searchQuery={searchQuery}
+      />
 
       <Tables>
         <thead>

@@ -7,14 +7,12 @@ import withAuth from "@utils/withAuth";
 import ImportPage from "@components/forms/ImportAsignacion";
 import Modal from "@components/Modal";
 
-
 function Home() {
   const [asignacion, setAsignaciones] = useState([]);
   const [loading, setLoading] = useState(true);
   const Api_import_URL = "http://localhost:8000/import/asignacion";
 
   const fetchData = async () => {
-    setLoading(true);
     let allAsignaciones = [];
     let nextUrl = "http://localhost:8000/api/asignacion";
 
@@ -29,7 +27,9 @@ function Home() {
       }
 
       // Keep only unique periods
-      const uniqueAsignaciones = [...new Set(allAsignaciones.map(asig => asig.period))].map(period => ({ period }));
+      const uniqueAsignaciones = [
+        ...new Set(allAsignaciones.map((asig) => asig.period)),
+      ].map((period) => ({ period }));
       setAsignaciones(uniqueAsignaciones);
     } catch (error) {
       console.error("Error fetching data", error);
@@ -39,21 +39,28 @@ function Home() {
   };
 
   const handleDelete = async (period) => {
-    if (!window.confirm(`¿Estás seguro de que deseas eliminar todas las asignaciones del período ${period}?`)) {
+    if (
+      !window.confirm(
+        `¿Estás seguro de que deseas eliminar todas las asignaciones del período ${period}?`
+      )
+    ) {
       return;
     }
 
     try {
-      const response = await fetch(`http://localhost:8000/api/asignacionDocente/delete?period=${period}`, {
-        method: "DELETE",
-      });
+      const response = await fetch(
+        `http://localhost:8000/api/asignacionDocente/delete?period=${period}`,
+        {
+          method: "DELETE",
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Fallo al eliminar las asignaciones");
       }
 
       // Remove the deleted items from the list
-      setAsignaciones(asignacion.filter(asig => asig.period !== period));
+      setAsignaciones(asignacion.filter((asig) => asig.period !== period));
     } catch (error) {
       console.error("Error deleting data", error);
     }
@@ -69,8 +76,6 @@ function Home() {
 
   return (
     <div>
-
-
       <h3 className="text-black mt-5">Selección de Asignación por Período</h3>
 
       <Modal title="Importar Asignación">
@@ -103,7 +108,10 @@ function Home() {
               <tr key={asig.period}>
                 <td>{asig.period}</td>
                 <td>
-                  <Link href={`/asignacionDocente/${asig.period}`} className="btn btn-primary btn-sm">
+                  <Link
+                    href={`/asignacionDocente/${asig.period}`}
+                    className="btn btn-primary btn-sm"
+                  >
                     Ver
                   </Link>
                   <button

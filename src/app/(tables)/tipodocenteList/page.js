@@ -2,8 +2,10 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+
 import Pagination from "@components/Pagination";
 import Tables from "@components/Tables";
+import Search from "@components/search";
 
 // Utils
 import withAuth from "@utils/withAuth";
@@ -14,12 +16,13 @@ function tipodocenteList() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [searchQuery, setSearchQuery] = useState("")
-
+  const [searchQuery, setSearchQuery] = useState("");
 
   const fetchData = async () => {
     try {
-      const searchParam = searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : '';
+      const searchParam = searchQuery
+        ? `&search=${encodeURIComponent(searchQuery)}`
+        : "";
 
       const tipoResponse = await fetch(
         `http://localhost:8000/api/tipodocente?page=${page}${searchParam}`
@@ -57,7 +60,7 @@ function tipodocenteList() {
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
     fetchData();
@@ -73,38 +76,31 @@ function tipodocenteList() {
   };
 
   const handleSearchChange = (e) => {
-    setSearchQuery(e.target.value)
-  }
+    setSearchQuery(e.target.value);
+  };
 
   const handleSearchSubmit = (e) => {
-    e.preventDefault()
-    fetchData()
-  }
+    e.preventDefault();
+    fetchData();
+  };
   if (loading) {
     return <p>loading...</p>;
   }
 
   return (
-    <div>
+    <div className="mt-5">
       <h1 className="text-dark">Lista lista Tipo docente</h1>
+      <div className="d-flex gap-2 mb-3 mt-3">
+        <Link className="btn btn-primary" href="/tipodocente">
+          Nuevo
+        </Link>
+      </div>
 
-
-      <Link className="btn btn-primary mt-5" href="/tipodocente">
-        Nuevo
-      </Link>
-
-      <form onSubmit={handleSearchSubmit} className="d-flex mb-3">
-        <input
-          type="text"
-          className="form-control me-2"
-          placeholder="Buscar por nombre o estado"
-          value={searchQuery}
-          onChange={handleSearchChange} // This just updates the input value, not triggering search yet
-        />
-        <button className="btn btn-primary" type="submit">
-          Buscar
-        </button>
-      </form>
+      <Search
+        SearchSubmit={handleSearchSubmit}
+        SearchChange={handleSearchChange}
+        searchQuery={searchQuery}
+      />
 
       <Tables>
         <thead>

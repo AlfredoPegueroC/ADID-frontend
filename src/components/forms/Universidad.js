@@ -1,8 +1,7 @@
 import { useRouter } from "next/navigation";
-import styles from "@styles/Notificacion.module.css";
 
 import Notification from "../Notification";
-
+import Styles from "@styles/form.module.css";
 
 export default function Universidad({ title }) {
   const router = useRouter();
@@ -31,45 +30,53 @@ export default function Universidad({ title }) {
       if (response.ok) {
         const result = await response.json();
         router.push("/universidadList");
-        Notification.alertSuccess("Universidad creada con éxito: " + result.nombre);
+        Notification.alertSuccess(
+          "Universidad creada con éxito: " + result.nombre
+        );
       } else {
         const error = await response.json();
-        Notification.alertError("Error al crear la universidad: " + error.message);
+        Notification.alertError(
+          "Error al crear la universidad: " + error.message
+        );
       }
     } catch (error) {
-      Notification.alertError("Hubo un error al conectar con la API: " + error.message);
+      Notification.alertError(
+        "Hubo un error al conectar con la API: " + error.message
+      );
     }
   };
 
-
   return (
-    <div>
+    <div className={Styles.container}>
       <form
         id="universidadForm"
         action="/universidadList"
         onSubmit={handleUniversidad}
+        className={Styles.form}
       >
-        <legend>{title}</legend>
-        <fieldset>
-          <label htmlFor="nombre">Nombre de la Universidad:</label>
+        <h1 className={Styles.title}>{title}</h1>
+
+        <div className={Styles.name_group}>
+          <label htmlFor="nombre">Nombre de la Universidad</label>
           <input
             type="text"
             placeholder="Nombre de la Universidad"
             id="nombre"
             required
           />
-
-          <label htmlFor="estado">Estado:</label>
+        </div>
+        <div className={Styles.name_group}>
+          <label htmlFor="estado">Estado</label>
           <select id="estado" defaultValue="" required>
-            <option defaultValue="" disabled>
-              -- Seleccione --
-            </option>
+            <option defaultValue="">-- Seleccione --</option>
             <option value="Activo">Activo</option>
             <option value="Inactivo">Inactivo</option>
           </select>
-        </fieldset>
+        </div>
 
-        <input type="submit" value="Enviar" className={styles.botonVerde} />
+        <button type="submit" className={Styles.btn}>
+          Enviar
+        </button>
       </form>
     </div>
   );

@@ -1,17 +1,18 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
+import Styles from "@styles/form.module.css";
 
 import Notification from "../Notification";
 
 export default function TipoDocenteForm() {
   const router = useRouter();
   const [formData, setFormData] = useState({
-    tipoDocenteCodigo: '',
-    nombre: '',
-    estado: '',
-    universidadCodigo: '',
+    tipoDocenteCodigo: "",
+    nombre: "",
+    estado: "",
+    universidadCodigo: "",
   });
 
   const [universidades, setUniversidades] = useState([]);
@@ -20,11 +21,11 @@ export default function TipoDocenteForm() {
     // Fetch universidades from API when component mounts
     const fetchUniversidades = async () => {
       try {
-        const response = await fetch('http://127.0.0.1:8000/api/universidad');
+        const response = await fetch("http://127.0.0.1:8000/api/universidad");
         const data = await response.json();
         setUniversidades(data.results);
       } catch (error) {
-        console.error('Error fetching universidades:', error);
+        console.error("Error fetching universidades:", error);
       }
     };
 
@@ -42,36 +43,46 @@ export default function TipoDocenteForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const response = await fetch('http://127.0.0.1:8000/api/tipodocente/create', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        tipoDocenteCodigo: formData.tipoDocenteCodigo,
-        nombre: formData.nombre,
-        estado: formData.estado,
-        UniversidadCodigo: formData.universidadCodigo,
-      }),
-    });
+    const response = await fetch(
+      "http://127.0.0.1:8000/api/tipodocente/create",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          tipoDocenteCodigo: formData.tipoDocenteCodigo,
+          nombre: formData.nombre,
+          estado: formData.estado,
+          UniversidadCodigo: formData.universidadCodigo,
+        }),
+      }
+    );
 
     if (response.ok) {
       const result = await response.json();
-      Notification.alertSuccess('Tipo de Docente creado exitosamente');
-      setFormData({ tipoDocenteCodigo: '', nombre: '', estado: '', universidadCodigo: '' });
-      router.push("/tipodocenteList") // Redirigir después de 2 segundos
+      Notification.alertSuccess("Tipo de Docente creado exitosamente");
+      setFormData({
+        tipoDocenteCodigo: "",
+        nombre: "",
+        estado: "",
+        universidadCodigo: "",
+      });
+      router.push("/tipodocenteList"); // Redirigir después de 2 segundos
     } else {
       const errorData = await response.json();
-      Notification.alertError('Error al crear el Tipo de Docente: ' + JSON.stringify(errorData));
+      Notification.alertError(
+        "Error al crear el Tipo de Docente: " + JSON.stringify(errorData)
+      );
     }
   };
 
   return (
-    <div>
-      <form onSubmit={handleSubmit}>
-        <fieldset>
-          <legend>Información del Tipo de Docente</legend>
+    <div className={Styles.container}>
+      <form onSubmit={handleSubmit} className={Styles.form}>
+        <h1 className={Styles.title}>Información del Tipo de Docente</h1>
 
+        <div className={Styles.name_group}>
           <label htmlFor="nombre">Nombre del Tipo de Docente:</label>
           <input
             type="text"
@@ -82,7 +93,9 @@ export default function TipoDocenteForm() {
             onChange={handleChange}
             required
           />
+        </div>
 
+        <div className={Styles.name_group}>
           <label htmlFor="universidadCodigo">Universidad:</label>
           <select
             id="universidadCodigo"
@@ -95,12 +108,17 @@ export default function TipoDocenteForm() {
               -- Seleccione una Universidad --
             </option>
             {universidades.map((universidad) => (
-              <option key={universidad.UniversidadCodigo} value={universidad.UniversidadCodigo}>
+              <option
+                key={universidad.UniversidadCodigo}
+                value={universidad.UniversidadCodigo}
+              >
                 {universidad.nombre}
               </option>
             ))}
           </select>
+        </div>
 
+        <div className={Styles.name_group}>
           <label htmlFor="estado">Estado:</label>
           <select
             id="estado"
@@ -115,9 +133,9 @@ export default function TipoDocenteForm() {
             <option value="Activo">Activo</option>
             <option value="Inactivo">Inactivo</option>
           </select>
-        </fieldset>
+        </div>
 
-        <button type="submit" className="boton-verde">
+        <button type="submit" className={Styles.btn}>
           Enviar
         </button>
       </form>
