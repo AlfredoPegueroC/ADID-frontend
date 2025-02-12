@@ -3,7 +3,7 @@
   background-color: #2dcc70;
   color: #fcfefc;
   padding: 15px 10px;
-  margin: 20px auto; /* Centra la alerta horizontalmente */
+  margin: 20px auto; 
   border: none;
   border-left: 6px solid #27ae60;
   border-radius: 10px;
@@ -14,16 +14,15 @@
   position: relative;
   display: flex;
   align-items: center;
-  width: 10cm; /* Ancho de 13 cm */
-  height: 2cm; /* Alto de 3 cm */
-  max-width: none; /* Sin máximo de ancho */
-  min-width: none; /* Sin mínimo de ancho */
+  width: 10cm; 
+  height: 2cm; 
+  min-width: none; 
 }
 .alertaExito::before {
-  content: '✔'; /* Icono de éxito */
-  font-size: 24px; /* Tamaño del icono */
-  color: #fcfefc;/* Color del icono */
-  margin-right: 10px; /* Espacio entre el icono y el texto */
+  content: '✔'; 
+  font-size: 24px; 
+  color: #fcfefc;
+  margin-right: 10px; 
 }
 
 .alertaError {
@@ -31,9 +30,9 @@
   background-color: #f74a41;
   color: #fcfefc;
   padding: 15px 10px;
-  margin: 20px auto; /* Centra la alerta horizontalmente */
+  margin: 20px auto; 
   border: none;
-  border-left: 6px solid #754a46;
+  border-left: 6px solid #ff291e;
   border-radius: 10px;
   font-weight: 500;
   font-size: 18px;

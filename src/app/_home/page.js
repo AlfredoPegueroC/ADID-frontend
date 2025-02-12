@@ -1,84 +1,154 @@
 "use client";
+
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import Link from "next/link";
-import Tables from "@components/Tables";
 
-function Home() {
-  const [asignacion, setAsignaciones] = useState([]);
-  const [loading, setLoading] = useState(true);
+export default function Periodo({ title, onSuccess }) {
+  const router = useRouter();
+  const [universidades, setUniversidades] = useState([]);
+  const [formData, setFormData] = useState({
+    periodoAcademicoCodigo: "",
+    nombre: "",
+    estado: "",
+    UniversidadCodigo: "",
+  });
 
-  const fetchAllData = async () => {
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    cargarUniversidades();
+  }, []);
+
+  async function cargarUniversidades() {
+    try {
+      const response = await fetch("http://127.0.0.1:8000/api/universidad");
+      if (!response.ok) throw new Error("Failed to fetch universities");
+      const data = await response.json();
+      setUniversidades(data.results);
+    } catch (error) {
+      console.error("Error loading universities:", error);
+      alert("No se pudieron cargar las universidades");
+    }
+  }
+
+  const handleInputChange = (e) => {
+    const { id, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [id]: value,
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     setLoading(true);
-    let allAsignaciones = [];
-    let nextUrl = "http://localhost:8000/api/asignacion";
+
+    if (!formData.UniversidadCodigo) {
+      alert("Por favor, seleccione una universidad.");
+      setLoading(false);
+      return;
+    }
 
     try {
-      while (nextUrl) {
-        const response = await fetch(nextUrl);
-        if (!response.ok) throw new Error("Fallo al buscar los datos");
-
-        const data = await response.json();
-        allAsignaciones = allAsignaciones.concat(data.results)
-        console.log(data.results)
-        nextUrl = data.next;
-      }
-
-      const uniqueAsignaciones = Array.from(
-        new Map(allAsignaciones.map(asig => [asig.period, asig])).values()
+      const response = await fetch(
+        "http://127.0.0.1:8000/api/periodoacademico/create",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        }
       );
 
-      setAsignaciones(uniqueAsignaciones);
+      if (response.ok) {
+        alert("Periodo Académico creado exitosamente");
+        setFormData({
+          periodoAcademicoCodigo: "",
+          nombre: "",
+          estado: "",
+          UniversidadCodigo: "",
+        });
+
+        onSuccess();
+      } else {
+        const errorData = await response.json();
+        alert(
+          `Error al crear el periodo: ${
+            errorData.detail || "Error desconocido"
+          }`
+        );
+      }
     } catch (error) {
-      console.error("Error fetching data", error);
+      console.error("Error creating periodo:", error);
+      alert("Hubo un problema al crear el periodo");
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchAllData();
-  }, []);
-
-  if (loading) {
-    return <p>Loading...</p>;
-  }
-
   return (
     <div>
-      <h3 className="text-black mt-5">Seleccion de Asignacion por Periodo</h3>
-      <Tables>
-        <thead>
-          <tr>
-            <th scope="col">Periodo</th>
-            <th scope="col">Acción</th>
-          </tr>
-        </thead>
-        <tbody>
-          {asignacion.length === 0 ? (
-            <tr>
-              <td colSpan="2" className="text-center">
-                No se encontraron asignaciones.
-              </td>
-            </tr>
-          ) : (
-            asignacion.map((asig) => (
-              <tr key={asig.period}>
-                <td>{asig.period}</td>
-                <td>
-                  <Link href={`/test/${asig.period}`} className="btn btn-primary btn-sm">
-                    ver
-                  </Link>
-                  <button className="btn btn-light btn-sm ms-2">
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))
-          )}
-        </tbody>
-      </Tables>
+      <form id="periodoForm" onSubmit={handleSubmit} className={Styles.form}>
+        <fieldset className={Styles.fieldset}>
+          <legend className={Styles.legend}>{title}</legend>
+
+          <div className={Styles.group}>
+            <label htmlFor="nombre">Nombre del periodo:</label>
+            <input
+              type="text"
+              placeholder="Nombre del periodo"
+              id="nombre"
+              value={formData.nombre}
+              onChange={handleInputChange}
+              className={Styles.input}
+              required
+            />
+          </div>
+
+          <div className={Styles.group}>
+            <label htmlFor="UniversidadCodigo">Universidad:</label>
+            <select
+              id="UniversidadCodigo"
+              value={formData.UniversidadCodigo}
+              onChange={handleInputChange}
+              className={Styles.select}
+              required
+            >
+              <option value="" disabled>
+                -- Seleccione una Universidad --
+              </option>
+              {universidades.map((universidad) => (
+                <option
+                  key={universidad.UniversidadCodigo}
+                  value={universidad.UniversidadCodigo}
+                >
+                  {universidad.nombre}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className={Styles.group}>
+            <label htmlFor="estado">Estado:</label>
+            <select
+              id="estado"
+              value={formData.estado}
+              onChange={handleInputChange}
+              className={Styles.select}
+              required
+            >
+              <option value="" disabled>
+                -- Seleccione Estado --
+              </option>
+              <option value="Abierto">Abierto</option>
+              <option value="Cerrado">Cerrado</option>
+            </select>
+          </div>
+        </fieldset>
+
+        <input type="submit" value="Guardar" className={Styles.btn} />
+      </form>
     </div>
   );
 }
-
-export default Home;

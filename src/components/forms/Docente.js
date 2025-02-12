@@ -13,7 +13,6 @@ export default function DocenteForm() {
   const [tiposDocente, setTiposDocente] = useState([]);
   const [categoriasDocente, setCategoriasDocente] = useState([]);
   const [isLoading, setIsLoading] = useState(true); // Loading state
- 
 
   const [formData, setFormData] = useState({
     Docentecodigo: "",
@@ -205,162 +204,165 @@ export default function DocenteForm() {
               required
             />
           </div>
-       
-        <div className={Styles.name_group}>
-          <label htmlFor="telefono">Teléfono:</label>
-          <input
-            type="text"
-            id="telefono"
-            name="telefono"
-            value={formData.telefono}
-            onChange={handleChange}
-            required
-          />
-        </div>
 
-        <div className={Styles.name_group}>
-          <label htmlFor="direccion">Dirección:</label>
-          <input
-            type="text"
-            id="direccion"
-            name="direccion"
-            value={formData.direccion}
-            onChange={handleChange}
-            required
-          />
-        </div>
+          <div className={Styles.name_group}>
+            <label htmlFor="telefono">Teléfono:</label>
+            <input
+              type="text"
+              id="telefono"
+              name="telefono"
+              value={formData.telefono}
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-        <div className={Styles.name_group}>
-          <label htmlFor="estado">Estado:</label>
-          <select
-            id="estado"
-            name="estado"
-            value={formData.estado}
-            onChange={handleChange}
-            required
-          >
-            <option value="" disabled>
-              -- Seleccione el estado --
-            </option>
-            <option value="Activo">Activo</option>
-            <option value="Inactivo">Inactivo</option>
-            <option value="Jubilado">Jubilado</option>
-            <option value="Sabático">Sabático</option>
-            <option value="Licencia">Licencia</option>
-          </select>
-        </div>
+          <div className={Styles.name_group}>
+            <label htmlFor="direccion">Dirección:</label>
+            <input
+              type="text"
+              id="direccion"
+              name="direccion"
+              value={formData.direccion}
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-        <div className={Styles.name_group}>
-          <label htmlFor="UniversidadCodigo">Universidad:</label>
-          <select
-            id="UniversidadCodigo"
-            name="UniversidadCodigo"
-            value={formData.UniversidadCodigo}
-            onChange={handleChange}
-            required
-          >
-            <option value="" disabled>
-              -- Seleccione una Universidad --
-            </option>
-            {universidades.map((universidad) => (
-              <option
-                key={universidad.UniversidadCodigo}
-                value={universidad.UniversidadCodigo}
-              >
-                {universidad.nombre}
+          <div className={Styles.name_group}>
+            <label htmlFor="estado">Estado:</label>
+            <select
+              id="estado"
+              name="estado"
+              value={formData.estado}
+              onChange={handleChange}
+              required
+            >
+              <option value="" disabled>
+                -- Seleccione el estado --
               </option>
-            ))}
-          </select>
-        </div>
+              <option value="Activo">Activo</option>
+              <option value="Inactivo">Inactivo</option>
+              <option value="Jubilado">Jubilado</option>
+              <option value="Sabático">Sabático</option>
+              <option value="Licencia">Licencia</option>
+            </select>
+          </div>
 
-        <div className={Styles.name_group}>
-          <label htmlFor="facultadCodigo">Facultad:</label>
-          <select
-            id="facultadCodigo"
-            name="facultadCodigo"
-            value={formData.facultadCodigo}
-            onChange={handleChange}
-            required
-          >
-            <option value="" disabled>
-              -- Seleccione una Facultad --
-            </option>
-            {facultades.map((facultad) => (
-              <option
-                key={facultad.facultadCodigo}
-                value={facultad.facultadCodigo}
-              >
-                {facultad.nombre}
+          <div className={Styles.name_group}>
+            <label htmlFor="UniversidadCodigo">Universidad:</label>
+            <select
+              id="UniversidadCodigo"
+              name="UniversidadCodigo"
+              value={formData.UniversidadCodigo}
+              onChange={handleChange}
+              required
+            >
+              <option value="" disabled>
+                -- Seleccione una Universidad --
               </option>
-            ))}
-          </select>
-        </div>
+              {universidades.map((universidad) => (
+                <option
+                  key={universidad.UniversidadCodigo}
+                  value={universidad.UniversidadCodigo}
+                >
+                  {universidad.nombre}
+                </option>
+              ))}
+            </select>
+          </div>
 
-        <div className={Styles.name_group}>
-          <label htmlFor="escuelaCodigo">Escuela:</label>
-          <select
-            id="escuelaCodigo"
-            name="escuelaCodigo"
-            value={formData.escuelaCodigo}
-            onChange={handleChange}
-            required
-          >
-            <option value="" disabled>
-              -- Seleccione una Escuela --
-            </option>
-            {escuelas.map((escuela) => (
-              <option key={escuela.escuelaCodigo} value={escuela.escuelaCodigo}>
-                {escuela.nombre}
+          <div className={Styles.name_group}>
+            <label htmlFor="facultadCodigo">Facultad:</label>
+            <select
+              id="facultadCodigo"
+              name="facultadCodigo"
+              value={formData.facultadCodigo}
+              onChange={handleChange}
+              required
+            >
+              <option value="" disabled>
+                -- Seleccione una Facultad --
               </option>
-            ))}
-          </select>
-        </div>
+              {facultades.map((facultad) => (
+                <option
+                  key={facultad.facultadCodigo}
+                  value={facultad.facultadCodigo}
+                >
+                  {facultad.nombre}
+                </option>
+              ))}
+            </select>
+          </div>
 
-        <div className={Styles.name_group}>
-          <label htmlFor="tipoDocenteCodigo">Tipo de Docente:</label>
-          <select
-            id="tipoDocenteCodigo"
-            name="tipoDocenteCodigo"
-            value={formData.tipoDocenteCodigo}
-            onChange={handleChange}
-            required
-          >
-            <option value="" disabled>
-              -- Seleccione el Tipo de Docente --
-            </option>
-            {tiposDocente.map((tipo) => (
-              <option
-                key={tipo.tipoDocenteCodigo}
-                value={tipo.tipoDocenteCodigo}
-              >
-                {tipo.nombre}
+          <div className={Styles.name_group}>
+            <label htmlFor="escuelaCodigo">Escuela:</label>
+            <select
+              id="escuelaCodigo"
+              name="escuelaCodigo"
+              value={formData.escuelaCodigo}
+              onChange={handleChange}
+              required
+            >
+              <option value="" disabled>
+                -- Seleccione una Escuela --
               </option>
-            ))}
-          </select>
-        </div>
+              {escuelas.map((escuela) => (
+                <option
+                  key={escuela.escuelaCodigo}
+                  value={escuela.escuelaCodigo}
+                >
+                  {escuela.nombre}
+                </option>
+              ))}
+            </select>
+          </div>
 
-        <div className={Styles.name_group}>
-          <label htmlFor="categoriaCodigo">Categoría de Docente:</label>
-          <select
-            id="categoriaCodigo"
-            name="categoriaCodigo"
-            value={formData.categoriaCodigo}
-            onChange={handleChange}
-            required
-          >
-            <option value="" disabled>
-              -- Seleccione la Categoría de Docente --
-            </option>
-            {categoriasDocente.map((categoria) => (
-              <option
-                key={categoria.categoriaCodigo}
-                value={categoria.categoriaCodigo}
-              >
-                {categoria.nombre}
+          <div className={Styles.name_group}>
+            <label htmlFor="tipoDocenteCodigo">Tipo de Docente:</label>
+            <select
+              id="tipoDocenteCodigo"
+              name="tipoDocenteCodigo"
+              value={formData.tipoDocenteCodigo}
+              onChange={handleChange}
+              required
+            >
+              <option value="" disabled>
+                -- Seleccione el Tipo de Docente --
               </option>
-            ))}
-          </select>
-        </div>
+              {tiposDocente.map((tipo) => (
+                <option
+                  key={tipo.tipoDocenteCodigo}
+                  value={tipo.tipoDocenteCodigo}
+                >
+                  {tipo.nombre}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className={Styles.name_group}>
+            <label htmlFor="categoriaCodigo">Categoría de Docente:</label>
+            <select
+              id="categoriaCodigo"
+              name="categoriaCodigo"
+              value={formData.categoriaCodigo}
+              onChange={handleChange}
+              required
+            >
+              <option value="" disabled>
+                -- Seleccione la Categoría de Docente --
+              </option>
+              {categoriasDocente.map((categoria) => (
+                <option
+                  key={categoria.categoriaCodigo}
+                  value={categoria.categoriaCodigo}
+                >
+                  {categoria.nombre}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
         <button type="submit" className={Styles.btn}>
           Enviar

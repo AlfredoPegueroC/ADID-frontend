@@ -121,9 +121,9 @@ function principal({ params }) {
   }
 
   return (
-    <div>
+    <div className="mt-4">
       <Link
-        className="btn btn-success mt-5 ms-2"
+        className="btn btn-success my-2"
         href={`http://127.0.0.1:8000/export/asignacionDocenteExport?period=${periodo}`}
       >
         Exportar

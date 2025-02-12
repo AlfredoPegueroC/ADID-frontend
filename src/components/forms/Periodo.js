@@ -2,11 +2,9 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-
 import Styles from "@styles/form.module.css";
 import Notification from "../Notification";
-
-export default function periodo({ title }) {
+export default function Periodo({ title, onSuccess }) {
   const router = useRouter();
   const [universidades, setUniversidades] = useState([]);
   const [formData, setFormData] = useState({
@@ -19,19 +17,20 @@ export default function periodo({ title }) {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    async function cargarUniversidades() {
-      try {
-        const response = await fetch("http://127.0.0.1:8000/api/universidad");
-        if (!response.ok) throw new Error("Failed to fetch universities");
-        const data = await response.json();
-        setUniversidades(data.results);
-      } catch (error) {
-        console.error("Error loading universities:", error);
-        alert("No se pudieron cargar las universidades");
-      }
-    }
     cargarUniversidades();
   }, []);
+
+  async function cargarUniversidades() {
+    try {
+      const response = await fetch("http://127.0.0.1:8000/api/universidad");
+      if (!response.ok) throw new Error("Failed to fetch universities");
+      const data = await response.json();
+      setUniversidades(data.results);
+    } catch (error) {
+      console.error("Error loading universities:", error);
+      alert("No se pudieron cargar las universidades");
+    }
+  }
 
   const handleInputChange = (e) => {
     const { id, value } = e.target;
@@ -45,6 +44,12 @@ export default function periodo({ title }) {
     e.preventDefault();
     setLoading(true);
 
+    if (!formData.UniversidadCodigo) {
+      alert("Por favor, seleccione una universidad.");
+      setLoading(false);
+      return;
+    }
+
     try {
       const response = await fetch(
         "http://127.0.0.1:8000/api/periodoacademico/create",
@@ -56,27 +61,28 @@ export default function periodo({ title }) {
           body: JSON.stringify(formData),
         }
       );
+
       if (response.ok) {
-        router.push("/periodoList");
-        Notification.alertSuccess(
-          "Universidad creada con éxito: " + result.nombre
-        );
+        Notification.alertSuccess("Periodo Académico creado exitosamente");
         setFormData({
           periodoAcademicoCodigo: "",
           nombre: "",
           estado: "",
           UniversidadCodigo: "",
         });
+
+        onSuccess();
       } else {
-        const error = await response.json();
+        const errorData = await response.json();
         Notification.alertError(
-          "Error al crear la universidad: " + error.message
+          `Error al crear el periodo: ${
+            errorData.detail || "Error desconocido"
+          }`
         );
       }
     } catch (error) {
-      Notification.alertError(
-        "Error al crear la universidad: " + error.message
-      );
+      console.error("Error creating periodo:", error);
+      Notification.alertError("Hubo un problema al crear el periodo");
     } finally {
       setLoading(false);
     }
@@ -88,9 +94,7 @@ export default function periodo({ title }) {
         <h1 className={Styles.title}>{title}</h1>
 
         <div className={Styles.name_group}>
-          <label htmlFor="nombre" className={Styles.label}>
-            Nombre del periodo:
-          </label>
+          <label htmlFor="nombre">Nombre del periodo</label>
           <input
             type="text"
             placeholder="Nombre del periodo"
@@ -98,20 +102,16 @@ export default function periodo({ title }) {
             value={formData.nombre}
             onChange={handleInputChange}
             required
-            className={Styles.input}
           />
         </div>
 
         <div className={Styles.name_group}>
-          <label htmlFor="UniversidadCodigo" className={Styles.label}>
-            Universidad:
-          </label>
+          <label htmlFor="UniversidadCodigo">Universidad</label>
           <select
             id="UniversidadCodigo"
             value={formData.UniversidadCodigo}
             onChange={handleInputChange}
             required
-            className={Styles.input}
           >
             <option value="" disabled>
               -- Seleccione una Universidad --
@@ -128,15 +128,12 @@ export default function periodo({ title }) {
         </div>
 
         <div className={Styles.name_group}>
-          <label htmlFor="estado" className={Styles.label}>
-            Estado:
-          </label>
+          <label htmlFor="estado">Estado</label>
           <select
             id="estado"
             value={formData.estado}
             onChange={handleInputChange}
             required
-            className={Styles.input}
           >
             <option value="" disabled>
               -- Seleccione Estado --
@@ -146,8 +143,8 @@ export default function periodo({ title }) {
           </select>
         </div>
 
-        <button type="submit" className={Styles.btn} disabled={loading}>
-          {loading ? "Enviando..." : "Enviar"}
+        <button type="submit" className={Styles.btn}>
+          Enviar
         </button>
       </form>
     </div>

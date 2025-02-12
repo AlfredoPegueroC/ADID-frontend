@@ -1,32 +1,40 @@
-"use client"
+"use client";
 
-import React, {useState, useEffect} from "react"
-import {useRouter} from "next/navigation" 
-import FormLayout from "@components/layouts/FormLayout"
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import FormLayout from "@components/layouts/FormLayout";
+import Styles from "@styles/form.module.css";
 
 // utils
-import withAuth from "@utils/withAuth"
+import withAuth from "@utils/withAuth";
+import { ST } from "next/dist/shared/lib/utils";
 
-function categoriaEdit({params}){
-  const router = useRouter()
-  const {id} = React.use(params)
+function categoriaEdit({ params }) {
+  const router = useRouter();
+  const { id } = React.use(params);
 
-  const [categoria, setCategoria] = useState(null)
-  const [universidades, setUniversidades] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [categoria, setCategoria] = useState(null);
+  const [universidades, setUniversidades] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const categoriasResponse = await fetch(`http://localhost:8000/api/categoriadocente/${id}/`);
-        if (!categoriasResponse.ok) throw new Error("Failed to fetch categorias");
+        const categoriasResponse = await fetch(
+          `http://localhost:8000/api/categoriadocente/${id}/`
+        );
+        if (!categoriasResponse.ok)
+          throw new Error("Failed to fetch categorias");
         const categoriasData = await categoriasResponse.json();
         setCategoria(categoriasData);
 
-        const universidadesResponse = await fetch("http://localhost:8000/api/universidad");
-        if (!universidadesResponse.ok) throw new Error("Failed to fetch universidades");
+        const universidadesResponse = await fetch(
+          "http://localhost:8000/api/universidad"
+        );
+        if (!universidadesResponse.ok)
+          throw new Error("Failed to fetch universidades");
         const universidadesData = await universidadesResponse.json();
-        setUniversidades(universidadesData.results); 
+        setUniversidades(universidadesData.results);
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -37,19 +45,21 @@ function categoriaEdit({params}){
     fetchData();
   }, [id]);
 
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!categoria) return;
 
     try {
-      const response = await fetch(`http://localhost:8000/api/categoriadocente/edit/${id}/`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(categoria),
-      });
+      const response = await fetch(
+        `http://localhost:8000/api/categoriadocente/edit/${id}/`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(categoria),
+        }
+      );
 
       if (response.ok) {
         alert("Categoria updated successfully!");
@@ -63,13 +73,13 @@ function categoriaEdit({params}){
     }
   };
 
-  const handleChange = (e) => { 
+  const handleChange = (e) => {
     const { name, value } = e.target;
     setCategoria({
       ...categoria,
       [name]: value,
     });
-  }
+  };
 
   if (loading) {
     return (
@@ -81,43 +91,64 @@ function categoriaEdit({params}){
 
   return (
     <FormLayout>
-      <h1>Editar Categoria</h1>
-      <form onSubmit={handleSubmit}>
-        <div className="mb-3">
-          <label htmlFor="nombre" className="form-label">Nombre</label>
-          <input type="text" className="form-control" id="nombre" name="nombre" value={categoria.nombre} onChange={handleChange} />
-        </div>
+      <div className={Styles.container}>
+        <form className={Styles.form} onSubmit={handleSubmit}>
+          <h1>Editar Categoria</h1>
 
+          <div className={Styles.names}>
+            <div className={Styles.name_group}>
+              <label htmlFor="nombre">Nombre</label>
+              <input
+                type="text"
+                id="nombre"
+                name="nombre"
+                value={categoria.nombre}
+                onChange={handleChange}
+                required
+              />
+            </div>
 
-        <div className="mb-3">
-          <label htmlFor="estado" className="form-label">Estado</label>
-          <select
-            className="form-control"
-            id="estado"
-            name="estado"
-            value={categoria?.estado || ""}
-            onChange={handleChange}
-          >
-            <option value="Activo">Activo</option>
-            <option value="Inactivo">Inactivo</option>
-          </select>
-        </div>
+            <div className={Styles.name_group}>
+              <label htmlFor="estado">Estado</label>
+              <select
+                id="estado"
+                name="estado"
+                value={categoria?.estado || ""}
+                onChange={handleChange}
+              >
+                <option value="Activo">Activo</option>
+                <option value="Inactivo">Inactivo</option>
+              </select>
+            </div>
+          </div>
 
-        <div className="mb-3">
-          <label htmlFor="universidad" className="form-label">Universidad</label>
-          <select className="form-select" id="universidad" name="universidad" value={categoria.universidad} onChange={handleChange}>
-            {universidades.map((universidad) => (
-              <option key={universidad.UniversidadCodigo} value={universidad.UniversidadCodigo}>
-                {universidad.nombre}
-              </option>
-            ))}
-          </select>
-        </div>
-        <button type="submit" className="btn btn-primary">Guardar Cambios</button>
-      </form>
+          <div className={Styles.name_group}>
+            <label htmlFor="universidad">Universidad</label>
+            <select
+              id="universidad"
+              name="universidad"
+              value={categoria.universidad}
+              onChange={handleChange}
+              required
+            >
+              {universidades.map((universidad) => (
+                <option
+                  key={universidad.UniversidadCodigo}
+                  value={universidad.UniversidadCodigo}
+                >
+                  {universidad.nombre}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <button type="submit" className={Styles.btn}>
+            Guardar Cambios
+          </button>
+        </form>
+      </div>
     </FormLayout>
-  )
-
+  );
 }
 
-export default withAuth(categoriaEdit)
+export default withAuth(categoriaEdit);

@@ -4,6 +4,8 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import FormLayout from "@components/layouts/FormLayout";
 import withAuth from "@utils/withAuth";
+import Styles from "@styles/form.module.css";
+import { ST } from "next/dist/shared/lib/utils";
 
 function AsignacionEdit({ params }) {
   const router = useRouter();
@@ -99,254 +101,249 @@ function AsignacionEdit({ params }) {
     );
   }
 
-
   return (
     <FormLayout>
-      <h1>Editar Asignacion</h1>
-      <form onSubmit={handleSubmit}>
-        
-      <div className="mb-3">
-          <label>NRC</label>
-          <input
-            type="text"
-            className="form-control"
-            name="rnc"
-            value={asignacion.nrc || ""}
-            onChange={handleChange}
-            required
-            disabled
-          />
-        </div>
+      <div className={Styles.container}>
+        <form className={Styles.form} onSubmit={handleSubmit}>
+          <h1>Editar Asignación</h1>
 
-        <div className="mb-3">
-          <label>Clave</label>
-          <input
-            type="text"
-            className="form-control"
-            name="clave"
-            value={asignacion.clave || ""}
-            onChange={handleChange}
-            required
-          />
-        </div>
+          <div className={Styles.names}>
+            <div className={Styles.name_group}>
+              <label>NRC</label>
+              <input
+                type="text"
+                name="rnc"
+                value={asignacion.nrc || ""}
+                onChange={handleChange}
+                required
+                disabled
+              />
+            </div>
 
-        <div className="mb-3">
-          <label>Asignatura</label>
-          <input
-            type="text"
-            className="form-control"
-            name="asignatura"
-            value={asignacion.asignatura || ""}
-            onChange={handleChange}
-            required
-          />
-        </div>
+            <div className={Styles.name_group}>
+              <label>Clave</label>
+              <input
+                type="text"
+                name="clave"
+                value={asignacion.clave || ""}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className={Styles.names}>
+              <div className={Styles.name_group}>
+                <label>Asignatura</label>
+                <input
+                  type="text"
+                  name="asignatura"
+                  value={asignacion.asignatura || ""}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
 
-        <div className="mb-3">
-          <label>Código</label>
-          <input
-            type="text"
-            className="form-control"
-            name="codigo"
-            value={asignacion.codigo || ""}
-            onChange={handleChange}
-            required
-          />
-        </div>
+              <div className={Styles.name_group}>
+                <label>Código</label>
+                <input
+                  type="text"
+                  name="codigo"
+                  value={asignacion.codigo || ""}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+            </div>
+            <div className={Styles.names}>
+              <div className={Styles.name_group}>
+                <label>Profesor</label>
+                <select
+                  name="DocenteCodigo"
+                  value={asignacion?.DocenteCodigo || ""}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="" disabled>
+                    -- Seleccione un Profesor --
+                  </option>
+                  {docentes.map((docente) => (
+                    <option
+                      key={docente.Docentecodigo}
+                      value={docente.Docentecodigo}
+                    >
+                      {docente.nombre} {docente.apellidos}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-        <div className="mb-3">
-          <label htmlFor="DocenteCodigo" className="form-label">
-            Profesor
-          </label>
-          <select
-            id="DocenteCodigo"
-            name="DocenteCodigo"
-            value={asignacion?.DocenteCodigo || ""}
-            onChange={handleChange}
-            required
-          >
-            <option value="" disabled>
-              -- Seleccione un Profesor --
-            </option>
-            {docentes.map((docente) => (
-              <option key={docente.Docentecodigo} value={docente.Docentecodigo}>
-                {docente.nombre} {docente.apellidos} {docente.DocenteCodigo}
-              </option>
-            ))}
-          </select>
-        </div>
+              <div className={Styles.name_group}>
+                <label>Sección</label>
+                <input
+                  type="text"
+                  name="seccion"
+                  value={asignacion.seccion || ""}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+            </div>
 
-        <div className="mb-3">
-          <label>Sección</label>
-          <input
-            type="text"
-            className="form-control"
-            name="seccion"
-            value={asignacion.seccion || ""}
-            onChange={handleChange}
-            required
-          />
-        </div>
+            <div className={Styles.names}>
+              <div className={Styles.name_group}>
+                <label>Modalidad</label>
+                <input
+                  type="text"
+                  name="modalidad"
+                  value={asignacion.modalidad || ""}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
 
-        <div className="mb-3">
-          <label>Modalidad</label>
-          <input
-            type="text"
-            className="form-control"
-            name="modalidad"
-            value={asignacion.modalidad || ""}
-            onChange={handleChange}
-            required
-          />
-        </div>
+              <div className={Styles.name_group}>
+                <label>Campus</label>
+                <input
+                  type="text"
+                  name="campus"
+                  value={asignacion.campus || ""}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+            </div>
 
-        <div className="mb-3">
-          <label>Campus</label>
-          <input
-            type="text"
-            className="form-control"
-            name="campus"
-            value={asignacion.campus || ""}
-            onChange={handleChange}
-            required
-          />
-        </div>
+            <div className={Styles.names}>
+              <div className={Styles.name_group}>
+                <label>Facultad</label>
+                <select
+                  name="facultadCodigo"
+                  value={asignacion?.facultadCodigo || ""}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="" disabled>
+                    -- Seleccione una Facultad --
+                  </option>
+                  {facultades.map((facultad) => (
+                    <option
+                      key={facultad.facultadCodigo}
+                      value={facultad.facultadCodigo}
+                    >
+                      {facultad.nombre}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-        <div className="mb-3">
-          <label htmlFor="facultadCodigo" className="form-label">
-            Facultad
-          </label>
-          <select
-            id="facultadCodigo"
-            name="facultadCodigo"
-            value={asignacion?.facultadCodigo || ""}
-            onChange={handleChange}
-            required
-          >
-            <option value="" disabled>
-              -- Seleccione una Facultad --
-            </option>
-            {facultades.map((facultad) => (
-              <option
-                key={facultad.facultadCodigo}
-                value={facultad.facultadCodigo}
-              >
-                {facultad.nombre}
-              </option>
-            ))}
-          </select>
-        </div>
+              <div className={Styles.name_group}>
+                <label>Escuela</label>
+                <select
+                  name="escuelaCodigo"
+                  value={asignacion?.escuelaCodigo || ""}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="" disabled>
+                    -- Seleccione una Escuela --
+                  </option>
+                  {escuelas.map((escuela) => (
+                    <option
+                      key={escuela.escuelaCodigo}
+                      value={escuela.escuelaCodigo}
+                    >
+                      {escuela.nombre}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
 
-        <div className="mb-3">
-          <label htmlFor="escuelaCodigo" className="form-label">
-            Escuela
-          </label>
-          <select
-            id="escuelaCodigo"
-            name="escuelaCodigo"
-            value={asignacion?.escuelaCodigo || ""}
-            onChange={handleChange}
-            required
-          >
-            <option value="" disabled>
-              -- Seleccione una Escuela --
-            </option>
-            {escuelas.map((escuela) => (
-              <option key={escuela.escuelaCodigo} value={escuela.escuelaCodigo}>
-                {escuela.nombre}
-              </option>
-            ))}
-          </select>
-        </div>
+            <div className={Styles.names}>
+              <div className={Styles.name_group}>
+                <label>Tipo</label>
+                <input
+                  type="text"
+                  name="tipo"
+                  value={asignacion.tipo || ""}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
 
-        <div className="mb-3">
-          <label>Tipo</label>
-          <input
-            type="text"
-            className="form-control"
-            name="tipo"
-            value={asignacion.tipo || ""}
-            onChange={handleChange}
-            required
-          />
-        </div>
+              <div className={Styles.name_group}>
+                <label>Cupo</label>
+                <input
+                  type="number"
+                  name="cupo"
+                  value={asignacion.cupo || ""}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+            </div>
+            <div className={Styles.names}>
+              <div className={Styles.name_group}>
+                <label>Inscripto</label>
+                <input
+                  type="number"
+                  name="inscripto"
+                  value={asignacion.inscripto || ""}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
 
-        <div className="mb-3">
-          <label>Cupo</label>
-          <input
-            type="number"
-            className="form-control"
-            name="cupo"
-            value={asignacion.cupo || ""}
-            onChange={handleChange}
-            required
-          />
-        </div>
+              <div className={Styles.name_group}>
+                <label>Horario</label>
+                <input
+                  type="text"
+                  name="horario"
+                  value={asignacion.horario || ""}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+            </div>
+            <div className={Styles.names}>
+              <div className={Styles.name_group}>
+                <label>Días</label>
+                <input
+                  type="text"
+                  name="dias"
+                  value={asignacion.dias || ""}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
 
-        <div className="mb-3">
-          <label>Inscripto</label>
-          <input
-            type="number"
-            className="form-control"
-            name="inscripto"
-            value={asignacion.inscripto || ""}
-            onChange={handleChange}
-            required
-          />
-        </div>
+              <div className={Styles.name_group}>
+                <label>Aula</label>
+                <input
+                  type="text"
+                  name="Aula"
+                  value={asignacion.Aula || ""}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+            </div>
+            <div className={Styles.name_group}>
+              <label>Créditos</label>
+              <input
+                type="number"
+                name="creditos"
+                value={asignacion.creditos || ""}
+                onChange={handleChange}
+                required
+              />
+            </div>
+          </div>
 
-        <div className="mb-3">
-          <label>Horario</label>
-          <input
-            type="text"
-            className="form-control"
-            name="horario"
-            value={asignacion.horario || ""}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <div className="mb-3">
-          <label>Días</label>
-          <input
-            type="text"
-            className="form-control"
-            name="dias"
-            value={asignacion.dias || ""}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <div className="mb-3">
-          <label>Aula</label>
-          <input
-            type="text"
-            className="form-control"
-            name="Aula"
-            value={asignacion.Aula || ""}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <div className="mb-3">
-          <label>Créditos</label>
-          <input
-            type="number"
-            className="form-control"
-            name="creditos"
-            value={asignacion.creditos || ""}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <button type="submit" className="btn btn-primary">
-          Guardar
-        </button>
-      </form>
+          <button type="submit" className={Styles.btn}>
+            Guardar
+          </button>
+        </form>
+      </div>
     </FormLayout>
   );
 }

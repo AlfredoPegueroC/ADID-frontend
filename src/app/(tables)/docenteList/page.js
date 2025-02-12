@@ -121,12 +121,12 @@ function DocenteList() {
   };
 
   const handleSearchChange = (e) => {
-    setSearchQuery(e.target.value); // Update search query as user types, but won't trigger search here
+    setSearchQuery(e.target.value); 
   };
 
   const handleSearchSubmit = (e) => {
-    e.preventDefault(); // Prevent the form from reloading the page
-    fetchData(); // Trigger search after form submit
+    e.preventDefault();
+    fetchData();
   };
 
   if (loading) {
@@ -142,7 +142,7 @@ function DocenteList() {
       <h1 className="text-dark">Lista Docente</h1>
       <div className="d-flex gap-2 mb-3 mt-3">
         <Link className="btn btn-primary" href="/docente">
-          Nuevo
+          Agregar Docente
         </Link>
         {docentes.length > 0 && (
           <Link

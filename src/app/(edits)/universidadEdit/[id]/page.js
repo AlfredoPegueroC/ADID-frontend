@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-
+import Styles from "@styles/form.module.css";
 import FormLayout from "@components/layouts/FormLayout";
 import withAuth from "@utils/withAuth";
 
@@ -77,41 +77,43 @@ function EditUniversidad({ params }) {
   }
 
   return (
-    <FormLayout>
-      <h1>Edit Universidad</h1>
-      <form onSubmit={handleSubmit}>
-        <div className="mb-3">
-          <label htmlFor="nombre" className="form-label">
-            Nombre
-          </label>
-          <input
-            type="text"
-            className="form-control"
-            id="nombre"
-            name="nombre"
-            value={universidad?.nombre || ""}
-            onChange={handleChange}
-          />
-        </div>
-        <div className="mb-3">
-          <label htmlFor="estado" className="form-label">
-            Estado
-          </label>
-          <select
-            className="form-control"
-            id="estado"
-            name="estado"
-            value={universidad?.estado || ""}
-            onChange={handleChange}
-          >
-            <option value="Activo">Activo</option>
-            <option value="Inactivo">Inactivo</option>
-          </select>
-        </div>
-        <button type="submit" className="btn btn-primary">
-          Guardar Cambios
-        </button>
-      </form>
+    <FormLayout className={Styles.container}>
+      <div className={Styles.container}>
+        <form onSubmit={handleSubmit} className={Styles.form}>
+          <h1 className={Styles.titte}>Editar Universidad</h1>
+          <div className={Styles.name_group}>
+            <label htmlFor="nombre">Nombre de la Universidad</label>
+            <input
+              type="text"
+              id="nombre"
+              name="nombre"
+              value={universidad?.nombre || ""}
+              onChange={handleChange}
+              placeholder="Nombre de la Universidad"
+              required
+            />
+          </div>
+
+          <div className={Styles.name_group}>
+            <label htmlFor="estado">Estado</label>
+            <select
+              id="estado"
+              name="estado"
+              value={universidad?.estado || ""}
+              onChange={handleChange}
+              required
+            >
+              <option value="">-- Seleccione --</option>
+              <option value="Activo">Activo</option>
+              <option value="Inactivo">Inactivo</option>
+            </select>
+          </div>
+
+          <button type="submit" className={Styles.btn}>
+            Guardar Cambios
+          </button>
+        </form>
+      </div>
     </FormLayout>
   );
 }
