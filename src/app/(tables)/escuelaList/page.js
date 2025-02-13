@@ -85,7 +85,7 @@ function EscuelaList() {
 
   useEffect(() => {
     fetchData();
-  }, [page]);
+  }, [page, searchQuery]);
 
   const deleteEscuela = (pk) => {
     deleteEntity(
@@ -202,7 +202,7 @@ function EscuelaList() {
         </tbody>
       </Tables>
 
-      {totalPages.length > 0 && (
+      {totalPages > 1 && (
         <Pagination
           page={page}
           totalPages={totalPages}

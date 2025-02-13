@@ -68,7 +68,7 @@ function FacultadList() {
 
   useEffect(() => {
     fetchData();
-  }, [page]);
+  }, [page, searchQuery]);
 
   const deleteFacultad = (pk) => {
     deleteEntity(
@@ -183,7 +183,7 @@ function FacultadList() {
       </Tables>
 
       {/* Pagination Controls */}
-      {totalPages.length > 0 && (
+      {totalPages > 1 && (
         <Pagination
           page={page}
           totalPages={totalPages}

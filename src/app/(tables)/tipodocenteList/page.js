@@ -65,7 +65,7 @@ function tipodocenteList() {
 
   useEffect(() => {
     fetchData();
-  }, [page]);
+  }, [page, searchQuery]);
 
   const deleteTipo = (pk) => {
     deleteEntity(
@@ -162,7 +162,7 @@ function tipodocenteList() {
         </tbody>
       </Tables>
 
-      {totalPages.length > 0 && (
+      {totalPages > 1 && (
         <Pagination
           page={page}
           totalPages={totalPages}

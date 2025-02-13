@@ -67,7 +67,7 @@ function periodoList() {
 
   useEffect(() => {
     fetchData();
-  }, [page]);
+  }, [page, searchQuery]);
 
   const deleteFacultad = (pk) => {
     deleteEntity(
@@ -175,7 +175,7 @@ function periodoList() {
         </tbody>
       </Tables>
 
-      {totalPages.length > 0 && (
+      {totalPages > 1 && (
         <Pagination
           page={page}
           totalPages={totalPages}

@@ -111,7 +111,7 @@ function DocenteList() {
 
   useEffect(() => {
     fetchData();
-  }, [page]);
+  }, [page, searchQuery]);
 
   const deleteDocente = (pk) => {
     deleteEntity(
@@ -246,7 +246,7 @@ function DocenteList() {
         </tbody>
       </Tables>
 
-      {totalPages.length > 0 && (
+      {totalPages > 1 && (
         <Pagination
           page={page}
           totalPages={totalPages}
