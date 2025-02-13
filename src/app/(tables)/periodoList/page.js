@@ -107,7 +107,17 @@ function periodoList() {
         >
           Nuevo Periodo
         </button>
+
+        {periodos.length > 0 && (
+          <Link
+            className="btn btn-success"
+            href="http://127.0.0.1:8000/export/periodoAcademico"
+          >
+            Exportar
+          </Link>
+        )}
       </div>
+
 
       {/* Modal components */}
       <Modal title="Importar Facultad">

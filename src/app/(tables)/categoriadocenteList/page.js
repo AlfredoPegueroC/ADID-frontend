@@ -94,9 +94,19 @@ function FacultadList() {
     <div className="mt-5">
       <h1 className="text-dark">Lista Categoría docente</h1>
       <div className="d-flex gap-2 mb-3 mt-3">
+
         <Link className="btn btn-primary" href="/categoriadocente">
           Nuevo
         </Link>
+
+        {categorias.length > 0 && (
+          <Link
+            className="btn btn-success"
+            href="http://127.0.0.1:8000/export/categoriaDocente"
+          >
+            Exportar
+          </Link>
+        )}
       </div>
       <Search
         SearchSubmit={handleSearchSubmit}

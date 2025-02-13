@@ -79,7 +79,7 @@ function UniversidadList() {
       <h1 className="text-dark mt-5">Lista Universidad</h1>
       <div className="d-flex gap-1 mb-3 mt-3">
         <Link className="btn btn-primary" href="/universidad">
-          Nuevo
+          Nuevo Universidad
         </Link>
         {universidades.length > 0 && (
           <Link

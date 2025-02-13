@@ -100,6 +100,14 @@ function tipodocenteList() {
         <Link className="btn btn-primary" href="/tipodocente">
           Nuevo
         </Link>
+        {tipodocentes.length > 0 && (
+          <Link
+            className="btn btn-success"
+            href="http://127.0.0.1:8000/export/tipoDocente"
+          >
+            Exportar
+          </Link>
+        )}
       </div>
 
       <Search
