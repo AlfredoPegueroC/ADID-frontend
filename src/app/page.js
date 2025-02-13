@@ -124,17 +124,6 @@ function Home() {
                 </Link>
 
                 <td>
-                  <button
-                    className="btn btn-danger btn-sm ms-1 "
-                    onClick={() => handleDelete(asig.period)}
-                  >
-                    <Image
-                      src="/delete.svg"
-                      alt="borrar"
-                      width={20}
-                      height={20}
-                    />
-                  </button>
                   <Link
                     className="btn btn-success btn-sm ms-1"
                     href={`http://127.0.0.1:8000/export/asignacionDocenteExport?period=${asig.period}`}
@@ -146,6 +135,18 @@ function Home() {
                       height={20}
                     />
                   </Link>
+
+                  <button
+                    className="btn btn-danger btn-sm ms-1 "
+                    onClick={() => handleDelete(asig.period)}
+                  >
+                    <Image
+                      src="/delete.svg"
+                      alt="borrar"
+                      width={20}
+                      height={20}
+                    />
+                  </button>
                 </td>
               </tr>
             ))

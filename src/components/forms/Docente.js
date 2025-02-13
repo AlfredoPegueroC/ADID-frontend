@@ -209,6 +209,7 @@ export default function DocenteForm() {
               type="text"
               id="telefono"
               name="telefono"
+              placeholder="Telefono"
               value={formData.telefono}
               onChange={handleChange}
               required
@@ -221,6 +222,7 @@ export default function DocenteForm() {
               type="text"
               id="direccion"
               name="direccion"
+              placeholder="Direccion"
               value={formData.direccion}
               onChange={handleChange}
               required

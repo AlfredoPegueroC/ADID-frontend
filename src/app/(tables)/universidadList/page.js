@@ -23,7 +23,6 @@ function UniversidadList() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      // If searchQuery is empty, do not include it in the request URL
       const searchParam = searchQuery
         ? `&search=${encodeURIComponent(searchQuery)}`
         : "";

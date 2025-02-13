@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Styles from "@styles/form.module.css";
 
-
 import FormLayout from "@components/layouts/FormLayout";
 import withAuth from "@utils/withAuth";
 
@@ -61,6 +60,7 @@ function TipoEdit({ params }) {
 
       if (response.ok) {
         alert("Tipo updated successfully!");
+        console.log("working");
         router.push("/tipodocenteList");
       } else {
         alert("Failed to update tipo.");
@@ -96,7 +96,7 @@ function TipoEdit({ params }) {
               type="text"
               id="nombre"
               name="nombre"
-              value={tipo.nombre}
+              value={tipo.nombre || ""}
               onChange={handleChange}
               required
             />
@@ -106,12 +106,12 @@ function TipoEdit({ params }) {
             <label htmlFor="universidadCodigo">Universidad</label>
             <select
               id="universidadCodigo"
-              name="universidadCodigo"
+              name="UniversidadCodigo"
               value={tipo?.UniversidadCodigo || ""}
               onChange={handleChange}
               required
             >
-              <option value="" >-- Seleccione --</option>
+              <option value="">-- Seleccione --</option>
               {universidades.map((universidad) => (
                 <option
                   key={universidad.UniversidadCodigo}
@@ -123,6 +123,18 @@ function TipoEdit({ params }) {
             </select>
           </div>
 
+          <div className={Styles.name_group}>
+            <label htmlFor="estado">Estado</label>
+            <select
+              id="estado"
+              name="estado"
+              value={tipo?.estado || ""}
+              onChange={handleChange}
+            >
+              <option value="Activo">Activo</option>
+              <option value="Inactivo">Inactivo</option>
+            </select>
+          </div>
           <button type="submit" className={Styles.btn}>
             Guardar Cambios
           </button>

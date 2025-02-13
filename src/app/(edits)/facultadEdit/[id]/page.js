@@ -32,7 +32,7 @@ function EditFacultad({ params }) {
         if (!universidadesResponse.ok)
           throw new Error("Failed to fetch universidades");
         const universidadesData = await universidadesResponse.json();
-        setUniversidades(universidadesData.results); // results es donde esta el contenido del json
+        setUniversidades(universidadesData.results);
       } catch (error) {
         console.error("Error fetching data:", error);
         setError("Failed to load data.");
