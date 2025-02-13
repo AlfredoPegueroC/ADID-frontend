@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
+
 // Components
 import Pagination from "@components/Pagination";
 import Tables from "@components/Tables";
@@ -121,7 +123,7 @@ function DocenteList() {
   };
 
   const handleSearchChange = (e) => {
-    setSearchQuery(e.target.value); 
+    setSearchQuery(e.target.value);
   };
 
   const handleSearchSubmit = (e) => {
@@ -225,13 +227,18 @@ function DocenteList() {
                   className="btn btn-primary btn-sm"
                   href={`/docenteEdit/${docente.Docentecodigo}`}
                 >
-                  Edit
+                  <Image src="/edit.svg" alt="editar" width={20} height={20} />
                 </Link>
                 <button
                   className="btn btn-danger btn-sm mx-2"
                   onClick={() => deleteDocente(docente.Docentecodigo)}
                 >
-                  Delete
+                  <Image
+                    src="/descargar-icon.svg"
+                    alt="borrar"
+                    width={20}
+                    height={20}
+                  />
                 </button>
               </td>
             </tr>

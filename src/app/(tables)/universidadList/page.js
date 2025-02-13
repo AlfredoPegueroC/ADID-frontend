@@ -2,11 +2,13 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
+
 // Components
 import Pagination from "@components/Pagination";
 import Tables from "@components/Tables";
 import Search from "@components/search";
-import isLoading from "@components/Loading";
+
 // Utils
 import withAuth from "@utils/withAuth";
 import { deleteEntity } from "@utils/delete";
@@ -64,7 +66,7 @@ function UniversidadList() {
     e.preventDefault();
     fetchData();
   };
-  
+
   if (loading) {
     return (
       <div className="spinner-container ">
@@ -123,13 +125,18 @@ function UniversidadList() {
                   href={`/universidadEdit/${universidad.UniversidadCodigo}`}
                   className="btn btn-primary btn-sm"
                 >
-                  Editar
+                  <Image src="/edit.svg" alt="editar" width={20} height={20} />
                 </Link>
                 <button
                   className="btn btn-danger btn-sm mx-2"
                   onClick={() => handleDelete(universidad.UniversidadCodigo)}
                 >
-                  Eliminar
+                  <Image
+                    src="/delete.svg"
+                    alt="borrar"
+                    width={20}
+                    height={20}
+                  />
                 </button>
               </td>
             </tr>

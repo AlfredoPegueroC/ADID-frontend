@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 
 import Pagination from "@components/Pagination";
 import Tables from "@components/Tables";
@@ -18,11 +19,13 @@ function periodoList() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [searchQuery, setSearchQuery] = useState("")
+  const [searchQuery, setSearchQuery] = useState("");
 
   const fetchData = async () => {
     try {
-      const searchParam = searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : '';
+      const searchParam = searchQuery
+        ? `&search=${encodeURIComponent(searchQuery)}`
+        : "";
 
       const periodoResponse = await fetch(
         `http://localhost:8000/api/periodoacademico?page=${page}${searchParam}`
@@ -84,8 +87,6 @@ function periodoList() {
     fetchData(); // Trigger search after form submit
   };
 
-
-
   if (loading) {
     return (
       <div className="spinner-container ">
@@ -98,18 +99,15 @@ function periodoList() {
     <div className="mt-5">
       <h1 className="text-dark">Lista Periodo</h1>
       <div className="d-flex gap-2 mb-3 mt-3">
-
-      <button
-        type="button"
-        className="btn btn-primary"
-        data-bs-toggle="modal"
-        data-bs-target="#Modal"
-      >
-        
-        Nuevo Periodo
-      </button>
+        <button
+          type="button"
+          className="btn btn-primary"
+          data-bs-toggle="modal"
+          data-bs-target="#Modal"
+        >
+          Nuevo Periodo
+        </button>
       </div>
-
 
       {/* Modal components */}
       <Modal title="Importar Facultad">
@@ -158,13 +156,18 @@ function periodoList() {
                   className="btn btn-primary btn-sm"
                   href={`/periodoEdit/${periodo.periodoAcademicoCodigo}`}
                 >
-                  Edit
+                  <Image src="/edit.svg" alt="editar" width={20} height={20} />
                 </Link>
                 <button
                   className="btn btn-danger btn-sm mx-2"
                   onClick={() => deleteFacultad(periodo.periodoAcademicoCodigo)}
                 >
-                  Delete
+                  <Image
+                    src="/delete.svg"
+                    alt="borrar"
+                    width={20}
+                    height={20}
+                  />
                 </button>
               </td>
             </tr>

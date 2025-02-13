@@ -2,6 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
+
 // Components
 import Pagination from "@components/Pagination";
 import Tables from "@components/Tables";
@@ -190,14 +192,19 @@ function principal({ params }) {
                   className="btn btn-primary btn-sm"
                   href={`/asignacionEdit/${asignacion.ADIDcodigo}`}
                 >
-                  U
+                  <Image src="/edit.svg" alt="editar" width={20} height={20} />
                 </Link>
                 <button
                   type="button"
                   className="btn btn-danger btn-sm mx-2"
                   onClick={() => handleDelete(asignacion.ADIDcodigo)}
                 >
-                  E
+                  <Image
+                    src="/delete.svg"
+                    alt="borrar"
+                    width={20}
+                    height={20}
+                  />
                 </button>
               </td>
             </tr>

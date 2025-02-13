@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 
 // Components
 import Pagination from "@components/Pagination";
@@ -83,10 +84,9 @@ function FacultadList() {
   };
 
   const handleSearchSubmit = (e) => {
-    e.preventDefault(); 
-    fetchData(); 
+    e.preventDefault();
+    fetchData();
   };
- 
 
   if (loading) {
     return (
@@ -163,13 +163,18 @@ function FacultadList() {
                   className="btn btn-primary btn-sm"
                   href={`/facultadEdit/${facultad.facultadCodigo}`}
                 >
-                  Edit
+                  <Image src="/edit.svg" alt="editar" width={20} height={20} />
                 </Link>
                 <button
                   className="btn btn-danger btn-sm mx-2"
                   onClick={() => deleteFacultad(facultad.facultadCodigo)}
                 >
-                  Delete
+                  <Image
+                    src="/delete.svg"
+                    alt="borrar"
+                    width={20}
+                    height={20}
+                  />
                 </button>
               </td>
             </tr>

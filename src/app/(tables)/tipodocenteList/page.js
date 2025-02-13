@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 
 import Pagination from "@components/Pagination";
 import Tables from "@components/Tables";
@@ -83,7 +84,7 @@ function tipodocenteList() {
     e.preventDefault();
     fetchData();
   };
-  
+
   if (loading) {
     return (
       <div className="spinner-container ">
@@ -137,14 +138,23 @@ function tipodocenteList() {
                     className="btn btn-primary btn-sm"
                     href={`/tipoEdit/${tipodocente.tipoDocenteCodigo}`}
                   >
-                    {" "}
-                    Edit
+                    <Image
+                      src="/edit.svg"
+                      alt="editar"
+                      width={20}
+                      height={20}
+                    />
                   </Link>
                   <button
                     className="btn btn-danger btn-sm mx-2"
                     onClick={() => deleteTipo(tipodocente.tipoDocenteCodigo)}
                   >
-                    Delete
+                    <Image
+                      src="/delete.svg"
+                      alt="borrar"
+                      width={20}
+                      height={20}
+                    />
                   </button>
                 </td>
               </tr>

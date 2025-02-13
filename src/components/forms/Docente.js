@@ -72,9 +72,7 @@ export default function DocenteForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSuccessMessage(""); // Reset success message on form submission
-    setErrorMessage(""); // Reset error message on form submission
-
+    
     try {
       const response = await fetch("http://127.0.0.1:8000/api/docente/create", {
         method: "POST",
@@ -104,7 +102,7 @@ export default function DocenteForm() {
 
         router.push("docenteList");
         Notification.alertSuccess(
-          "Universidad creada con éxito: " + result.nombre
+          "Universidad creada con éxito: "
         );
       } else {
         const errorData = await response.json();

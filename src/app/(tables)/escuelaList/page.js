@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
+
 // Components
 import Pagination from "@components/Pagination";
 import Tables from "@components/Tables";
@@ -175,13 +177,23 @@ function EscuelaList() {
                     className="btn btn-primary btn-sm"
                     href={`/escuelaEdit/${escuela.escuelaCodigo}`}
                   >
-                    Edit
+                    <Image
+                      src="/edit.svg"
+                      alt="editar"
+                      width={20}
+                      height={20}
+                    />
                   </Link>
                   <button
                     className="btn btn-danger btn-sm mx-2"
                     onClick={() => deleteEscuela(escuela.escuelaCodigo)}
                   >
-                    Delete
+                    <Image
+                      src="/delete.svg"
+                      alt="borrar"
+                      width={20}
+                      height={20}
+                    />
                   </button>
                 </td>
               </tr>

@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Tables from "@components/Tables";
 import withAuth from "@utils/withAuth";
-
+import Image from "next/image";
 import ImportPage from "@components/forms/ImportAsignacion";
 import Modal from "@components/Modal";
 
@@ -110,20 +110,42 @@ function Home() {
           ) : (
             asignacion.map((asig) => (
               <tr key={asig.period}>
-                <td>{asig.period}</td>
+                <Link href={`/asignacionDocente/${asig.period}`}>
+                  <td className="d-flex align-items-center gap-3">
+                    {" "}
+                    <Image
+                      src="/excel-icon.png"
+                      alt="Logo de la Facultad de Ciencias"
+                      width={32}
+                      height={32}
+                    />{" "}
+                    {asig.period}
+                  </td>
+                </Link>
+
                 <td>
-                  <Link
-                    href={`/asignacionDocente/${asig.period}`}
-                    className="btn btn-primary btn-sm"
-                  >
-                    Ver
-                  </Link>
                   <button
-                    className="btn btn-danger btn-sm ms-2"
+                    className="btn btn-danger btn-sm ms-1 "
                     onClick={() => handleDelete(asig.period)}
                   >
-                    Eliminar
+                    <Image
+                      src="/delete.svg"
+                      alt="borrar"
+                      width={20}
+                      height={20}
+                    />
                   </button>
+                  <Link
+                    className="btn btn-success btn-sm ms-1"
+                    href={`http://127.0.0.1:8000/export/asignacionDocenteExport?period=${asig.period}`}
+                  >
+                    <Image
+                      src="/descargar-icon.svg"
+                      alt="borrar"
+                      width={20}
+                      height={20}
+                    />
+                  </Link>
                 </td>
               </tr>
             ))
