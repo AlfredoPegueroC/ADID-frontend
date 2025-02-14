@@ -184,10 +184,10 @@ export default function DocenteForm() {
               <option value="" disabled>
                 -- Seleccione el estado civil --
               </option>
-              <option value="S">Soltero</option>
-              <option value="C">Casado</option>
-              <option value="U">Unión Libre</option>
-              <option value="V">Viudo</option>
+              <option value="Soltero">Soltero</option>
+              <option value="Casado">Casado</option>
+              <option value="Union Libre">Unión Libre</option>
+              <option value="Viudo">Viudo</option>
             </select>
           </div>
 

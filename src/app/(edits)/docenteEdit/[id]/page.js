@@ -159,17 +159,7 @@ function DocenteEdit({ params }) {
                 required
               />
             </div>
-            <div className={Styles.name_group}>
-              <label htmlFor="estado_civil">Estado civil</label>
-              <input
-                type="text"
-                id="estado_civil"
-                name="estado_civil"
-                value={docente.estado_civil}
-                onChange={handleChange}
-                required
-              />
-            </div>
+
             <div className={Styles.name_group}>
               <label htmlFor="estado_civil">Estado civil</label>
               <select
@@ -184,9 +174,6 @@ function DocenteEdit({ params }) {
                 <option value="Viudo">Viudo</option>
               </select>
             </div>
-
-
-
           </div>
           <div className={Styles.names}>
             <div className={Styles.name_group}>
