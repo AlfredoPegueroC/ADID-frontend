@@ -36,8 +36,9 @@ export default function Universidad({ title }) {
       } else {
         const error = await response.json();
         Notification.alertError(
-          "Error al crear la universidad: " + error.message
+          `Error al crear la universidad existe en la DB.`
         );
+        console.log("aqui", error)
       }
     } catch (error) {
       Notification.alertError(

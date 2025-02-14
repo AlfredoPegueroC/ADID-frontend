@@ -101,7 +101,7 @@ function FacultadList() {
       <h1 className="text-dark">Lista Facultad</h1>
       <div className="d-flex gap-2 mb-3 mt-3">
         <Link className="btn btn-primary" href="/facultad">
-          Nuevo
+          Nuevo Facultad
         </Link>
         {facultades.length > 0 && (
           <Link

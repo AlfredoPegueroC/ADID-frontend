@@ -72,7 +72,7 @@ export default function TipoDocenteForm() {
     } else {
       const errorData = await response.json();
       Notification.alertError(
-        "Error al crear el Tipo de Docente: " + JSON.stringify(errorData)
+        "Error al crear el Tipo de Docente ya existe."
       );
     }
   };

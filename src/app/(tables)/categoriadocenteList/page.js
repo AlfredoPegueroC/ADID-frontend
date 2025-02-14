@@ -7,6 +7,8 @@ import Image from "next/image";
 import Pagination from "@components/Pagination";
 import Tables from "@components/Tables";
 import Search from "@components/search";
+import ImportExcel from "@components/forms/Import";
+import Modal from "@components/Modal";
 
 // Utils
 import withAuth from "@utils/withAuth";
@@ -18,6 +20,8 @@ function FacultadList() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
+
+  const Api_import_URL = "http://localhost:8000/import/categoriaDocente";
 
   const fetchData = async () => {
     try {
@@ -94,9 +98,8 @@ function FacultadList() {
     <div className="mt-5">
       <h1 className="text-dark">Lista Categoría docente</h1>
       <div className="d-flex gap-2 mb-3 mt-3">
-
         <Link className="btn btn-primary" href="/categoriadocente">
-          Nuevo
+          Nuevo Categoría
         </Link>
 
         {categorias.length > 0 && (
@@ -107,7 +110,20 @@ function FacultadList() {
             Exportar
           </Link>
         )}
+
+        <button
+          type="button"
+          className="btn btn-warning"
+          data-bs-toggle="modal"
+          data-bs-target="#Modal"
+        >
+          Importar
+        </button>
       </div>
+
+      <Modal title="Importar Categoria">
+        <ImportExcel importURL={Api_import_URL} onSuccess={fetchData} />
+      </Modal>
       <Search
         SearchSubmit={handleSearchSubmit}
         SearchChange={handleSearchChange}

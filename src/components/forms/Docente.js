@@ -107,7 +107,7 @@ export default function DocenteForm() {
       } else {
         const errorData = await response.json();
         Notification.alertError(
-          "Error al crear el docente: " + JSON.stringify(errorData)
+          "Error al crear el docente, ya existe "
         );
       }
     } catch (error) {

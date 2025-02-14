@@ -7,6 +7,7 @@ import Image from "next/image";
 import Pagination from "@components/Pagination";
 import Tables from "@components/Tables";
 import Modal from "@components/Modal";
+import ImportExcel from "@components/forms/Import";
 
 import Periodo from "@components/forms/Periodo";
 
@@ -118,8 +119,6 @@ function periodoList() {
         )}
       </div>
 
-
-      {/* Modal components */}
       <Modal title="Importar Facultad">
         <Periodo title="Periodo Academico" onSuccess={fetchData} />
       </Modal>

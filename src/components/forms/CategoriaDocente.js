@@ -81,7 +81,7 @@ export default function CategoriaDocenteForm() {
     } else {
       const errorData = await response.json();
       Notification.alertError(
-        "Error al crear la Categoría de Docente: " + JSON.stringify(errorData)
+        "Error al crear la Categoría de Docente ya existe DB" 
       );
     }
   };

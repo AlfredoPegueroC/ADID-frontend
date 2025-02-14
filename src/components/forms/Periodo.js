@@ -75,9 +75,7 @@ export default function Periodo({ title, onSuccess }) {
       } else {
         const errorData = await response.json();
         Notification.alertError(
-          `Error al crear el periodo: ${
-            errorData.detail || "Error desconocido"
-          }`
+          `Error al crear el periodo ya existe.`
         );
       }
     } catch (error) {

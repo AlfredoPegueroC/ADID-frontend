@@ -170,6 +170,23 @@ function DocenteEdit({ params }) {
                 required
               />
             </div>
+            <div className={Styles.name_group}>
+              <label htmlFor="estado_civil">Estado civil</label>
+              <select
+                id="estado_civil"
+                name="estado_civil"
+                value={docente?.estado_civil || ""}
+                onChange={handleChange}
+              >
+                <option value="Soltero">Soltero</option>
+                <option value="Casado">Casado</option>
+                <option value="Union Libre">Union Libre</option>
+                <option value="Viudo">Viudo</option>
+              </select>
+            </div>
+
+
+
           </div>
           <div className={Styles.names}>
             <div className={Styles.name_group}>
@@ -219,6 +236,9 @@ function DocenteEdit({ params }) {
               >
                 <option value="Activo">Activo</option>
                 <option value="Inactivo">Inactivo</option>
+                <option value="Jubilado">Jubilado</option>
+                <option value="Sabático">Sabático</option>
+                <option value="Licencia">Licencia</option>
               </select>
             </div>
           </div>
@@ -318,27 +338,24 @@ function DocenteEdit({ params }) {
           </div>
 
           <div className={Styles.name_group}>
-          <label htmlFor="categoriaCodigo">Categoría de Docente:</label>
-          <select
-            id="categoriaCodigo"
-            name="categoriaCodigo"
-            value={docente?.categoriaCodigo || ""}
-            onChange={handleChange}
-            required
-          >
-            <option value="" disabled>
-              -- Seleccione la Categoría de Docente --
-            </option>
-            {tipos.map((tipo) => (
-              <option
-                key={tipo.categoriaCodigo}
-                value={tipo.categoriaCodigo}
-              >
-                {tipo.nombre}
+            <label htmlFor="categoriaCodigo">Categoría de Docente:</label>
+            <select
+              id="categoriaCodigo"
+              name="categoriaCodigo"
+              value={docente?.categoriaCodigo || ""}
+              onChange={handleChange}
+              required
+            >
+              <option value="" disabled>
+                -- Seleccione la Categoría de Docente --
               </option>
-            ))}
-          </select>
-        </div>
+              {tipos.map((tipo) => (
+                <option key={tipo.categoriaCodigo} value={tipo.categoriaCodigo}>
+                  {tipo.nombre}
+                </option>
+              ))}
+            </select>
+          </div>
           <button type="submit" className={Styles.btn}>
             Guardar Cambios
           </button>

@@ -7,6 +7,8 @@ import Image from "next/image";
 import Pagination from "@components/Pagination";
 import Tables from "@components/Tables";
 import Search from "@components/search";
+import ImportExcel from "@components/forms/Import";
+import Modal from "@components/Modal";
 
 // Utils
 import withAuth from "@utils/withAuth";
@@ -18,6 +20,8 @@ function tipodocenteList() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
+
+  const Api_import_URL = "http://localhost:8000/import/tipoDocente";
 
   const fetchData = async () => {
     try {
@@ -98,7 +102,7 @@ function tipodocenteList() {
       <h1 className="text-dark">Lista lista Tipo docente</h1>
       <div className="d-flex gap-2 mb-3 mt-3">
         <Link className="btn btn-primary" href="/tipodocente">
-          Nuevo
+          Nuevo Tipo Docente
         </Link>
         {tipodocentes.length > 0 && (
           <Link
@@ -108,8 +112,19 @@ function tipodocenteList() {
             Exportar
           </Link>
         )}
+        <button
+          type="button"
+          className="btn btn-warning"
+          data-bs-toggle="modal"
+          data-bs-target="#Modal"
+        >
+          Importar
+        </button>
       </div>
-
+      <Modal title="Importar Tipo Docente">
+        <ImportExcel importURL={Api_import_URL} onSuccess={fetchData} />
+      </Modal>
+      
       <Search
         SearchSubmit={handleSearchSubmit}
         SearchChange={handleSearchChange}

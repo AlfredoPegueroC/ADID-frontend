@@ -84,7 +84,7 @@ export default function EscuelaForm() {
       } else {
         const errorData = await response.json();
         Notification.alertError(
-          "Error al crear la escuela: " + JSON.stringify(errorData)
+          "Error al crear la escuela ya existe en la DB"
         );
       }
     } catch (error) {

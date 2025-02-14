@@ -117,7 +117,7 @@ function EscuelaList() {
       <h1 className="text-dark">Lista Escuela</h1>
       <div className="d-flex gap-2 mb-3 mt-3">
         <Link className="btn btn-primary" href="/escuela">
-          Nuevo
+          Nuevo Escuela
         </Link>
         {escuelas.length > 0 && (
           <Link

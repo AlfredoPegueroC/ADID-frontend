@@ -8,6 +8,8 @@ import Image from "next/image";
 import Pagination from "@components/Pagination";
 import Tables from "@components/Tables";
 import Search from "@components/search";
+import Modal from "@components/Modal";
+import ImportExcel from "@components/forms/Import";
 
 // Utils
 import withAuth from "@utils/withAuth";
@@ -20,8 +22,9 @@ function UniversidadList() {
   const [totalPages, setTotalPages] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
 
+  const Api_import_URL = "http://localhost:8000/import/universidad"
+
   const fetchData = async () => {
-    setLoading(true);
     try {
       const searchParam = searchQuery
         ? `&search=${encodeURIComponent(searchQuery)}`
@@ -89,7 +92,20 @@ function UniversidadList() {
             Exportar
           </Link>
         )}
+
+        <button
+          type="button"
+          className="btn btn-warning"
+          data-bs-toggle="modal"
+          data-bs-target="#Modal"
+        >
+          Importar
+        </button>
       </div>
+
+      <Modal title="Importar Universidad">
+        <ImportExcel importURL={Api_import_URL} onSuccess={fetchData} />
+      </Modal>
 
       <Search
         SearchSubmit={handleSearchSubmit}

@@ -70,16 +70,16 @@ export default function FacultadForm({ title }) {
       } else {
         const error = await response.json();
         Notification.alertError(
-          "Error al crear la universidad: " + error.message
+          "Error al crear la Facultad ya existe."
         );
       }
     } catch (error) {
       console.error("Error creating faculty:", error);
       Notification.alertError(
-        "Error al crear la universidad: " + error.message
+        "Error al crear la Facultad: " + error.message
       );
     } finally {
-      setIsLoading(false); // Stop loading
+      setIsLoading(false);
     }
   };
 
