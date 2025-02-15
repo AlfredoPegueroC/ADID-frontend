@@ -95,7 +95,7 @@ function principal({ params }) {
 
   useEffect(() => {
     fetchData();
-  }, [page]);
+  }, [page, searchQuery]);
 
   const handleDelete = (pk) => {
     deleteEntity(

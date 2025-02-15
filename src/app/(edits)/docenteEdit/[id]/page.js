@@ -336,7 +336,7 @@ function DocenteEdit({ params }) {
               <option value="" disabled>
                 -- Seleccione la Categoría de Docente --
               </option>
-              {tipos.map((tipo) => (
+              {categorias.map((tipo) => (
                 <option key={tipo.categoriaCodigo} value={tipo.categoriaCodigo}>
                   {tipo.nombre}
                 </option>

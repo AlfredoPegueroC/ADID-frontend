@@ -1,11 +1,12 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import Tables from "@components/Tables";
 import withAuth from "@utils/withAuth";
 import Image from "next/image";
 import ImportPage from "@components/forms/ImportAsignacion";
 import Modal from "@components/Modal";
+
+import Styles from "@styles/home.module.css";
 
 function Home() {
   const [asignacion, setAsignaciones] = useState([]);
@@ -26,7 +27,6 @@ function Home() {
         nextUrl = data.next;
       }
 
-      // Keep only unique periods
       const uniqueAsignaciones = [
         ...new Set(allAsignaciones.map((asig) => asig.period)),
       ].map((period) => ({ period }));
@@ -80,8 +80,6 @@ function Home() {
 
   return (
     <div>
-      <h3 className="text-black mt-5">Selección de Asignación por Período</h3>
-
       <Modal title="Importar Asignación">
         <ImportPage importURL={Api_import_URL} onSuccess={fetchData} />
       </Modal>
@@ -93,66 +91,67 @@ function Home() {
       >
         Nueva Asignación
       </button>
-      <Tables>
-        <thead>
-          <tr>
-            <th scope="col">Período</th>
-            <th scope="col">Acción</th>
-          </tr>
-        </thead>
-        <tbody>
-          {asignacion.length === 0 ? (
-            <tr>
-              <td colSpan="2" className="text-center">
-                No se encontraron asignaciones.
-              </td>
-            </tr>
-          ) : (
-            asignacion.map((asig) => (
-              <tr key={asig.period}>
-                <Link href={`/asignacionDocente/${asig.period}`}>
-                  <td className="d-flex align-items-center gap-3">
-                    {" "}
-                    <Image
-                      src="/excel-icon.png"
-                      alt="Logo de la Facultad de Ciencias"
-                      width={32}
-                      height={32}
-                    />{" "}
-                    {asig.period}
-                  </td>
+      <div className={Styles.home_container}>
+        <h1 className={Styles.home_title}>
+          Selección de Asignación por Período
+        </h1>
+        {asignacion.length === 0 ? (
+          <div className={Styles.empty_asig}>
+            <p className={Styles.empty_title}>
+              No se encontraron asignaciones.
+            </p>
+            <Image
+              src="/undraw_no-data_ig65.svg"
+              alt="excel"
+              width={400}
+              height={400}
+            />
+          </div>
+        ) : (
+          asignacion.map((asig) => (
+            <div key={asig.period} className={Styles.home_items}>
+              <Link
+                className={Styles.item}
+                href={`/asignacionDocente/${asig.period}`}
+              >
+                <Image
+                  src="/excel-icon.png"
+                  alt="excel"
+                  width={32}
+                  height={32}
+                />
+                {asig.period}
+              </Link>
+
+              <div className="home_btns">
+                <Link
+                  className="btn btn-success btn-sm ms-1"
+                  href={`http://127.0.0.1:8000/export/asignacionDocenteExport?period=${asig.period}`}
+                >
+                  <Image
+                    src="/descargar-icon.svg"
+                    alt="borrar"
+                    width={20}
+                    height={20}
+                  />
                 </Link>
 
-                <td>
-                  <Link
-                    className="btn btn-success btn-sm ms-1"
-                    href={`http://127.0.0.1:8000/export/asignacionDocenteExport?period=${asig.period}`}
-                  >
-                    <Image
-                      src="/descargar-icon.svg"
-                      alt="borrar"
-                      width={20}
-                      height={20}
-                    />
-                  </Link>
-
-                  <button
-                    className="btn btn-danger btn-sm ms-1 "
-                    onClick={() => handleDelete(asig.period)}
-                  >
-                    <Image
-                      src="/delete.svg"
-                      alt="borrar"
-                      width={20}
-                      height={20}
-                    />
-                  </button>
-                </td>
-              </tr>
-            ))
-          )}
-        </tbody>
-      </Tables>
+                <button
+                  className="btn btn-danger btn-sm ms-1 "
+                  onClick={() => handleDelete(asig.period)}
+                >
+                  <Image
+                    src="/delete.svg"
+                    alt="borrar"
+                    width={20}
+                    height={20}
+                  />
+                </button>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
     </div>
   );
 }
