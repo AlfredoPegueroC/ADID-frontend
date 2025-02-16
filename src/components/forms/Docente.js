@@ -12,7 +12,14 @@ export default function DocenteForm() {
   const [escuelas, setEscuelas] = useState([]);
   const [tiposDocente, setTiposDocente] = useState([]);
   const [categoriasDocente, setCategoriasDocente] = useState([]);
-  const [isLoading, setIsLoading] = useState(true); // Loading state
+  const [isLoading, setIsLoading] = useState(true);
+
+  const [filteredFacultades, setFilteredFacultades] = useState([]); 
+  const [filteredCategoria, setFilteredCategoria] = useState([])
+  const [filteredTipo, setFilteredTipo] = useState([])
+  const [filteredEscuela, setFilteredEscuela] = useState([])
+
+  
 
   const [formData, setFormData] = useState({
     Docentecodigo: "",
@@ -62,12 +69,63 @@ export default function DocenteForm() {
     fetchData();
   }, []);
 
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
     }));
+
+    if(name === 'UniversidadCodigo'){
+      const filtered = facultades.filter(
+        (facultad) => facultad.UniversidadCodigo === parseInt(value)
+      );
+      setFilteredFacultades(filtered);
+      setFormData({
+        ...formData,
+        [name]: value,
+        facultadCodigo: "", 
+      });
+      console.log(filtered)
+    }
+
+    if(name === 'UniversidadCodigo'){
+      const filtered = categoriasDocente.filter(
+        (categoria) => categoria.UniversidadCodigo === parseInt(value)
+      )
+      setFilteredCategoria(filtered)
+      setFormData({
+        ...formData,
+        [name]: value,
+        categoriaCodigo: "", 
+      });
+    }
+
+    if(name === 'UniversidadCodigo'){
+      const filtered = tiposDocente.filter(
+        (tipo) => tipo.UniversidadCodigo === parseInt(value)
+      )
+      setFilteredTipo(filtered)
+      setFormData({
+        ...formData,
+        [name]: value,
+        tipoDocenteCodigo: "", 
+      });
+    }
+
+    if(name === 'facultadCodigo'){
+      const filtered = escuelas.filter(
+        (escuelas) => escuelas.facultadCodigo === parseInt(value)
+      )
+      setFilteredEscuela(filtered)
+      setFormData({
+        ...formData,
+        [name]: value,
+        escuelaCodigo: "", 
+      });
+    }
+    
   };
 
   const handleSubmit = async (e) => {
@@ -284,7 +342,7 @@ export default function DocenteForm() {
               <option value="" disabled>
                 -- Seleccione una Facultad --
               </option>
-              {facultades.map((facultad) => (
+              {filteredFacultades.map((facultad) => (
                 <option
                   key={facultad.facultadCodigo}
                   value={facultad.facultadCodigo}
@@ -307,7 +365,7 @@ export default function DocenteForm() {
               <option value="" disabled>
                 -- Seleccione una Escuela --
               </option>
-              {escuelas.map((escuela) => (
+              {filteredEscuela.map((escuela) => (
                 <option
                   key={escuela.escuelaCodigo}
                   value={escuela.escuelaCodigo}
@@ -330,7 +388,7 @@ export default function DocenteForm() {
               <option value="" disabled>
                 -- Seleccione el Tipo de Docente --
               </option>
-              {tiposDocente.map((tipo) => (
+              {filteredTipo.map((tipo) => (
                 <option
                   key={tipo.tipoDocenteCodigo}
                   value={tipo.tipoDocenteCodigo}
@@ -353,7 +411,7 @@ export default function DocenteForm() {
               <option value="" disabled>
                 -- Seleccione la Categoría de Docente --
               </option>
-              {categoriasDocente.map((categoria) => (
+              {filteredCategoria.map((categoria) => (
                 <option
                   key={categoria.categoriaCodigo}
                   value={categoria.categoriaCodigo}

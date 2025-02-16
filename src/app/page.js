@@ -79,7 +79,7 @@ function Home() {
   }
 
   return (
-    <div>
+    <div className={Styles.home}>
       <Modal title="Importar Asignación">
         <ImportPage importURL={Api_import_URL} onSuccess={fetchData} />
       </Modal>

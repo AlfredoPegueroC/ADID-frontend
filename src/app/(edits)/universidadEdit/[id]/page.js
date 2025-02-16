@@ -80,7 +80,7 @@ function EditUniversidad({ params }) {
     <FormLayout className={Styles.container}>
       <div className={Styles.container}>
         <form onSubmit={handleSubmit} className={Styles.form}>
-          <h1 className={Styles.titte}>Editar Universidad</h1>
+          <h1 className={Styles.title}>Editar Universidad</h1>
           <div className={Styles.name_group}>
             <label htmlFor="nombre">Nombre de la Universidad</label>
             <input

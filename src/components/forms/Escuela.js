@@ -1,4 +1,3 @@
-"use client";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import Notification from "../Notification";
@@ -8,6 +7,7 @@ export default function EscuelaForm() {
   const router = useRouter();
   const [universidades, setUniversidades] = useState([]);
   const [facultades, setFacultades] = useState([]);
+  const [filteredFacultades, setFilteredFacultades] = useState([]); 
   const [formData, setFormData] = useState({
     escuelaCodigo: "",
     nombre: "",
@@ -17,7 +17,6 @@ export default function EscuelaForm() {
   });
 
   useEffect(() => {
-    // Fetch universities
     const fetchUniversidades = async () => {
       try {
         const response = await fetch("http://127.0.0.1:8000/api/universidad");
@@ -28,7 +27,6 @@ export default function EscuelaForm() {
       }
     };
 
-    // Fetch faculties
     const fetchFacultades = async () => {
       try {
         const response = await fetch("http://127.0.0.1:8000/api/facultad");
@@ -43,19 +41,31 @@ export default function EscuelaForm() {
     fetchFacultades();
   }, []);
 
-  // Handle form field changes
   const handleChange = (e) => {
+    const { id, value } = e.target;
     setFormData({
       ...formData,
-      [e.target.id]: e.target.value,
+      [id]: value,
     });
+
+
+    if (id === "UniversidadCodigo") {
+      const filtered = facultades.filter(
+        (facultad) => facultad.UniversidadCodigo === parseInt(value)
+      );
+      setFilteredFacultades(filtered);
+      setFormData({
+        ...formData,
+        [id]: value,
+        facultadCodigo: "", 
+      });
+    }
   };
 
-  // Handle form submission
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Ensure UniversidadCodigo and facultadCodigo are numbers
     const dataToSend = {
       ...formData,
       UniversidadCodigo: parseInt(formData.UniversidadCodigo),
@@ -84,7 +94,7 @@ export default function EscuelaForm() {
       } else {
         const errorData = await response.json();
         Notification.alertError(
-          "Error al crear la escuela ya existe en la DB"
+          "Error al crear la escuela, ya existe en la DB"
         );
       }
     } catch (error) {
@@ -162,7 +172,7 @@ export default function EscuelaForm() {
             <option value="" disabled>
               -- Seleccione una Facultad --
             </option>
-            {facultades.map((facultad) => (
+            {filteredFacultades.map((facultad) => (
               <option
                 key={facultad.facultadCodigo}
                 value={facultad.facultadCodigo}
@@ -171,7 +181,7 @@ export default function EscuelaForm() {
               </option>
             ))}
           </select>
-         </div>
+        </div>
 
         <button type="submit" className={Styles.btn}>
           Enviar
