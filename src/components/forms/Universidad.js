@@ -5,12 +5,13 @@ import Styles from "@styles/form.module.css";
 
 export default function Universidad({ title }) {
   const router = useRouter();
+  const API = process.env.NEXT_PUBLIC_API_KEY;
 
   const handleUniversidad = async (e) => {
     e.preventDefault();
     const nombre = document.getElementById("nombre").value;
     const estado = document.getElementById("estado").value;
-    const API = process.env.NEXT_PUBLIC_API_KEY;
+    
 
     const data = {
       nombre: nombre,

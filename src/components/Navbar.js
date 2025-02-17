@@ -6,6 +6,7 @@ import Style from "@styles/navbar.module.css";
 
 export default function Navbar() {
   const router = useRouter();
+  const API = process.env.NEXT_PUBLIC_API_KEY;
 
   const handleLogout = async () => {
     const refreshToken = localStorage.getItem("refreshToken");
@@ -17,7 +18,7 @@ export default function Navbar() {
     }
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/logout", {
+      const response = await fetch(`${API}/api/logout`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -48,9 +49,9 @@ export default function Navbar() {
   return (
     <nav className={`${Style.navbar} navbar navbar-expand-lg `}>
       <div className="container-fluid d-flex  mx-5 py-2">
-        <a className="navbar-brand text-white" href="/">
+        <Link className="navbar-brand text-white" href="/">
           Asignacion Docente - UASD
-        </a>
+        </Link>
         <button
           className="navbar-toggler"
           type="button"
@@ -74,7 +75,7 @@ export default function Navbar() {
               </Link>
             </li>
             <li className="nav-item dropdown">
-              <a
+              <Link
                 className="nav-link dropdown-toggle text-white fw-bold"
                 href="#"
                 role="button"
@@ -82,7 +83,7 @@ export default function Navbar() {
                 aria-expanded="false"
               >
                 Matenimientos
-              </a>
+              </Link>
               <ul className="dropdown-menu">
                 <li>
                   <Link className="dropdown-item " href="/universidad">
@@ -118,7 +119,7 @@ export default function Navbar() {
               </ul>
             </li>
             <li className="nav-item dropdown">
-              <a
+              <Link
                 className="nav-link dropdown-toggle text-white  fw-bold"
                 href="#"
                 role="button"
@@ -126,7 +127,7 @@ export default function Navbar() {
                 aria-expanded="false"
               >
                 Listados
-              </a>
+              </Link>
               <ul className="dropdown-menu">
                 <li>
                   <Link className="dropdown-item" href="/universidadList">

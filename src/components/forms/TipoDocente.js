@@ -8,6 +8,7 @@ import Notification from "../Notification";
 
 export default function TipoDocenteForm() {
   const router = useRouter();
+  const API = process.env.NEXT_PUBLIC_API_KEY;
   const [formData, setFormData] = useState({
     tipoDocenteCodigo: "",
     nombre: "",
@@ -16,7 +17,6 @@ export default function TipoDocenteForm() {
   });
 
   const [universidades, setUniversidades] = useState([]);
-  const API = process.env.NEXT_PUBLIC_API_KEY;
 
   useEffect(() => {
     // Fetch universidades from API when component mounts
