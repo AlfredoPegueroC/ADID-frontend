@@ -9,27 +9,22 @@ import Styles from "@styles/form.module.css";
 function EditFacultad({ params }) {
   const router = useRouter();
   const { id } = React.use(params);
-
+  const API = process.env.NEXT_PUBLIC_API_KEY;
   const [facultad, setFacultad] = useState(null);
   const [universidades, setUniversidades] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const API = process.env.NEXT_PUBLIC_API_KEY;
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const facultadesResponse = await fetch(
-          `${API}/api/facultad/${id}/`
-        );
+        const facultadesResponse = await fetch(`${API}/api/facultad/${id}/`);
         if (!facultadesResponse.ok)
           throw new Error("Failed to fetch facultades");
         const facultadesData = await facultadesResponse.json();
         setFacultad(facultadesData);
 
-        const universidadesResponse = await fetch(
-          `${API}/api/universidad`
-        );
+        const universidadesResponse = await fetch(`${API}/api/universidad`);
         if (!universidadesResponse.ok)
           throw new Error("Failed to fetch universidades");
         const universidadesData = await universidadesResponse.json();
@@ -43,23 +38,20 @@ function EditFacultad({ params }) {
     }
 
     fetchData();
-  }, [id]);
+  }, [id, API]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!facultad) return;
 
     try {
-      const response = await fetch(
-        `${API}/api/facultad/edit/${id}/`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(facultad),
-        }
-      );
+      const response = await fetch(`${API}/api/facultad/edit/${id}/`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(facultad),
+      });
 
       if (response.ok) {
         alert("Facultad updated successfully!");

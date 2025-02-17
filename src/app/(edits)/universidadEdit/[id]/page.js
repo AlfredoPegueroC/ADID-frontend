@@ -10,11 +10,10 @@ function EditUniversidad({ params }) {
   const router = useRouter();
 
   const { id } = React.use(params);
-
+  const API = process.env.NEXT_PUBLIC_API_KEY;
   const [universidad, setUniversidad] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const API = process.env.NEXT_PUBLIC_API_KEY;
 
   useEffect(() => {
     fetch(`${API}/api/universidad/${id}/`)
@@ -34,23 +33,20 @@ function EditUniversidad({ params }) {
         setError("Unable to fetch universidad details.");
         setLoading(false);
       });
-  }, [router.isReady, id]);
+  }, [router.isReady, id, API]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!universidad) return;
 
     try {
-      const response = await fetch(
-        `${API}/api/universidad/edit/${id}/`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(universidad),
-        }
-      );
+      const response = await fetch(`${API}/api/universidad/edit/${id}/`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(universidad),
+      });
 
       if (response.ok) {
         alert("Universidad updated successfully!");

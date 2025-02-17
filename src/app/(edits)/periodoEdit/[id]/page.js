@@ -6,16 +6,14 @@ import FormLayout from "@components/layouts/FormLayout";
 import withAuth from "@utils/withAuth";
 import Styles from "@styles/form.module.css";
 
-
 function EditPeriodo({ params }) {
   const router = useRouter();
   const { id } = React.use(params);
-
+  const API = process.env.NEXT_PUBLIC_API_KEY;
   const [periodo, setperiodo] = useState(null);
   const [universidades, setUniversidades] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const API = process.env.NEXT_PUBLIC_API_KEY;
 
   useEffect(() => {
     async function fetchData() {
@@ -27,9 +25,7 @@ function EditPeriodo({ params }) {
         const periodoesData = await periodoesResponse.json();
         setperiodo(periodoesData);
 
-        const universidadesResponse = await fetch(
-          `${API}/api/universidad`
-        );
+        const universidadesResponse = await fetch(`${API}/api/universidad`);
         if (!universidadesResponse.ok)
           throw new Error("Failed to fetch universidades");
         const universidadesData = await universidadesResponse.json();
@@ -43,23 +39,20 @@ function EditPeriodo({ params }) {
     }
 
     fetchData();
-  }, [id]);
+  }, [id, API]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!periodo) return;
 
     try {
-      const response = await fetch(
-        `${API}/api/periodoacademico/edit/${id}/`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(periodo),
-        }
-      );
+      const response = await fetch(`${API}/api/periodoacademico/edit/${id}/`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(periodo),
+      });
 
       if (response.ok) {
         alert("periodo updated successfully!");

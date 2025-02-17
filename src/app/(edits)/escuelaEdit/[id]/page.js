@@ -6,38 +6,30 @@ import FormLayout from "@components/layouts/FormLayout";
 import withAuth from "@utils/withAuth";
 import Styles from "@styles/form.module.css";
 
-
 function EditEscuela({ params }) {
   const router = useRouter();
   const { id } = React.use(params);
-
+  const API = process.env.NEXT_PUBLIC_API_KEY;
   const [escuela, setEscuela] = useState(null);
   const [facultades, setFacultades] = useState([]);
   const [universidades, setUniversidades] = useState([]);
   const [loading, setLoading] = useState(true);
-  const API = process.env.NEXT_PUBLIC_API_KEY;
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const escuelaResponse = await fetch(
-          `${API}/api/escuela/${id}/`
-        );
+        const escuelaResponse = await fetch(`${API}/api/escuela/${id}/`);
         if (!escuelaResponse.ok) throw new Error("Failed to fetch escuela");
         const escuelaData = await escuelaResponse.json();
         setEscuela(escuelaData);
 
-        const facultadesResponse = await fetch(
-          `${API}/api/facultad`
-        );
+        const facultadesResponse = await fetch(`${API}/api/facultad`);
         if (!facultadesResponse.ok)
           throw new Error("Failed to fetch facultades");
         const facultadesData = await facultadesResponse.json();
         setFacultades(facultadesData.results);
 
-        const universidadesResponse = await fetch(
-          `${API}/api/universidad`
-        );
+        const universidadesResponse = await fetch(`${API}/api/universidad`);
         if (!universidadesResponse.ok)
           throw new Error("Failed to fetch universidades");
         const universidadesData = await universidadesResponse.json();
@@ -50,23 +42,20 @@ function EditEscuela({ params }) {
     }
 
     fetchData();
-  }, [id]);
+  }, [id, API]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!escuela) return;
 
     try {
-      const response = await fetch(
-        `${API}/api/escuela/edit/${id}/`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(escuela),
-        }
-      );
+      const response = await fetch(`${API}/api/escuela/edit/${id}/`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(escuela),
+      });
 
       if (response.ok) {
         alert("Escuela updated successfully!");

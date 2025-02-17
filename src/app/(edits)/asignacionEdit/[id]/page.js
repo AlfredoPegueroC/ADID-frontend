@@ -60,7 +60,7 @@ function AsignacionEdit({ params }) {
     };
 
     fetchData();
-  }, [id]);
+  }, [id, API]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

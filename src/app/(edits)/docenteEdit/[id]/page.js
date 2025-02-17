@@ -9,7 +9,7 @@ import Styles from "@styles/form.module.css";
 function DocenteEdit({ params }) {
   const router = useRouter();
   const { id } = React.use(params);
-
+  const API = process.env.NEXT_PUBLIC_API_KEY;
   const [docente, setDocente] = useState(null);
   const [universidades, setUniversidades] = useState([]);
   const [facultades, setFacultades] = useState([]);
@@ -17,50 +17,38 @@ function DocenteEdit({ params }) {
   const [tipos, setTipos] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [loading, setLoading] = useState(true);
-  const API = process.env.NEXT_PUBLIC_API_KEY;
+
   useEffect(() => {
     async function fetchData() {
       try {
-        const docenteResponse = await fetch(
-          `${API}/api/docente/${id}/`
-        );
+        const docenteResponse = await fetch(`${API}/api/docente/${id}/`);
         if (!docenteResponse.ok) throw new Error("Failed to fetch docente");
         const docenteData = await docenteResponse.json();
         setDocente(docenteData);
-        console.log(docenteData)
-        const universidadesResponse = await fetch(
-          `${API}/api/universidad`
-        );
+        console.log(docenteData);
+        const universidadesResponse = await fetch(`${API}/api/universidad`);
         if (!universidadesResponse.ok)
           throw new Error("Failed to fetch universidades");
         const universidadesData = await universidadesResponse.json();
         setUniversidades(universidadesData.results);
 
-        const facultadesResponse = await fetch(
-          `${API}/api/facultad`
-        );
+        const facultadesResponse = await fetch(`${API}/api/facultad`);
         if (!facultadesResponse.ok)
           throw new Error("Failed to fetch facultades");
         const facultadesData = await facultadesResponse.json();
         setFacultades(facultadesData.results);
 
-        const escuelasResponse = await fetch(
-          `${API}/api/escuela`
-        );
+        const escuelasResponse = await fetch(`${API}/api/escuela`);
         if (!escuelasResponse.ok) throw new Error("Failed to fetch escuelas");
         const escuelasData = await escuelasResponse.json();
         setEscuelas(escuelasData.results);
 
-        const tiposResponse = await fetch(
-          `${API}/api/tipodocente`
-        );
+        const tiposResponse = await fetch(`${API}/api/tipodocente`);
         if (!tiposResponse.ok) throw new Error("Failed to fetch tipos");
         const tiposData = await tiposResponse.json();
         setTipos(tiposData.results);
 
-        const categoriasResponse = await fetch(
-          `${API}/api/categoriaDocente`
-        );
+        const categoriasResponse = await fetch(`${API}/api/categoriaDocente`);
         if (!categoriasResponse.ok)
           throw new Error("Failed to fetch categorias");
         const categoriasData = await categoriasResponse.json();
@@ -72,24 +60,21 @@ function DocenteEdit({ params }) {
       }
     }
     fetchData();
-  }, [id]);
+  }, [id, API]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!docente) return;
 
     try {
-      const response = await fetch(
-        `${API}/api/docente/edit/${id}/`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(docente),
-        }
-      );
-      console.log(response)
+      const response = await fetch(`${API}/api/docente/edit/${id}/`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(docente),
+      });
+      console.log(response);
       if (response.ok) {
         alert("Docente updated successfully!");
         router.push("/docenteList");
@@ -337,7 +322,10 @@ function DocenteEdit({ params }) {
                 -- Seleccione la Categoría de Docente --
               </option>
               {categorias.map((categoria) => (
-                <option key={categoria.categoriaCodigo} value={categoria.categoriaCodigo}>
+                <option
+                  key={categoria.categoriaCodigo}
+                  value={categoria.categoriaCodigo}
+                >
                   {categoria.nombre}
                 </option>
               ))}

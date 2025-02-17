@@ -1,6 +1,4 @@
-"use client";
-
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -24,7 +22,8 @@ function FacultadList() {
   const API = process.env.NEXT_PUBLIC_API_KEY;
   const Api_import_URL = `${API}/import/categoriaDocente`;
 
-  const fetchData = async () => {
+ 
+  const fetchData = useCallback(async () => {
     try {
       const searchParam = searchQuery
         ? `&search=${encodeURIComponent(searchQuery)}`
@@ -37,9 +36,7 @@ function FacultadList() {
         throw new Error("Failed to fetch categoriaDocente data");
       const categoriaData = await categoriaResponse.json();
 
-      const universidadResponse = await fetch(
-        `${API}/api/universidad`
-      );
+      const universidadResponse = await fetch(`${API}/api/universidad`);
       if (!universidadResponse.ok)
         throw new Error("Failed to fetch universidad data");
       const universidadData = await universidadResponse.json();
@@ -64,11 +61,11 @@ function FacultadList() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [API, page, searchQuery]); // Dependencies: API, page, and searchQuery
 
   useEffect(() => {
-    fetchData();
-  }, [page, searchQuery]);
+    fetchData(); // Call fetchData when the component mounts or when dependencies change
+  }, [fetchData]); // Use fetchData in the dependency array of useEffect
 
   const deleteCategoria = (pk) => {
     deleteEntity(
@@ -80,13 +77,14 @@ function FacultadList() {
   };
 
   const handleSearchChange = (e) => {
-    setSearchQuery(e.target.value); // Update search query as user types, but won't trigger search here
+    setSearchQuery(e.target.value);
   };
 
   const handleSearchSubmit = (e) => {
-    e.preventDefault(); // Prevent the form from reloading the page
+    e.preventDefault();
     fetchData(); // Trigger search after form submit
   };
+
   if (loading) {
     return (
       <div className="spinner-container ">

@@ -10,25 +10,20 @@ import withAuth from "@utils/withAuth";
 function TipoEdit({ params }) {
   const router = useRouter();
   const { id } = React.use(params);
-
+  const API = process.env.NEXT_PUBLIC_API_KEY;
   const [tipo, setTipo] = useState(null);
   const [universidades, setUniversidades] = useState([]);
   const [loading, setLoading] = useState(true);
-  const API = process.env.NEXT_PUBLIC_API_KEY;
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const tipoResponse = await fetch(
-          `${API}/api/tipodocente/${id}/`
-        );
+        const tipoResponse = await fetch(`${API}/api/tipodocente/${id}/`);
         if (!tipoResponse.ok) throw new Error("Failed to fetch tipo");
         const tipoData = await tipoResponse.json();
         setTipo(tipoData);
 
-        const universidadesResponse = await fetch(
-          `${API}/api/universidad`
-        );
+        const universidadesResponse = await fetch(`${API}/api/universidad`);
         if (!universidadesResponse.ok)
           throw new Error("Failed to fetch universidades");
         const universidadesData = await universidadesResponse.json();
@@ -41,23 +36,20 @@ function TipoEdit({ params }) {
     }
 
     fetchData();
-  }, [id]);
+  }, [id, API]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!tipo) return;
 
     try {
-      const response = await fetch(
-        `${API}/api/tipodocente/edit/${id}/`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(tipo),
-        }
-      );
+      const response = await fetch(`${API}/api/tipodocente/edit/${id}/`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(tipo),
+      });
 
       if (response.ok) {
         alert("Tipo updated successfully!");
