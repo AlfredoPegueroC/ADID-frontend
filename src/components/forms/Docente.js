@@ -30,17 +30,18 @@ export default function DocenteForm() {
     tipoDocenteCodigo: "",
     categoriaCodigo: "",
   });
+  const API = process.env.NEXT_PUBLIC_API_KEY;
 
   useEffect(() => {
     async function fetchData() {
       setIsLoading(true); // Set loading to true while fetching data
       try {
         const responses = await Promise.all([
-          fetch("http://127.0.0.1:8000/api/universidad"),
-          fetch("http://127.0.0.1:8000/api/facultad"),
-          fetch("http://127.0.0.1:8000/api/escuela"),
-          fetch("http://127.0.0.1:8000/api/tipodocente"),
-          fetch("http://127.0.0.1:8000/api/categoriaDocente"),
+          fetch(`${API}/api/universidad`),
+          fetch(`${API}/api/facultad`),
+          fetch(`${API}/api/escuela`),
+          fetch(`${API}/api/tipodocente`),
+          fetch(`${API}/api/categoriaDocente`),
         ]);
         const data = await Promise.all(responses.map((res) => res.json()));
 
@@ -74,7 +75,7 @@ export default function DocenteForm() {
     e.preventDefault();
     
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/docente/create", {
+      const response = await fetch(`${API}/api/docente/create`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
