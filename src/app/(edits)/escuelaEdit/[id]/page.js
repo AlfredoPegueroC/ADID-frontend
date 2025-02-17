@@ -15,19 +15,20 @@ function EditEscuela({ params }) {
   const [facultades, setFacultades] = useState([]);
   const [universidades, setUniversidades] = useState([]);
   const [loading, setLoading] = useState(true);
+  const API = process.env.NEXT_PUBLIC_API_KEY;
 
   useEffect(() => {
     async function fetchData() {
       try {
         const escuelaResponse = await fetch(
-          `http://localhost:8000/api/escuela/${id}/`
+          `${API}/api/escuela/${id}/`
         );
         if (!escuelaResponse.ok) throw new Error("Failed to fetch escuela");
         const escuelaData = await escuelaResponse.json();
         setEscuela(escuelaData);
 
         const facultadesResponse = await fetch(
-          "http://localhost:8000/api/facultad"
+          `${API}/api/facultad`
         );
         if (!facultadesResponse.ok)
           throw new Error("Failed to fetch facultades");
@@ -35,7 +36,7 @@ function EditEscuela({ params }) {
         setFacultades(facultadesData.results);
 
         const universidadesResponse = await fetch(
-          "http://localhost:8000/api/universidad"
+          `${API}/api/universidad`
         );
         if (!universidadesResponse.ok)
           throw new Error("Failed to fetch universidades");
@@ -57,7 +58,7 @@ function EditEscuela({ params }) {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/api/escuela/edit/${id}/`,
+        `${API}/api/escuela/edit/${id}/`,
         {
           method: "PATCH",
           headers: {

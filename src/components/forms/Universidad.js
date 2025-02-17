@@ -10,6 +10,7 @@ export default function Universidad({ title }) {
     e.preventDefault();
     const nombre = document.getElementById("nombre").value;
     const estado = document.getElementById("estado").value;
+    const API = process.env.NEXT_PUBLIC_API_KEY;
 
     const data = {
       nombre: nombre,
@@ -17,28 +18,26 @@ export default function Universidad({ title }) {
     };
 
     try {
-      const response = await fetch(
-        "http://127.0.0.1:8000/api/universidad/create",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(data),
-        }
-      );
+      const response = await fetch(`${API}/api/universidad/create`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
       if (response.ok) {
         const result = await response.json();
         router.push("/universidadList");
         Notification.alertSuccess(
           "Universidad creada con éxito: " + result.nombre
         );
+        console.log(data)
       } else {
         const error = await response.json();
         Notification.alertError(
           `Error al crear la universidad existe en la DB.`
         );
-        console.log("aqui", error)
+        console.log("aqui", error);
       }
     } catch (error) {
       Notification.alertError(

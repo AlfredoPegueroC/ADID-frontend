@@ -11,11 +11,13 @@ import Styles from "@styles/home.module.css";
 function Home() {
   const [asignacion, setAsignaciones] = useState([]);
   const [loading, setLoading] = useState(true);
-  const Api_import_URL = "http://localhost:8000/import/asignacion";
+
+  const API = process.env.NEXT_PUBLIC_API_KEY;
+  const Api_import_URL = `${API}/import/asignacion`;
 
   const fetchData = async () => {
     let allAsignaciones = [];
-    let nextUrl = "http://localhost:8000/api/asignacion";
+    let nextUrl = `${API}/api/asignacion`;
 
     try {
       while (nextUrl) {
@@ -49,7 +51,7 @@ function Home() {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/api/asignacionDocente/delete?period=${period}`,
+        `${API}/api/asignacionDocente/delete?period=${period}`,
         {
           method: "DELETE",
         }
@@ -126,7 +128,7 @@ function Home() {
               <div className="home_btns">
                 <Link
                   className="btn btn-success btn-sm ms-1"
-                  href={`http://127.0.0.1:8000/export/asignacionDocenteExport?period=${asig.period}`}
+                  href={`${API}/export/asignacionDocenteExport?period=${asig.period}`}
                 >
                   <Image
                     src="/descargar-icon.svg"

@@ -22,16 +22,18 @@ function UniversidadList() {
   const [totalPages, setTotalPages] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const Api_import_URL = "http://localhost:8000/import/universidad"
+  const API = process.env.NEXT_PUBLIC_API_KEY;
+  const Api_import_URL = `${API}/import/universidad`;
 
   const fetchData = async () => {
+    console.log("here it is: ", API);
     try {
       const searchParam = searchQuery
         ? `&search=${encodeURIComponent(searchQuery)}`
         : "";
 
       const response = await fetch(
-        `http://localhost:8000/api/universidad?page=${page}${searchParam}`
+        `${API}/api/universidad?page=${page}${searchParam}`
       );
       if (!response.ok) {
         console.error("Failed to fetch data");
@@ -44,6 +46,8 @@ function UniversidadList() {
     } catch (error) {
       console.error("Error fetching data:", error);
       setLoading(false);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -53,7 +57,7 @@ function UniversidadList() {
 
   const handleDelete = (pk) => {
     deleteEntity(
-      "http://localhost:8000/api/universidad/delete",
+      `${API}}/api/universidad/delete`,
       pk,
       setUniversidades,
       "UniversidadCodigo"
@@ -85,10 +89,7 @@ function UniversidadList() {
           Nuevo Universidad
         </Link>
         {universidades.length > 0 && (
-          <Link
-            className="btn btn-success"
-            href="http://127.0.0.1:8000/export/universidad"
-          >
+          <Link className="btn btn-success" href={`${API}/export/universidad`}>
             Exportar
           </Link>
         )}

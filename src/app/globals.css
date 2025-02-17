@@ -84,6 +84,7 @@ body {
   cursor: pointer;
 }
 .not_found{
+  color: #171717;
   display: flex;
   justify-content: center;
   flex-direction: column;

@@ -14,19 +14,20 @@ function TipoEdit({ params }) {
   const [tipo, setTipo] = useState(null);
   const [universidades, setUniversidades] = useState([]);
   const [loading, setLoading] = useState(true);
+  const API = process.env.NEXT_PUBLIC_API_KEY;
 
   useEffect(() => {
     async function fetchData() {
       try {
         const tipoResponse = await fetch(
-          `http://localhost:8000/api/tipodocente/${id}/`
+          `${API}/api/tipodocente/${id}/`
         );
         if (!tipoResponse.ok) throw new Error("Failed to fetch tipo");
         const tipoData = await tipoResponse.json();
         setTipo(tipoData);
 
         const universidadesResponse = await fetch(
-          "http://localhost:8000/api/universidad"
+          `${API}/api/universidad`
         );
         if (!universidadesResponse.ok)
           throw new Error("Failed to fetch universidades");
@@ -48,7 +49,7 @@ function TipoEdit({ params }) {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/api/tipodocente/edit/${id}/`,
+        `${API}/api/tipodocente/edit/${id}/`,
         {
           method: "PATCH",
           headers: {

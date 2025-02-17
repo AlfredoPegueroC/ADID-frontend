@@ -16,12 +16,13 @@ export default function FacultadForm({ title }) {
     estado: "",
   });
   const [isLoading, setIsLoading] = useState(false);
+  const API = process.env.NEXT_PUBLIC_API_KEY;
 
   // Load universities on component mount
   useEffect(() => {
     async function cargarUniversidades() {
       try {
-        const response = await fetch("http://127.0.0.1:8000/api/universidad");
+        const response = await fetch(`${API}/api/universidad`);
         if (!response.ok) throw new Error("Failed to fetch universities");
         const data = await response.json();
         setUniversidades(data.results);
@@ -45,10 +46,10 @@ export default function FacultadForm({ title }) {
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true); // Start loading
+    setIsLoading(true);
     try {
       const response = await fetch(
-        "http://127.0.0.1:8000/api/facultad/create",
+        `${API}/api/facultad/create`,
         {
           method: "POST",
           headers: {

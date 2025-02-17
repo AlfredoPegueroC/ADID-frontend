@@ -21,7 +21,8 @@ function tipodocenteList() {
   const [totalPages, setTotalPages] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const Api_import_URL = "http://localhost:8000/import/tipoDocente";
+  const API = process.env.NEXT_PUBLIC_API_KEY;
+  const Api_import_URL = `${API}/import/tipoDocente`;
 
   const fetchData = async () => {
     try {
@@ -30,7 +31,7 @@ function tipodocenteList() {
         : "";
 
       const tipoResponse = await fetch(
-        `http://localhost:8000/api/tipodocente?page=${page}${searchParam}`
+        `${API}/api/tipodocente?page=${page}${searchParam}`
       );
       if (!tipoResponse.ok) {
         throw new Error("Failed to fetch data");
@@ -38,7 +39,7 @@ function tipodocenteList() {
       const tipoData = await tipoResponse.json();
 
       const universidadResponse = await fetch(
-        "http://localhost:8000/api/universidad"
+        `${API}/api/universidad`
       );
       if (!universidadResponse.ok) {
         throw new Error("Failed to fetch data");
@@ -73,7 +74,7 @@ function tipodocenteList() {
 
   const deleteTipo = (pk) => {
     deleteEntity(
-      "http://localhost:8000/api/tipodocente/delete",
+      `${API}/api/tipodocente/delete`,
       pk,
       setTipodocentes,
       "tipoDocenteCodigo"
@@ -107,7 +108,7 @@ function tipodocenteList() {
         {tipodocentes.length > 0 && (
           <Link
             className="btn btn-success"
-            href="http://127.0.0.1:8000/export/tipoDocente"
+            href={`${API}/export/tipoDocente`}
           >
             Exportar
           </Link>

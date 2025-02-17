@@ -13,6 +13,7 @@ export default function CategoriaDocenteForm() {
     estado: "",
     universidadCodigo: "",
   });
+  const API = process.env.NEXT_PUBLIC_API_KEY;
 
   const [universidades, setUniversidades] = useState([]);
 
@@ -20,7 +21,7 @@ export default function CategoriaDocenteForm() {
   useEffect(() => {
     const fetchUniversidades = async () => {
       try {
-        const response = await fetch("http://127.0.0.1:8000/api/universidad");
+        const response = await fetch(`${API}/api/universidad`);
         const data = await response.json();
         setUniversidades(data.results);
       } catch (error) {
@@ -52,7 +53,7 @@ export default function CategoriaDocenteForm() {
     e.preventDefault();
 
     const response = await fetch(
-      "http://127.0.0.1:8000/api/categoriadocente/create",
+      `${API}/api/categoriadocente/create`,
       {
         method: "POST",
         headers: {

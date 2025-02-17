@@ -7,7 +7,7 @@ import Styles from "@styles/form.module.css";
 
 // utils
 import withAuth from "@utils/withAuth";
-import { ST } from "next/dist/shared/lib/utils";
+
 
 function categoriaEdit({ params }) {
   const router = useRouter();
@@ -16,12 +16,13 @@ function categoriaEdit({ params }) {
   const [categoria, setCategoria] = useState(null);
   const [universidades, setUniversidades] = useState([]);
   const [loading, setLoading] = useState(true);
+  const API = process.env.NEXT_PUBLIC_API_KEY;
 
   useEffect(() => {
     async function fetchData() {
       try {
         const categoriasResponse = await fetch(
-          `http://localhost:8000/api/categoriadocente/${id}/`
+          `${API}/api/categoriadocente/${id}/`
         );
         if (!categoriasResponse.ok)
           throw new Error("Failed to fetch categorias");
@@ -29,7 +30,7 @@ function categoriaEdit({ params }) {
         setCategoria(categoriasData);
 
         const universidadesResponse = await fetch(
-          "http://localhost:8000/api/universidad"
+          `${API}/api/universidad`
         );
         if (!universidadesResponse.ok)
           throw new Error("Failed to fetch universidades");
@@ -51,7 +52,7 @@ function categoriaEdit({ params }) {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/api/categoriadocente/edit/${id}/`,
+        `${API}/api/categoriadocente/edit/${id}/`,
         {
           method: "PATCH",
           headers: {

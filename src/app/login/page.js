@@ -10,6 +10,7 @@ export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
+  const API = process.env.NEXT_PUBLIC_API_KEY;
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
@@ -22,7 +23,7 @@ export default function LoginPage() {
     e.preventDefault();
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/login", {
+      const response = await fetch(`${API}/api/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
@@ -37,7 +38,7 @@ export default function LoginPage() {
       localStorage.setItem("accessToken", data.access);
       localStorage.setItem("refreshToken", data.refresh);
 
-      alert("Login successful!");
+      alert("Logeado...");
       router.push("/");
     } catch (error) {
       setError(error.message);

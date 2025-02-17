@@ -48,10 +48,10 @@
 }
 
 .alertaError::before {
-  content: '⚠️'; /* Icono de éxito */
-  font-size: 24px; /* Tamaño del icono */
-  color: #fcfefc;/* Color del icono */
-  margin-right: 10px; /* Espacio entre el icono y el texto */
+  content: '⚠️';
+  font-size: 24px;
+  color: #fcfefc;
+  margin-right: 10px; 
 }
 
 .botonVerde {

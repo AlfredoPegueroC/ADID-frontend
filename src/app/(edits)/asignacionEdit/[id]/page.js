@@ -1,15 +1,16 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import FormLayout from "@components/layouts/FormLayout";
 import withAuth from "@utils/withAuth";
 import Styles from "@styles/form.module.css";
-import { ST } from "next/dist/shared/lib/utils";
 
 function AsignacionEdit({ params }) {
   const router = useRouter();
   const { id } = React.use(params);
+  const searchParams = useSearchParams()
+  const period = searchParams.get("period");
 
   const [asignacion, setAsignacion] = useState(null);
 
@@ -17,20 +18,21 @@ function AsignacionEdit({ params }) {
   const [escuelas, setEscuelas] = useState([]);
   const [docentes, setDocentes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const API = process.env.NEXT_PUBLIC_API_KEY;
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const asignacionResponse = await fetch(
-          `http://localhost:8000/api/asignacion/${id}/`
+          `${API}/api/asignacion/${id}/`
         );
         if (!asignacionResponse.ok)
           throw new Error("Fallo la llamada de datos asignacion");
         const asignacionData = await asignacionResponse.json();
-        setAsignacion(asignacionData); // ✅ Correcto aquí
+        setAsignacion(asignacionData); //
 
         const facultadesResponse = await fetch(
-          "http://localhost:8000/api/facultad"
+          `${API}/api/facultad`
         );
         if (!facultadesResponse.ok)
           throw new Error("Failed to fetch facultades");
@@ -38,14 +40,14 @@ function AsignacionEdit({ params }) {
         setFacultades(facultadesData.results);
 
         const escuelasResponse = await fetch(
-          "http://localhost:8000/api/escuela"
+          `${API}/api/escuela`
         );
         if (!escuelasResponse.ok) throw new Error("Failed to fetch escuelas");
         const escuelasData = await escuelasResponse.json();
         setEscuelas(escuelasData.results);
 
         const docenteResponse = await fetch(
-          "http://localhost:8000/api/docente"
+          `${API}/api/docente`
         );
         if (!docenteResponse.ok) throw new Error("Failed to fetch docentes");
         const docentesData = await docenteResponse.json();
@@ -66,7 +68,7 @@ function AsignacionEdit({ params }) {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/api/asignacion/edit/${id}/`,
+        `${API}/api/asignacion/edit/${id}/`,
         {
           method: "PATCH",
           headers: {
@@ -77,8 +79,8 @@ function AsignacionEdit({ params }) {
       );
 
       if (response.ok) {
-        alert("Asignacion updated successfully!");
-        router.push("/");
+        alert("Asignacion se ha Actualizado!");
+        router.push(`/asignacionDocente/${period}`);
       } else {
         alert("Failed to update Asignacion.");
         console.log(response.json());

@@ -15,19 +15,20 @@ function EditPeriodo({ params }) {
   const [universidades, setUniversidades] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const API = process.env.NEXT_PUBLIC_API_KEY;
 
   useEffect(() => {
     async function fetchData() {
       try {
         const periodoesResponse = await fetch(
-          `http://localhost:8000/api/periodoacademico/${id}/`
+          `${API}/api/periodoacademico/${id}/`
         );
         if (!periodoesResponse.ok) throw new Error("Failed to fetch periodoes");
         const periodoesData = await periodoesResponse.json();
         setperiodo(periodoesData);
 
         const universidadesResponse = await fetch(
-          "http://localhost:8000/api/universidad"
+          `${API}/api/universidad`
         );
         if (!universidadesResponse.ok)
           throw new Error("Failed to fetch universidades");
@@ -50,7 +51,7 @@ function EditPeriodo({ params }) {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/api/periodoacademico/edit/${id}/`,
+        `${API}/api/periodoacademico/edit/${id}/`,
         {
           method: "PATCH",
           headers: {

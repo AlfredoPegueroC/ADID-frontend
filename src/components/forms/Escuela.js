@@ -15,11 +15,12 @@ export default function EscuelaForm() {
     UniversidadCodigo: "",
     facultadCodigo: "",
   });
+  const API = process.env.NEXT_PUBLIC_API_KEY;
 
   useEffect(() => {
     const fetchUniversidades = async () => {
       try {
-        const response = await fetch("http://127.0.0.1:8000/api/universidad");
+        const response = await fetch(`${API}/api/universidad`);
         const data = await response.json();
         setUniversidades(data.results);
       } catch (error) {
@@ -29,7 +30,7 @@ export default function EscuelaForm() {
 
     const fetchFacultades = async () => {
       try {
-        const response = await fetch("http://127.0.0.1:8000/api/facultad");
+        const response = await fetch(`${API}/api/facultad`);
         const data = await response.json();
         setFacultades(data.results);
       } catch (error) {
@@ -73,7 +74,7 @@ export default function EscuelaForm() {
     };
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/escuela/create", {
+      const response = await fetch(`${API}/api/escuela/create`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

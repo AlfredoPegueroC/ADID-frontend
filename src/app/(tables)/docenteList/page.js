@@ -21,6 +21,7 @@ function DocenteList() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
+  const API = process.env.NEXT_PUBLIC_API_KEY;
 
   const fetchData = async () => {
     try {
@@ -29,7 +30,7 @@ function DocenteList() {
         : "";
       // Fetch main data
       const docenteResponse = await fetch(
-        `http://localhost:8000/api/docente?page=${page}${searchParam}`
+        `${API}/api/docente?page=${page}${searchParam}`
       );
       if (!docenteResponse.ok) {
         throw new Error("Failed to fetch docentes");
@@ -37,7 +38,7 @@ function DocenteList() {
       const docenteData = await docenteResponse.json();
 
       const universidadResponse = await fetch(
-        "http://localhost:8000/api/universidad"
+        `${API}/api/universidad`
       );
       if (!universidadResponse.ok) {
         throw new Error("Failed to fetch universidades");
@@ -45,27 +46,27 @@ function DocenteList() {
       const universidadData = await universidadResponse.json();
 
       const facultadResponse = await fetch(
-        "http://localhost:8000/api/facultad"
+        `${API}/api/facultad`
       );
       if (!facultadResponse.ok) {
         throw new Error("Failed to fetch facultades");
       }
       const facultadData = await facultadResponse.json();
 
-      const escuelaResponse = await fetch("http://localhost:8000/api/escuela");
+      const escuelaResponse = await fetch(`${API}/api/escuela`);
       if (!escuelaResponse.ok) {
         throw new Error("Failed to fetch escuelas");
       }
       const escuelaData = await escuelaResponse.json();
 
-      const tipoResponse = await fetch("http://localhost:8000/api/tipodocente");
+      const tipoResponse = await fetch(`${API}/api/tipodocente`);
       if (!tipoResponse.ok) {
         throw new Error("Failed to fetch tipos");
       }
       const tipoData = await tipoResponse.json();
 
       const categoriaResponse = await fetch(
-        "http://localhost:8000/api/categoriaDocente"
+        `${API}/api/categoriaDocente`
       );
       if (!categoriaResponse.ok) {
         throw new Error("Failed to fetch categorias");
@@ -111,11 +112,11 @@ function DocenteList() {
 
   useEffect(() => {
     fetchData();
-  }, [page, searchQuery]);
+  }, [page]);
 
   const deleteDocente = (pk) => {
     deleteEntity(
-      "http://localhost:8000/api/docente/delete",
+      `${API}/api/docente/delete`,
       pk,
       setDocentes,
       "Docentecodigo"
@@ -149,7 +150,7 @@ function DocenteList() {
         {docentes.length > 0 && (
           <Link
             className="btn btn-success"
-            href="http://127.0.0.1:8000/export/docente"
+            href={`${API}/export/docente`}
           >
             Exportar
           </Link>
@@ -167,7 +168,7 @@ function DocenteList() {
 
       <Modal title="Importar Docente">
         <ImportExcel
-          importURL="http://localhost:8000/import/docente"
+          importURL={`${API}/import/docente`}
           onSuccess={fetchData}
         />
       </Modal>
@@ -234,7 +235,7 @@ function DocenteList() {
                   onClick={() => deleteDocente(docente.Docentecodigo)}
                 >
                   <Image
-                    src="/descargar-icon.svg"
+                    src="/delete.svg"
                     alt="borrar"
                     width={20}
                     height={20}

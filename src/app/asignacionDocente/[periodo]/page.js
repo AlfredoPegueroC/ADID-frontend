@@ -23,6 +23,8 @@ function principal({ params }) {
   const [totalPages, setTotalPages] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
 
+  const API = process.env.NEXT_PUBLIC_API_KEY;
+
   // const Api_import_URL = "http://localhost:8000/import/asignacion";
 
   const fetchData = async () => {
@@ -33,7 +35,7 @@ function principal({ params }) {
 
       // Fetch main data for AsignacionDocente
       const asignacionResponse = await fetch(
-        `http://localhost:8000/api/asignacion_frontend?page=${page}&period=${periodo}${searchParam}`
+        `${API}/api/asignacion_frontend?page=${page}&period=${periodo}${searchParam}`
       );
       if (!asignacionResponse.ok) {
         throw new Error("Failed to fetch asignaciones");
@@ -43,20 +45,20 @@ function principal({ params }) {
 
       // Fetch related data
       const facultadResponse = await fetch(
-        "http://localhost:8000/api/facultad"
+        `${API}/api/facultad`
       );
       if (!facultadResponse.ok) {
         throw new Error("Failed to fetch facultades");
       }
       const facultadData = await facultadResponse.json();
 
-      const escuelaResponse = await fetch("http://localhost:8000/api/escuela");
+      const escuelaResponse = await fetch(`${API}/api/escuela`);
       if (!escuelaResponse.ok) {
         throw new Error("Failed to fetch escuelas");
       }
       const escuelaData = await escuelaResponse.json();
 
-      const docenteResponse = await fetch("http://localhost:8000/api/docente");
+      const docenteResponse = await fetch(`${API}/api/docente`);
       if (!docenteResponse.ok) {
         throw new Error("Failed to fetch docentes");
       }
@@ -99,7 +101,7 @@ function principal({ params }) {
 
   const handleDelete = (pk) => {
     deleteEntity(
-      "http://localhost:8000/api/asignacionDocente/delete",
+      `${API}/api/asignacionDocente/delete`,
       pk,
       setAsignaciones,
       "ADIDcodigo"
@@ -126,7 +128,7 @@ function principal({ params }) {
     <div className="mt-4">
       <Link
         className="btn btn-success my-2"
-        href={`http://127.0.0.1:8000/export/asignacionDocenteExport?period=${periodo}`}
+        href={`${API}/export/asignacionDocenteExport?period=${periodo}`}
       >
         Exportar
       </Link>
@@ -190,7 +192,7 @@ function principal({ params }) {
               <td>
                 <Link
                   className="btn btn-primary btn-sm"
-                  href={`/asignacionEdit/${asignacion.ADIDcodigo}`}
+                  href={`/asignacionEdit/${asignacion.ADIDcodigo}?period=${periodo}`}
                 >
                   <Image src="/edit.svg" alt="editar" width={20} height={20} />
                 </Link>

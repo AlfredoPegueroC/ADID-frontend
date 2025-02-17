@@ -14,9 +14,10 @@ function EditUniversidad({ params }) {
   const [universidad, setUniversidad] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const API = process.env.NEXT_PUBLIC_API_KEY;
 
   useEffect(() => {
-    fetch(`http://localhost:8000/api/universidad/${id}/`)
+    fetch(`${API}/api/universidad/${id}/`)
       .then((response) => {
         if (!response.ok) {
           console.log("faild");
@@ -41,7 +42,7 @@ function EditUniversidad({ params }) {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/api/universidad/edit/${id}/`,
+        `${API}/api/universidad/edit/${id}/`,
         {
           method: "PATCH",
           headers: {

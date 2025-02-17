@@ -7,7 +7,6 @@ import Image from "next/image";
 import Pagination from "@components/Pagination";
 import Tables from "@components/Tables";
 import Modal from "@components/Modal";
-import ImportExcel from "@components/forms/Import";
 
 import Periodo from "@components/forms/Periodo";
 
@@ -22,6 +21,9 @@ function periodoList() {
   const [totalPages, setTotalPages] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
 
+  const API = process.env.NEXT_PUBLIC_API_KEY;
+
+
   const fetchData = async () => {
     try {
       const searchParam = searchQuery
@@ -29,14 +31,14 @@ function periodoList() {
         : "";
 
       const periodoResponse = await fetch(
-        `http://localhost:8000/api/periodoacademico?page=${page}${searchParam}`
+        `${API}/api/periodoacademico?page=${page}${searchParam}`
       );
       if (!periodoResponse.ok)
         throw new Error("Fallo la busqueda de datos de periodo");
       const periodoData = await periodoResponse.json();
 
       const universidadesResponse = await fetch(
-        "http://localhost:8000/api/universidad"
+        `${API}/api/universidad`
       );
 
       if (!universidadesResponse.ok)
@@ -72,7 +74,7 @@ function periodoList() {
 
   const deleteFacultad = (pk) => {
     deleteEntity(
-      "http://localhost:8000/api/periodoacademico/delete",
+      `${API}/api/periodoacademico/delete`,
       pk,
       setPeriodos,
       "periodoAcademicoCodigo"
@@ -112,7 +114,7 @@ function periodoList() {
         {periodos.length > 0 && (
           <Link
             className="btn btn-success"
-            href="http://127.0.0.1:8000/export/periodoAcademico"
+            href={`${API}/export/periodoAcademico`}
           >
             Exportar
           </Link>

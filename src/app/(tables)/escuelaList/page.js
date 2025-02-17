@@ -21,8 +21,9 @@ function EscuelaList() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
-
-  const Api_import_URL = "http://localhost:8000/import/escuela";
+  
+  const API = process.env.NEXT_PUBLIC_API_KEY;
+  const Api_import_URL = `${API}/import/escuela`;
 
   // const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000/api";
   const fetchData = async () => {
@@ -33,21 +34,21 @@ function EscuelaList() {
 
       // Fetch escuela data
       const escuelaResponse = await fetch(
-        `http://localhost:8000/api/escuela?page=${page}${searchParam}`
+        `${API}/api/escuela?page=${page}${searchParam}`
       );
       if (!escuelaResponse.ok) throw new Error("Failed to fetch escuelas");
       const escuelaData = await escuelaResponse.json();
 
       // Fetch facultad data
       const facultadResponse = await fetch(
-        `http://localhost:8000/api/facultad`
+        `${API}/api/facultad`
       );
       if (!facultadResponse.ok) throw new Error("Failed to fetch facultades");
       const facultadData = await facultadResponse.json();
 
       // Fetch universidad data
       const universidadResponse = await fetch(
-        `http://localhost:8000/api/universidad`
+        `${API}/api/universidad`
       );
       if (!universidadResponse.ok)
         throw new Error("Failed to fetch universidades");
@@ -89,7 +90,7 @@ function EscuelaList() {
 
   const deleteEscuela = (pk) => {
     deleteEntity(
-      "http://localhost:8000/api/escuela/delete",
+      `${API}/api/escuela/delete`,
       pk,
       setEscuelas,
       "escuelaCodigo"
@@ -122,7 +123,7 @@ function EscuelaList() {
         {escuelas.length > 0 && (
           <Link
             className="btn btn-success"
-            href={`http://localhost:8000/export/escuela`}
+            href={`${API}/export/escuela`}
           >
             Exportar
           </Link>

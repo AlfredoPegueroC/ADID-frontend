@@ -10,11 +10,13 @@ export default function ImportPage({ onSuccess }) {
   const [selectedPeriod, setSelectedPeriod] = useState(""); // Track selected period
   const [message, setMessage] = useState("");
 
+  const API = process.env.NEXT_PUBLIC_API_KEY;
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         const periodoResponse = await fetch(
-          "http://localhost:8000/api/periodoacademico"
+          `${API}/api/periodoacademico`
         );
         if (!periodoResponse.ok) throw new Error("Failed to fetch periodo");
         const periodoData = await periodoResponse.json();
@@ -55,7 +57,7 @@ export default function ImportPage({ onSuccess }) {
     formData.append("period", selectedPeriod);
 
     try {
-      const response = await fetch("http://localhost:8000/import/asignacion", {
+      const response = await fetch(`${API}/import/asignacion`, {
         method: "POST",
         body: formData,
       });

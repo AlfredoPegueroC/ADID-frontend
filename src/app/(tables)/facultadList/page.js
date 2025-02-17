@@ -22,7 +22,8 @@ function FacultadList() {
   const [totalPages, setTotalPages] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const Api_import_URL = "http://localhost:8000/import/facultad";
+  const API = process.env.NEXT_PUBLIC_API_KEY;
+  const Api_import_URL = `${API}/import/facultad`;
 
   const fetchData = async () => {
     try {
@@ -31,13 +32,13 @@ function FacultadList() {
         : "";
 
       const facultadesResponse = await fetch(
-        `http://localhost:8000/api/facultad?page=${page}${searchParam}`
+        `${API}/api/facultad?page=${page}${searchParam}`
       );
       if (!facultadesResponse.ok) throw new Error("Failed to fetch facultades");
       const facultadesData = await facultadesResponse.json();
 
       const universidadesResponse = await fetch(
-        "http://localhost:8000/api/universidad"
+        `${API}/api/universidad`
       );
       if (!universidadesResponse.ok)
         throw new Error("Failed to fetch universidades");
@@ -72,7 +73,7 @@ function FacultadList() {
 
   const deleteFacultad = (pk) => {
     deleteEntity(
-      "http://localhost:8000/api/facultad/delete",
+      `${API}/api/facultad/delete`,
       pk,
       setFacultades,
       "facultadCodigo"
@@ -106,7 +107,7 @@ function FacultadList() {
         {facultades.length > 0 && (
           <Link
             className="btn btn-success"
-            href="http://127.0.0.1:8000/export/facultad"
+            href={`${API}/export/facultad`}
           >
             Exportar
           </Link>

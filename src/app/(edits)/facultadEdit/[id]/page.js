@@ -14,12 +14,13 @@ function EditFacultad({ params }) {
   const [universidades, setUniversidades] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const API = process.env.NEXT_PUBLIC_API_KEY;
 
   useEffect(() => {
     async function fetchData() {
       try {
         const facultadesResponse = await fetch(
-          `http://localhost:8000/api/facultad/${id}/`
+          `${API}/api/facultad/${id}/`
         );
         if (!facultadesResponse.ok)
           throw new Error("Failed to fetch facultades");
@@ -27,7 +28,7 @@ function EditFacultad({ params }) {
         setFacultad(facultadesData);
 
         const universidadesResponse = await fetch(
-          "http://localhost:8000/api/universidad"
+          `${API}/api/universidad`
         );
         if (!universidadesResponse.ok)
           throw new Error("Failed to fetch universidades");
@@ -50,7 +51,7 @@ function EditFacultad({ params }) {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/api/facultad/edit/${id}/`,
+        `${API}/api/facultad/edit/${id}/`,
         {
           method: "PATCH",
           headers: {

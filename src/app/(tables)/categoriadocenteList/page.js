@@ -21,7 +21,8 @@ function FacultadList() {
   const [totalPages, setTotalPages] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const Api_import_URL = "http://localhost:8000/import/categoriaDocente";
+  const API = process.env.NEXT_PUBLIC_API_KEY;
+  const Api_import_URL = `${API}/import/categoriaDocente`;
 
   const fetchData = async () => {
     try {
@@ -30,14 +31,14 @@ function FacultadList() {
         : "";
 
       const categoriaResponse = await fetch(
-        `http://localhost:8000/api/categoriaDocente?page=${page}${searchParam}`
+        `${API}/api/categoriaDocente?page=${page}${searchParam}`
       );
       if (!categoriaResponse.ok)
         throw new Error("Failed to fetch categoriaDocente data");
       const categoriaData = await categoriaResponse.json();
 
       const universidadResponse = await fetch(
-        "http://localhost:8000/api/universidad"
+        `${API}/api/universidad`
       );
       if (!universidadResponse.ok)
         throw new Error("Failed to fetch universidad data");
@@ -71,7 +72,7 @@ function FacultadList() {
 
   const deleteCategoria = (pk) => {
     deleteEntity(
-      "http://localhost:8000/api/categoriadocente/delete",
+      `${API}/api/categoriadocente/delete`,
       pk,
       setCategorias,
       "categoriaCodigo"
@@ -105,7 +106,7 @@ function FacultadList() {
         {categorias.length > 0 && (
           <Link
             className="btn btn-success"
-            href="http://127.0.0.1:8000/export/categoriaDocente"
+            href={`${API}/export/categoriaDocente`}
           >
             Exportar
           </Link>

@@ -17,19 +17,19 @@ function DocenteEdit({ params }) {
   const [tipos, setTipos] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [loading, setLoading] = useState(true);
-
+  const API = process.env.NEXT_PUBLIC_API_KEY;
   useEffect(() => {
     async function fetchData() {
       try {
         const docenteResponse = await fetch(
-          `http://localhost:8000/api/docente/${id}/`
+          `${API}/api/docente/${id}/`
         );
         if (!docenteResponse.ok) throw new Error("Failed to fetch docente");
         const docenteData = await docenteResponse.json();
         setDocente(docenteData);
-
+        console.log(docenteData)
         const universidadesResponse = await fetch(
-          "http://localhost:8000/api/universidad"
+          `${API}/api/universidad`
         );
         if (!universidadesResponse.ok)
           throw new Error("Failed to fetch universidades");
@@ -37,7 +37,7 @@ function DocenteEdit({ params }) {
         setUniversidades(universidadesData.results);
 
         const facultadesResponse = await fetch(
-          "http://localhost:8000/api/facultad"
+          `${API}/api/facultad`
         );
         if (!facultadesResponse.ok)
           throw new Error("Failed to fetch facultades");
@@ -45,21 +45,21 @@ function DocenteEdit({ params }) {
         setFacultades(facultadesData.results);
 
         const escuelasResponse = await fetch(
-          "http://localhost:8000/api/escuela"
+          `${API}/api/escuela`
         );
         if (!escuelasResponse.ok) throw new Error("Failed to fetch escuelas");
         const escuelasData = await escuelasResponse.json();
         setEscuelas(escuelasData.results);
 
         const tiposResponse = await fetch(
-          "http://localhost:8000/api/tipodocente"
+          `${API}/api/tipodocente`
         );
         if (!tiposResponse.ok) throw new Error("Failed to fetch tipos");
         const tiposData = await tiposResponse.json();
         setTipos(tiposData.results);
 
         const categoriasResponse = await fetch(
-          "http://localhost:8000/api/categoriaDocente"
+          `${API}/api/categoriaDocente`
         );
         if (!categoriasResponse.ok)
           throw new Error("Failed to fetch categorias");
@@ -80,7 +80,7 @@ function DocenteEdit({ params }) {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/api/docente/edit/${id}/`,
+        `${API}/api/docente/edit/${id}/`,
         {
           method: "PATCH",
           headers: {
@@ -89,7 +89,7 @@ function DocenteEdit({ params }) {
           body: JSON.stringify(docente),
         }
       );
-
+      console.log(response)
       if (response.ok) {
         alert("Docente updated successfully!");
         router.push("/docenteList");
@@ -129,7 +129,7 @@ function DocenteEdit({ params }) {
                 type="text"
                 id="nombre"
                 name="nombre"
-                value={docente.nombre}
+                value={docente?.nombre || ""}
                 onChange={handleChange}
                 required
               />
@@ -141,7 +141,7 @@ function DocenteEdit({ params }) {
                 type="text"
                 id="apellidos"
                 name="apellidos"
-                value={docente.apellidos}
+                value={docente?.apellidos || ""}
                 onChange={handleChange}
                 required
               />
@@ -154,7 +154,7 @@ function DocenteEdit({ params }) {
                 type="text"
                 id="sexo"
                 name="sexo"
-                value={docente.sexo}
+                value={docente?.sexo || ""}
                 onChange={handleChange}
                 required
               />
@@ -182,7 +182,7 @@ function DocenteEdit({ params }) {
                 type="text"
                 id="fecha_nacimiento"
                 name="fecha_nacimiento"
-                value={docente.fecha_nacimiento}
+                value={docente?.fecha_nacimiento || ""}
                 onChange={handleChange}
                 required
               />
@@ -194,7 +194,7 @@ function DocenteEdit({ params }) {
                 type="text"
                 id="telefono"
                 name="telefono"
-                value={docente.telefono}
+                value={docente?.telefono || ""}
                 onChange={handleChange}
                 required
               />
@@ -207,7 +207,7 @@ function DocenteEdit({ params }) {
                 type="text"
                 id="direccion"
                 name="direccion"
-                value={docente.direccion}
+                value={docente?.direccion || ""}
                 onChange={handleChange}
                 required
               />
@@ -336,9 +336,9 @@ function DocenteEdit({ params }) {
               <option value="" disabled>
                 -- Seleccione la Categoría de Docente --
               </option>
-              {categorias.map((tipo) => (
-                <option key={tipo.categoriaCodigo} value={tipo.categoriaCodigo}>
-                  {tipo.nombre}
+              {categorias.map((categoria) => (
+                <option key={categoria.categoriaCodigo} value={categoria.categoriaCodigo}>
+                  {categoria.nombre}
                 </option>
               ))}
             </select>
