@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function isLoading({ isLoading }) {
+export default function IsLoading({ isLoading }) {
 
     return (
       <div className="spinner-container ">

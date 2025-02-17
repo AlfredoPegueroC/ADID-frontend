@@ -40,14 +40,7 @@ export default function CategoriaDocenteForm() {
     });
   };
 
-  // Function to display success alert
-  const alertSuccess = (message) => {
-    const alertDiv = document.createElement("div");
-    alertDiv.className = styles.alertaExito;
-    alertDiv.textContent = message;
-    document.body.appendChild(alertDiv);
-    setTimeout(() => alertDiv.remove(), 5000); // Remove alert after 5 seconds
-  };
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -77,7 +70,7 @@ export default function CategoriaDocenteForm() {
         estado: "",
         universidadCodigo: "",
       });
-      router.push("/categoriadocenteList"); // Redirect after 2 seconds
+      router.push("/categoriadocenteList"); 
       Notification.alertSuccess("Categoría de Docente creada exitosamente");
     } else {
       const errorData = await response.json();

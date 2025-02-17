@@ -14,7 +14,7 @@ import Periodo from "@components/forms/Periodo";
 import withAuth from "@utils/withAuth";
 import { deleteEntity } from "@utils/delete";
 
-function periodoList() {
+function PeriodoList() {
   const [periodos, setPeriodos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -197,4 +197,4 @@ function periodoList() {
   );
 }
 
-export default withAuth(periodoList);
+export default withAuth(PeriodoList);

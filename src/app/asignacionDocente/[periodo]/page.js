@@ -14,7 +14,7 @@ import { deleteEntity } from "@utils/delete";
 // Utils
 import withAuth from "@utils/withAuth";
 
-function principal({ params }) {
+function Principal({ params }) {
   const { periodo } = React.use(params);
 
   const [asignaciones, setAsignaciones] = useState([]);
@@ -225,4 +225,4 @@ function principal({ params }) {
   );
 }
 
-export default withAuth(principal);
+export default withAuth(Principal);

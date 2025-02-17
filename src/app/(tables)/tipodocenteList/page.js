@@ -14,7 +14,7 @@ import Modal from "@components/Modal";
 import withAuth from "@utils/withAuth";
 import { deleteEntity } from "@utils/delete";
 
-function tipodocenteList() {
+function TipodocenteList() {
   const [tipodocentes, setTipodocentes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -197,4 +197,4 @@ function tipodocenteList() {
   );
 }
 
-export default withAuth(tipodocenteList);
+export default withAuth(TipodocenteList);
