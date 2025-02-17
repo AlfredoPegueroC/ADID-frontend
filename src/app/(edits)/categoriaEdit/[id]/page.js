@@ -9,7 +9,7 @@ import Styles from "@styles/form.module.css";
 import withAuth from "@utils/withAuth";
 
 
-function categoriaEdit({ params }) {
+function CategoriaEdit({ params }) {
   const router = useRouter();
   const { id } = React.use(params);
 
@@ -152,4 +152,4 @@ function categoriaEdit({ params }) {
   );
 }
 
-export default withAuth(categoriaEdit);
+export default withAuth(CategoriaEdit);
