@@ -1,6 +1,4 @@
-:root{
-  --primary-color: #16a1d8;
-}
+
 .table_content{
   border-collapse: collapse;
   margin: 25px 0;
@@ -28,7 +26,7 @@
   border-radius: 50px;
 }
 .table_content thead tr{
-  background-color: var(--primary-color);
+  background-color: #16a1d8;
   color: #ffffff;
   text-align: left;
   font-weight: bold;
@@ -38,6 +36,6 @@
   background-color: #f2f2f2;
 }
 .table_content tbody tr:last-child{
-  border-bottom: 2px solid var(--primary-color);
+  border-bottom: 2px solid #16a1d8;
   outline: none;
 }
