@@ -57,12 +57,14 @@ function UniversidadList() {
 
   const handleDelete = (pk) => {
     deleteEntity(
-      `${API}}/api/universidad/delete`,
+      `${API}/api/universidad/delete`,
       pk,
       setUniversidades,
       "UniversidadCodigo"
     );
   };
+
+
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);

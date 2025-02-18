@@ -18,6 +18,7 @@ function CategoriaEdit({ params }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log(id);
     async function fetchData() {
       try {
         const categoriasResponse = await fetch(
@@ -41,7 +42,7 @@ function CategoriaEdit({ params }) {
     }
 
     fetchData();
-  }, [id, API]);
+  }, [id]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -120,12 +121,15 @@ function CategoriaEdit({ params }) {
           <div className={Styles.name_group}>
             <label htmlFor="universidad">Universidad</label>
             <select
-              id="universidad"
-              name="universidad"
-              value={categoria.universidad}
+              id="UniversidadCodigo"
+              name="UniversidadCodigo"
+              value={categoria?.UniversidadCodigo || ""}
               onChange={handleChange}
               required
             >
+              <option value="" disabled>
+                -- Seleccione una Universidad --
+              </option>
               {universidades.map((universidad) => (
                 <option
                   key={universidad.UniversidadCodigo}
