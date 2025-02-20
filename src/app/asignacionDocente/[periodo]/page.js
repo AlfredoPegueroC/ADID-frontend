@@ -1,21 +1,21 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { debounce } from "lodash"; // Import debounce from lodash
 
 // Components
 import Pagination from "@components/Pagination";
 import Tables from "@components/Tables";
 import Search from "@components/search";
 
-import { deleteEntity } from "@utils/delete";
-
 // Utils
 import withAuth from "@utils/withAuth";
+import { deleteEntity } from "@utils/delete";
 
 function Principal({ params }) {
-  const { periodo } = React.use(params);
+  const { periodo } = React.use(params); // Directly destructure params
 
   const [asignaciones, setAsignaciones] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -25,15 +25,10 @@ function Principal({ params }) {
 
   const API = process.env.NEXT_PUBLIC_API_KEY;
 
-  // const Api_import_URL = "http://localhost:8000/import/asignacion";
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
-      const searchParam = searchQuery
-        ? `&search=${encodeURIComponent(searchQuery)}`
-        : "";
+      const searchParam = searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : "";
 
-      // Fetch main data for AsignacionDocente
       const asignacionResponse = await fetch(
         `${API}/api/asignacion_frontend?page=${page}&period=${periodo}${searchParam}`
       );
@@ -43,61 +38,54 @@ function Principal({ params }) {
       const asignacionData = await asignacionResponse.json();
       console.log("Asignaciones data:", asignacionData);
 
-      // Fetch related data
-      const facultadResponse = await fetch(
-        `${API}/api/facultad`
-      );
-      if (!facultadResponse.ok) {
-        throw new Error("Failed to fetch facultades");
+      // Use Promise.all to fetch related data concurrently
+      const [facultadResponse, escuelaResponse, docenteResponse] = await Promise.all([
+        fetch(`${API}/api/facultad`),
+        fetch(`${API}/api/escuela`),
+        fetch(`${API}/api/docente`),
+      ]);
+
+      if (!facultadResponse.ok || !escuelaResponse.ok || !docenteResponse.ok) {
+        throw new Error("Failed to fetch related data");
       }
+
       const facultadData = await facultadResponse.json();
-
-      const escuelaResponse = await fetch(`${API}/api/escuela`);
-      if (!escuelaResponse.ok) {
-        throw new Error("Failed to fetch escuelas");
-      }
       const escuelaData = await escuelaResponse.json();
-
-      const docenteResponse = await fetch(`${API}/api/docente`);
-      if (!docenteResponse.ok) {
-        throw new Error("Failed to fetch docentes");
-      }
       const docenteData = await docenteResponse.json();
 
       // Merge data
       const mergedData = asignacionData.results.map((asignacion) => {
-        const facultad = facultadData.results.find(
-          (fac) => fac.facultadCodigo === asignacion.facultadCodigo
-        );
-        const escuela = escuelaData.results.find(
-          (esc) => esc.escuelaCodigo === asignacion.escuelaCodigo
-        );
-        const docente = docenteData.results.find(
-          (doc) => doc.Docentecodigo === asignacion.DocenteCodigo
-        );
+        const facultad = facultadData.results.find((fac) => fac.facultadCodigo === asignacion.facultadCodigo);
+        const escuela = escuelaData.results.find((esc) => esc.escuelaCodigo === asignacion.escuelaCodigo);
+        const docente = docenteData.results.find((doc) => doc.Docentecodigo === asignacion.DocenteCodigo);
 
         return {
           ...asignacion,
           facultadNombre: facultad ? facultad.nombre : "N/A",
           escuelaNombre: escuela ? escuela.nombre : "N/A",
-          docenteNombre: docente
-            ? `${docente.nombre} ${docente.apellidos}`
-            : "N/A",
+          docenteNombre: docente ? `${docente.nombre} ${docente.apellidos}` : "N/A",
         };
       });
 
-      setAsignaciones(asignacionData.results);
+      setAsignaciones(mergedData); // Use mergedData instead of asignacionData.results
       setTotalPages(Math.ceil(asignacionData.count / 30));
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, periodo, searchQuery, API]); // Add dependencies
 
   useEffect(() => {
     fetchData();
-  }, [page, searchQuery]);
+  }, [fetchData]); // Call fetchData when it changes
+
+  const debouncedFetchData = debounce(fetchData, 300); // Debounce the fetch function
+
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+    debouncedFetchData(); // Call the debounced function
+  };
 
   const handleDelete = (pk) => {
     deleteEntity(
@@ -106,14 +94,6 @@ function Principal({ params }) {
       setAsignaciones,
       "ADIDcodigo"
     );
-  };
-  const handleSearchChange = (e) => {
-    setSearchQuery(e.target.value);
-  };
-
-  const handleSearchSubmit = (e) => {
-    e.preventDefault();
-    fetchData();
   };
 
   if (loading) {
@@ -134,7 +114,10 @@ function Principal({ params }) {
       </Link>
 
       <Search
-        SearchSubmit={handleSearchSubmit}
+        SearchSubmit={(e) => {
+          e.preventDefault();
+          fetchData(); // Call fetchData on submit
+        }}
         SearchChange={handleSearchChange}
         searchQuery={searchQuery}
       />
@@ -170,7 +153,7 @@ function Principal({ params }) {
               </td>
             </tr>
           )}
-          {asignaciones.map((asignacion, index) => (
+          {asignaciones.map((asignacion) => (
             <tr key={asignacion.ADIDcodigo}>
               <td>{asignacion.nrc}</td>
               <td>{asignacion.clave}</td>

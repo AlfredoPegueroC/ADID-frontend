@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -25,46 +25,32 @@ function UniversidadList() {
   const API = process.env.NEXT_PUBLIC_API_KEY;
   const Api_import_URL = `${API}/import/universidad`;
 
-  const fetchData = async () => {
-    console.log("here it is: ", API);
+  const fetchData = useCallback(async () => {
     try {
-      const searchParam = searchQuery
-        ? `&search=${encodeURIComponent(searchQuery)}`
-        : "";
-
-      const response = await fetch(
-        `${API}/api/universidad?page=${page}${searchParam}`
-      );
-      if (!response.ok) {
-        console.error("Failed to fetch data");
-        return;
-      }
+      const searchParam = searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : "";
+      const response = await fetch(`${API}/api/universidad?page=${page}${searchParam}`);
+      if (!response.ok) throw new Error("Failed to fetch data");
+      
       const data = await response.json();
-      setUniversidades(data.results);
-      setTotalPages(Math.ceil(data.count / 30));
-      setLoading(false);
+      // Update state only if the data is different
+      if (JSON.stringify(data.results) !== JSON.stringify(universidades)) {
+        setUniversidades(data.results);
+        setTotalPages(Math.ceil(data.count / 30));
+      }
     } catch (error) {
       console.error("Error fetching data:", error);
-      setLoading(false);
     } finally {
       setLoading(false);
     }
-  };
+  }, [API, page, searchQuery, universidades]);
 
   useEffect(() => {
     fetchData();
-  }, [page, searchQuery]);
+  }, [fetchData]);
 
   const handleDelete = (pk) => {
-    deleteEntity(
-      `${API}/api/universidad/delete`,
-      pk,
-      setUniversidades,
-      "UniversidadCodigo"
-    );
+    deleteEntity(`${API}/api/universidad/delete`, pk, setUniversidades, "UniversidadCodigo");
   };
-
-
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
@@ -95,7 +81,6 @@ function UniversidadList() {
             Exportar
           </Link>
         )}
-
         <button
           type="button"
           className="btn btn-warning"
@@ -126,48 +111,34 @@ function UniversidadList() {
           </tr>
         </thead>
         <tbody>
-          {universidades.length === 0 && (
+          {universidades.length === 0 ? (
             <tr>
               <td colSpan="4" className="text-center">
                 No se encontraron universidades.
               </td>
             </tr>
+          ) : (
+            universidades.map((universidad, index) => (
+              <tr key={universidad.UniversidadCodigo}>
+                <th scope="row">{index + 1 + (page - 1) * 30}</th>
+                <td>{universidad.nombre}</td>
+                <td>{universidad.estado}</td>
+                <td>
+                  <Link href={`/universidadEdit/${universidad.UniversidadCodigo}`} className="btn btn-primary btn-sm">
+                    <Image src="/edit.svg" alt="editar" width={20} height={20} />
+                  </Link>
+                  <button className="btn btn-danger btn-sm mx-2" onClick={() => handleDelete(universidad.UniversidadCodigo)}>
+                    <Image src="/delete.svg" alt="borrar" width={20} height={20} />
+                  </button>
+                </td>
+              </tr>
+            ))
           )}
-          {universidades.map((universidad, index) => (
-            <tr key={universidad.UniversidadCodigo}>
-              <th scope="row">{index + 1 + (page - 1) * 10}</th>
-              <td>{universidad.nombre}</td>
-              <td>{universidad.estado}</td>
-              <td>
-                <Link
-                  href={`/universidadEdit/${universidad.UniversidadCodigo}`}
-                  className="btn btn-primary btn-sm"
-                >
-                  <Image src="/edit.svg" alt="editar" width={20} height={20} />
-                </Link>
-                <button
-                  className="btn btn-danger btn-sm mx-2"
-                  onClick={() => handleDelete(universidad.UniversidadCodigo)}
-                >
-                  <Image
-                    src="/delete.svg"
-                    alt="borrar"
-                    width={20}
-                    height={20}
-                  />
-                </button>
-              </td>
-            </tr>
-          ))}
         </tbody>
       </Tables>
 
       {totalPages > 1 && (
-        <Pagination
-          page={page}
-          totalPages={totalPages}
-          onPageChange={setPage}
-        />
+        <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
       )}
     </div>
   );

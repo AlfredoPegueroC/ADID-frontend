@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { debounce } from "lodash";
 
 import Pagination from "@components/Pagination";
 import Tables from "@components/Tables";
@@ -24,7 +25,7 @@ function TipodocenteList() {
   const API = process.env.NEXT_PUBLIC_API_KEY;
   const Api_import_URL = `${API}/import/tipoDocente`;
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       const searchParam = searchQuery
         ? `&search=${encodeURIComponent(searchQuery)}`
@@ -38,9 +39,7 @@ function TipodocenteList() {
       }
       const tipoData = await tipoResponse.json();
 
-      const universidadResponse = await fetch(
-        `${API}/api/universidad`
-      );
+      const universidadResponse = await fetch(`${API}/api/universidad`);
       if (!universidadResponse.ok) {
         throw new Error("Failed to fetch data");
       }
@@ -62,15 +61,15 @@ function TipodocenteList() {
       setTipodocentes(mergedData);
       setTotalPages(Math.ceil(tipoData.count / 30));
     } catch (error) {
-      console.error("error tipo docentes", error);
+      console.error("Error fetching tipo docentes:", error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, searchQuery, API]);
 
   useEffect(() => {
     fetchData();
-  }, [page, searchQuery]);
+  }, [fetchData]);
 
   const deleteTipo = (pk) => {
     deleteEntity(
@@ -85,9 +84,13 @@ function TipodocenteList() {
     setSearchQuery(e.target.value);
   };
 
+  const debouncedFetchData = debounce(() => {
+    fetchData();
+  }, 300);
+
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    fetchData();
+    debouncedFetchData(); // Trigger debounced search
   };
 
   if (loading) {
@@ -100,7 +103,7 @@ function TipodocenteList() {
 
   return (
     <div className="mt-5">
-      <h1 className="text-dark">Lista lista Tipo docente</h1>
+      <h1 className="text-dark">Lista Tipo Docente</h1>
       <div className="d-flex gap-2 mb-3 mt-3">
         <Link className="btn btn-primary" href="/tipodocente">
           Nuevo Tipo Docente
@@ -125,7 +128,7 @@ function TipodocenteList() {
       <Modal title="Importar Tipo Docente">
         <ImportExcel importURL={Api_import_URL} onSuccess={fetchData} />
       </Modal>
-      
+
       <Search
         SearchSubmit={handleSearchSubmit}
         SearchChange={handleSearchChange}
@@ -145,44 +148,43 @@ function TipodocenteList() {
         <tbody>
           {tipodocentes.length === 0 && (
             <tr>
-              <td colSpan="4" className="text-center">
-                No universities found.
+              <td colSpan="5" className="text-center">
+                No se han encontrado tipo docentes.
               </td>
             </tr>
           )}
-          {tipodocentes.length > 0 &&
-            tipodocentes.map((tipodocente, index) => (
-              <tr key={tipodocente.tipoDocenteCodigo}>
-                <th scope="row">{index + 1}</th>
-                <td>{tipodocente.nombre}</td>
-                <td>{tipodocente.estado}</td>
-                <td>{tipodocente.universidadNombre}</td>
-                <td>
-                  <Link
-                    className="btn btn-primary btn-sm"
-                    href={`/tipoEdit/${tipodocente.tipoDocenteCodigo}`}
-                  >
-                    <Image
-                      src="/edit.svg"
-                      alt="editar"
-                      width={20}
-                      height={20}
-                    />
-                  </Link>
-                  <button
-                    className="btn btn-danger btn-sm mx-2"
-                    onClick={() => deleteTipo(tipodocente.tipoDocenteCodigo)}
-                  >
-                    <Image
-                      src="/delete.svg"
-                      alt="borrar"
-                      width={20}
-                      height={20}
-                    />
-                  </button>
-                </td>
-              </tr>
-            ))}
+          {tipodocentes.map((tipodocente, index) => (
+            <tr key={tipodocente.tipoDocenteCodigo}>
+              <th scope="row">{index + 1}</th>
+              <td>{tipodocente.nombre}</td>
+              <td>{tipodocente.estado}</td>
+              <td>{tipodocente.universidadNombre}</td>
+              <td>
+                <Link
+                  className="btn btn-primary btn-sm"
+                  href={`/tipoEdit/${tipodocente.tipoDocenteCodigo}`}
+                >
+                  <Image
+                    src="/edit.svg"
+                    alt="editar"
+                    width={20}
+                    height={20}
+                  />
+                </Link>
+                <button
+                  className="btn btn-danger btn-sm mx-2"
+                  onClick={() => deleteTipo(tipodocente.tipoDocenteCodigo)}
+                >
+                  <Image
+                    src="/delete.svg"
+                    alt="borrar"
+                    width={20}
+                    height={20}
+                  />
+                </button>
+              </td>
+            </tr>
+          ))}
         </tbody>
       </Tables>
 

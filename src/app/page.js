@@ -11,6 +11,8 @@ import Styles from "@styles/home.module.css";
 function Home() {
   const [asignacion, setAsignaciones] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null); 
+  const [successMessage, setSuccessMessage] = useState(""); 
 
   const API = process.env.NEXT_PUBLIC_API_KEY;
   const Api_import_URL = `${API}/import/asignacion`;
@@ -34,6 +36,7 @@ function Home() {
       ].map((period) => ({ period }));
       setAsignaciones(uniqueAsignaciones);
     } catch (error) {
+      setError(error.message); // Set error message
       console.error("Error fetching data", error);
     } finally {
       setLoading(false);
@@ -63,7 +66,9 @@ function Home() {
 
       // Remove the deleted items from the list
       setAsignaciones(asignacion.filter((asig) => asig.period !== period));
+      setSuccessMessage(`Asignaciones del período ${period} eliminadas con éxito.`);
     } catch (error) {
+      setError(error.message); // Set error message
       console.error("Error deleting data", error);
     }
   };
@@ -74,8 +79,9 @@ function Home() {
 
   if (loading) {
     return (
-      <div className="spinner-container ">
+      <div className="spinner-container">
         <div className="spinner"></div>
+        <p>Cargando...</p> {/* Loading message */}
       </div>
     );
   }
@@ -93,6 +99,8 @@ function Home() {
       >
         Nueva Asignación
       </button>
+      {error && <div className="alert alert-danger">{error}</div>} {/* Display error message */}
+      {successMessage && <div className="alert alert-success">{successMessage}</div>} {/* Display success message */}
       <div className={Styles.home_container}>
         <h1 className={Styles.home_title}>
           Selección de Asignación por Período
@@ -104,7 +112,7 @@ function Home() {
             </p>
             <Image
               src="/undraw_no-data_ig65.svg"
-              alt="excel"
+              alt="No data"
               width={400}
               height={400}
             />
@@ -118,7 +126,7 @@ function Home() {
               >
                 <Image
                   src="/excel-icon.png"
-                  alt="excel"
+                  alt="Excel Icon"
                   width={32}
                   height={32}
                 />
@@ -132,19 +140,20 @@ function Home() {
                 >
                   <Image
                     src="/descargar-icon.svg"
-                    alt="borrar"
+                    alt="Download"
                     width={20}
                     height={20}
                   />
                 </Link>
 
                 <button
-                  className="btn btn-danger btn-sm ms-1 "
+                  className="btn btn-danger btn-sm ms-1"
                   onClick={() => handleDelete(asig.period)}
+                  aria-label={`Eliminar asignaciones del período ${asig.period}`} 
                 >
                   <Image
                     src="/delete.svg"
-                    alt="borrar"
+                    alt="Eliminar"
                     width={20}
                     height={20}
                   />

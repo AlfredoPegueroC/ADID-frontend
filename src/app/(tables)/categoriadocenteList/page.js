@@ -1,4 +1,5 @@
-"use client"
+"use client";
+
 import React, { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -13,7 +14,7 @@ import Modal from "@components/Modal";
 import withAuth from "@utils/withAuth";
 import { deleteEntity } from "@utils/delete";
 
-function FacultadList() {
+function CategoriaList() {
   const [categorias, setCategorias] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -23,23 +24,20 @@ function FacultadList() {
   const API = process.env.NEXT_PUBLIC_API_KEY;
   const Api_import_URL = `${API}/import/categoriaDocente`;
 
- 
   const fetchData = useCallback(async () => {
     try {
-      const searchParam = searchQuery
-        ? `&search=${encodeURIComponent(searchQuery)}`
-        : "";
+      const searchParam = searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : "";
 
-      const categoriaResponse = await fetch(
-        `${API}/api/categoriaDocente?page=${page}${searchParam}`
-      );
-      if (!categoriaResponse.ok)
-        throw new Error("Failed to fetch categoriaDocente data");
+      // Fetch categories and universities in parallel
+      const [categoriaResponse, universidadResponse] = await Promise.all([
+        fetch(`${API}/api/categoriaDocente?page=${page}${searchParam}`),
+        fetch(`${API}/api/universidad`)
+      ]);
+
+      if (!categoriaResponse.ok) throw new Error("Failed to fetch categoriaDocente data");
+      if (!universidadResponse.ok) throw new Error("Failed to fetch universidad data");
+
       const categoriaData = await categoriaResponse.json();
-
-      const universidadResponse = await fetch(`${API}/api/universidad`);
-      if (!universidadResponse.ok)
-        throw new Error("Failed to fetch universidad data");
       const universidadData = await universidadResponse.json();
 
       const mergedData = categoriaData.results.map((categoria) => {
@@ -49,9 +47,7 @@ function FacultadList() {
 
         return {
           ...categoria,
-          universidadNombre: universidad
-            ? universidad.nombre
-            : "Universidad no encontrada",
+          universidadNombre: universidad ? universidad.nombre : "Universidad no encontrada",
         };
       });
 
@@ -60,21 +56,16 @@ function FacultadList() {
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
-      setLoading(false);
+      setLoading(false); // Stop loading
     }
-  }, [API, page, searchQuery]); // Dependencies: API, page, and searchQuery
+  }, [API, page, searchQuery]); // Dependencies
 
   useEffect(() => {
-    fetchData(); // Call fetchData when the component mounts or when dependencies change
-  }, [fetchData]); // Use fetchData in the dependency array of useEffect
+    fetchData(); // Call fetchData on mount or when dependencies change
+  }, [fetchData]);
 
   const deleteCategoria = (pk) => {
-    deleteEntity(
-      `${API}/api/categoriadocente/delete`,
-      pk,
-      setCategorias,
-      "categoriaCodigo"
-    );
+    deleteEntity(`${API}/api/categoriadocente/delete`, pk, setCategorias, "categoriaCodigo");
   };
 
   const handleSearchChange = (e) => {
@@ -103,10 +94,7 @@ function FacultadList() {
         </Link>
 
         {categorias.length > 0 && (
-          <Link
-            className="btn btn-success"
-            href={`${API}/export/categoriaDocente`}
-          >
+          <Link className="btn btn-success" href={`${API}/export/categoriaDocente`}>
             Exportar
           </Link>
         )}
@@ -144,13 +132,13 @@ function FacultadList() {
           {categorias.length === 0 ? (
             <tr>
               <td colSpan="5" className="text-center">
-                No categories found.
+                No se encontraron categorías.
               </td>
             </tr>
           ) : (
             categorias.map((categoria, index) => (
               <tr key={categoria.categoriaCodigo}>
-                <th scope="row">{index + 1}</th>
+                <th scope="row">{index + 1 + (page - 1) * 30}</th>
                 <td>{categoria.nombre}</td>
                 <td>{categoria.estado}</td>
                 <td>{categoria.universidadNombre}</td>
@@ -194,5 +182,5 @@ function FacultadList() {
     </div>
   );
 }
+export default withAuth(CategoriaList);
 
-export default withAuth(FacultadList);

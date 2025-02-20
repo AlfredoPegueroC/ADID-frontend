@@ -1,18 +1,28 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
 import Pagination from "@components/Pagination";
 import Tables from "@components/Tables";
 import Modal from "@components/Modal";
-
 import Periodo from "@components/forms/Periodo";
 
 // Utils
 import withAuth from "@utils/withAuth";
 import { deleteEntity } from "@utils/delete";
+
+// Debounce function
+const debounce = (func, delay) => {
+  let timeoutId;
+  return (...args) => {
+    if (timeoutId) clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+      func(...args);
+    }, delay);
+  };
+};
 
 function PeriodoList() {
   const [periodos, setPeriodos] = useState([]);
@@ -23,56 +33,53 @@ function PeriodoList() {
 
   const API = process.env.NEXT_PUBLIC_API_KEY;
 
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       const searchParam = searchQuery
         ? `&search=${encodeURIComponent(searchQuery)}`
         : "";
 
-      const periodoResponse = await fetch(
-        `${API}/api/periodoacademico?page=${page}${searchParam}`
-      );
+      // Fetch both periodo and universidad data concurrently
+      const [periodoResponse, universidadesResponse] = await Promise.all([
+        fetch(`${API}/api/periodoacademico?page=${page}${searchParam}`),
+        fetch(`${API}/api/universidad`),
+      ]);
+
       if (!periodoResponse.ok)
         throw new Error("Fallo la busqueda de datos de periodo");
       const periodoData = await periodoResponse.json();
-
-      const universidadesResponse = await fetch(
-        `${API}/api/universidad`
-      );
 
       if (!universidadesResponse.ok)
         throw new Error("Failed to fetch universidades");
       const universidadesData = await universidadesResponse.json();
 
+      // Merge the fetched data
       const mergedData = periodoData.results.map((periodo) => {
-        let universidadNombre = "Universidad no encontrada"; // Default value
         const universidad = universidadesData.results.find(
           (uni) => uni.UniversidadCodigo === periodo.UniversidadCodigo
         );
-        if (universidad) {
-          universidadNombre = universidad.nombre;
-        }
         return {
           ...periodo,
-          universidadNombre,
+          universidadNombre: universidad
+            ? universidad.nombre
+            : "Universidad no encontrada",
         };
       });
 
       setPeriodos(mergedData);
       setTotalPages(Math.ceil(periodoData.count / 30));
     } catch (error) {
-      console.error("Error feaching data", error);
+      console.error("Error fetching data", error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, searchQuery, API]);
 
   useEffect(() => {
     fetchData();
-  }, [page, searchQuery]);
+  }, [fetchData]);
 
-  const deleteFacultad = (pk) => {
+  const deletePeriodo = (pk) => {
     deleteEntity(
       `${API}/api/periodoacademico/delete`,
       pk,
@@ -81,8 +88,16 @@ function PeriodoList() {
     );
   };
 
+  // Debounced search handler
+  const debouncedSearch = useCallback(
+    debounce((query) => {
+      setSearchQuery(query);
+    }, 500), // Delay of 500 ms
+    []
+  );
+
   const handleSearchChange = (e) => {
-    setSearchQuery(e.target.value); // Update search query as user types, but won't trigger search here
+    debouncedSearch(e.target.value); // Call the debounced search function
   };
 
   const handleSearchSubmit = (e) => {
@@ -130,8 +145,7 @@ function PeriodoList() {
           type="text"
           className="form-control me-2"
           placeholder="Buscar por nombre o estado"
-          value={searchQuery}
-          onChange={handleSearchChange} // This just updates the input value, not triggering search yet
+          onChange={handleSearchChange} // This just updates the input value
         />
         <button className="btn btn-primary" type="submit">
           Buscar
@@ -171,7 +185,7 @@ function PeriodoList() {
                 </Link>
                 <button
                   className="btn btn-danger btn-sm mx-2"
-                  onClick={() => deleteFacultad(periodo.periodoAcademicoCodigo)}
+                  onClick={() => deletePeriodo(periodo.periodoAcademicoCodigo)}
                 >
                   <Image
                     src="/delete.svg"

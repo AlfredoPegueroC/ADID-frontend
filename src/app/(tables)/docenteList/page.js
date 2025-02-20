@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -23,84 +23,32 @@ function DocenteList() {
   const [searchQuery, setSearchQuery] = useState("");
   const API = process.env.NEXT_PUBLIC_API_KEY;
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
-      const searchParam = searchQuery
-        ? `&search=${encodeURIComponent(searchQuery)}`
-        : "";
-      // Fetch main data
-      const docenteResponse = await fetch(
-        `${API}/api/docente?page=${page}${searchParam}`
-      );
-      if (!docenteResponse.ok) {
-        throw new Error("Failed to fetch docentes");
-      }
-      const docenteData = await docenteResponse.json();
-
-      const universidadResponse = await fetch(
-        `${API}/api/universidad`
-      );
-      if (!universidadResponse.ok) {
-        throw new Error("Failed to fetch universidades");
-      }
-      const universidadData = await universidadResponse.json();
-
-      const facultadResponse = await fetch(
-        `${API}/api/facultad`
-      );
-      if (!facultadResponse.ok) {
-        throw new Error("Failed to fetch facultades");
-      }
-      const facultadData = await facultadResponse.json();
-
-      const escuelaResponse = await fetch(`${API}/api/escuela`);
-      if (!escuelaResponse.ok) {
-        throw new Error("Failed to fetch escuelas");
-      }
-      const escuelaData = await escuelaResponse.json();
-
-      const tipoResponse = await fetch(`${API}/api/tipodocente`);
-      if (!tipoResponse.ok) {
-        throw new Error("Failed to fetch tipos");
-      }
-      const tipoData = await tipoResponse.json();
-
-      const categoriaResponse = await fetch(
+      const searchParam = searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : "";
+      
+      const endpoints = [
+        `${API}/api/docente?page=${page}${searchParam}`,
+        `${API}/api/universidad`,
+        `${API}/api/facultad`,
+        `${API}/api/escuela`,
+        `${API}/api/tipodocente`,
         `${API}/api/categoriaDocente`
+      ];
+      
+      const [docenteData, universidadData, facultadData, escuelaData, tipoData, categoriaData] = await Promise.all(
+        endpoints.map(url => fetch(url).then(res => res.json()))
       );
-      if (!categoriaResponse.ok) {
-        throw new Error("Failed to fetch categorias");
-      }
-      const categoriaData = await categoriaResponse.json();
-
-      // Merge data
-      const mergedData = docenteData.results.map((docente) => {
-        const universidad = universidadData.results.find(
-          (uni) => uni.UniversidadCodigo === docente.UniversidadCodigo
-        );
-        const facultad = facultadData.results.find(
-          (fac) => fac.facultadCodigo === docente.facultadCodigo
-        );
-        const escuela = escuelaData.results.find(
-          (esc) => esc.escuelaCodigo === docente.escuelaCodigo
-        );
-        const tipo = tipoData.results.find(
-          (tip) => tip.tipoDocenteCodigo === docente.tipoDocenteCodigo
-        );
-        const categoria = categoriaData.results.find(
-          (cat) => cat.categoriaCodigo === docente.categoriaCodigo
-        );
-
-        return {
-          ...docente,
-          universidadNombre: universidad ? universidad.nombre : "N/A",
-          facultadNombre: facultad ? facultad.nombre : "N/A",
-          escuelaNombre: escuela ? escuela.nombre : "N/A",
-          tipoNombre: tipo ? tipo.nombre : "N/A",
-          categoriaNombre: categoria ? categoria.nombre : "N/A",
-        };
-      });
-
+      
+      const mergedData = docenteData.results.map((docente) => ({
+        ...docente,
+        universidadNombre: universidadData.results.find(uni => uni.UniversidadCodigo === docente.UniversidadCodigo)?.nombre || "N/A",
+        facultadNombre: facultadData.results.find(fac => fac.facultadCodigo === docente.facultadCodigo)?.nombre || "N/A",
+        escuelaNombre: escuelaData.results.find(esc => esc.escuelaCodigo === docente.escuelaCodigo)?.nombre || "N/A",
+        tipoNombre: tipoData.results.find(tip => tip.tipoDocenteCodigo === docente.tipoDocenteCodigo)?.nombre || "N/A",
+        categoriaNombre: categoriaData.results.find(cat => cat.categoriaCodigo === docente.categoriaCodigo)?.nombre || "N/A",
+      }));
+      
       setDocentes(mergedData);
       setTotalPages(Math.ceil(docenteData.count / 30));
     } catch (error) {
@@ -108,20 +56,15 @@ function DocenteList() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, searchQuery, API]);
 
   useEffect(() => {
     fetchData();
-  }, [page]);
+  }, [fetchData]);
 
-  const deleteDocente = (pk) => {
-    deleteEntity(
-      `${API}/api/docente/delete`,
-      pk,
-      setDocentes,
-      "Docentecodigo"
-    );
-  };
+  const deleteDocente = useCallback((pk) => {
+    deleteEntity(`${API}/api/docente/delete`, pk, setDocentes, "Docentecodigo");
+  }, [API]);
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
@@ -134,7 +77,7 @@ function DocenteList() {
 
   if (loading) {
     return (
-      <div className="spinner-container ">
+      <div className="spinner-container">
         <div className="spinner"></div>
       </div>
     );
@@ -144,72 +87,40 @@ function DocenteList() {
     <div className="mt-5">
       <h1 className="text-dark">Lista Docente</h1>
       <div className="d-flex gap-2 mb-3 mt-3">
-        <Link className="btn btn-primary" href="/docente">
-          Agregar Docente
-        </Link>
-        {docentes.length > 0 && (
-          <Link
-            className="btn btn-success"
-            href={`${API}/export/docente`}
-          >
-            Exportar
-          </Link>
-        )}
-
-        <button
-          type="button"
-          className="btn btn-warning"
-          data-bs-toggle="modal"
-          data-bs-target="#Modal"
-        >
-          Importar
-        </button>
+        <Link className="btn btn-primary" href="/docente">Agregar Docente</Link>
+        {docentes.length > 0 && <Link className="btn btn-success" href={`${API}/export/docente`}>Exportar</Link>}
+        <button type="button" className="btn btn-warning" data-bs-toggle="modal" data-bs-target="#Modal">Importar</button>
       </div>
 
       <Modal title="Importar Docente">
-        <ImportExcel
-          importURL={`${API}/import/docente`}
-          onSuccess={fetchData}
-        />
+        <ImportExcel importURL={`${API}/import/docente`} onSuccess={fetchData} />
       </Modal>
 
-      <Search
-        SearchSubmit={handleSearchSubmit}
-        SearchChange={handleSearchChange}
-        searchQuery={searchQuery}
-      />
+      <Search SearchSubmit={handleSearchSubmit} SearchChange={handleSearchChange} searchQuery={searchQuery} />
 
       <Tables>
         <thead>
           <tr>
-            <th scope="col">#</th>
-            <th scope="col">Nombre</th>
-            <th scope="col">Apellidos</th>
-            <th scope="col">Sexo</th>
-            <th scope="col">Estado Civil</th>
-            <th scope="col">Fecha</th>
-            <th scope="col">Teléfono</th>
-            <th scope="col">Dirección</th>
-            <th scope="col">Estado</th>
-            <th scope="col">Universidad</th>
-            <th scope="col">Facultad</th>
-            <th scope="col">Escuela</th>
-            <th scope="col">Tipo D.</th>
-            <th scope="col">Categoría</th>
-            <th scope="col">Acción</th>
+            <th>Nombre</th>
+            <th>Apellidos</th>
+            <th>Sexo</th>
+            <th>Estado Civil</th>
+            <th>Fecha</th>
+            <th>Teléfono</th>
+            <th>Dirección</th>
+            <th>Estado</th>
+            <th>Universidad</th>
+            <th>Facultad</th>
+            <th>Escuela</th>
+            <th>Tipo D.</th>
+            <th>Categoría</th>
+            <th>Acción</th>
           </tr>
         </thead>
         <tbody>
-          {docentes.length === 0 && (
-            <tr>
-              <td colSpan="15" className="text-center">
-                No docentes found.
-              </td>
-            </tr>
-          )}
+          {docentes.length === 0 && <tr><td colSpan="15" className="text-center">No docentes found.</td></tr>}
           {docentes.map((docente, index) => (
             <tr key={docente.Docentecodigo}>
-              <th scope="row">{index + 1}</th>
               <td>{docente.nombre}</td>
               <td>{docente.apellidos}</td>
               <td>{docente.sexo}</td>
@@ -224,22 +135,11 @@ function DocenteList() {
               <td>{docente.tipoNombre}</td>
               <td>{docente.categoriaNombre}</td>
               <td>
-                <Link
-                  className="btn btn-primary btn-sm"
-                  href={`/docenteEdit/${docente.Docentecodigo}`}
-                >
+                <Link className="btn btn-primary btn-sm" href={`/docenteEdit/${docente.Docentecodigo}`}>
                   <Image src="/edit.svg" alt="editar" width={20} height={20} />
                 </Link>
-                <button
-                  className="btn btn-danger btn-sm mx-2"
-                  onClick={() => deleteDocente(docente.Docentecodigo)}
-                >
-                  <Image
-                    src="/delete.svg"
-                    alt="borrar"
-                    width={20}
-                    height={20}
-                  />
+                <button className="btn btn-danger btn-sm mx-2" onClick={() => deleteDocente(docente.Docentecodigo)}>
+                  <Image src="/delete.svg" alt="borrar" width={20} height={20} />
                 </button>
               </td>
             </tr>
@@ -247,13 +147,7 @@ function DocenteList() {
         </tbody>
       </Tables>
 
-      {totalPages > 1 && (
-        <Pagination
-          page={page}
-          totalPages={totalPages}
-          onPageChange={setPage}
-        />
-      )}
+      {totalPages > 1 && <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />}
     </div>
   );
 }
