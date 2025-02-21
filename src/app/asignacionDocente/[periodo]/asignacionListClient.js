@@ -1,91 +1,52 @@
 "use client";
 
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { debounce } from "lodash"; // Import debounce from lodash
+import { debounce } from "lodash";
 
 // Components
 import Pagination from "@components/Pagination";
 import Tables from "@components/Tables";
 import Search from "@components/search";
-
+// import { fetchAsignacion } from "@/api/asignacionService";
 // Utils
 import withAuth from "@utils/withAuth";
 import { deleteEntity } from "@utils/delete";
 
-function Principal({ params }) {
-  const { periodo } = React.use(params); // Directly destructure params
-
-  const [asignaciones, setAsignaciones] = useState([]);
-  const [loading, setLoading] = useState(true);
+function PrincipalClient({ initialData, periodo }) {
+  const [asignaciones, setAsignaciones] = useState(initialData.asignaciones);
+  const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const [totalPages, setTotalPages] = useState(initialData.totalPages);
   const [searchQuery, setSearchQuery] = useState("");
 
   const API = process.env.NEXT_PUBLIC_API_KEY;
 
-  const fetchData = useCallback(async () => {
-    try {
-      const searchParam = searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : "";
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+    debouncedFetchData();
+  };
 
-      const asignacionResponse = await fetch(
+  const fetchData = async () => {
+    try {
+      const searchParam = searchQuery
+        ? `&search=${encodeURIComponent(searchQuery)}`
+        : "";
+      const response = await fetch(
         `${API}/api/asignacion_frontend?page=${page}&period=${periodo}${searchParam}`
       );
-      if (!asignacionResponse.ok) {
-        throw new Error("Failed to fetch asignaciones");
-      }
-      const asignacionData = await asignacionResponse.json();
-      console.log("Asignaciones data:", asignacionData);
-
-      // Use Promise.all to fetch related data concurrently
-      const [facultadResponse, escuelaResponse, docenteResponse] = await Promise.all([
-        fetch(`${API}/api/facultad`),
-        fetch(`${API}/api/escuela`),
-        fetch(`${API}/api/docente`),
-      ]);
-
-      if (!facultadResponse.ok || !escuelaResponse.ok || !docenteResponse.ok) {
-        throw new Error("Failed to fetch related data");
-      }
-
-      const facultadData = await facultadResponse.json();
-      const escuelaData = await escuelaResponse.json();
-      const docenteData = await docenteResponse.json();
-
-      // Merge data
-      const mergedData = asignacionData.results.map((asignacion) => {
-        const facultad = facultadData.results.find((fac) => fac.facultadCodigo === asignacion.facultadCodigo);
-        const escuela = escuelaData.results.find((esc) => esc.escuelaCodigo === asignacion.escuelaCodigo);
-        const docente = docenteData.results.find((doc) => doc.Docentecodigo === asignacion.DocenteCodigo);
-
-        return {
-          ...asignacion,
-          facultadNombre: facultad ? facultad.nombre : "N/A",
-          escuelaNombre: escuela ? escuela.nombre : "N/A",
-          docenteNombre: docente ? `${docente.nombre} ${docente.apellidos}` : "N/A",
-        };
-      });
-
-      setAsignaciones(mergedData); 
-      setTotalPages(Math.ceil(asignacionData.count / 30));
+      const data = await response.json();
+      setAsignaciones(data.results);
+      setTotalPages(Math.ceil(data.count / 30));
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
       setLoading(false);
     }
-  }, [page, periodo, searchQuery, API]); // Add dependencies
-
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]); // Call fetchData when it changes
-
-  const debouncedFetchData = debounce(fetchData, 300); // Debounce the fetch function
-
-  const handleSearchChange = (e) => {
-    setSearchQuery(e.target.value);
-    debouncedFetchData(); // Call the debounced function
   };
+
+  const debouncedFetchData = debounce(fetchData, 300);
 
   const handleDelete = (pk) => {
     deleteEntity(
@@ -163,8 +124,8 @@ function Principal({ params }) {
               <td>{asignacion.seccion}</td>
               <td>{asignacion.modalidad}</td>
               <td>{asignacion.campus}</td>
-              <td>{asignacion.facultadCodigo}</td>
-              <td>{asignacion.escuelaCodigo}</td>
+              <td>{asignacion.facultadNombre}</td>
+              <td>{asignacion.escuelaNombre}</td>
               <td>{asignacion.tipo}</td>
               <td>{asignacion.cupo}</td>
               <td>{asignacion.inscripto}</td>
@@ -208,4 +169,4 @@ function Principal({ params }) {
   );
 }
 
-export default withAuth(Principal);
+export default withAuth(PrincipalClient);

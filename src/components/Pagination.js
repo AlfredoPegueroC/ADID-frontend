@@ -1,5 +1,3 @@
-"use client";
-
 export default function Pagination({ page, totalPages, onPageChange }) {
   const handlePagination = (direction) => {
     if (direction === "next" && page < totalPages) {
