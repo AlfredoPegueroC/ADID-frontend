@@ -4,7 +4,7 @@ export default function NotFound() {
   return (
     <div className="not_found">
       <Image
-        src="/undraw_page-not-found.svg"
+        src="/undraw_page-not-found_6wni.svg"
         alt="excel"
         width={720}
         height={720}

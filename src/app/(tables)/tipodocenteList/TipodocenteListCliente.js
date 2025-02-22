@@ -10,7 +10,7 @@ import Tables from "@components/Tables";
 import Search from "@components/search";
 import ImportExcel from "@components/forms/Import";
 import Modal from "@components/Modal";
-
+import {fetchTipoDocentes} from "@api/tipoDocenteService"
 // Utils
 import withAuth from "@utils/withAuth";
 import { deleteEntity } from "@utils/delete";

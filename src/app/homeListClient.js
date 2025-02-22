@@ -5,7 +5,7 @@ import withAuth from "@utils/withAuth";
 import Image from "next/image";
 import ImportPage from "@components/forms/ImportAsignacion";
 import Modal from "@components/Modal";
-import { fetchPeriodos } from "@api/periodoService";
+import { fetchHome } from "@api/homeService";
 import debounce from "lodash/debounce"; 
 import Styles from "@styles/home.module.css";
 
@@ -21,8 +21,8 @@ function HomeListClient() {
 
   const fetchData = useCallback(async () => {
     try {
-      const allAsignaciones = await fetchPeriodos();
-    
+      const allAsignaciones = await fetchHome();
+      console.log(allAsignaciones)
       setAsignaciones(allAsignaciones.results);
     } catch (error) {
       setError(error.message);
@@ -108,11 +108,11 @@ function HomeListClient() {
             />
           </div>
         ) : (
-          asignaciones.map((asig) => (
-            <div key={asig.nombre} className={Styles.home_items}>
+          asignaciones.map((asig, index) => (
+            <div key={index + 1} className={Styles.home_items}>
               <Link
                 className={Styles.item}
-                href={`/asignacionDocente/${asig.nombre}`}
+                href={`/asignacionDocente/${asig.periodo}`}
               >
                 <Image
                   src="/excel-icon.png"
@@ -120,7 +120,7 @@ function HomeListClient() {
                   width={32}
                   height={32}
                 />
-                {asig.nombre}
+                {asig.periodo}
               </Link>
 
               <div className="home_btns">
