@@ -110,8 +110,8 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages, perio
                 <td>{asignacion.seccion}</td>
                 <td>{asignacion.modalidad}</td>
                 <td>{asignacion.campus}</td>
-                <td>{asignacion.facultadCodigo}</td>
-                <td>{asignacion.escuelaCodigo}</td>
+                <td>{asignacion.facultadNombre}</td>
+                <td>{asignacion.escuelaNombre}</td>
                 <td>{asignacion.tipo}</td>
                 <td>{asignacion.cupo}</td>
                 <td>{asignacion.inscripto}</td>

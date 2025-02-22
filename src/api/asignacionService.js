@@ -39,7 +39,6 @@ export async function fetchAsignacionData(periodo, page = 1, searchQuery = "") {
         docenteNombre: docente ? `${docente.nombre} ${docente.apellidos}` : "N/A",
       };
     });
-    console.log(mergedData)
     return { asignaciones: mergedData, totalPages: Math.ceil(asignacionData.count / 30) };
   } catch (error) {
     console.error("Error fetching data:", error);
