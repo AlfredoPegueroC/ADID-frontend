@@ -1,44 +1,28 @@
 "use client";
 
-import React, { useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { debounce } from "lodash";
-
-// Components
 import Pagination from "@components/Pagination";
 import Tables from "@components/Tables";
 import Search from "@components/search";
-// import { fetchAsignacion } from "@/api/asignacionService";
-// Utils
-import withAuth from "@utils/withAuth";
 import { deleteEntity } from "@utils/delete";
+import { fetchAsignacionData } from "@api/asignacionService";
+import { debounce } from "lodash";
 
-function PrincipalClient({ initialData, periodo }) {
-  const [asignaciones, setAsignaciones] = useState(initialData.asignaciones);
-  const [loading, setLoading] = useState(false);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(initialData.totalPages);
+function PrincipalListClient({ initialData, totalPages: initialTotalPages, periodo }) {
+  const [asignaciones, setAsignaciones] = useState(initialData);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(initialTotalPages);
   const [searchQuery, setSearchQuery] = useState("");
-
+  const [loading, setLoading] = useState(false);
   const API = process.env.NEXT_PUBLIC_API_KEY;
 
-  const handleSearchChange = (e) => {
-    setSearchQuery(e.target.value);
-    debouncedFetchData();
-  };
-
-  const fetchData = async () => {
+  const fetchData = async (page, query) => {
     try {
-      const searchParam = searchQuery
-        ? `&search=${encodeURIComponent(searchQuery)}`
-        : "";
-      const response = await fetch(
-        `${API}/api/asignacion_frontend?page=${page}&period=${periodo}${searchParam}`
-      );
-      const data = await response.json();
-      setAsignaciones(data.results);
-      setTotalPages(Math.ceil(data.count / 30));
+      const { asignaciones, totalPages } = await fetchAsignacionData(periodo, page, query);
+      setAsignaciones(asignaciones);
+      setTotalPages(totalPages);
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
@@ -46,24 +30,29 @@ function PrincipalClient({ initialData, periodo }) {
     }
   };
 
-  const debouncedFetchData = debounce(fetchData, 300);
+  useEffect(() => {
+    fetchData(currentPage, searchQuery);
+  }, [currentPage, searchQuery]); // Fetch data only when currentPage or searchQuery changes
 
-  const handleDelete = (pk) => {
-    deleteEntity(
-      `${API}/api/asignacionDocente/delete`,
-      pk,
-      setAsignaciones,
-      "ADIDcodigo"
-    );
+  const handlePageChange = (page) => {
+    setCurrentPage(page); // Set the current page directly
   };
 
-  if (loading) {
-    return (
-      <div className="spinner-container ">
-        <div className="spinner"></div>
-      </div>
-    );
-  }
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+  };
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    setCurrentPage(1); // Reset to first page on search
+  };
+
+  const deleteAsignacion = useCallback((id) => {
+    deleteEntity(`${API}/api/asignacionDocente/delete`, id, setAsignaciones, "ADIDcodigo");
+  }, [API]);
+
+  // Create a debounced function to handle search input
+  const debouncedSearchChange = useCallback(debounce(handleSearchChange, 500), []); // Debounce search change
 
   return (
     <div className="mt-4">
@@ -75,98 +64,91 @@ function PrincipalClient({ initialData, periodo }) {
       </Link>
 
       <Search
-        SearchSubmit={(e) => {
-          e.preventDefault();
-          fetchData(); // Call fetchData on submit
-        }}
-        SearchChange={handleSearchChange}
+        SearchSubmit={handleSearchSubmit}
+        SearchChange={debouncedSearchChange} // Use debounced function for search
         searchQuery={searchQuery}
       />
 
       <Tables>
         <thead>
           <tr>
-            <th scope="col">NRC</th>
-            <th scope="col">Clave</th>
-            <th scope="col">Asignatura</th>
-            <th scope="col">Codigo</th>
-            <th scope="col">Profesor</th>
-            <th scope="col">Seccion</th>
-            <th scope="col">Modalidad</th>
-            <th scope="col">Campus</th>
-            <th scope="col">Facultad</th>
-            <th scope="col">Escuela</th>
-            <th scope="col">Tipo</th>
-            <th scope="col">Cupo</th>
-            <th scope="col">Inscripto</th>
-            <th scope="col">Horario</th>
-            <th scope="col">Dias</th>
-            <th scope="col">Aulas</th>
-            <th scope="col">CR</th>
-            <th scope="col">Acción</th>
+            <th>NRC</th>
+            <th>Clave</th>
+            <th>Asignatura</th>
+            <th>Codigo</th>
+            <th>Profesor</th>
+            <th>Seccion</th>
+            <th>Modalidad</th>
+            <th>Campus</th>
+            <th>Facultad</th>
+            <th>Escuela</th>
+            <th>Tipo</th>
+            <th>Cupo</th>
+            <th>Inscripto</th>
+            <th>Horario</th>
+            <th>Dias</th>
+            <th>Aulas</th>
+            <th>CR</th>
+            <th>Acción</th>
           </tr>
         </thead>
         <tbody>
-          {asignaciones.length === 0 && (
+          {asignaciones.length === 0 ? (
             <tr>
-              <td colSpan="16" className="text-center">
+              <td colSpan="18" className="text-center">
                 No asignaciones encontradas.
               </td>
             </tr>
+          ) : (
+            asignaciones.map((asignacion) => (
+              <tr key={asignacion.ADIDcodigo}>
+                <td>{asignacion.nrc}</td>
+                <td>{asignacion.clave}</td>
+                <td>{asignacion.asignatura}</td>
+                <td>{asignacion.codigo}</td>
+                <td>{asignacion.docenteNombre}</td>
+                <td>{asignacion.seccion}</td>
+                <td>{asignacion.modalidad}</td>
+                <td>{asignacion.campus}</td>
+                <td>{asignacion.facultadCodigo}</td>
+                <td>{asignacion.escuelaCodigo}</td>
+                <td>{asignacion.tipo}</td>
+                <td>{asignacion.cupo}</td>
+                <td>{asignacion.inscripto}</td>
+                <td>{asignacion.horario}</td>
+                <td>{asignacion.dias}</td>
+                <td>{asignacion.Aula}</td>
+                <td>{asignacion.creditos}</td>
+                <td>
+                  <Link
+                    className="btn btn-primary btn-sm"
+                    href={`/asignacionEdit/${asignacion.ADIDcodigo}?period=${periodo}`}
+                  >
+                    <Image src="/edit.svg" alt="editar" width={20} height={20} />
+                  </Link>
+                  <button
+                    type="button"
+                    className="btn btn-danger btn-sm mx-2"
+                    onClick={() => deleteAsignacion(asignacion.ADIDcodigo)}
+                  >
+                    <Image src="/delete.svg" alt="borrar" width={20} height={20} />
+                  </button>
+                </td>
+              </tr>
+            ))
           )}
-          {asignaciones.map((asignacion) => (
-            <tr key={asignacion.ADIDcodigo}>
-              <td>{asignacion.nrc}</td>
-              <td>{asignacion.clave}</td>
-              <td>{asignacion.asignatura}</td>
-              <td>{asignacion.codigo}</td>
-              <td>{asignacion.docente_nombre_completo}</td>
-              <td>{asignacion.seccion}</td>
-              <td>{asignacion.modalidad}</td>
-              <td>{asignacion.campus}</td>
-              <td>{asignacion.facultadNombre}</td>
-              <td>{asignacion.escuelaNombre}</td>
-              <td>{asignacion.tipo}</td>
-              <td>{asignacion.cupo}</td>
-              <td>{asignacion.inscripto}</td>
-              <td>{asignacion.horario}</td>
-              <td>{asignacion.dias}</td>
-              <td>{asignacion.Aula}</td>
-              <td>{asignacion.creditos}</td>
-              <td>
-                <Link
-                  className="btn btn-primary btn-sm"
-                  href={`/asignacionEdit/${asignacion.ADIDcodigo}?period=${periodo}`}
-                >
-                  <Image src="/edit.svg" alt="editar" width={20} height={20} />
-                </Link>
-                <button
-                  type="button"
-                  className="btn btn-danger btn-sm mx-2"
-                  onClick={() => handleDelete(asignacion.ADIDcodigo)}
-                >
-                  <Image
-                    src="/delete.svg"
-                    alt="borrar"
-                    width={20}
-                    height={20}
-                  />
-                </button>
-              </td>
-            </tr>
-          ))}
         </tbody>
       </Tables>
 
       {totalPages > 1 && (
         <Pagination
-          page={page}
+          page={currentPage}
           totalPages={totalPages}
-          onPageChange={setPage}
+          onPageChange={handlePageChange} // Pass the handlePageChange function
         />
       )}
     </div>
   );
 }
 
-export default withAuth(PrincipalClient);
+export default PrincipalListClient;
