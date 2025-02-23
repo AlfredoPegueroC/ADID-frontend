@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Styles from "@styles/form.module.css";
-import Notification from "@/components/Notification";
+import Notification from "@components/Notification";
 import FormLayout from "@components/layouts/FormLayout";
 import withAuth from "@utils/withAuth";
 
