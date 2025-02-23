@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import FormLayout from "@components/layouts/FormLayout";
 import withAuth from "@utils/withAuth";
 import Styles from "@styles/form.module.css";
-
+import Notification from "@components/Notification";
 function EditPeriodo({ params }) {
   const router = useRouter();
   const { id } = React.use(params);
@@ -13,7 +13,7 @@ function EditPeriodo({ params }) {
   const [periodo, setperiodo] = useState(null);
   const [universidades, setUniversidades] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+
 
   useEffect(() => {
     async function fetchData() {
@@ -32,7 +32,6 @@ function EditPeriodo({ params }) {
         setUniversidades(universidadesData.results); // results es donde esta el contenido del json
       } catch (error) {
         console.error("Error fetching data:", error);
-        setError("Failed to load data.");
       } finally {
         setLoading(false);
       }
@@ -55,14 +54,14 @@ function EditPeriodo({ params }) {
       });
 
       if (response.ok) {
-        alert("periodo updated successfully!");
+        Notification.alertSuccess("periodo Academico Editado.");
         router.push("/periodoList");
       } else {
-        alert("Failed to update periodo.");
+        Notification.alertError("Falla al Editar.");
       }
     } catch (error) {
       console.error("Error updating periodo:", error);
-      alert("An error occurred.");
+      Notification.alertError("Falla al Editar.");
     }
   };
 

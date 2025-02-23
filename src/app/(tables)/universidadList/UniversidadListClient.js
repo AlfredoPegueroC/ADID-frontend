@@ -3,7 +3,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
-
 // Components
 import Pagination from "@components/Pagination";
 import Tables from "@components/Tables";
@@ -16,6 +15,7 @@ import withAuth from "@utils/withAuth";
 import { deleteEntity } from "@utils/delete";
 
 function UniversidadListClient({ initialData }) {
+  
   const [universidades, setUniversidades] = useState(initialData.universidades);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
@@ -80,7 +80,7 @@ function UniversidadListClient({ initialData }) {
           Importar
         </button>
       </div>
-
+      
       <Modal title="Importar Universidad">
         <ImportExcel importURL={Api_import_URL} onSuccess={fetchData} />
       </Modal>

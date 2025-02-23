@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import FormLayout from "@components/layouts/FormLayout";
 import withAuth from "@utils/withAuth";
 import Styles from "@styles/form.module.css";
-
+import Notification from "@components/Notification";
 function EditFacultad({ params }) {
   const router = useRouter();
   const { id } = React.use(params);
@@ -13,7 +13,7 @@ function EditFacultad({ params }) {
   const [facultad, setFacultad] = useState(null);
   const [universidades, setUniversidades] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  
 
   useEffect(() => {
     async function fetchData() {
@@ -31,7 +31,6 @@ function EditFacultad({ params }) {
         setUniversidades(universidadesData.results);
       } catch (error) {
         console.error("Error fetching data:", error);
-        setError("Failed to load data.");
       } finally {
         setLoading(false);
       }
@@ -54,14 +53,14 @@ function EditFacultad({ params }) {
       });
 
       if (response.ok) {
-        alert("Facultad updated successfully!");
+        Notification.alertSuccess("Facultad updated successfully!");
         router.push("/facultadList");
       } else {
-        alert("Failed to update facultad.");
+        Notification.alertError("Failed to update facultad.");
       }
     } catch (error) {
       console.error("Error updating facultad:", error);
-      alert("An error occurred.");
+      Notification.alertError("An error occurred.");
     }
   };
 

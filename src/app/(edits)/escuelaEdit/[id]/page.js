@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import FormLayout from "@components/layouts/FormLayout";
 import withAuth from "@utils/withAuth";
 import Styles from "@styles/form.module.css";
+import Notification from "@components/Notification";
 
 function EditEscuela({ params }) {
   const router = useRouter();
@@ -58,14 +59,14 @@ function EditEscuela({ params }) {
       });
 
       if (response.ok) {
-        alert("Escuela updated successfully!");
+        Notification.alertSuccess("Escuela Editada.");
         router.push("/escuelaList");
       } else {
-        alert("Failed to update escuela.");
+        Notification.alertError("Fallo al Editar.");
       }
     } catch (error) {
       console.error("Error updating escuela:", error);
-      alert("An error occurred.");
+      Notification.alertError("Fallo al Editar.");
     }
   };
 

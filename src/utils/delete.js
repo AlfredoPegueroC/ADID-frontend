@@ -1,6 +1,8 @@
+import Notification from '@components/Notification'
 
 export const deleteEntity = async (endpoint, pk, setEntities, idKey = "id") => {
   const confirmDelete = window.confirm("¿Estás seguro de querer eliminar?");
+  
   if (confirmDelete) {
     try {
       const response = await fetch(`${endpoint}/${pk}/`, {
@@ -11,13 +13,14 @@ export const deleteEntity = async (endpoint, pk, setEntities, idKey = "id") => {
         setEntities((prevEntities) => prevEntities.filter((entity) => entity[idKey] !== pk)
         
       );
-        alert("Elemento eliminado con éxito.");
+        Notification.alertLogin("Elemento eliminado con éxito.");
       } else {
-        alert("Error al eliminar el elemento.")
+        Notification.alertError("Error al eliminar el elemento.")
       }
     } catch (error) {
       console.error("Error deleting entity:", error);
-      alert("Error al eliminar el elemento.");
+      Notification.alertError("Error al eliminar el elemento.")
+
     }
   }
 };

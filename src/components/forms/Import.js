@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-
+import Notification from "../Notification";
 import Styles from "@styles/form.module.css";
 
 export default function ImportExcel({ title, importURL, onSuccess }) {
@@ -32,14 +32,14 @@ export default function ImportExcel({ title, importURL, onSuccess }) {
       const result = await response.json();
 
       if (response.ok) {
-        setMessage(result.message || "Import successful!");
+        Notification.alertSuccess(result.message || "Se ha importado.")
         if (onSuccess) onSuccess();
-        document.querySelector("#myform").reset(); // check this later
+        document.querySelector("#myform").reset();
       } else {
-        setMessage(result.error || "Error during import.");
+        Notification.alertError(result.error || "Error al Importar");
       }
     } catch (error) {
-      setMessage("An error occurred while uploading the file.");
+      Notification.alertError("An error occurred while uploading the file.");
     }
   };
 

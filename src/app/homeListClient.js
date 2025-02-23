@@ -6,12 +6,12 @@ import Image from "next/image";
 import ImportPage from "@components/forms/ImportAsignacion";
 import Modal from "@components/Modal";
 import { fetchHome } from "@api/homeService";
-import debounce from "lodash/debounce"; 
+import debounce from "lodash/debounce";
 import Styles from "@styles/home.module.css";
 
 import Notification from "@components/Notification";
 function HomeListClient() {
-  const [asignaciones, setAsignaciones] = useState([]); 
+  const [asignaciones, setAsignaciones] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
@@ -22,7 +22,7 @@ function HomeListClient() {
   const fetchData = useCallback(async () => {
     try {
       const allAsignaciones = await fetchHome();
-      console.log(allAsignaciones)
+      console.log(allAsignaciones);
       setAsignaciones(allAsignaciones.results);
     } catch (error) {
       setError(error.message);
@@ -30,45 +30,53 @@ function HomeListClient() {
     } finally {
       setLoading(false);
     }
-  }, []); 
+  }, []);
 
-  const debouncedFetchData = debounce(fetchData, 500); 
+  const debouncedFetchData = debounce(fetchData, 500);
 
   // const handleDelete = (pk) => {
   //     deleteEntity(`${API}/api/periodoacademico/delete`, pk, setAsignaciones, "periodoAcademicoCodigo");
   //   };
-  
 
   const handleDelete = async (period) => {
-    if (!window.confirm(`¿Estás seguro de que deseas eliminar todas las asignaciones del período ${period}?`)) {
+    if (
+      !window.confirm(
+        `¿Estás seguro de que deseas eliminar todas las asignaciones del período ${period}?`
+      )
+    ) {
       return;
     }
 
     try {
-      const response = await fetch(`${API}/api/asignacionDocente/delete?period=${period}`, {
-        method: "DELETE",
-      });
+      const response = await fetch(
+        `${API}/api/asignacionDocente/delete?period=${period}`,
+        {
+          method: "DELETE",
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Fallo al eliminar las asignaciones");
       }
 
-  
-      setAsignaciones((prevAsignaciones) => prevAsignaciones.filter((asig) => asig.period !== period));
-      Notification.alertSuccess(`Asignaciones del período ${period} eliminadas con éxito.`);
-
+      Notification.alertLogin(
+        `Asignaciones del período ${period} eliminadas con éxito.`
+      );
+      setAsignaciones((prevAsignaciones) =>
+        prevAsignaciones.filter((asig) => asig.period !== period)
+      );
     } catch (error) {
       setError(error.message);
-      console.error("Error deleting data", error);
+      Notification.alertError("Error deleting data", error);
     }
   };
 
   useEffect(() => {
-    debouncedFetchData(); 
+    debouncedFetchData();
     return () => {
       debouncedFetchData.cancel();
     };
-  }, [debouncedFetchData]); 
+  }, [debouncedFetchData]);
 
   if (loading) {
     return (
@@ -92,14 +100,18 @@ function HomeListClient() {
         Nueva Asignación
       </button>
       {error && <div className="alert alert-danger">{error}</div>}
-      {successMessage && <div className="alert alert-success">{successMessage}</div>}
+      {successMessage && (
+        <div className="alert alert-success">{successMessage}</div>
+      )}
       <div className={Styles.home_container}>
         <h1 className={Styles.home_title}>
           Selección de Asignación por Período
         </h1>
         {asignaciones.length === 0 ? (
           <div className={Styles.empty_asig}>
-            <p className={Styles.empty_title}>No se encontraron asignaciones.</p>
+            <p className={Styles.empty_title}>
+              No se encontraron asignaciones.
+            </p>
             <Image
               src="/undraw_no-data_ig65.svg"
               alt="No data"
@@ -126,7 +138,7 @@ function HomeListClient() {
               <div className="home_btns">
                 <Link
                   className="btn btn-success btn-sm ms-1"
-                  href={`${API}/export/asignacionDocenteExport?period=${asig.period}`}
+                  href={`${API}/export/asignacionDocenteExport?period=${asig.periodo}`}
                 >
                   <Image
                     src="/descargar-icon.svg"
@@ -138,8 +150,8 @@ function HomeListClient() {
 
                 <button
                   className="btn btn-danger btn-sm ms-1"
-                  onClick={() => handleDelete(asig.period)}
-                  aria-label={`Eliminar asignaciones del período ${asig.period}`}
+                  onClick={() => handleDelete(asig.periodo)}
+                  aria-label={`Eliminar asignaciones del período ${asig.periodo}`}
                 >
                   <Image
                     src="/delete.svg"

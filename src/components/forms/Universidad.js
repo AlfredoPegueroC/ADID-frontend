@@ -2,16 +2,16 @@ import { useRouter } from "next/navigation";
 
 import Notification from "../Notification";
 import Styles from "@styles/form.module.css";
-
+import { toast, Bounce } from "react-toastify";
 export default function Universidad({ title }) {
   const router = useRouter();
   const API = process.env.NEXT_PUBLIC_API_KEY;
+  
 
   const handleUniversidad = async (e) => {
     e.preventDefault();
     const nombre = document.getElementById("nombre").value;
     const estado = document.getElementById("estado").value;
-    
 
     const data = {
       nombre: nombre,
@@ -28,11 +28,9 @@ export default function Universidad({ title }) {
       });
       if (response.ok) {
         const result = await response.json();
+        Notification.alertSuccess(`Universidad Creada: ${result.nombre}`);
         router.push("/universidadList");
-        Notification.alertSuccess(
-          "Universidad creada con éxito: " + result.nombre
-        );
-        console.log(data)
+        
       } else {
         const error = await response.json();
         Notification.alertError(

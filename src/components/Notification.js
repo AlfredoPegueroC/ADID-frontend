@@ -1,19 +1,48 @@
-import styles from "@styles/Notificacion.module.css"; 
 
-function alertSuccess(message) {
-  const alertDiv = document.createElement("div");
-  alertDiv.className = styles.alertaExito;
-  alertDiv.textContent = message;
-  document.body.appendChild(alertDiv);
-  setTimeout(() => alertDiv.remove(), 2000);
+import { toast, Bounce } from "react-toastify";
+
+
+const alertSuccess = (message) => {
+  toast.success(message, {
+    position: "top-center",
+    autoClose: 2000,
+    hideProgressBar: false,
+    closeOnClick: false,
+    pauseOnHover: false,
+    draggable: true,
+    progress: undefined,
+    theme: "colored",
+    transition: Bounce,
+  });
 };
 
-function alertError(message){
-  const alertDiv = document.createElement("div");
-  alertDiv.className = styles.alertaError;
-  alertDiv.textContent = message;
-  document.body.appendChild(alertDiv);
-  setTimeout(() => {alertDiv.remove()}, 2000); 
+
+const alertError = (message) => {
+  toast.error(message, {
+    position: "top-center",
+    autoClose: 2000,
+    hideProgressBar: false,
+    closeOnClick: false,
+    pauseOnHover: false,
+    draggable: true,
+    progress: undefined,
+    theme: "colored",
+    transition: Bounce,
+    });
 };
 
-export default{ alertSuccess, alertError}
+const alertLogin = (message) => {
+  toast.info(message, {
+    position: "top-center",
+    autoClose: 2000,
+    hideProgressBar: false,
+    closeOnClick: false,
+    pauseOnHover: false,
+    draggable: true,
+    progress: undefined,
+    theme: "light",
+    transition: Bounce,
+    });
+};
+
+export default{ alertSuccess, alertError, alertLogin}

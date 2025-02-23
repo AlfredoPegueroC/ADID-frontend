@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from "react";
 import Styles from "@styles/form.module.css";
-
+import Notification from "../Notification";
 
 export default function ImportPage({ onSuccess }) {
   const [file, setFile] = useState(null);
-  const [periods, setPeriods] = useState([]); // Array to store period options
-  const [selectedPeriod, setSelectedPeriod] = useState(""); // Track selected period
+  const [periods, setPeriods] = useState([]);
+  const [selectedPeriod, setSelectedPeriod] = useState(""); 
   const [message, setMessage] = useState("");
 
   const API = process.env.NEXT_PUBLIC_API_KEY;
@@ -65,19 +65,20 @@ export default function ImportPage({ onSuccess }) {
       const result = await response.json();
 
       if (response.ok) {
-        setMessage(result.message || "Import successful");
+        Notification.alertSuccess(result.message || "Import successful");
         if (onSuccess) onSuccess();
+        document.querySelector("#myform").reset();
       } else {
-        setMessage(result.error || "Error during import");
+        Notification.alertError(result.error || "Error durante la importacion.");
       }
     } catch (error) {
-      setMessage("An error occurred while uploading the file.");
+      Notification.alertError("Error mientras subiendo el archivo excel");
     }
   };
 
   return (
     <div>
-      <form onSubmit={handleSubmit} className={Styles.form}>
+      <form id="myform" onSubmit={handleSubmit} className={Styles.form}>
         <h1 className={Styles.title}>Subir Archivo Excel</h1>
 
         <div className={Styles.name_group}>

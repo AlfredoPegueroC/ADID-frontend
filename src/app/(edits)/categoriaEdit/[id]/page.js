@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import FormLayout from "@components/layouts/FormLayout";
 import Styles from "@styles/form.module.css";
-
+import Notification from "@components/Notification";
 // utils
 import withAuth from "@utils/withAuth";
 
@@ -58,14 +58,14 @@ function CategoriaEdit({ params }) {
       });
 
       if (response.ok) {
-        alert("Categoria updated successfully!");
+        Notification.alertSuccess("Categoria Docente Editada.");
         router.push("/categoriadocenteList");
       } else {
-        alert("Failed to update categoria.");
+        Notification.alertError("Fallo al editar");
       }
     } catch (error) {
       console.error("Error updating categoria:", error);
-      alert("An error occurred.");
+      Notification.alertError("Fallo al editar");
     }
   };
 

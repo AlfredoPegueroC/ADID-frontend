@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Styles from "@styles/login.module.css";
 import Image from 'next/image';
-
+import Notification from "@components/Notification";
 export default function LoginPage() {
   const router = useRouter();
   const [username, setUsername] = useState("");
@@ -38,8 +38,9 @@ export default function LoginPage() {
       localStorage.setItem("accessToken", data.access);
       localStorage.setItem("refreshToken", data.refresh);
 
-      alert("Logeado...");
+      
       router.push("/");
+      Notification.alertLogin('Logeado...')
     } catch (error) {
       setError(error.message);
     }

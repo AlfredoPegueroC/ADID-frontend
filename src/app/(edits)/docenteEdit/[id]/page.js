@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import FormLayout from "@components/layouts/FormLayout";
 import withAuth from "@utils/withAuth";
 import Styles from "@styles/form.module.css";
+import Notification from "@components/Notification";
 
 function DocenteEdit({ params }) {
   const router = useRouter();
@@ -76,15 +77,15 @@ function DocenteEdit({ params }) {
       });
       console.log(response);
       if (response.ok) {
-        alert("Docente updated successfully!");
+        Notification.alertSuccess("Docente Editado.");
         router.push("/docenteList");
       } else {
-        alert("Failed to update docente.");
+        Notification.alertError("Fallo al Editar.");
         console.log(response.json());
       }
     } catch (error) {
       console.error("Error updating docente:", error);
-      alert("An error occurred.");
+      Notification.alertError("Fallo al Editar.");
     }
   };
 

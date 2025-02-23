@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import Style from "@styles/navbar.module.css";
+import Notification from "./Notification";
 
 export default function Navbar() {
   const router = useRouter();
@@ -29,6 +30,7 @@ export default function Navbar() {
       if (response.ok) {
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
+        Notification.alertLogin('Saliendo...')
         router.push("/login");
       } else {
         const errorData = await response.json();

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Styles from "@styles/form.module.css";
 import FormLayout from "@components/layouts/FormLayout";
 import withAuth from "@utils/withAuth";
-
+import Notification from "@components/Notification";
 function EditUniversidad({ params }) {
   const router = useRouter();
 
@@ -49,14 +49,14 @@ function EditUniversidad({ params }) {
       });
 
       if (response.ok) {
-        alert("Universidad updated successfully!");
+        Notification.alertSuccess("Universidad Editado.");
         router.push("/universidadList");
       } else {
-        alert("Failed to update universidad.");
+        Notification.alertError("Fallo del Editado.");
       }
     } catch (error) {
       console.error("Error updating universidad:", error);
-      alert("An error occurred.");
+      Notification.alertError("An error occurred.");
     }
   };
 
