@@ -22,7 +22,6 @@ function HomeListClient() {
   const fetchData = useCallback(async () => {
     try {
       const allAsignaciones = await fetchHome();
-      console.log(allAsignaciones);
       setAsignaciones(allAsignaciones.results);
     } catch (error) {
       setError(error.message);
