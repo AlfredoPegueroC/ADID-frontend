@@ -16,7 +16,7 @@ export default function ImportPage({ onSuccess }) {
     const fetchData = async () => {
       try {
         const periodoResponse = await fetch(
-          `${API}/api/periodoacademico`
+          `${API}api/periodoacademico`
         );
         if (!periodoResponse.ok) throw new Error("Failed to fetch periodo");
         const periodoData = await periodoResponse.json();
