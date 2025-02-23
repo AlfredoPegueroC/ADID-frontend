@@ -26,7 +26,6 @@ function UniversidadListClient({ initialData }) {
   const Api_import_URL = `${API}/import/universidad`;
 
   const fetchData = useCallback(async () => {
-    setLoading(true);
     try {
       const searchParam = searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : "";
       const response = await fetch(`${API}/api/universidad?page=${page}${searchParam}`);

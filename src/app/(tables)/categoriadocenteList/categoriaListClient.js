@@ -1,13 +1,16 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import Pagination from "@components/Pagination";
-import Tables from "@components/Tables";
+import { debounce } from "lodash";
+
 import Modal from "@components/Modal";
 import ImportExcel from "@components/forms/Import";
 import Search from "@components/search";
+import Tables from "@components/Tables";
+import Pagination from "@components/Pagination";
+
 import withAuth from "@utils/withAuth";
 import { deleteEntity } from "@utils/delete";
 import { fetchCategorias } from "@api/categoriaService";
@@ -15,55 +18,38 @@ import { fetchCategorias } from "@api/categoriaService";
 function CategoriaListClient({ initialData, totalPages }) {
   const [categorias, setCategorias] = useState(initialData);
   const [currentPage, setCurrentPage] = useState(1);
-  const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const fetchCategoriaData = async (page, query) => {
-    try {
-      const { results } = await fetchCategorias(query, page);
-      setCategorias(results);
-    } catch (error) {
-      console.error("Error fetching categorias:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const API = process.env.NEXT_PUBLIC_API_KEY;
+  const Api_import_URL = `${API}/import/categoriaDocente`;
 
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
-    fetchCategoriaData(page, searchQuery);
+  const deleteCategoria = (pk) => {
+    deleteEntity(`${API}/api/categoriadocente/delete`, pk, setCategorias, "categoriaCodigo");
   };
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
   };
 
+  const debouncedFetchData = debounce(async () => {
+    const { results } = await fetchCategorias(searchQuery, currentPage);
+    setCategorias(results);
+  }, 300);
+
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    fetchCategoriaData(currentPage, searchQuery);
+    debouncedFetchData();
   };
-
-  useEffect(() => {
-    fetchCategoriaData(currentPage, searchQuery);
-  }, [currentPage, searchQuery]);
-
-  if (loading) {
-    return (
-      <div className="spinner-container">
-        <div className="spinner"></div>
-      </div>
-    );
-  }
 
   return (
     <div className="mt-5">
-      <h1 className="text-dark">Lista Categoría docente</h1>
+      <h1 className="text-dark">Lista Categoría Docente</h1>
       <div className="d-flex gap-2 mb-3 mt-3">
         <Link className="btn btn-primary" href="/categoriadocente">
           Nuevo Categoría
         </Link>
         {categorias.length > 0 && (
-          <Link className="btn btn-success" href={`${process.env.NEXT_PUBLIC_API_KEY}/export/categoriaDocente`}>
+          <Link className="btn btn-success" href={`${API}/export/categoriaDocente`}>
             Exportar
           </Link>
         )}
@@ -73,7 +59,7 @@ function CategoriaListClient({ initialData, totalPages }) {
       </div>
 
       <Modal title="Importar Categoria">
-        <ImportExcel importURL={`${process.env.NEXT_PUBLIC_API_KEY}/import/categoriaDocente`} onSuccess={() => fetchCategoriaData(currentPage, searchQuery)} />
+        <ImportExcel importURL={Api_import_URL} onSuccess={debouncedFetchData} />
       </Modal>
 
       <Search SearchSubmit={handleSearchSubmit} SearchChange={handleSearchChange} searchQuery={searchQuery} />
@@ -106,7 +92,10 @@ function CategoriaListClient({ initialData, totalPages }) {
                   <Link href={`/categoriaEdit/${categoria.categoriaCodigo}`} className="btn btn-primary btn-sm">
                     <Image src="/edit.svg" alt="editar" width={20} height={20} />
                   </Link>
-                  <button className="btn btn-danger btn-sm mx-2" onClick={() => deleteEntity(`${process.env.NEXT_PUBLIC_API_KEY}/api/categoriadocente/delete`, categoria.categoriaCodigo, setCategorias, "categoriaCodigo")}>
+                  <button
+                    className="btn btn-danger btn-sm mx-2"
+                    onClick={() => deleteCategoria(categoria.categoriaCodigo)}
+                  >
                     <Image src="/delete.svg" alt="borrar" width={20} height={20} />
                   </button>
                 </td>
@@ -116,15 +105,10 @@ function CategoriaListClient({ initialData, totalPages }) {
         </tbody>
       </Tables>
 
-      {totalPages > 1 && (
-        <Pagination
-          page={currentPage}
-          totalPages={totalPages}
-          onPageChange={handlePageChange}
-        />
-      )}
+      {totalPages > 1 && <Pagination page={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />}
     </div>
   );
 }
 
 export default withAuth(CategoriaListClient);
+

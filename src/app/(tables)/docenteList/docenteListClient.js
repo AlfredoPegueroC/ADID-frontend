@@ -136,7 +136,7 @@ function DocenteListClient({ initialData, totalPages }) {
         <Pagination
           page={currentPage}
           totalPages={totalPages}
-          onPageChange={handlePageChange} // Pass the handlePageChange function
+          onPageChange={handlePageChange}
         />
       )}
     </div>
