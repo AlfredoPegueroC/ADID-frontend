@@ -12,7 +12,7 @@ export async function fetchUniversidades(page, searchQuery) {
 
     const data = await response.json();
     return {
-      universidades: data.results || [],
+      results: data.results || [],
       totalPages: Math.ceil(data.count / 30),
     };
   } catch (error) {

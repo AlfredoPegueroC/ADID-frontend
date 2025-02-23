@@ -19,13 +19,11 @@ function EscuelaListClient() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
-  const [error, setError] = useState(null);
 
   const API = process.env.NEXT_PUBLIC_API_KEY;
   const Api_import_URL = `${API}/import/escuela`;
 
   const fetchData = useCallback(async () => {
-    setError(null);
     try {
       const { results, totalPages } = await fetchEscuelas(searchQuery, page);
       setEscuelas(results);
