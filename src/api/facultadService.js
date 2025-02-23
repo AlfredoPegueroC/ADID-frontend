@@ -5,8 +5,8 @@ export async function fetchFacultades(searchQuery = "", page = 1) {
     const searchParam = searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : "";
 
     const [facultadesResponse, universidadesResponse] = await Promise.all([
-      fetch(`${API}/api/facultad?page=${page}${searchParam}`),
-      fetch(`${API}/api/universidad`),
+      fetch(`${API}api/facultad?page=${page}${searchParam}`),
+      fetch(`${API}api/universidad`),
     ]);
 
     if (!facultadesResponse.ok || !universidadesResponse.ok) {

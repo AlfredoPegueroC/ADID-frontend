@@ -25,7 +25,7 @@ function PeriodoListClient({ initialData, totalPages }) {
 
   const deletePeriodo = (pk) => {
     deleteEntity(
-      `${API}/api/periodoacademico/delete`,
+      `${API}api/periodoacademico/delete`,
       pk,
       setPeriodos,
       "periodoAcademicoCodigo"
@@ -61,7 +61,7 @@ function PeriodoListClient({ initialData, totalPages }) {
         {periodos.length > 0 && (
           <Link
             className="btn btn-success"
-            href={`${API}/export/periodoAcademico`}
+            href={`${API}export/periodoAcademico`}
           >
             Exportar
           </Link>

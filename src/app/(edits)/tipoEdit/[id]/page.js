@@ -18,12 +18,12 @@ function TipoEdit({ params }) {
   useEffect(() => {
     async function fetchData() {
       try {
-        const tipoResponse = await fetch(`${API}/api/tipodocente/${id}/`);
+        const tipoResponse = await fetch(`${API}api/tipodocente/${id}/`);
         if (!tipoResponse.ok) throw new Error("Failed to fetch tipo");
         const tipoData = await tipoResponse.json();
         setTipo(tipoData);
 
-        const universidadesResponse = await fetch(`${API}/api/universidad`);
+        const universidadesResponse = await fetch(`${API}api/universidad`);
         if (!universidadesResponse.ok)
           throw new Error("Failed to fetch universidades");
         const universidadesData = await universidadesResponse.json();
@@ -43,7 +43,7 @@ function TipoEdit({ params }) {
     if (!tipo) return;
 
     try {
-      const response = await fetch(`${API}/api/tipodocente/edit/${id}/`, {
+      const response = await fetch(`${API}api/tipodocente/edit/${id}/`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

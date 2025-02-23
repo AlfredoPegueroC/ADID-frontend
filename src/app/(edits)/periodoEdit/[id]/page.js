@@ -19,13 +19,13 @@ function EditPeriodo({ params }) {
     async function fetchData() {
       try {
         const periodoesResponse = await fetch(
-          `${API}/api/periodoacademico/${id}/`
+          `${API}api/periodoacademico/${id}/`
         );
         if (!periodoesResponse.ok) throw new Error("Failed to fetch periodoes");
         const periodoesData = await periodoesResponse.json();
         setperiodo(periodoesData);
 
-        const universidadesResponse = await fetch(`${API}/api/universidad`);
+        const universidadesResponse = await fetch(`${API}api/universidad`);
         if (!universidadesResponse.ok)
           throw new Error("Failed to fetch universidades");
         const universidadesData = await universidadesResponse.json();
@@ -45,7 +45,7 @@ function EditPeriodo({ params }) {
     if (!periodo) return;
 
     try {
-      const response = await fetch(`${API}/api/periodoacademico/edit/${id}/`, {
+      const response = await fetch(`${API}api/periodoacademico/edit/${id}/`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

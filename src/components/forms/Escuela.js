@@ -20,7 +20,7 @@ export default function EscuelaForm() {
   useEffect(() => {
     const fetchUniversidades = async () => {
       try {
-        const response = await fetch(`${API}/api/universidad`);
+        const response = await fetch(`${API}api/universidad`);
         const data = await response.json();
         setUniversidades(data.results);
       } catch (error) {
@@ -30,7 +30,7 @@ export default function EscuelaForm() {
 
     const fetchFacultades = async () => {
       try {
-        const response = await fetch(`${API}/api/facultad`);
+        const response = await fetch(`${API}api/facultad`);
         const data = await response.json();
         setFacultades(data.results);
       } catch (error) {
@@ -74,7 +74,7 @@ export default function EscuelaForm() {
     };
 
     try {
-      const response = await fetch(`${API}/api/escuela/create`, {
+      const response = await fetch(`${API}api/escuela/create`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

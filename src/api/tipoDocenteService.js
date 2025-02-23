@@ -5,8 +5,8 @@ export async function fetchTipoDocentes(searchQuery = "", page = 1) {
     const searchParam = searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : "";
 
     const [tipoResponse, universidadResponse] = await Promise.all([
-      fetch(`${API}/api/tipodocente?page=${page}${searchParam}`),
-      fetch(`${API}/api/universidad`),
+      fetch(`${API}api/tipodocente?page=${page}${searchParam}`),
+      fetch(`${API}api/universidad`),
     ]);
 
     if (!tipoResponse.ok || !universidadResponse.ok) {

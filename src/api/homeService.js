@@ -1,7 +1,7 @@
 export async function fetchHome(period = "", page = 1) {
   const API = process.env.NEXT_PUBLIC_API_KEY;
   let allPeriodo = [];
-  let nextUrl = `${API}/api/asignacion`;
+  let nextUrl = `${API}api/asignacion`;
 
   try {
     // Fetch all pages of asignaciones
@@ -23,7 +23,7 @@ export async function fetchHome(period = "", page = 1) {
 
     // Fetch asignaciones count for pagination
     const periodParam = period ? `&period=${encodeURIComponent(period)}` : "";
-    const asignacionResponse = await fetch(`${API}/api/asignacion?page=${page}${periodParam}`);
+    const asignacionResponse = await fetch(`${API}api/asignacion?page=${page}${periodParam}`);
 
     if (!asignacionResponse.ok) throw new Error("Failed to fetch asignaciones");
 

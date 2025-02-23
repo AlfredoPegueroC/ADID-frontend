@@ -22,7 +22,7 @@ export default function TipoDocenteForm() {
     // Fetch universidades from API when component mounts
     const fetchUniversidades = async () => {
       try {
-        const response = await fetch(`${API}/api/universidad`);
+        const response = await fetch(`${API}api/universidad`);
         const data = await response.json();
         setUniversidades(data.results);
       } catch (error) {
@@ -45,7 +45,7 @@ export default function TipoDocenteForm() {
     e.preventDefault();
 
     const response = await fetch(
-      `${API}/api/tipodocente/create`,
+      `${API}api/tipodocente/create`,
       {
         method: "POST",
         headers: {

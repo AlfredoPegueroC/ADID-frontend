@@ -18,13 +18,13 @@ function EditFacultad({ params }) {
   useEffect(() => {
     async function fetchData() {
       try {
-        const facultadesResponse = await fetch(`${API}/api/facultad/${id}/`);
+        const facultadesResponse = await fetch(`${API}api/facultad/${id}/`);
         if (!facultadesResponse.ok)
           throw new Error("Failed to fetch facultades");
         const facultadesData = await facultadesResponse.json();
         setFacultad(facultadesData);
 
-        const universidadesResponse = await fetch(`${API}/api/universidad`);
+        const universidadesResponse = await fetch(`${API}api/universidad`);
         if (!universidadesResponse.ok)
           throw new Error("Failed to fetch universidades");
         const universidadesData = await universidadesResponse.json();
@@ -44,7 +44,7 @@ function EditFacultad({ params }) {
     if (!facultad) return;
 
     try {
-      const response = await fetch(`${API}/api/facultad/edit/${id}/`, {
+      const response = await fetch(`${API}api/facultad/edit/${id}/`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

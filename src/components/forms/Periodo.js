@@ -23,7 +23,7 @@ export default function Periodo({ title, onSuccess }) {
 
   async function cargarUniversidades() {
     try {
-      const response = await fetch(`${API}/api/universidad`);
+      const response = await fetch(`${API}api/universidad`);
       if (!response.ok) throw new Error("Failed to fetch universities");
       const data = await response.json();
       setUniversidades(data.results);
@@ -53,7 +53,7 @@ export default function Periodo({ title, onSuccess }) {
 
     try {
       const response = await fetch(
-        `${API}/api/periodoacademico/create`,
+        `${API}api/periodoacademico/create`,
         {
           method: "POST",
           headers: {

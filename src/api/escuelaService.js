@@ -5,9 +5,9 @@ export async function fetchEscuelas(searchQuery = "", page = 1) {
     const searchParam = searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : "";
 
     const [escuelaResponse, facultadResponse, universidadResponse] = await Promise.all([
-      fetch(`${API}/api/escuela?page=${page}${searchParam}`),
-      fetch(`${API}/api/facultad`),
-      fetch(`${API}/api/universidad`),
+      fetch(`${API}api/escuela?page=${page}${searchParam}`),
+      fetch(`${API}api/facultad`),
+      fetch(`${API}api/universidad`),
     ]);
 
     if (!escuelaResponse.ok) throw new Error("Failed to fetch escuelas");

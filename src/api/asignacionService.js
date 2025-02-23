@@ -6,7 +6,7 @@ export async function fetchAsignacionData(periodo, page = 1, searchQuery = "") {
   try {
 
     const asignacionResponse = await fetch(
-      `${API}/api/asignacion?page=${page}&period=${periodo}${searchParam}`
+      `${API}api/asignacion?page=${page}&period=${periodo}${searchParam}`
     );
     if (!asignacionResponse.ok) {
       throw new Error("Failed to fetch asignaciones");
@@ -14,9 +14,9 @@ export async function fetchAsignacionData(periodo, page = 1, searchQuery = "") {
     const asignacionData = await asignacionResponse.json();
 
     const [facultadResponse, escuelaResponse, docenteResponse] = await Promise.all([
-      fetch(`${API}/api/facultad`),
-      fetch(`${API}/api/escuela`),
-      fetch(`${API}/api/docente`),
+      fetch(`${API}api/facultad`),
+      fetch(`${API}api/escuela`),
+      fetch(`${API}api/docente`),
     ]);
 
     if (!facultadResponse.ok || !escuelaResponse.ok || !docenteResponse.ok) {

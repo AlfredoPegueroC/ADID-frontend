@@ -21,10 +21,10 @@ function CategoriaListClient({ initialData, totalPages }) {
   const [searchQuery, setSearchQuery] = useState("");
 
   const API = process.env.NEXT_PUBLIC_API_KEY;
-  const Api_import_URL = `${API}/import/categoriaDocente`;
+  const Api_import_URL = `${API}import/categoriaDocente`;
 
   const deleteCategoria = (pk) => {
-    deleteEntity(`${API}/api/categoriadocente/delete`, pk, setCategorias, "categoriaCodigo");
+    deleteEntity(`${API}api/categoriadocente/delete`, pk, setCategorias, "categoriaCodigo");
   };
 
   const handleSearchChange = (e) => {
@@ -49,7 +49,7 @@ function CategoriaListClient({ initialData, totalPages }) {
           Nuevo Categoría
         </Link>
         {categorias.length > 0 && (
-          <Link className="btn btn-success" href={`${API}/export/categoriaDocente`}>
+          <Link className="btn btn-success" href={`${API}export/categoriaDocente`}>
             Exportar
           </Link>
         )}

@@ -21,10 +21,10 @@ function TipodocenteListClient({ initialData, totalPages }) {
   const [searchQuery, setSearchQuery] = useState("");
 
   const API = process.env.NEXT_PUBLIC_API_KEY;
-  const Api_import_URL = `${API}/import/tipoDocente`;
+  const Api_import_URL = `${API}import/tipoDocente`;
 
   const deleteTipo = (pk) => {
-    deleteEntity(`${API}/api/tipodocente/delete`, pk, setTipodocentes, "tipoDocenteCodigo");
+    deleteEntity(`${API}api/tipodocente/delete`, pk, setTipodocentes, "tipoDocenteCodigo");
   };
 
   const handleSearchChange = (e) => {

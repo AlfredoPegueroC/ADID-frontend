@@ -16,7 +16,7 @@ function EditUniversidad({ params }) {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch(`${API}/api/universidad/${id}/`)
+    fetch(`${API}api/universidad/${id}/`)
       .then((response) => {
         if (!response.ok) {
           console.log("faild");
@@ -40,7 +40,7 @@ function EditUniversidad({ params }) {
     if (!universidad) return;
 
     try {
-      const response = await fetch(`${API}/api/universidad/edit/${id}/`, {
+      const response = await fetch(`${API}api/universidad/edit/${id}/`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

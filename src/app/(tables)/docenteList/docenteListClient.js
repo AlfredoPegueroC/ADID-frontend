@@ -46,7 +46,7 @@ function DocenteListClient({ initialData, totalPages }) {
   };
 
   const deleteDocente = useCallback((pk) => {
-    deleteEntity(`${API}/api/docente/delete`, pk, setDocentes, "Docentecodigo");
+    deleteEntity(`${API}api/docente/delete`, pk, setDocentes, "Docentecodigo");
   }, [API]);
 
   // Create a debounced function to fetch docentes data
@@ -73,12 +73,12 @@ function DocenteListClient({ initialData, totalPages }) {
       <h1 className="text-dark">Lista Docente</h1>
       <div className="d-flex gap-2 mb-3 mt-3">
         <Link className="btn btn-primary" href="/docente">Agregar Docente</Link>
-        {docentes.length > 0 && <Link className="btn btn-success" href={`${API}/export/docente`}>Exportar</Link>}
+        {docentes.length > 0 && <Link className="btn btn-success" href={`${API}export/docente`}>Exportar</Link>}
         <button type="button" className="btn btn-warning" data-bs-toggle="modal" data-bs-target="#Modal">Importar</button>
       </div>
 
       <Modal title="Importar Docente">
-        <ImportExcel importURL={`${API}/import/docente`} onSuccess={() => fetchDocentesData(currentPage, searchQuery)} />
+        <ImportExcel importURL={`${API}import/docente`} onSuccess={() => fetchDocentesData(currentPage, searchQuery)} />
       </Modal>
 
       <Search SearchSubmit={handleSearchSubmit} SearchChange={handleSearchChange} searchQuery={searchQuery} />

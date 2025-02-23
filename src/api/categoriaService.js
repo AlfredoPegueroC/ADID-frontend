@@ -5,8 +5,8 @@ export async function fetchCategorias(searchQuery = "", page = 1) {
     const searchParam = searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : "";
 
     const [categoriaResponse, universidadResponse] = await Promise.all([
-      fetch(`${API}/api/categoriaDocente?page=${page}${searchParam}`),
-      fetch(`${API}/api/universidad`), // Fetching universities to associate with categories
+      fetch(`${API}api/categoriaDocente?page=${page}${searchParam}`),
+      fetch(`${API}api/universidad`), // Fetching universities to associate with categories
     ]);
 
     if (!categoriaResponse.ok) throw new Error("Failed to fetch categorias");

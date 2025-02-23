@@ -22,7 +22,7 @@ function EscuelaListClient() {
   const [error, setError] = useState(null);
 
   const API = process.env.NEXT_PUBLIC_API_KEY;
-  const Api_import_URL = `${API}/import/escuela`;
+  const Api_import_URL = `${API}import/escuela`;
 
   const fetchData = useCallback(async () => {
     setError(null);
@@ -43,7 +43,7 @@ function EscuelaListClient() {
   }, [fetchData]);
 
   const deleteEscuela = (pk) => {
-    deleteEntity(`${API}/api/escuela/delete`, pk, setEscuelas, "escuelaCodigo");
+    deleteEntity(`${API}api/escuela/delete`, pk, setEscuelas, "escuelaCodigo");
   };
 
   const handleSearchChange = debounce((e) => {
@@ -72,7 +72,7 @@ function EscuelaListClient() {
           Nuevo Escuela
         </Link>
         {escuelas.length > 0 && (
-          <Link className="btn btn-success" href={`${API}/export/escuela`}>
+          <Link className="btn btn-success" href={`${API}export/escuela`}>
             Exportar
           </Link>
         )}

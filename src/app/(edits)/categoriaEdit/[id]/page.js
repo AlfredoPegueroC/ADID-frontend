@@ -29,7 +29,7 @@ function CategoriaEdit({ params }) {
         const categoriasData = await categoriasResponse.json();
         setCategoria(categoriasData);
 
-        const universidadesResponse = await fetch(`${API}/api/universidad`);
+        const universidadesResponse = await fetch(`${API}api/universidad`);
         if (!universidadesResponse.ok)
           throw new Error("Failed to fetch universidades");
         const universidadesData = await universidadesResponse.json();
@@ -49,7 +49,7 @@ function CategoriaEdit({ params }) {
     if (!categoria) return;
 
     try {
-      const response = await fetch(`${API}/api/categoriadocente/edit/${id}/`, {
+      const response = await fetch(`${API}api/categoriadocente/edit/${id}/`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

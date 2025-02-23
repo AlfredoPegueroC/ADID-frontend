@@ -21,7 +21,7 @@ export default function CategoriaDocenteForm() {
   useEffect(() => {
     const fetchUniversidades = async () => {
       try {
-        const response = await fetch(`${API}/api/universidad`);
+        const response = await fetch(`${API}api/universidad`);
         const data = await response.json();
         setUniversidades(data.results);
       } catch (error) {
@@ -46,7 +46,7 @@ export default function CategoriaDocenteForm() {
     e.preventDefault();
 
     const response = await fetch(
-      `${API}/api/categoriadocente/create`,
+      `${API}api/categoriadocente/create`,
       {
         method: "POST",
         headers: {

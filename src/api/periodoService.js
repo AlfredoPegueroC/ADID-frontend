@@ -5,8 +5,8 @@ export async function fetchPeriodos(searchQuery = "", page = 1) {
     const searchParam = searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : "";
 
     const [periodoResponse, universidadResponse] = await Promise.all([
-      fetch(`${API}/api/periodoacademico?page=${page}${searchParam}`),
-      fetch(`${API}/api/universidad`),
+      fetch(`${API}api/periodoacademico?page=${page}${searchParam}`),
+      fetch(`${API}api/universidad`),
     ]);
 
     if (!periodoResponse.ok || !universidadResponse.ok) {

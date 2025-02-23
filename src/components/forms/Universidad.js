@@ -19,7 +19,7 @@ export default function Universidad({ title }) {
     };
 
     try {
-      const response = await fetch(`${API}/api/universidad/create`, {
+      const response = await fetch(`${API}api/universidad/create`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

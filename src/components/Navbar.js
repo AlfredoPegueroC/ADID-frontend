@@ -19,7 +19,7 @@ export default function Navbar() {
     }
 
     try {
-      const response = await fetch(`${API}/api/logout`, {
+      const response = await fetch(`${API}api/logout`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -24,24 +24,24 @@ function AsignacionEdit({ params }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const asignacionResponse = await fetch(`${API}/api/asignacion/${id}/`);
+        const asignacionResponse = await fetch(`${API}api/asignacion/${id}/`);
         if (!asignacionResponse.ok)
           throw new Error("Fallo la llamada de datos asignacion");
         const asignacionData = await asignacionResponse.json();
         setAsignacion(asignacionData); //
 
-        const facultadesResponse = await fetch(`${API}/api/facultad`);
+        const facultadesResponse = await fetch(`${API}api/facultad`);
         if (!facultadesResponse.ok)
           throw new Error("Failed to fetch facultades");
         const facultadesData = await facultadesResponse.json();
         setFacultades(facultadesData.results);
 
-        const escuelasResponse = await fetch(`${API}/api/escuela`);
+        const escuelasResponse = await fetch(`${API}api/escuela`);
         if (!escuelasResponse.ok) throw new Error("Failed to fetch escuelas");
         const escuelasData = await escuelasResponse.json();
         setEscuelas(escuelasData.results);
 
-        const docenteResponse = await fetch(`${API}/api/docente`);
+        const docenteResponse = await fetch(`${API}api/docente`);
         if (!docenteResponse.ok) throw new Error("Failed to fetch docentes");
         const docentesData = await docenteResponse.json();
         setDocentes(docentesData.results);
@@ -60,7 +60,7 @@ function AsignacionEdit({ params }) {
     if (!asignacion) return;
 
     try {
-      const response = await fetch(`${API}/api/asignacion/edit/${id}/`, {
+      const response = await fetch(`${API}api/asignacion/edit/${id}/`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

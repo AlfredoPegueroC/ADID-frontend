@@ -57,7 +57,7 @@ export default function ImportPage({ onSuccess }) {
     formData.append("period", selectedPeriod);
 
     try {
-      const response = await fetch(`${API}/import/asignacion`, {
+      const response = await fetch(`${API}import/asignacion`, {
         method: "POST",
         body: formData,
       });

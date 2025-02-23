@@ -22,10 +22,10 @@ function FacultadListClient({ initialData, totalPages }) {
   const [searchQuery, setSearchQuery] = useState("");
 
   const API = process.env.NEXT_PUBLIC_API_KEY;
-  const Api_import_URL = `${API}/import/facultad`;
+  const Api_import_URL = `${API}import/facultad`;
 
   const deleteFacultad = (pk) => {
-    deleteEntity(`${API}/api/facultad/delete`, pk, setFacultades, "facultadCodigo");
+    deleteEntity(`${API}api/facultad/delete`, pk, setFacultades, "facultadCodigo");
   };
 
   const handleSearchChange = (e) => {
@@ -50,7 +50,7 @@ function FacultadListClient({ initialData, totalPages }) {
           Nuevo Facultad
         </Link>
         {facultades.length > 0 && (
-          <Link className="btn btn-success" href={`${API}/export/facultad`}>
+          <Link className="btn btn-success" href={`${API}export/facultad`}>
             Exportar
           </Link>
         )}

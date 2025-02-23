@@ -5,12 +5,12 @@ export async function fetchDocentes(searchQuery = "", page = 1) {
     const searchParam = searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : "";
 
     const [docenteResponse, universidadResponse, facultadResponse, escuelaResponse, tipoResponse, categoriaResponse] = await Promise.all([
-      fetch(`${API}/api/docente?page=${page}${searchParam}`),
-      fetch(`${API}/api/universidad`),
-      fetch(`${API}/api/facultad`),
-      fetch(`${API}/api/escuela`),
-      fetch(`${API}/api/tipodocente`),
-      fetch(`${API}/api/categoriaDocente`),
+      fetch(`${API}api/docente?page=${page}${searchParam}`),
+      fetch(`${API}api/universidad`),
+      fetch(`${API}api/facultad`),
+      fetch(`${API}api/escuela`),
+      fetch(`${API}api/tipodocente`),
+      fetch(`${API}api/categoriaDocente`),
     ]);
 
     if (!docenteResponse.ok) throw new Error("Failed to fetch docentes");

@@ -50,7 +50,7 @@ function UniversidadListClient({ initialData }) {
 
   const handleDelete = (pk) => {
     deleteEntity(
-      `${process.env.NEXT_PUBLIC_API_KEY}/api/universidad/delete`,
+      `${process.env.NEXT_PUBLIC_API_KEY}api/universidad/delete`,
       pk,
       setUniversidades,
       "UniversidadCodigo"
@@ -67,7 +67,7 @@ function UniversidadListClient({ initialData }) {
         {universidades.length > 0 && (
           <Link
             className="btn btn-success"
-            href={`${process.env.NEXT_PUBLIC_API_KEY}/export/universidad`}
+            href={`${process.env.NEXT_PUBLIC_API_KEY}export/universidad`}
           >
             Exportar
           </Link>

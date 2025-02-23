@@ -37,11 +37,11 @@ export default function DocenteForm() {
       setIsLoading(true); // Set loading to true while fetching data
       try {
         const responses = await Promise.all([
-          fetch(`${API}/api/universidad`),
-          fetch(`${API}/api/facultad`),
-          fetch(`${API}/api/escuela`),
-          fetch(`${API}/api/tipodocente`),
-          fetch(`${API}/api/categoriaDocente`),
+          fetch(`${API}api/universidad`),
+          fetch(`${API}api/facultad`),
+          fetch(`${API}api/escuela`),
+          fetch(`${API}api/tipodocente`),
+          fetch(`${API}api/categoriaDocente`),
         ]);
         const data = await Promise.all(responses.map((res) => res.json()));
 
@@ -75,7 +75,7 @@ export default function DocenteForm() {
     e.preventDefault();
     
     try {
-      const response = await fetch(`${API}/api/docente/create`, {
+      const response = await fetch(`${API}api/docente/create`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -22,7 +22,7 @@ export default function FacultadForm({ title }) {
   useEffect(() => {
     async function cargarUniversidades() {
       try {
-        const response = await fetch(`${API}/api/universidad`);
+        const response = await fetch(`${API}api/universidad`);
         if (!response.ok) throw new Error("Failed to fetch universities");
         const data = await response.json();
         setUniversidades(data.results);
@@ -49,7 +49,7 @@ export default function FacultadForm({ title }) {
     setIsLoading(true);
     try {
       const response = await fetch(
-        `${API}/api/facultad/create`,
+        `${API}api/facultad/create`,
         {
           method: "POST",
           headers: {

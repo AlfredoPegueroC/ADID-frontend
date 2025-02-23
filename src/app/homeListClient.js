@@ -17,7 +17,7 @@ function HomeListClient() {
   const [successMessage, setSuccessMessage] = useState("");
 
   const API = process.env.NEXT_PUBLIC_API_KEY;
-  const Api_import_URL = `${API}/import/asignacion`;
+  const Api_import_URL = `${API}import/asignacion`;
 
   const fetchData = useCallback(async () => {
     try {
@@ -48,7 +48,7 @@ function HomeListClient() {
 
     try {
       const response = await fetch(
-        `${API}/api/asignacionDocente/delete?period=${period}`,
+        `${API}api/asignacionDocente/delete?period=${period}`,
         {
           method: "DELETE",
         }
@@ -137,7 +137,7 @@ function HomeListClient() {
               <div className="home_btns">
                 <Link
                   className="btn btn-success btn-sm ms-1"
-                  href={`${API}/export/asignacionDocenteExport?period=${asig.periodo}`}
+                  href={`${API}export/asignacionDocenteExport?period=${asig.periodo}`}
                 >
                   <Image
                     src="/descargar-icon.svg"

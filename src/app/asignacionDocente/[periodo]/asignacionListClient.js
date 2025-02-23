@@ -48,7 +48,7 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages, perio
   };
 
   const deleteAsignacion = useCallback((id) => {
-    deleteEntity(`${API}/api/asignacionDocente/delete`, id, setAsignaciones, "ADIDcodigo");
+    deleteEntity(`${API}api/asignacionDocente/delete`, id, setAsignaciones, "ADIDcodigo");
   }, [API]);
 
   // Create a debounced function to handle search input
@@ -58,7 +58,7 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages, perio
     <div className="mt-4">
       <Link
         className="btn btn-success my-2"
-        href={`${API}/export/asignacionDocenteExport?period=${periodo}`}
+        href={`${API}export/asignacionDocenteExport?period=${periodo}`}
       >
         Exportar
       </Link>

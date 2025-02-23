@@ -4,7 +4,7 @@ export async function fetchUniversidades(page, searchQuery) {
   const searchParam = searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : "";
   
   try {
-    const response = await fetch(`${API}/api/universidad?page=${page}${searchParam}`, {
+    const response = await fetch(`${API}api/universidad?page=${page}${searchParam}`, {
       cache: "no-store",
     });
 
