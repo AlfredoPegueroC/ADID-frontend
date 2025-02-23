@@ -64,7 +64,7 @@ export default function Periodo({ title, onSuccess }) {
       );
 
       if (response.ok) {
-        alert("Periodo Académico creado exitosamente");
+        Notification.alertSuccess("Periodo Académico creado exitosamente");
         setFormData({
           periodoAcademicoCodigo: "",
           nombre: "",
