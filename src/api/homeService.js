@@ -4,7 +4,6 @@ export async function fetchHome(period = "", page = 1) {
   let nextUrl = `${API}api/asignacion`;
 
   try {
-  
     while (nextUrl) {
       const response = await fetch(nextUrl);
       if (!response.ok) throw new Error("Fallo al buscar los datos");
@@ -12,25 +11,24 @@ export async function fetchHome(period = "", page = 1) {
 
       allPeriodo = allPeriodo.concat(data.results);
 
-     
-      nextUrl = data.next; 
+      nextUrl = data.next;
     }
 
-  
     const uniquePeriodo = [
       ...new Set(allPeriodo.map((asig) => asig.period)),
     ].map((periodo) => ({ periodo }));
-    console.log(uniquePeriodo)
-   
+
     const periodParam = period ? `&period=${encodeURIComponent(period)}` : "";
-    const asignacionResponse = await fetch(`${API}api/asignacion?page=${page}${periodParam}`);
+    const asignacionResponse = await fetch(
+      `${API}api/asignacion?page=${page}${periodParam}`
+    );
 
     if (!asignacionResponse.ok) throw new Error("Failed to fetch asignaciones");
 
     const asignacionData = await asignacionResponse.json();
 
     return {
-      results: uniquePeriodo, 
+      results: uniquePeriodo,
       totalPages: Math.ceil(asignacionData.count / 30),
     };
   } catch (error) {
