@@ -7,7 +7,7 @@ import Notification from "../Notification";
 export default function ImportPage({ onSuccess }) {
   const [file, setFile] = useState(null);
   const [periods, setPeriods] = useState([]);
-  const [selectedPeriod, setSelectedPeriod] = useState(""); 
+  const [selectedPeriod, setSelectedPeriod] = useState("");
   const [message, setMessage] = useState("");
 
   const API = process.env.NEXT_PUBLIC_API_KEY;
@@ -15,9 +15,7 @@ export default function ImportPage({ onSuccess }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const periodoResponse = await fetch(
-          `${API}api/periodoacademico`
-        );
+        const periodoResponse = await fetch(`${API}api/periodoacademico`);
         if (!periodoResponse.ok) throw new Error("Failed to fetch periodo");
         const periodoData = await periodoResponse.json();
         setPeriods(periodoData.results);
@@ -65,12 +63,15 @@ export default function ImportPage({ onSuccess }) {
       const result = await response.json();
 
       if (response.ok) {
+        Notification.alertSuccess(result || "Import successful");
         if (onSuccess) onSuccess();
-        Notification.alertSuccess(result.failed_records || "Import successful");
-        
+        console.log(response);
+
         document.querySelector("#myform").reset();
       } else {
-        Notification.alertError(result.error || "Error durante la importacion.");
+        Notification.alertError(
+          result.error || "Error durante la importacion."
+        );
       }
     } catch (error) {
       Notification.alertError("Error mientras subiendo el archivo excel");
