@@ -37,7 +37,7 @@ function PeriodoListClient({ initialData, totalPages }) {
   };
 
   const debouncedFetchData = debounce(async () => {
-    const { results } = await fetchPeriodos(page, searchQuery);
+    const { results } = await fetchPeriodos(searchQuery, page);
     setPeriodos(results);
   }, 300);
 
