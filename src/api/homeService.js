@@ -4,7 +4,7 @@ export async function fetchHome(period = "", page = 1) {
   let nextUrl = `${API}api/asignacion`;
 
   try {
-    // Fetch all pages of asignaciones
+  
     while (nextUrl) {
       const response = await fetch(nextUrl);
       if (!response.ok) throw new Error("Fallo al buscar los datos");
@@ -12,16 +12,16 @@ export async function fetchHome(period = "", page = 1) {
 
       allPeriodo = allPeriodo.concat(data.results);
 
-      // Update nextUrl for pagination
-      nextUrl = data.next; // Assuming your API follows pagination with "next" key
+     
+      nextUrl = data.next; 
     }
 
-    // Extract unique periods
+  
     const uniquePeriodo = [
       ...new Set(allPeriodo.map((asig) => asig.period)),
     ].map((periodo) => ({ periodo }));
-
-    // Fetch asignaciones count for pagination
+    console.log(uniquePeriodo)
+   
     const periodParam = period ? `&period=${encodeURIComponent(period)}` : "";
     const asignacionResponse = await fetch(`${API}api/asignacion?page=${page}${periodParam}`);
 
@@ -30,8 +30,8 @@ export async function fetchHome(period = "", page = 1) {
     const asignacionData = await asignacionResponse.json();
 
     return {
-      results: uniquePeriodo,  // Return results as an array
-      totalPages: Math.ceil(asignacionData.count / 30), // Fix pagination calculation
+      results: uniquePeriodo, 
+      totalPages: Math.ceil(asignacionData.count / 30),
     };
   } catch (error) {
     console.error("Error fetching data:", error);

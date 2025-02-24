@@ -65,8 +65,9 @@ export default function ImportPage({ onSuccess }) {
       const result = await response.json();
 
       if (response.ok) {
-        Notification.alertSuccess(result.message || "Import successful");
         if (onSuccess) onSuccess();
+        Notification.alertSuccess(result.failed_records || "Import successful");
+        
         document.querySelector("#myform").reset();
       } else {
         Notification.alertError(result.error || "Error durante la importacion.");
