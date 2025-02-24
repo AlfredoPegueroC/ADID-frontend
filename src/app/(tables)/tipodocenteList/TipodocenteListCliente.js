@@ -49,7 +49,7 @@ function TipodocenteListClient({ initialData, totalPages }) {
           Nuevo Tipo Docente
         </Link>
         {tipodocentes.length > 0 && (
-          <Link className="btn btn-success" href={`${API}/export/tipoDocente`}>
+          <Link className="btn btn-success" href={`${API}export/tipoDocente`}>
             Exportar
           </Link>
         )}

@@ -84,7 +84,7 @@ function UniversidadListClient({ initialData }) {
 
       <Modal title="Importar Universidad">
         <ImportExcel
-          importURL={`${process.env.NEXT_PUBLIC_API_KEY}/import/universidad`}
+          importURL={`${process.env.NEXT_PUBLIC_API_KEY}import/universidad`}
           onSuccess={debouncedFetchData}
         />
       </Modal>
