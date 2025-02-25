@@ -31,7 +31,7 @@ export default function RootLayout({ children }) {
         className={`${geistSans.variable} ${geistMono.variable} ${backgroundClass}`}
       >
         {!isLoginPage && <Navbar />}
-        <div className="container-fluid px-5">
+        <div className="container-fluid px-3">
           <ToastContainer
             position="top-right"
             autoClose={1000}
