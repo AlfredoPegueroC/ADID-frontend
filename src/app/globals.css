@@ -38,9 +38,6 @@ h5,
 h6 {
   text-wrap: balance;
 }
-p {
-  text-wrap: pretty;
-}
 img,
 video,
 svg {
