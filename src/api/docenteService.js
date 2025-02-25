@@ -10,7 +10,7 @@ export async function fetchDocentes(searchQuery = "", page = 1) {
       fetch(`${API}facultades`),
       fetch(`${API}escuelas`),
       fetch(`${API}tipodocentes`),
-      fetch(`${API}categoriaDocentes`),
+      fetch(`${API}categoriadocentes`),
     ]);
 
     if (!docenteResponse.ok) throw new Error("Failed to fetch docentes");
