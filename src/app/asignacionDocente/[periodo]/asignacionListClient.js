@@ -10,8 +10,12 @@ import { deleteEntity } from "@utils/delete";
 import { fetchAsignacionData } from "@api/asignacionService";
 import { debounce } from "lodash";
 
-function PrincipalListClient({ initialData, totalPages: initialTotalPages, periodo }) {
-  const [asignaciones, setAsignaciones] = useState(initialData);
+function PrincipalListClient({
+  initialData,
+  totalPages: initialTotalPages,
+  periodo,
+}) {
+  const [asignaciones, setAsignaciones] = useState(initialData || []); 
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(initialTotalPages);
   const [searchQuery, setSearchQuery] = useState("");
@@ -20,22 +24,27 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages, perio
 
   const fetchData = async (page, query) => {
     try {
-      const { asignaciones, totalPages } = await fetchAsignacionData(periodo, page, query);
+      const { asignaciones, totalPages } = await fetchAsignacionData(
+        periodo,
+        page,
+        query
+      );
+      console.log("Fetched data:", asignaciones, totalPages); // Log the fetched data
       setAsignaciones(asignaciones);
       setTotalPages(totalPages);
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
-      setLoading(false);
+      setLoading(false); // Set loading to false after fetching
     }
   };
 
   useEffect(() => {
     fetchData(currentPage, searchQuery);
-  }, [currentPage, searchQuery]); // Fetch data only when currentPage or searchQuery changes
+  }, [currentPage, searchQuery]);
 
   const handlePageChange = (page) => {
-    setCurrentPage(page); // Set the current page directly
+    setCurrentPage(page);
   };
 
   const handleSearchChange = (e) => {
@@ -47,12 +56,23 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages, perio
     setCurrentPage(1); // Reset to first page on search
   };
 
-  const deleteAsignacion = useCallback((id) => {
-    deleteEntity(`${API}api/asignacionDocente/delete`, id, setAsignaciones, "ADIDcodigo");
-  }, [API]);
+  const deleteAsignacion = useCallback(
+    (id) => {
+      deleteEntity(
+        `${API}api/asignacionDocente/delete`,
+        id,
+        setAsignaciones,
+        "ADIDcodigo"
+      );
+    },
+    [API]
+  );
 
   // Create a debounced function to handle search input
-  const debouncedSearchChange = useCallback(debounce(handleSearchChange, 500), []); // Debounce search change
+  const debouncedSearchChange = useCallback(
+    debounce(handleSearchChange, 500),
+    []
+  ); // Debounce search change
 
   return (
     <div className="mt-4">
@@ -124,14 +144,24 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages, perio
                     className="btn btn-primary btn-sm"
                     href={`/asignacionEdit/${asignacion.ADIDcodigo}?period=${periodo}`}
                   >
-                    <Image src="/edit.svg" alt="editar" width={20} height={20} />
+                    <Image
+                      src="/edit.svg"
+                      alt="editar"
+                      width={20}
+                      height={20}
+                    />
                   </Link>
                   <button
                     type="button"
                     className="btn btn-danger btn-sm mx-2"
                     onClick={() => deleteAsignacion(asignacion.ADIDcodigo)}
                   >
-                    <Image src="/delete.svg" alt="borrar" width={20} height={20} />
+                    <Image
+                      src="/delete.svg"
+                      alt="borrar"
+                      width={20}
+                      height={20}
+                    />
                   </button>
                 </td>
               </tr>
@@ -144,7 +174,7 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages, perio
         <Pagination
           page={currentPage}
           totalPages={totalPages}
-          onPageChange={handlePageChange} // Pass the handlePageChange function
+          onPageChange={handlePageChange}
         />
       )}
     </div>

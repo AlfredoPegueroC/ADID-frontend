@@ -28,7 +28,7 @@ export default function ImportPage({ onSuccess }) {
     fetchData();
   }, []);
 
-  // Handle file input change
+
   const handleFileChange = (event) => {
     setFile(event.target.files[0]);
   };
@@ -63,7 +63,8 @@ export default function ImportPage({ onSuccess }) {
       });
 
       const result = await response.json();
-
+      console.log("Error", result.error)
+      console.log("Failed records", result.failed_records)
       if(result.failed_records) {
         Notification.alertLogin(`Error en ${result.failed_records[0]} registros, revisa el archivo y vuelve a intentarlo.`)
         return;

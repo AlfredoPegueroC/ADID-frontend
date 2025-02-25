@@ -6,8 +6,8 @@ export async function fetchEscuelas(searchQuery = "", page = 1) {
 
     const [escuelaResponse, facultadResponse, universidadResponse] = await Promise.all([
       fetch(`${API}api/escuela?page=${page}${searchParam}`),
-      fetch(`${API}api/facultad`),
-      fetch(`${API}api/universidad`),
+      fetch(`${API}facultades`),
+      fetch(`${API}universidades`),
     ]);
 
     if (!escuelaResponse.ok) throw new Error("Failed to fetch escuelas");
@@ -19,11 +19,11 @@ export async function fetchEscuelas(searchQuery = "", page = 1) {
     const universidadData = await universidadResponse.json();
 
     const mergedData = escuelaData.results.map((escuela) => {
-      const facultad = facultadData.results.find(
+      const facultad = facultadData.find(
         (fac) => fac.facultadCodigo === escuela.facultadCodigo
       ) || { nombre: "Facultad no encontrada" };
 
-      const universidad = universidadData.results.find(
+      const universidad = universidadData.find(
         (uni) => uni.UniversidadCodigo === escuela.UniversidadCodigo
       ) || { nombre: "Universidad no encontrada" };
 

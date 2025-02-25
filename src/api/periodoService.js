@@ -6,7 +6,7 @@ export async function fetchPeriodos(searchQuery = "", page = 1) {
 
     const [periodoResponse, universidadResponse] = await Promise.all([
       fetch(`${API}api/periodoacademico?page=${page}${searchParam}`),
-      fetch(`${API}api/universidad`),
+      fetch(`${API}universidades`),
     ]);
 
     if (!periodoResponse.ok || !universidadResponse.ok) {
@@ -19,7 +19,7 @@ export async function fetchPeriodos(searchQuery = "", page = 1) {
     ]);
 
     const mergedData = periodoData.results.map((periodo) => {
-      const universidad = universidadData.results.find(
+      const universidad = universidadData.find(
         (uni) => uni.UniversidadCodigo === periodo.UniversidadCodigo
       );
       return {

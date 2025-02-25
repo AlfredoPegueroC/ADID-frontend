@@ -6,11 +6,11 @@ export async function fetchDocentes(searchQuery = "", page = 1) {
 
     const [docenteResponse, universidadResponse, facultadResponse, escuelaResponse, tipoResponse, categoriaResponse] = await Promise.all([
       fetch(`${API}api/docente?page=${page}${searchParam}`),
-      fetch(`${API}api/universidad`),
-      fetch(`${API}api/facultad`),
-      fetch(`${API}api/escuela`),
-      fetch(`${API}api/tipodocente`),
-      fetch(`${API}api/categoriaDocente`),
+      fetch(`${API}universidades`),
+      fetch(`${API}facultades`),
+      fetch(`${API}escuelas`),
+      fetch(`${API}tipodocentes`),
+      fetch(`${API}categoriaDocentes`),
     ]);
 
     if (!docenteResponse.ok) throw new Error("Failed to fetch docentes");
@@ -28,23 +28,23 @@ export async function fetchDocentes(searchQuery = "", page = 1) {
     const categoriaData = await categoriaResponse.json();
 
     const mergedData = docenteData.results.map((docente) => {
-      const universidad = universidadData.results.find(
+      const universidad = universidadData.find(
         (uni) => uni.UniversidadCodigo === docente.UniversidadCodigo
       ) || { nombre: "Universidad no encontrada" };
 
-      const facultad = facultadData.results.find(
+      const facultad = facultadData.find(
         (fac) => fac.facultadCodigo === docente.facultadCodigo
       ) || { nombre: "Facultad no encontrada" };
 
-      const escuela = escuelaData.results.find(
+      const escuela = escuelaData.find(
         (esc) => esc.escuelaCodigo === docente.escuelaCodigo
       ) || { nombre: "Escuela no encontrada" };
 
-      const tipo = tipoData.results.find(
+      const tipo = tipoData.find(
         (tip) => tip.tipoDocenteCodigo === docente.tipoDocenteCodigo
       ) || { nombre: "Tipo no encontrado" };
 
-      const categoria = categoriaData.results.find(
+      const categoria = categoriaData.find(
         (cat) => cat.categoriaCodigo === docente.categoriaCodigo
       ) || { nombre: "Categoría no encontrada" };
 

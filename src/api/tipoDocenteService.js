@@ -6,7 +6,7 @@ export async function fetchTipoDocentes(searchQuery = "", page = 1) {
 
     const [tipoResponse, universidadResponse] = await Promise.all([
       fetch(`${API}api/tipodocente?page=${page}${searchParam}`),
-      fetch(`${API}api/universidad`),
+      fetch(`${API}universidades`),
     ]);
 
     if (!tipoResponse.ok || !universidadResponse.ok) {
@@ -19,7 +19,7 @@ export async function fetchTipoDocentes(searchQuery = "", page = 1) {
     ]);
 
     const mergedData = tipoData.results.map((tipo) => {
-      const universidad = universidadData.results.find(
+      const universidad = universidadData.find(
         (uni) => uni.UniversidadCodigo === tipo.UniversidadCodigo
       );
       return {

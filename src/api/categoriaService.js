@@ -6,7 +6,7 @@ export async function fetchCategorias(searchQuery = "", page = 1) {
 
     const [categoriaResponse, universidadResponse] = await Promise.all([
       fetch(`${API}api/categoriaDocente?page=${page}${searchParam}`),
-      fetch(`${API}api/universidad`), // Fetching universities to associate with categories
+      fetch(`${API}universidades`), // Fetching universities to associate with categories
     ]);
 
     if (!categoriaResponse.ok) throw new Error("Failed to fetch categorias");
@@ -16,7 +16,7 @@ export async function fetchCategorias(searchQuery = "", page = 1) {
     const universidadData = await universidadResponse.json();
 
     const mergedData = categoriaData.results.map((categoria) => {
-      const universidad = universidadData.results.find(
+      const universidad = universidadData.find(
         (uni) => uni.UniversidadCodigo === categoria.UniversidadCodigo
       ) || { nombre: "Universidad no encontrada" };
 
