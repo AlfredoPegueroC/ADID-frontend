@@ -22,7 +22,7 @@ function CategoriaEdit({ params }) {
     async function fetchData() {
       try {
         const categoriasResponse = await fetch(
-          `${API}/api/categoriadocente/${id}/`
+          `${API}api/categoriadocente/${id}/`
         );
         if (!categoriasResponse.ok)
           throw new Error("Failed to fetch categorias");
