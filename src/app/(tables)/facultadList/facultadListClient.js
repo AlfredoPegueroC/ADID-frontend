@@ -36,7 +36,12 @@ function FacultadListClient({ initialData, totalPages }) {
     const { results } = await fetchFacultades(searchQuery, page);
     setFacultades(results);
   }, 300);
-
+ 
+  const handlePageChange = async (page) => {
+    const { results } = await fetchFacultades(searchQuery, page);
+    setFacultades(results);
+    setPage(page);
+  }
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     debouncedFetchData();
@@ -100,7 +105,7 @@ function FacultadListClient({ initialData, totalPages }) {
         </tbody>
       </Tables>
 
-      {totalPages > 1 && <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />}
+      {totalPages > 1 && <Pagination page={page} totalPages={totalPages} onPageChange={handlePageChange} />}
     </div>
   );
 }
