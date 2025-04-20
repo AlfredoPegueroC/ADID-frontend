@@ -1,10 +1,9 @@
-export async function fetchAsignacionData(periodo, page = 1, searchQuery = "") {
+export async function fetchAsignacionData(periodo = null, page = 1, searchQuery = "") {
   const API = process.env.NEXT_PUBLIC_API_KEY;
 
   try {
-    const searchParam = searchQuery
-      ? `&search=${encodeURIComponent(searchQuery)}`
-      : "";
+    const searchParam = searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : "";
+    const periodParam = periodo ? `&period=${periodo}` : "";
 
     const [
       asignacionResponse,
@@ -12,9 +11,7 @@ export async function fetchAsignacionData(periodo, page = 1, searchQuery = "") {
       escuelaResponse,
       docenteResponse,
     ] = await Promise.all([
-      fetch(
-        `${API}api/asignacion?page=${page}&period=${periodo}${searchParam}`
-      ),
+      fetch(`${API}api/asignacion?page=${page}${periodParam}${searchParam}`),
       fetch(`${API}facultades`),
       fetch(`${API}escuelas`),
       fetch(`${API}docentes`),
@@ -42,7 +39,7 @@ export async function fetchAsignacionData(periodo, page = 1, searchQuery = "") {
       const docente = docenteData.find(
         (doc) => doc.Docentecodigo === asignacion.DocenteCodigo
       ) || { nombre: "Docente no encontrado" };
-      console.log(docente);
+
       return {
         ...asignacion,
         facultadNombre: facultad.nombre,

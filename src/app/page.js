@@ -1,12 +1,17 @@
-import { fetchPeriodos } from "@api/periodoService";
-import HomeListClient from "./homeListClient";
+// app/principalPage.js
+import PrincipalListClient from "./Client";
+import { fetchAsignacionData } from "@api/asignacionService";
 
-export default async function AsignacionPage({ searchParams }) {
-  const params = await searchParams;
-  const period = params?.period || "";
-  const page = params?.page ? parseInt(params.page) : 1;
+export default async function PrincipalPage() {
+  const initialPage = 1;
+  const searchQuery = "";
 
-  const { results, totalPages } = await fetchPeriodos(period, page); 
+  const { asignaciones, totalPages } = await fetchAsignacionData(null, initialPage, searchQuery);
 
-  return <HomeListClient initialData={results} totalPages={totalPages} />;
+  return (
+    <PrincipalListClient
+      initialData={asignaciones}
+      totalPages={totalPages}
+    />
+  );
 }

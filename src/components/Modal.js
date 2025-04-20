@@ -1,10 +1,10 @@
 "use client"
 
-export default function Modal({ title, children, onClose}) {
+export default function Modal({ title, children, onClose, modelName="Modal"}) {
   return (
     <div
       className="modal fade"
-      id="Modal"
+      id={modelName}
       tabIndex="-1"
       aria-labelledby="exampleModalLabel"
       aria-hidden="true"
