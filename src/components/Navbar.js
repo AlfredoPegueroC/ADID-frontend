@@ -50,7 +50,9 @@ export default function Navbar() {
 
   return (
     <nav className={`${Style.navbar} navbar navbar-expand-lg `}>
-      <div className="container-fluid d-flex  mx-5 py-2">
+      <div className="container-fluid d-flex  mx-2.5 py-1">
+      <img src="/LogoUASD.jpg" alt="Logo de la app" width="40" height="40" style={{ borderRadius: "10px", marginRight: "12px" }} />
+
         <Link className="navbar-brand text-white" href="/">
           Asignacion Docente - UASD
         </Link>

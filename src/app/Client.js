@@ -26,6 +26,8 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
   const [copiando, setCopiando] = useState(false);
   const API = process.env.NEXT_PUBLIC_API_KEY;
   const fileInputRef = useRef(null);
+  const [mostrarColumnasExtra, setMostrarColumnasExtra] = useState(true); //**** */
+
 
   const Api_import_URL = `${API}import/asignacion`;
 
@@ -57,11 +59,19 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
       try {
         const periodosData = await fetchPeriodos();
         const nombres = periodosData.results.map((p) => p.nombre);
-        console.log(nombres);
-        setPeriodos(nombres);
-
-        if (nombres.length > 0 && !selectedPeriodo) {
-          setSelectedPeriodo(nombres[nombres.length - 1]);
+  
+        // Ordenamos los períodos del más reciente al más antiguo
+        const nombresOrdenados = nombres.sort((a, b) => {
+          const [aYear, aTerm] = a.split("-").map(Number);
+          const [bYear, bTerm] = b.split("-").map(Number);
+          return bYear !== aYear ? bYear - aYear : bTerm - aTerm;
+        });
+  
+        setPeriodos(nombresOrdenados);
+  
+        // Establecemos por defecto el más reciente
+        if (nombresOrdenados.length > 0 && !selectedPeriodo) {
+          setSelectedPeriodo(nombresOrdenados[0]);
         }
       } catch (error) {
         console.error("Error al cargar periodos:", error);
@@ -155,16 +165,20 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
   return (
     <div className="mt-4">
       <div className="d-flex gap-1 mb-3 mt-3">
-        <Link
-          className="btn btn-success"
-          href={`${API}export/asignacionDocenteExport?period=${selectedPeriodo}`}
-        >
-          Exportar
-        </Link>
+        
 
         <button
           type="button"
           className="btn btn-primary"
+          data-bs-toggle=""
+          data-bs-target=""
+        >
+          Consulta
+        </button>
+
+        <button
+          type="button"
+          className="btn btn-warning text-dark"
           data-bs-toggle="modal"
           data-bs-target="#Modal"
         >
@@ -172,12 +186,37 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
         </button>
         <button
           type="button"
-          className="btn btn-warning"
+          className="btn btn-info text-white"
           data-bs-toggle="modal"
           data-bs-target="#modalcopiar"
         >
-          Copiar Asignación
+          Editar Asignación
         </button>
+
+        <button
+          type="button"
+          className="btn btn-success"
+          data-bs-toggle="modal"
+          data-bs-target="#modalcopiar"
+        >
+          Crear Seccion
+        </button>
+
+        <Link
+          className="btn btn-secondary"
+          href={`${API}export/asignacionDocenteExport?period=${selectedPeriodo}`}
+        >
+          Exportar
+        </Link>
+
+        <button
+        type="button"
+        className="btn btn-outline-dark"
+        onClick={() => setMostrarColumnasExtra((prev) => !prev)}
+    >
+  {mostrarColumnasExtra ? "Ocultar detalles" : "Mostrar detalles"}
+</button>
+
         <select
           className="form w-auto"
           value={selectedPeriodo}
@@ -193,10 +232,10 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
       <Modal title="Importar Asignación">
         <ImportPage importURL={Api_import_URL} onSuccess={debouncedSearchChange} />
       </Modal>
-      <Modal title="Copiar asignaciones desde otro periodo" modelName="modalcopiar">
+      <Modal title="Editar asignaciones desde otro periodo" modelName="modalcopiar">
         <div className="d-flex flex-column gap-4 my-4 border rounded p-3 bg-light text-black">
           <div>
-            <h5>📄 Copiar asignaciones desde otro periodo</h5>
+            <h5>📄 Editar asignaciones desde otro periodo</h5>
             <select
               className="form-select w-auto d-inline-block me-2"
               onChange={(e) => setPeriodoDestino(e.target.value)}
@@ -216,7 +255,7 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
               onClick={handleCopiarPeriodo}
               disabled={!periodoDestino || copiando}
             >
-              {copiando ? "Copiando..." : "Copiar asignaciones"}
+              {copiando ? "Editar..." : "Editar asignaciones"}
             </button>
           </div>
         </div>
@@ -229,28 +268,32 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
       />
 
       <Tables>
-        <thead>
-          <tr>
-            <th>NRC</th>
-            <th>Clave</th>
-            <th>Asignatura</th>
-            <th>Codigo</th>
-            <th>Profesor</th>
-            <th>Seccion</th>
-            <th>Modalidad</th>
-            <th>Campus</th>
-            <th>Facultad</th>
-            <th>Escuela</th>
-            <th>Tipo</th>
-            <th>Cupo</th>
-            <th>Inscripto</th>
-            <th>Horario</th>
-            <th>Dias</th>
-            <th>Aulas</th>
-            <th>CR</th>
-            <th>Accion</th>
-          </tr>
-        </thead>
+      <thead>
+  <tr>
+    <th>NRC</th>
+    <th>Clave</th>
+    <th>Asignatura</th>
+    <th>Codigo</th>
+    <th>Profesor</th>
+    <th>Seccion</th>
+    <th>Modalidad</th>
+    <th>Campus</th>
+    {mostrarColumnasExtra && (
+      <>
+        <th>Facultad</th>
+        <th>Escuela</th>
+        <th>Tipo</th>
+      </>
+    )}
+    <th>Cupo</th>
+    <th>Inscripto</th>
+    <th>Horario</th>
+    <th>Dias</th>
+    <th>Aulas</th>
+    {mostrarColumnasExtra && <th>CR</th>}
+    <th>Accion</th>
+  </tr>
+</thead>
         <tbody>
           {asignaciones.length === 0 ? (
             <tr>
@@ -305,6 +348,7 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
         />
       )}
     </div>
+    
   );
 }
 
