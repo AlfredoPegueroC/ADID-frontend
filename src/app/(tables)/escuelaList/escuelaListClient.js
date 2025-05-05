@@ -43,7 +43,7 @@ function EscuelaListClient() {
   }, [fetchData]);
 
   const deleteEscuela = (pk) => {
-    deleteEntity(`${API}api/escuela/delete`, pk, setEscuelas, "escuelaCodigo");
+    deleteEntity(`${API}api/escuela/delete`, pk, setEscuelas, "EscuelaCodigo");
   };
 
   const handleSearchChange = debounce((e) => {
@@ -57,7 +57,7 @@ function EscuelaListClient() {
 
   if (loading) {
     return (
-      <div className="spinner-container ">
+      <div className="spinner-container">
         <div className="spinner"></div>
       </div>
     );
@@ -65,11 +65,11 @@ function EscuelaListClient() {
 
   return (
     <div className="mt-5">
-      <h1 className="text-dark">Lista Escuela</h1>
+      <h1 className="text-dark">Lista de Escuelas</h1>
       {error && <div className="alert alert-danger">{error}</div>}
       <div className="d-flex gap-2 mb-3 mt-3">
         <Link className="btn btn-primary" href="/escuela">
-          Nuevo Escuela
+          Nueva Escuela
         </Link>
         {escuelas.length > 0 && (
           <Link className="btn btn-success" href={`${API}export/escuela`}>
@@ -99,7 +99,10 @@ function EscuelaListClient() {
         <thead>
           <tr>
             <th scope="col">#</th>
+            <th scope="col">Código</th>
             <th scope="col">Nombre</th>
+            <th scope="col">Directora</th>
+            <th scope="col">Teléfono</th>
             <th scope="col">Estado</th>
             <th scope="col">Universidad</th>
             <th scope="col">Facultad</th>
@@ -109,28 +112,31 @@ function EscuelaListClient() {
         <tbody>
           {escuelas.length === 0 ? (
             <tr>
-              <td colSpan="6" className="text-center">
-                No escuelas found.
+              <td colSpan="9" className="text-center">
+                No se han encontrado escuelas.
               </td>
             </tr>
           ) : (
             escuelas.map((escuela, index) => (
-              <tr key={escuela.escuelaCodigo}>
+              <tr key={escuela.EscuelaCodigo}>
                 <th scope="row">{index + 1}</th>
-                <td>{escuela.nombre}</td>
-                <td>{escuela.estado}</td>
-                <td>{escuela.universidadNombre}</td>
-                <td>{escuela.facultadNombre}</td>
+                <td>{escuela.EscuelaCodigo}</td>
+                <td>{escuela.EscuelaNombre}</td>
+                <td>{escuela.EscuelaDirectora}</td>
+                <td>{escuela.EscuelaTelefono}</td>
+                <td>{escuela.EscuelaEstado}</td>
+                <td>{escuela.universidadNombre || "—"}</td>
+                <td>{escuela.facultadNombre || "—"}</td>
                 <td>
                   <Link
                     className="btn btn-primary btn-sm"
-                    href={`/escuelaEdit/${escuela.escuelaCodigo}`}
+                    href={`/escuelaEdit/${escuela.EscuelaId}`}
                   >
                     <Image src="/edit.svg" alt="editar" width={20} height={20} />
                   </Link>
                   <button
                     className="btn btn-danger btn-sm mx-2"
-                    onClick={() => deleteEscuela(escuela.escuelaCodigo)}
+                    onClick={() => deleteEscuela(escuela.EscuelaId)}
                   >
                     <Image src="/delete.svg" alt="borrar" width={20} height={20} />
                   </button>

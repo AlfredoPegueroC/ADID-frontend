@@ -1,77 +1,63 @@
+"use client";
+
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import Notification from "../Notification";
 import Styles from "@styles/form.module.css";
 
 export default function EscuelaForm() {
   const router = useRouter();
+  const API = process.env.NEXT_PUBLIC_API_KEY;
+
   const [universidades, setUniversidades] = useState([]);
   const [facultades, setFacultades] = useState([]);
-  const [filteredFacultades, setFilteredFacultades] = useState([]); 
+
   const [formData, setFormData] = useState({
-    escuelaCodigo: "",
-    nombre: "",
-    estado: "",
-    UniversidadCodigo: "",
-    facultadCodigo: "",
+    EscuelaCodigo: "",
+    EscuelaNombre: "",
+    EscuelaDirectora: "",
+    EscuelaTelefono: "",
+    EscuelaCorreo: "",
+    EscuelaEstado: "",
+    Escuela_UniversidadFK: "",
+    Escuela_facultadFK: "",
   });
-  const API = process.env.NEXT_PUBLIC_API_KEY;
 
   useEffect(() => {
     const fetchUniversidades = async () => {
       try {
-        const response = await fetch(`${API}api/universidad`);
-        const data = await response.json();
-        setUniversidades(data.results);
+        const res = await fetch(`${API}api/universidad`);
+        const data = await res.json();
+        setUniversidades(data.results || data);
       } catch (error) {
-        console.error("Error fetching universities:", error);
+        console.error("Error cargando universidades:", error);
       }
     };
 
     const fetchFacultades = async () => {
       try {
-        const response = await fetch(`${API}api/facultad`);
-        const data = await response.json();
-        setFacultades(data.results);
+        const res = await fetch(`${API}api/facultad`);
+        const data = await res.json();
+        setFacultades(data.results || data);
       } catch (error) {
-        console.error("Error fetching faculties:", error);
+        console.error("Error cargando facultades:", error);
       }
     };
 
     fetchUniversidades();
     fetchFacultades();
-  }, []);
+  }, [API]);
 
   const handleChange = (e) => {
-    const { id, value } = e.target;
+    const { name, value } = e.target;
     setFormData({
       ...formData,
-      [id]: value,
+      [name]: value,
     });
-
-
-    if (id === "UniversidadCodigo") {
-      const filtered = facultades.filter(
-        (facultad) => facultad.UniversidadCodigo === parseInt(value)
-      );
-      setFilteredFacultades(filtered);
-      setFormData({
-        ...formData,
-        [id]: value,
-        facultadCodigo: "", 
-      });
-    }
   };
-
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const dataToSend = {
-      ...formData,
-      UniversidadCodigo: parseInt(formData.UniversidadCodigo),
-      facultadCodigo: parseInt(formData.facultadCodigo),
-    };
 
     try {
       const response = await fetch(`${API}api/escuela/create`, {
@@ -79,29 +65,30 @@ export default function EscuelaForm() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(dataToSend),
+        body: JSON.stringify(formData),
       });
 
       if (response.ok) {
-        setFormData({
-          escuelaCodigo: "",
-          nombre: "",
-          estado: "",
-          UniversidadCodigo: "",
-          facultadCodigo: "",
-        });
-        router.push("/escuelaList");
+        await response.json();
         Notification.alertSuccess("Escuela creada exitosamente");
+        router.push("/escuelaList");
+        setFormData({
+          EscuelaCodigo: "",
+          EscuelaNombre: "",
+          EscuelaDirectora: "",
+          EscuelaTelefono: "",
+          EscuelaCorreo: "",
+          EscuelaEstado: "",
+          Escuela_UniversidadFK: "",
+          Escuela_facultadFK: "",
+        });
       } else {
-        const errorData = await response.json();
-        Notification.alertError(
-          "Error al crear la escuela, ya existe en la DB"
-        );
+        const error = await response.json();
+        Notification.alertError("Error al crear la escuela.");
+        console.error("Error:", error);
       }
     } catch (error) {
-      Notification.alertError(
-        "Error al enviar el formulario: " + error.message
-      );
+      Notification.alertError("Error de conexión con el servidor.");
     }
   };
 
@@ -110,75 +97,117 @@ export default function EscuelaForm() {
       <form onSubmit={handleSubmit} className={Styles.form}>
         <h1 className={Styles.title}>Registrar Escuela</h1>
 
-        <div className={Styles.names}>
-          <div className={Styles.name_group}>
-            <label htmlFor="nombre">Nombre de la Escuela:</label>
-            <input
-              type="text"
-              id="nombre"
-              value={formData.nombre}
-              onChange={handleChange}
-              placeholder="Nombre de escuela"
-              required
-            />
-          </div>
-
-          <div className={Styles.name_group}>
-            <label htmlFor="estado">Estado:</label>
-            <select
-              id="estado"
-              value={formData.estado}
-              onChange={handleChange}
-              required
-            >
-              <option value="" disabled>
-                -- Seleccione el estado --
-              </option>
-              <option value="Activo">Activo</option>
-              <option value="Inactivo">Inactivo</option>
-            </select>
-          </div>
+        <div className={Styles.name_group}>
+          <label htmlFor="EscuelaCodigo">Código:</label>
+          <input
+            type="text"
+            id="EscuelaCodigo"
+            name="EscuelaCodigo"
+            value={formData.EscuelaCodigo}
+            onChange={handleChange}
+            placeholder="Ej. ESC001"
+            required
+          />
         </div>
 
         <div className={Styles.name_group}>
-          <label htmlFor="UniversidadCodigo">Universidad:</label>
+          <label htmlFor="EscuelaNombre">Nombre:</label>
+          <input
+            type="text"
+            id="EscuelaNombre"
+            name="EscuelaNombre"
+            value={formData.EscuelaNombre}
+            onChange={handleChange}
+            placeholder="Nombre de la escuela"
+            required
+          />
+        </div>
+
+        <div className={Styles.name_group}>
+          <label htmlFor="EscuelaDirectora">Directora:</label>
+          <input
+            type="text"
+            id="EscuelaDirectora"
+            name="EscuelaDirectora"
+            value={formData.EscuelaDirectora}
+            onChange={handleChange}
+            placeholder="Nombre de la directora"
+            required
+          />
+        </div>
+
+        <div className={Styles.name_group}>
+          <label htmlFor="EscuelaTelefono">Teléfono:</label>
+          <input
+            type="text"
+            id="EscuelaTelefono"
+            name="EscuelaTelefono"
+            value={formData.EscuelaTelefono}
+            onChange={handleChange}
+            placeholder="809-000-0000"
+            required
+          />
+        </div>
+
+        <div className={Styles.name_group}>
+          <label htmlFor="EscuelaCorreo">Correo:</label>
+          <input
+            type="email"
+            id="EscuelaCorreo"
+            name="EscuelaCorreo"
+            value={formData.EscuelaCorreo}
+            onChange={handleChange}
+            placeholder="escuela@universidad.edu.do"
+            required
+          />
+        </div>
+
+        <div className={Styles.name_group}>
+          <label htmlFor="EscuelaEstado">Estado:</label>
           <select
-            id="UniversidadCodigo"
-            value={formData.UniversidadCodigo}
+            id="EscuelaEstado"
+            name="EscuelaEstado"
+            value={formData.EscuelaEstado}
             onChange={handleChange}
             required
           >
-            <option value="" disabled>
-              -- Seleccione una Universidad --
-            </option>
-            {universidades.map((universidad) => (
-              <option
-                key={universidad.UniversidadCodigo}
-                value={universidad.UniversidadCodigo}
-              >
-                {universidad.nombre}
+            <option value="">-- Seleccione el estado --</option>
+            <option value="Activo">Activo</option>
+            <option value="Inactivo">Inactivo</option>
+          </select>
+        </div>
+
+        <div className={Styles.name_group}>
+          <label htmlFor="Escuela_UniversidadFK">Universidad:</label>
+          <select
+            id="Escuela_UniversidadFK"
+            name="Escuela_UniversidadFK"
+            value={formData.Escuela_UniversidadFK}
+            onChange={handleChange}
+            required
+          >
+            <option value="">-- Seleccione una universidad --</option>
+            {universidades.map((u) => (
+              <option key={u.UniversidadID} value={u.UniversidadID}>
+                {u.UniversidadNombre}
               </option>
             ))}
           </select>
         </div>
 
         <div className={Styles.name_group}>
-          <label htmlFor="facultadCodigo">Facultad:</label>
+          <label htmlFor="Escuela_facultadFK">Facultad:</label>
           <select
-            id="facultadCodigo"
-            value={formData.facultadCodigo}
+            id="Escuela_facultadFK"
+            name="Escuela_facultadFK"
+            value={formData.Escuela_facultadFK}
             onChange={handleChange}
             required
           >
-            <option value="" disabled>
-              -- Seleccione una Facultad --
-            </option>
-            {filteredFacultades.map((facultad) => (
-              <option
-                key={facultad.facultadCodigo}
-                value={facultad.facultadCodigo}
-              >
-                {facultad.nombre}
+            <option value="">-- Seleccione una facultad --</option>
+            {facultades.map((f) => (
+              <option key={f.FacultadID} value={f.FacultadID}>
+                {f.FacultadNombre}
               </option>
             ))}
           </select>

@@ -80,53 +80,70 @@ function TipoEdit({ params }) {
     <FormLayout>
       <div className={Styles.container}>
         <form onSubmit={handleSubmit} className={Styles.form}>
-          <h1 className={Styles.title}>Editar Tipo</h1>
+          <h1 className={Styles.title}>Editar Tipo Docente</h1>
 
           <div className={Styles.name_group}>
-            <label htmlFor="nombre">Nombre</label>
+            <label htmlFor="TipoDocenteCodigo">Código</label>
             <input
               type="text"
-              id="nombre"
-              name="nombre"
-              value={tipo.nombre || ""}
+              id="TipoDocenteCodigo"
+              name="TipoDocenteCodigo"
+              value={tipo.TipoDocenteCodigo || ""}
               onChange={handleChange}
               required
             />
           </div>
 
           <div className={Styles.name_group}>
-            <label htmlFor="universidadCodigo">Universidad</label>
+            <label htmlFor="TipoDocenteDescripcion">Descripción</label>
+            <input
+              type="text"
+              id="TipoDocenteDescripcion"
+              name="TipoDocenteDescripcion"
+              value={tipo.TipoDocenteDescripcion || ""}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
+          <div className={Styles.name_group}>
+            <label htmlFor="TipoDocenteEstado">Estado</label>
             <select
-              id="universidadCodigo"
-              name="UniversidadCodigo"
-              value={tipo?.UniversidadCodigo || ""}
+              id="TipoDocenteEstado"
+              name="TipoDocenteEstado"
+              value={tipo?.TipoDocenteEstado || ""}
               onChange={handleChange}
               required
             >
-              <option value="">-- Seleccione --</option>
-              {universidades.map((universidad) => (
+              <option value="">-- Seleccione Estado --</option>
+              <option value="Activo">Activo</option>
+              <option value="Inactivo">Inactivo</option>
+            </select>
+          </div>
+
+          <div className={Styles.name_group}>
+            <label htmlFor="TipoDocente_UniversidadFK">Universidad</label>
+            <select
+              id="TipoDocente_UniversidadFK"
+              name="TipoDocente_UniversidadFK"
+              value={tipo?.TipoDocente_UniversidadFK || ""}
+              onChange={handleChange}
+              required
+            >
+              <option value="" disabled>
+                -- Seleccione una Universidad --
+              </option>
+              {universidades.map((u) => (
                 <option
-                  key={universidad.UniversidadCodigo}
-                  value={universidad.UniversidadCodigo}
+                  key={u.UniversidadID}
+                  value={u.UniversidadID}
                 >
-                  {universidad.nombre}
+                  {u.UniversidadNombre}
                 </option>
               ))}
             </select>
           </div>
 
-          <div className={Styles.name_group}>
-            <label htmlFor="estado">Estado</label>
-            <select
-              id="estado"
-              name="estado"
-              value={tipo?.estado || ""}
-              onChange={handleChange}
-            >
-              <option value="Activo">Activo</option>
-              <option value="Inactivo">Inactivo</option>
-            </select>
-          </div>
           <button type="submit" className={Styles.btn}>
             Guardar Cambios
           </button>

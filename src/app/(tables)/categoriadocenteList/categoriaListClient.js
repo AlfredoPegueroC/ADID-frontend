@@ -43,10 +43,11 @@ function CategoriaListClient({ initialData, totalPages }) {
 
   return (
     <div className="mt-5">
-      <h1 className="text-dark">Lista Categoría Docente</h1>
+      <h1 className="text-dark">Lista Categorías de Docente</h1>
+
       <div className="d-flex gap-2 mb-3 mt-3">
         <Link className="btn btn-primary" href="/categoriadocente">
-          Nuevo Categoría
+          Nueva Categoría
         </Link>
         {categorias.length > 0 && (
           <Link className="btn btn-success" href={`${API}export/categoriaDocente`}>
@@ -58,26 +59,31 @@ function CategoriaListClient({ initialData, totalPages }) {
         </button>
       </div>
 
-      <Modal title="Importar Categoria">
+      <Modal title="Importar Categoría">
         <ImportExcel importURL={Api_import_URL} onSuccess={debouncedFetchData} />
       </Modal>
 
-      <Search SearchSubmit={handleSearchSubmit} SearchChange={handleSearchChange} searchQuery={searchQuery} />
+      <Search
+        SearchSubmit={handleSearchSubmit}
+        SearchChange={handleSearchChange}
+        searchQuery={searchQuery}
+      />
 
       <Tables>
         <thead>
           <tr>
-            <th scope="col">#</th>
-            <th scope="col">Nombre</th>
-            <th scope="col">Estado</th>
-            <th scope="col">Universidad</th>
-            <th scope="col">Acción</th>
+            <th>#</th>
+            <th>Código</th>
+            <th>Nombre</th>
+            <th>Estado</th>
+            <th>Universidad</th>
+            <th>Acción</th>
           </tr>
         </thead>
         <tbody>
           {categorias.length === 0 ? (
             <tr>
-              <td colSpan="5" className="text-center">
+              <td colSpan="6" className="text-center">
                 No se encontraron categorías.
               </td>
             </tr>
@@ -85,16 +91,17 @@ function CategoriaListClient({ initialData, totalPages }) {
             categorias.map((categoria, index) => (
               <tr key={categoria.categoriaCodigo}>
                 <th scope="row">{index + 1 + (currentPage - 1) * 30}</th>
-                <td>{categoria.nombre}</td>
-                <td>{categoria.estado}</td>
-                <td>{categoria.universidadNombre}</td>
+                <td>{categoria.categoriaCodigo}</td>
+                <td>{categoria.CategoriaNombre}</td>
+                <td>{categoria.CategoriaEstado}</td>
+                <td>{categoria.universidadNombre || "—"}</td>
                 <td>
-                  <Link href={`/categoriaEdit/${categoria.categoriaCodigo}`} className="btn btn-primary btn-sm">
+                  <Link href={`/categoriaEdit/${categoria.CategoriaID}`} className="btn btn-primary btn-sm">
                     <Image src="/edit.svg" alt="editar" width={20} height={20} />
                   </Link>
                   <button
                     className="btn btn-danger btn-sm mx-2"
-                    onClick={() => deleteCategoria(categoria.categoriaCodigo)}
+                    onClick={() => deleteCategoria(categoria.CategoriaID)}
                   >
                     <Image src="/delete.svg" alt="borrar" width={20} height={20} />
                   </button>
@@ -105,7 +112,9 @@ function CategoriaListClient({ initialData, totalPages }) {
         </tbody>
       </Tables>
 
-      {totalPages > 1 && <Pagination page={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />}
+      {totalPages > 1 && (
+        <Pagination page={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+      )}
     </div>
   );
 }

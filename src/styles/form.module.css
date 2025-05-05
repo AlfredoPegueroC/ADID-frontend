@@ -1,6 +1,7 @@
 .container {
   position: relative;
   background-color: white;
+  color: #000;
   padding: 2.5rem;
   border-radius: 10px;
   margin-top: 4rem;

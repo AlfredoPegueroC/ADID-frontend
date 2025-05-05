@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import FormLayout from "@components/layouts/FormLayout";
 import Styles from "@styles/form.module.css";
 import Notification from "@components/Notification";
-// utils
 import withAuth from "@utils/withAuth";
 
 function CategoriaEdit({ params }) {
@@ -18,20 +17,15 @@ function CategoriaEdit({ params }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    console.log(id);
     async function fetchData() {
       try {
-        const categoriasResponse = await fetch(
-          `${API}api/categoriadocente/${id}/`
-        );
-        if (!categoriasResponse.ok)
-          throw new Error("Failed to fetch categorias");
+        const categoriasResponse = await fetch(`${API}api/categoriadocente/${id}/`);
+        if (!categoriasResponse.ok) throw new Error("Failed to fetch categorias");
         const categoriasData = await categoriasResponse.json();
         setCategoria(categoriasData);
 
         const universidadesResponse = await fetch(`${API}api/universidad`);
-        if (!universidadesResponse.ok)
-          throw new Error("Failed to fetch universidades");
+        if (!universidadesResponse.ok) throw new Error("Failed to fetch universidades");
         const universidadesData = await universidadesResponse.json();
         setUniversidades(universidadesData.results);
       } catch (error) {
@@ -58,7 +52,7 @@ function CategoriaEdit({ params }) {
       });
 
       if (response.ok) {
-        Notification.alertSuccess("Categoria Docente Editada.");
+        Notification.alertSuccess("Categoría Docente editada.");
         router.push("/categoriadocenteList");
       } else {
         Notification.alertError("Fallo al editar");
@@ -89,28 +83,41 @@ function CategoriaEdit({ params }) {
     <FormLayout>
       <div className={Styles.container}>
         <form className={Styles.form} onSubmit={handleSubmit}>
-          <h1>Editar Categoria</h1>
+          <h1>Editar Categoría Docente</h1>
 
           <div className={Styles.names}>
             <div className={Styles.name_group}>
-              <label htmlFor="nombre">Nombre</label>
+              <label htmlFor="categoriaCodigo">Código</label>
               <input
                 type="text"
-                id="nombre"
-                name="nombre"
-                value={categoria.nombre}
+                id="categoriaCodigo"
+                name="categoriaCodigo"
+                value={categoria?.categoriaCodigo || ""}
                 onChange={handleChange}
                 required
               />
             </div>
 
             <div className={Styles.name_group}>
-              <label htmlFor="estado">Estado</label>
-              <select
-                id="estado"
-                name="estado"
-                value={categoria?.estado || ""}
+              <label htmlFor="CategoriaNombre">Nombre</label>
+              <input
+                type="text"
+                id="CategoriaNombre"
+                name="CategoriaNombre"
+                value={categoria?.CategoriaNombre || ""}
                 onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div className={Styles.name_group}>
+              <label htmlFor="CategoriaEstado">Estado</label>
+              <select
+                id="CategoriaEstado"
+                name="CategoriaEstado"
+                value={categoria?.CategoriaEstado || ""}
+                onChange={handleChange}
+                required
               >
                 <option value="Activo">Activo</option>
                 <option value="Inactivo">Inactivo</option>
@@ -119,27 +126,31 @@ function CategoriaEdit({ params }) {
           </div>
 
           <div className={Styles.name_group}>
-            <label htmlFor="universidad">Universidad</label>
+            <label htmlFor="CategoriaDocente_UniversidadFK">Universidad</label>
             <select
-              id="UniversidadCodigo"
-              name="UniversidadCodigo"
-              value={categoria?.UniversidadCodigo || ""}
+              id="CategoriaDocente_UniversidadFK"
+              name="CategoriaDocente_UniversidadFK"
+              value={categoria?.Categoria_UniversidadFK|| ""}
               onChange={handleChange}
               required
             >
               <option value="" disabled>
                 -- Seleccione una Universidad --
               </option>
-              {universidades.map((universidad) => (
-                <option
-                  key={universidad.UniversidadCodigo}
-                  value={universidad.UniversidadCodigo}
-                >
-                  {universidad.nombre}
+              {universidades.map((u) => (
+                <option key={u.UniversidadID} value={u.UniversidadID}>
+                  {u.UniversidadNombre}
                 </option>
               ))}
             </select>
           </div>
+
+          {/* UsuarioRegistro solo si deseas mostrarlo */}
+          <input
+            type="hidden"
+            name="UsuarioRegistro"
+            value={categoria?.UsuarioRegistro || "admin"}
+          />
 
           <button type="submit" className={Styles.btn}>
             Guardar Cambios

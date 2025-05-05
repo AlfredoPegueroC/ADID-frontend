@@ -1,36 +1,36 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
 import Notification from "../Notification";
 import Styles from "@styles/form.module.css";
 
 export default function CategoriaDocenteForm() {
   const router = useRouter();
-  const [formData, setFormData] = useState({
-    categoriaCodigo: "",
-    nombre: "",
-    estado: "",
-    universidadCodigo: "",
-  });
   const API = process.env.NEXT_PUBLIC_API_KEY;
 
   const [universidades, setUniversidades] = useState([]);
+  const [formData, setFormData] = useState({
+    categoriaCodigo: "",
+    CategoriaNombre: "",
+    CategoriaEstado: "",
+    Categoria_UniversidadFK: "",
+  });
 
-  // Fetch universidades when component mounts
   useEffect(() => {
     const fetchUniversidades = async () => {
       try {
-        const response = await fetch(`${API}api/universidad`);
-        const data = await response.json();
-        setUniversidades(data.results);
+        const res = await fetch(`${API}api/universidad`);
+        const data = await res.json();
+        setUniversidades(data.results || data);
+        console.log(data)
       } catch (error) {
-        console.error("Error fetching universidades:", error);
+        console.error("Error al cargar universidades:", error);
       }
     };
 
     fetchUniversidades();
-  }, []);
+  }, [API]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -40,43 +40,36 @@ export default function CategoriaDocenteForm() {
     });
   };
 
-
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const response = await fetch(
-      `${API}api/categoriadocente/create`,
-      {
+    try {
+      const response = await fetch(`${API}api/categoriadocente/create`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          categoriaCodigo: formData.categoriaCodigo,
-          nombre: formData.nombre,
-          estado: formData.estado,
-          UniversidadCodigo: formData.universidadCodigo,
-        }),
-      }
-    );
-
-    if (response.ok) {
-      const result = await response.json();
-
-      setFormData({
-        categoriaCodigo: "",
-        nombre: "",
-        estado: "",
-        universidadCodigo: "",
+        body: JSON.stringify(formData),
       });
-      router.push("/categoriadocenteList"); 
-      Notification.alertSuccess("Categoría de Docente creada exitosamente");
-    } else {
-      const errorData = await response.json();
-      Notification.alertError(
-        "Error al crear la Categoría de Docente ya existe DB" 
-      );
+
+      if (response.ok) {
+        await response.json();
+        Notification.alertSuccess("Categoría de Docente creada correctamente");
+        router.push("/categoriadocenteList");
+
+        setFormData({
+          categoriaCodigo: "",
+          CategoriaNombre: "",
+          CategoriaEstado: "",
+          Categoria_UniversidadFK: "",
+        });
+      } else {
+        const error = await response.json();
+        Notification.alertError("Error al crear la categoría. Puede que ya exista.");
+        console.error("Error:", error);
+      }
+    } catch (error) {
+      Notification.alertError("Error de conexión con el servidor.");
     }
   };
 
@@ -85,57 +78,62 @@ export default function CategoriaDocenteForm() {
       <form onSubmit={handleSubmit} className={Styles.form}>
         <h1 className={Styles.title}>Registrar Categoría de Docente</h1>
 
-          <div className={Styles.name_group}>
-            <label htmlFor="nombre">Nombre de la Categoría:</label>
-            <input
-              type="text"
-              id="nombre"
-              name="nombre"
-              value={formData.nombre}
-              onChange={handleChange}
-              placeholder="Nombre de la Categoría"
-              required
-            />
-          </div>
-       
+        <div className={Styles.name_group}>
+          <label htmlFor="categoriaCodigo">Código:</label>
+          <input
+            type="text"
+            id="categoriaCodigo"
+            name="categoriaCodigo"
+            value={formData.categoriaCodigo}
+            onChange={handleChange}
+            placeholder="Ej. CAT001"
+            required
+          />
+        </div>
 
         <div className={Styles.name_group}>
-          <label htmlFor="universidadCodigo">Universidad:</label>
+          <label htmlFor="CategoriaNombre">Nombre:</label>
+          <input
+            type="text"
+            id="CategoriaNombre"
+            name="CategoriaNombre"
+            value={formData.CategoriaNombre}
+            onChange={handleChange}
+            placeholder="Ej. Titular, Asociado, etc."
+            required
+          />
+        </div>
+
+        <div className={Styles.name_group}>
+          <label htmlFor="CategoriaEstado">Estado:</label>
           <select
-            id="universidadCodigo"
-            name="universidadCodigo"
-            value={formData.universidadCodigo}
+            id="CategoriaEstado"
+            name="CategoriaEstado"
+            value={formData.CategoriaEstado}
             onChange={handleChange}
             required
           >
-            <option value="" disabled>
-              -- Seleccione una Universidad --
-            </option>
-            {universidades.map((universidad) => (
-              <option
-                key={universidad.UniversidadCodigo}
-                value={universidad.UniversidadCodigo}
-              >
-                {universidad.nombre}
-              </option>
-            ))}
+            <option value="">-- Seleccione el estado --</option>
+            <option value="Activo">Activo</option>
+            <option value="Inactivo">Inactivo</option>
           </select>
         </div>
 
         <div className={Styles.name_group}>
-          <label htmlFor="estado">Estado:</label>
+          <label htmlFor="Categoria_UniversidadFK">Universidad:</label>
           <select
-            id="estado"
-            name="estado"
-            value={formData.estado}
+            id="Categoria_UniversidadFK"
+            name="Categoria_UniversidadFK"
+            value={formData.Categoria_UniversidadFK}
             onChange={handleChange}
             required
           >
-            <option value="" disabled>
-              -- Seleccione el estado --
-            </option>
-            <option value="Activo">Activo</option>
-            <option value="Inactivo">Inactivo</option>
+            <option value="">-- Seleccione una universidad --</option>
+            {universidades.map((u) => (
+              <option key={u.UniversidadID} value={u.UniversidadID}>
+                {u.UniversidadNombre}
+              </option>
+            ))}
           </select>
         </div>
 

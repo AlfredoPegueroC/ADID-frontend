@@ -28,10 +28,7 @@ function UniversidadListClient({ initialData }) {
     debounce(async () => {
       try {
         setLoading(true);
-        const { results, totalPages } = await fetchUniversidades(
-          page,
-          searchQuery
-        );
+        const { results, totalPages } = await fetchUniversidades(page, searchQuery);
         setUniversidades(results);
         setTotalPages(totalPages);
       } catch (error) {
@@ -59,10 +56,11 @@ function UniversidadListClient({ initialData }) {
 
   return (
     <div>
-      <h1 className="text-dark mt-5">Lista Universidad</h1>
+      <h1 className="text-dark mt-5">Lista de Universidades</h1>
+
       <div className="d-flex gap-1 mb-3 mt-3">
         <Link className="btn btn-primary" href="/universidad">
-          Nuevo Universidad
+          Nueva Universidad
         </Link>
         {universidades.length > 0 && (
           <Link
@@ -104,47 +102,57 @@ function UniversidadListClient({ initialData }) {
       <Tables>
         <thead>
           <tr>
-            <th scope="col">#</th>
-            <th scope="col">Nombre</th>
-            <th scope="col">Estado</th>
-            <th scope="col">Acción</th>
+            <th>#</th>
+            <th>Código</th>
+            <th>Nombre</th>
+            <th>Dirección</th>
+            <th>Teléfono</th>
+            <th>Email</th>
+            <th>Sitio Web</th>
+            <th>Rector</th>
+            <th>Estado</th>
+            <th>Acción</th>
           </tr>
         </thead>
         <tbody>
           {universidades.length === 0 ? (
             <tr>
-              <td colSpan="4" className="text-center">
+              <td colSpan="10" className="text-center">
                 No se encontraron universidades.
               </td>
             </tr>
           ) : (
             universidades.map((universidad, index) => (
               <tr key={universidad.UniversidadCodigo}>
-                <th scope="row">{index + 1 + (page - 1) * 30}</th>
-                <td>{universidad.nombre}</td>
-                <td>{universidad.estado}</td>
+                <td>{index + 1 + (page - 1) * 30}</td>
+                <td>{universidad.UniversidadCodigo}</td>
+                <td>{universidad.UniversidadNombre}</td>
+                <td>{universidad.UniversidadDireccion}</td>
+                <td>{universidad.UniversidadTelefono}</td>
+                <td>{universidad.UniversidadEmail}</td>
+                <td>
+                  <a
+                    href={universidad.UniversidadSitioWeb}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {universidad.UniversidadSitioWeb}
+                  </a>
+                </td>
+                <td>{universidad.UniversidadRector}</td>
+                <td>{universidad.UniversidadEstado}</td>
                 <td>
                   <Link
-                    href={`/universidadEdit/${universidad.UniversidadCodigo}`}
+                    href={`/universidadEdit/${universidad.UniversidadID}`}
                     className="btn btn-primary btn-sm"
                   >
-                    <Image
-                      src="/edit.svg"
-                      alt="editar"
-                      width={20}
-                      height={20}
-                    />
+                    <Image src="/edit.svg" alt="editar" width={20} height={20} />
                   </Link>
                   <button
                     className="btn btn-danger btn-sm mx-2"
-                    onClick={() => handleDelete(universidad.UniversidadCodigo)}
+                    onClick={() => handleDelete(universidad.UniversidadID)}
                   >
-                    <Image
-                      src="/delete.svg"
-                      alt="borrar"
-                      width={20}
-                      height={20}
-                    />
+                    <Image src="/delete.svg" alt="borrar" width={20} height={20} />
                   </button>
                 </td>
               </tr>
@@ -154,11 +162,7 @@ function UniversidadListClient({ initialData }) {
       </Tables>
 
       {totalPages > 1 && (
-        <Pagination
-          page={page}
-          totalPages={totalPages}
-          onPageChange={setPage}
-        />
+        <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
       )}
     </div>
   );

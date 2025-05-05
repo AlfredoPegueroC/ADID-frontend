@@ -93,6 +93,11 @@ export default function Navbar() {
                   </Link>
                 </li>
                 <li>
+                  <Link className="dropdown-item " href="/campus">
+                    Campus
+                  </Link>
+                </li>
+                <li>
                   <Link className="dropdown-item " href="/facultad">
                     Facultad
                   </Link>
@@ -134,6 +139,11 @@ export default function Navbar() {
                 <li>
                   <Link className="dropdown-item" href="/universidadList">
                     Universidad
+                  </Link>
+                </li>
+                <li>
+                  <Link className="dropdown-item" href="/campusList">
+                    Campus
                   </Link>
                 </li>
                 <li>

@@ -1,22 +1,37 @@
+"use client";
+
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import Notification from "../Notification";
 import Styles from "@styles/form.module.css";
 import { toast, Bounce } from "react-toastify";
+
 export default function Universidad({ title }) {
   const router = useRouter();
   const API = process.env.NEXT_PUBLIC_API_KEY;
-  
+
+  const [formData, setFormData] = useState({
+    UniversidadCodigo: "", // ✅ Agregado
+    UniversidadNombre: "",
+    UniversidadDireccion: "",
+    UniversidadTelefono: "",
+    UniversidadEmail: "",
+    UniversidadSitioWeb: "",
+    UniversidadRector: "",
+    UniversidadEstado: "",
+  });
+
+  const handleChange = (e) => {
+    const { id, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [id]: value,
+    }));
+  };
 
   const handleUniversidad = async (e) => {
     e.preventDefault();
-    const nombre = document.getElementById("nombre").value;
-    const estado = document.getElementById("estado").value;
-
-    const data = {
-      nombre: nombre,
-      estado: estado,
-    };
 
     try {
       const response = await fetch(`${API}api/universidad/create`, {
@@ -24,24 +39,20 @@ export default function Universidad({ title }) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(formData),
       });
+
       if (response.ok) {
         const result = await response.json();
-        Notification.alertSuccess(`Universidad Creada: ${result.nombre}`);
+        Notification.alertSuccess(`Universidad Creada: ${result.UniversidadNombre}`);
         router.push("/universidadList");
-        
       } else {
         const error = await response.json();
-        Notification.alertError(
-          `Error al crear la universidad existe en la DB.`
-        );
-        console.log("aqui", error);
+        Notification.alertError("Error al crear la universidad. Ya existe en la DB.");
+        console.log("Error", error);
       }
     } catch (error) {
-      Notification.alertError(
-        "Hubo un error al conectar con la API: " + error.message
-      );
+      Notification.alertError("Hubo un error al conectar con la API: " + error.message);
     }
   };
 
@@ -49,25 +60,98 @@ export default function Universidad({ title }) {
     <div className={Styles.container}>
       <form
         id="universidadForm"
-        action="/universidadList"
         onSubmit={handleUniversidad}
         className={Styles.form}
       >
         <h1 className={Styles.title}>{title}</h1>
 
+        {/* ✅ Campo para Código de la Universidad */}
         <div className={Styles.name_group}>
-          <label htmlFor="nombre">Nombre de la Universidad</label>
+          <label htmlFor="UniversidadCodigo">Código de la Universidad</label>
           <input
             type="text"
-            placeholder="Nombre de la Universidad"
-            id="nombre"
+            id="UniversidadCodigo"
+            value={formData.UniversidadCodigo}
+            onChange={handleChange}
             required
           />
         </div>
+
         <div className={Styles.name_group}>
-          <label htmlFor="estado">Estado</label>
-          <select id="estado" defaultValue="" required>
-            <option defaultValue="">-- Seleccione --</option>
+          <label htmlFor="UniversidadNombre">Nombre de la Universidad</label>
+          <input
+            type="text"
+            id="UniversidadNombre"
+            value={formData.UniversidadNombre}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        <div className={Styles.name_group}>
+          <label htmlFor="UniversidadDireccion">Dirección</label>
+          <input
+            type="text"
+            id="UniversidadDireccion"
+            value={formData.UniversidadDireccion}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        <div className={Styles.name_group}>
+          <label htmlFor="UniversidadTelefono">Teléfono</label>
+          <input
+            type="text"
+            id="UniversidadTelefono"
+            value={formData.UniversidadTelefono}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        <div className={Styles.name_group}>
+          <label htmlFor="UniversidadEmail">Email</label>
+          <input
+            type="email"
+            id="UniversidadEmail"
+            value={formData.UniversidadEmail}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        <div className={Styles.name_group}>
+          <label htmlFor="UniversidadSitioWeb">Sitio Web</label>
+          <input
+            type="text"
+            id="UniversidadSitioWeb"
+            value={formData.UniversidadSitioWeb}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        <div className={Styles.name_group}>
+          <label htmlFor="UniversidadRector">Rector</label>
+          <input
+            type="text"
+            id="UniversidadRector"
+            value={formData.UniversidadRector}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        <div className={Styles.name_group}>
+          <label htmlFor="UniversidadEstado">Estado</label>
+          <select
+            id="UniversidadEstado"
+            value={formData.UniversidadEstado}
+            onChange={handleChange}
+            required
+          >
+            <option value="">-- Seleccione --</option>
             <option value="Activo">Activo</option>
             <option value="Inactivo">Inactivo</option>
           </select>

@@ -1,41 +1,57 @@
-// app/components/FacultadForm.js
 "use client";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import Notification from "../Notification";
 
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+
+import Notification from "../Notification";
 import Styles from "@styles/form.module.css";
 
-export default function FacultadForm({ title }) {
+export default function Facultad({ title }) {
   const router = useRouter();
-  const [universidades, setUniversidades] = useState([]);
-  const [formData, setFormData] = useState({
-    facultadCodigo: "",
-    nombre: "",
-    UniversidadCodigo: "",
-    estado: "",
-  });
-  const [isLoading, setIsLoading] = useState(false);
   const API = process.env.NEXT_PUBLIC_API_KEY;
 
-  // Load universities on component mount
-  useEffect(() => {
-    async function cargarUniversidades() {
-      try {
-        const response = await fetch(`${API}api/universidad`);
-        if (!response.ok) throw new Error("Failed to fetch universities");
-        const data = await response.json();
-        setUniversidades(data.results);
-      } catch (error) {
-        console.error("Error loading universities:", error);
-        alert("No se pudieron cargar las universidades");
-      }
-    }
-    cargarUniversidades();
-  }, []);
+  const [universidades, setUniversidades] = useState([]);
+  const [campus, setCampus] = useState([]);
 
-  // Handle form input changes
-  const handleInputChange = (e) => {
+  const [formData, setFormData] = useState({
+    FacultadCodigo: "",
+    FacultadNombre: "",
+    FacultadDecano: "",
+    FacultadDireccion: "",
+    FacultadTelefono: "",
+    FacultadEmail: "",
+    FacultadEstado: "",
+    Facultad_UniversidadFK: "",
+    Facultad_CampusFK: "",
+  });
+
+  useEffect(() => {
+    const fetchUniversidades = async () => {
+      try {
+        const res = await fetch(`${API}api/universidad`);
+        const data = await res.json();
+        setUniversidades(data.results || data);
+      } catch (error) {
+        console.error("Error cargando universidades:", error);
+      }
+    };
+
+    const fetchCampus = async () => {
+      try {
+        const res = await fetch(`${API}api/campus`);
+        const data = await res.json();
+        setCampus(data.results || data);
+        console.log(data.results)
+      } catch (error) {
+        console.error("Error cargando campus:", error);
+      }
+    };
+
+    fetchUniversidades();
+    fetchCampus();
+  }, [API]);
+
+  const handleChange = (e) => {
     const { id, value } = e.target;
     setFormData((prevData) => ({
       ...prevData,
@@ -43,108 +59,155 @@ export default function FacultadForm({ title }) {
     }));
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
     try {
-      const response = await fetch(
-        `${API}api/facultad/create`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
-        }
-      );
+      const response = await fetch(`${API}api/facultad/create`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
 
       if (response.ok) {
-        setFormData({
-          facultadCodigo: "",
-          nombre: "",
-          UniversidadCodigo: "",
-          estado: "",
-        });
+        const result = await response.json();
+        Notification.alertSuccess(`Facultad creada: ${result.FacultadNombre}`);
         router.push("/facultadList");
-        Notification.alertSuccess("Facultad creada exitosamente");
       } else {
         const error = await response.json();
-        Notification.alertError(
-          "Error al crear la Facultad ya existe."
-        );
+        Notification.alertError("Error al crear la facultad.");
+        console.log("Error:", error);
       }
     } catch (error) {
-      console.error("Error creating faculty:", error);
-      Notification.alertError(
-        "Error al crear la Facultad: " + error.message
-      );
-    } finally {
-      setIsLoading(false);
+      Notification.alertError("Error de conexión con el servidor.");
     }
   };
 
   return (
     <div className={Styles.container}>
-      <form id="facultadForm" onSubmit={handleSubmit} className={Styles.form}>
+      <form onSubmit={handleSubmit} className={Styles.form}>
         <h1 className={Styles.title}>{title}</h1>
 
         <div className={Styles.name_group}>
-          <label htmlFor="nombre">Nombre de la Facultad:</label>
+          <label htmlFor="FacultadCodigo">Código</label>
           <input
             type="text"
-            placeholder="Nombre de la Facultad"
-            id="nombre"
-            value={formData.nombre}
-            onChange={handleInputChange}
+            id="FacultadCodigo"
+            value={formData.FacultadCodigo}
+            onChange={handleChange}
+            placeholder="Ej. F001"
             required
           />
         </div>
 
         <div className={Styles.name_group}>
-          <label htmlFor="UniversidadCodigo">Universidad:</label>
+          <label htmlFor="FacultadNombre">Nombre</label>
+          <input
+            type="text"
+            id="FacultadNombre"
+            value={formData.FacultadNombre}
+            onChange={handleChange}
+            placeholder="Nombre de la facultad"
+            required
+          />
+        </div>
+
+        <div className={Styles.name_group}>
+          <label htmlFor="FacultadDecano">Decano</label>
+          <input
+            type="text"
+            id="FacultadDecano"
+            value={formData.FacultadDecano}
+            onChange={handleChange}
+            placeholder="Nombre del decano"
+            required
+          />
+        </div>
+
+        <div className={Styles.name_group}>
+          <label htmlFor="FacultadDireccion">Dirección</label>
+          <input
+            type="text"
+            id="FacultadDireccion"
+            value={formData.FacultadDireccion}
+            onChange={handleChange}
+            placeholder="Dirección de la facultad"
+            required
+          />
+        </div>
+
+        <div className={Styles.name_group}>
+          <label htmlFor="FacultadTelefono">Teléfono</label>
+          <input
+            type="text"
+            id="FacultadTelefono"
+            value={formData.FacultadTelefono}
+            onChange={handleChange}
+            placeholder="809-000-0000"
+            required
+          />
+        </div>
+
+        <div className={Styles.name_group}>
+          <label htmlFor="FacultadEmail">Email</label>
+          <input
+            type="email"
+            id="FacultadEmail"
+            value={formData.FacultadEmail}
+            onChange={handleChange}
+            placeholder="correo@facultad.edu.do"
+            required
+          />
+        </div>
+
+        <div className={Styles.name_group}>
+          <label htmlFor="FacultadEstado">Estado</label>
           <select
-            id="UniversidadCodigo"
-            value={formData.UniversidadCodigo}
-            onChange={handleInputChange}
+            id="FacultadEstado"
+            value={formData.FacultadEstado}
+            onChange={handleChange}
             required
           >
-            <option value="" disabled>
-              -- Seleccione una Universidad --
-            </option>
-            {universidades.map((universidad) => (
-              <option
-                key={universidad.UniversidadCodigo}
-                value={universidad.UniversidadCodigo}
-              >
-                {universidad.nombre}
+            <option value="">-- Seleccione --</option>
+            <option value="Activo">Activo</option>
+            <option value="Inactivo">Inactivo</option>
+          </select>
+        </div>
+
+        <div className={Styles.name_group}>
+          <label htmlFor="Facultad_UniversidadFK">Universidad</label>
+          <select
+            id="Facultad_UniversidadFK"
+            value={formData.Facultad_UniversidadFK}
+            onChange={handleChange}
+            required
+          >
+            <option value="">-- Seleccione una universidad --</option>
+            {universidades.map((u) => (
+              <option key={u.UniversidadID} value={u.UniversidadID}>
+                {u.UniversidadNombre}
               </option>
             ))}
           </select>
         </div>
 
         <div className={Styles.name_group}>
-          <label htmlFor="estado">Estado:</label>
+          <label htmlFor="Facultad_CampusFK">Campus</label>
           <select
-            id="estado"
-            value={formData.estado}
-            onChange={handleInputChange}
+            id="Facultad_CampusFK"
+            value={formData.Facultad_CampusFK}
+            onChange={handleChange}
             required
           >
-            <option value="" disabled>
-              -- Seleccione --
-            </option>
-            <option value="Activo">Activo</option>
-            <option value="Inactivo">Inactivo</option>
+            <option value="">-- Seleccione un campus --</option>
+            {campus.map((c) => (
+              <option key={c.CampusID} value={c.CampusID}>
+                {c.CampusNombre}
+              </option>
+            ))}
           </select>
         </div>
 
-        <button
-          type="submit"
-          className={Styles.btn}
-          value={isLoading ? "Enviando..." : "Enviar"}
-          disabled={isLoading}
-        >
+        <button type="submit" className={Styles.btn}>
           Enviar
         </button>
       </form>

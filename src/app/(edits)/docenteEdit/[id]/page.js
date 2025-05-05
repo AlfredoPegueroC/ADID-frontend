@@ -26,33 +26,20 @@ function DocenteEdit({ params }) {
         if (!docenteResponse.ok) throw new Error("Failed to fetch docente");
         const docenteData = await docenteResponse.json();
         setDocente(docenteData);
-        console.log(docenteData);
-        const universidadesResponse = await fetch(`${API}api/universidad`);
-        if (!universidadesResponse.ok)
-          throw new Error("Failed to fetch universidades");
-        const universidadesData = await universidadesResponse.json();
+
+        const universidadesData = await (await fetch(`${API}api/universidad`)).json();
         setUniversidades(universidadesData.results);
 
-        const facultadesResponse = await fetch(`${API}api/facultad`);
-        if (!facultadesResponse.ok)
-          throw new Error("Failed to fetch facultades");
-        const facultadesData = await facultadesResponse.json();
+        const facultadesData = await (await fetch(`${API}api/facultad`)).json();
         setFacultades(facultadesData.results);
 
-        const escuelasResponse = await fetch(`${API}api/escuela`);
-        if (!escuelasResponse.ok) throw new Error("Failed to fetch escuelas");
-        const escuelasData = await escuelasResponse.json();
+        const escuelasData = await (await fetch(`${API}api/escuela`)).json();
         setEscuelas(escuelasData.results);
 
-        const tiposResponse = await fetch(`${API}api/tipodocente`);
-        if (!tiposResponse.ok) throw new Error("Failed to fetch tipos");
-        const tiposData = await tiposResponse.json();
+        const tiposData = await (await fetch(`${API}api/tipodocente`)).json();
         setTipos(tiposData.results);
 
-        const categoriasResponse = await fetch(`${API}api/categoriaDocente`);
-        if (!categoriasResponse.ok)
-          throw new Error("Failed to fetch categorias");
-        const categoriasData = await categoriasResponse.json();
+        const categoriasData = await (await fetch(`${API}api/categoriaDocente`)).json();
         setCategorias(categoriasData.results);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -70,18 +57,15 @@ function DocenteEdit({ params }) {
     try {
       const response = await fetch(`${API}api/docente/edit/${id}/`, {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(docente),
       });
-      console.log(response);
       if (response.ok) {
         Notification.alertSuccess("Docente Editado.");
         router.push("/docenteList");
       } else {
         Notification.alertError("Fallo al Editar.");
-        console.log(response.json());
+        console.log(await response.json());
       }
     } catch (error) {
       console.error("Error updating docente:", error);
@@ -96,7 +80,7 @@ function DocenteEdit({ params }) {
 
   if (loading) {
     return (
-      <div className="spinner-container ">
+      <div className="spinner-container">
         <div className="spinner"></div>
       </div>
     );
@@ -108,202 +92,233 @@ function DocenteEdit({ params }) {
         <form onSubmit={handleSubmit} className={Styles.form}>
           <h1 className={Styles.title}>Editar Docente</h1>
 
+          <div className={Styles.name_group}>
+            <label htmlFor="DocenteCodigo">Código del Docente</label>
+            <input
+              type="text"
+              id="DocenteCodigo"
+              name="DocenteCodigo"
+              value={docente?.DocenteCodigo || ""}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
           <div className={Styles.names}>
             <div className={Styles.name_group}>
-              <label htmlFor="nombre">Nombre</label>
+              <label htmlFor="DocenteNombre">Nombre</label>
               <input
                 type="text"
-                id="nombre"
-                name="nombre"
-                value={docente?.nombre || ""}
+                id="DocenteNombre"
+                name="DocenteNombre"
+                value={docente?.DocenteNombre || ""}
                 onChange={handleChange}
                 required
               />
             </div>
-
             <div className={Styles.name_group}>
-              <label htmlFor="apellidos">Apellido</label>
+              <label htmlFor="DocenteApellido">Apellido</label>
               <input
                 type="text"
-                id="apellidos"
-                name="apellidos"
-                value={docente?.apellidos || ""}
+                id="DocenteApellido"
+                name="DocenteApellido"
+                value={docente?.DocenteApellido || ""}
                 onChange={handleChange}
                 required
               />
             </div>
           </div>
+
           <div className={Styles.names}>
             <div className={Styles.name_group}>
-              <label htmlFor="sexo">Sexo</label>
-              <input
-                type="text"
-                id="sexo"
-                name="sexo"
-                value={docente?.sexo || ""}
+              <label htmlFor="DocenteSexo">Sexo</label>
+              <select
+                id="DocenteSexo"
+                name="DocenteSexo"
+                value={docente?.DocenteSexo || ""}
                 onChange={handleChange}
                 required
-              />
+              >
+                <option value="M">Masculino</option>
+                <option value="F">Femenino</option>
+              </select>
             </div>
-
             <div className={Styles.name_group}>
-              <label htmlFor="estado_civil">Estado civil</label>
+              <label htmlFor="DocenteEstadoCivil">Estado Civil</label>
               <select
-                id="estado_civil"
-                name="estado_civil"
-                value={docente?.estado_civil || ""}
+                id="DocenteEstadoCivil"
+                name="DocenteEstadoCivil"
+                value={docente?.DocenteEstadoCivil || ""}
                 onChange={handleChange}
+                required
               >
                 <option value="Soltero">Soltero</option>
                 <option value="Casado">Casado</option>
-                <option value="Union Libre">Union Libre</option>
+                <option value="Union Libre">Unión Libre</option>
                 <option value="Viudo">Viudo</option>
               </select>
             </div>
           </div>
+
           <div className={Styles.names}>
             <div className={Styles.name_group}>
-              <label htmlFor="fecha_nacimiento">Fecha de nacimiento</label>
+              <label htmlFor="DocenteFechaNacimiento">Fecha de Nacimiento</label>
               <input
-                type="text"
-                id="fecha_nacimiento"
-                name="fecha_nacimiento"
-                value={docente?.fecha_nacimiento || ""}
+                type="date"
+                id="DocenteFechaNacimiento"
+                name="DocenteFechaNacimiento"
+                value={docente?.DocenteFechaNacimiento || ""}
                 onChange={handleChange}
-                required
               />
             </div>
-
             <div className={Styles.name_group}>
-              <label htmlFor="telefono">Teléfono</label>
+              <label htmlFor="DocenteLugarNacimiento">Lugar de Nacimiento</label>
               <input
                 type="text"
-                id="telefono"
-                name="telefono"
-                value={docente?.telefono || ""}
+                id="DocenteLugarNacimiento"
+                name="DocenteLugarNacimiento"
+                value={docente?.DocenteLugarNacimiento || ""}
                 onChange={handleChange}
-                required
               />
             </div>
           </div>
+
           <div className={Styles.names}>
             <div className={Styles.name_group}>
-              <label htmlFor="direccion">Dirección</label>
+              <label htmlFor="DocenteFechaIngreso">Fecha de Ingreso</label>
               <input
-                type="text"
-                id="direccion"
-                name="direccion"
-                value={docente?.direccion || ""}
+                type="date"
+                id="DocenteFechaIngreso"
+                name="DocenteFechaIngreso"
+                value={docente?.DocenteFechaIngreso || ""}
                 onChange={handleChange}
-                required
               />
             </div>
-
             <div className={Styles.name_group}>
-              <label htmlFor="estado">Estado</label>
-              <select
-                id="estado"
-                name="estado"
-                value={docente?.estado || ""}
+              <label htmlFor="DocenteNacionalidad">Nacionalidad</label>
+              <input
+                type="text"
+                id="DocenteNacionalidad"
+                name="DocenteNacionalidad"
+                value={docente?.DocenteNacionalidad || ""}
                 onChange={handleChange}
-              >
-                <option value="Activo">Activo</option>
-                <option value="Inactivo">Inactivo</option>
-                <option value="Jubilado">Jubilado</option>
-                <option value="Sabático">Sabático</option>
-                <option value="Licencia">Licencia</option>
-              </select>
+              />
             </div>
           </div>
+
           <div className={Styles.names}>
             <div className={Styles.name_group}>
-              <label htmlFor="UniversidadCodigo">Universidad</label>
-              <select
-                id="UniversidadCodigo"
-                name="UniversidadCodigo"
-                value={docente?.UniversidadCodigo || ""}
+              <label htmlFor="DocenteTipoIdentificacion">Tipo de Identificación</label>
+              <input
+                type="text"
+                id="DocenteTipoIdentificacion"
+                name="DocenteTipoIdentificacion"
+                value={docente?.DocenteTipoIdentificacion || ""}
                 onChange={handleChange}
-                required
+              />
+            </div>
+            <div className={Styles.name_group}>
+              <label htmlFor="DocenteNumeroIdentificacion">Número de Identificación</label>
+              <input
+                type="text"
+                id="DocenteNumeroIdentificacion"
+                name="DocenteNumeroIdentificacion"
+                value={docente?.DocenteNumeroIdentificacion || ""}
+                onChange={handleChange}
+              />
+            </div>
+          </div>
+
+          <div className={Styles.names}>
+            <div className={Styles.name_group}>
+              <label htmlFor="DocenteTelefono">Teléfono</label>
+              <input
+                type="text"
+                id="DocenteTelefono"
+                name="DocenteTelefono"
+                value={docente?.DocenteTelefono || ""}
+                onChange={handleChange}
+              />
+            </div>
+            <div className={Styles.name_group}>
+              <label htmlFor="DocenteCorreoElectronico">Correo Electrónico</label>
+              <input
+                type="email"
+                id="DocenteCorreoElectronico"
+                name="DocenteCorreoElectronico"
+                value={docente?.DocenteCorreoElectronico || ""}
+                onChange={handleChange}
+              />
+            </div>
+          </div>
+
+          <div className={Styles.name_group}>
+            <label htmlFor="DocenteDireccion">Dirección</label>
+            <input
+              type="text"
+              id="DocenteDireccion"
+              name="DocenteDireccion"
+              value={docente?.DocenteDireccion || ""}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div className={Styles.name_group}>
+            <label htmlFor="DocenteEstado">Estado</label>
+            <select
+              id="DocenteEstado"
+              name="DocenteEstado"
+              value={docente?.DocenteEstado || ""}
+              onChange={handleChange}
+              required
+            >
+              <option value="Activo">Activo</option>
+              <option value="Inactivo">Inactivo</option>
+            </select>
+          </div>
+
+          <div className={Styles.name_group}>
+            <label htmlFor="DocenteObservaciones">Observaciones</label>
+            <textarea
+              id="DocenteObservaciones"
+              name="DocenteObservaciones"
+              rows="3"
+              value={docente?.DocenteObservaciones || ""}
+              onChange={handleChange}
+            />
+          </div>
+
+          {/* FOREIGN KEYS */}
+          <div className={Styles.names}>
+            <div className={Styles.name_group}>
+              <label htmlFor="Docente_UniversidadFK">Universidad</label>
+              <select
+                id="Docente_UniversidadFK"
+                name="Docente_UniversidadFK"
+                value={docente?.Docente_UniversidadFK || ""}
+                onChange={handleChange}
               >
-                <option value="" disabled>
-                  -- Seleccione una Universidad --
-                </option>
-                {universidades.map((universidad) => (
-                  <option
-                    key={universidad.UniversidadCodigo}
-                    value={universidad.UniversidadCodigo}
-                  >
-                    {universidad.nombre}
+                <option value="">-- Seleccione una Universidad --</option>
+                {universidades.map((u) => (
+                  <option key={u.UniversidadID} value={u.UniversidadID}>
+                    {u.UniversidadNombre}
                   </option>
                 ))}
               </select>
             </div>
 
             <div className={Styles.name_group}>
-              <label htmlFor="facultadCodigo">Facultad</label>
+              <label htmlFor="Docente_TipoDocenteFK">Tipo Docente</label>
               <select
-                id="facultadCodigo"
-                name="facultadCodigo"
-                value={docente?.facultadCodigo || ""}
+                id="Docente_TipoDocenteFK"
+                name="Docente_TipoDocenteFK"
+                value={docente?.Docente_TipoDocenteFK || ""}
                 onChange={handleChange}
-                required
               >
-                <option value="" disabled>
-                  -- Seleccione una Facultad --
-                </option>
-                {facultades.map((facultad) => (
-                  <option
-                    key={facultad.facultadCodigo}
-                    value={facultad.facultadCodigo}
-                  >
-                    {facultad.nombre}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-          <div className={Styles.names}>
-            <div className={Styles.name_group}>
-              <label htmlFor="escuelaCodigo">Escuela</label>
-              <select
-                id="escuelaCodigo"
-                name="escuelaCodigo"
-                value={docente?.escuelaCodigo || ""}
-                onChange={handleChange}
-                required
-              >
-                <option value="" disabled>
-                  -- Seleccione una Escuela --
-                </option>
-                {escuelas.map((escuela) => (
-                  <option
-                    key={escuela.escuelaCodigo}
-                    value={escuela.escuelaCodigo}
-                  >
-                    {escuela.nombre}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className={Styles.name_group}>
-              <label htmlFor="tipoDocenteCodigo">Tipo Docente</label>
-              <select
-                id="tipoDocenteCodigo"
-                name="tipoDocenteCodigo"
-                value={docente?.tipoDocenteCodigo || ""}
-                onChange={handleChange}
-                required
-              >
-                <option value="" disabled>
-                  -- Seleccione un tipo docente --
-                </option>
+                <option value="">-- Seleccione un Tipo Docente --</option>
                 {tipos.map((tipo) => (
-                  <option
-                    key={tipo.tipoDocenteCodigo}
-                    value={tipo.tipoDocenteCodigo}
-                  >
-                    {tipo.nombre}
+                  <option key={tipo.TipoDocenteID} value={tipo.TipoDocenteID}>
+                    {tipo.TipoDocenteDescripcion}
                   </option>
                 ))}
               </select>
@@ -311,30 +326,23 @@ function DocenteEdit({ params }) {
           </div>
 
           <div className={Styles.name_group}>
-            <label htmlFor="categoriaCodigo">Categoría de Docente:</label>
+            <label htmlFor="Docente_CategoriaDocenteFK">Categoría Docente</label>
             <select
-              id="categoriaCodigo"
-              name="categoriaCodigo"
-              value={docente?.categoriaCodigo || ""}
+              id="Docente_CategoriaDocenteFK"
+              name="Docente_CategoriaDocenteFK"
+              value={docente?.Docente_CategoriaDocenteFK || ""}
               onChange={handleChange}
-              required
             >
-              <option value="" disabled>
-                -- Seleccione la Categoría de Docente --
-              </option>
-              {categorias.map((categoria) => (
-                <option
-                  key={categoria.categoriaCodigo}
-                  value={categoria.categoriaCodigo}
-                >
-                  {categoria.nombre}
+              <option value="">-- Seleccione una Categoría --</option>
+              {categorias.map((c) => (
+                <option key={c.CategoriaID} value={c.CategoriaID}>
+                  {c.CategoriaNombre}
                 </option>
               ))}
             </select>
           </div>
-          <button type="submit" className={Styles.btn}>
-            Guardar Cambios
-          </button>
+
+          <button type="submit" className={Styles.btn}>Guardar Cambios</button>
         </form>
       </div>
     </FormLayout>
@@ -342,3 +350,4 @@ function DocenteEdit({ params }) {
 }
 
 export default withAuth(DocenteEdit);
+

@@ -10,8 +10,8 @@ import ImportExcel from "@components/forms/Import";
 import Search from "@components/search";
 import withAuth from "@utils/withAuth";
 import { deleteEntity } from "@utils/delete";
-import { fetchDocentes } from "@api/docenteService"; // Import your fetch function
-import { debounce } from "lodash"; // Import debounce
+import { fetchDocentes } from "@api/docenteService";
+import { debounce } from "lodash";
 
 function DocenteListClient({ initialData, totalPages }) {
   const [docentes, setDocentes] = useState(initialData);
@@ -22,7 +22,7 @@ function DocenteListClient({ initialData, totalPages }) {
 
   const fetchDocentesData = async (page, query) => {
     try {
-      const response = await fetchDocentes(query, page); // Fetch docentes based on the current page and search query
+      const response = await fetchDocentes(query, page);
       setDocentes(response.results);
     } catch (error) {
       console.error("Error fetching docentes:", error);
@@ -33,7 +33,7 @@ function DocenteListClient({ initialData, totalPages }) {
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
-    fetchDocentesData(page, searchQuery); // Fetch new data for the selected page
+    fetchDocentesData(page, searchQuery);
   };
 
   const handleSearchChange = (e) => {
@@ -42,22 +42,17 @@ function DocenteListClient({ initialData, totalPages }) {
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    fetchDocentesData(currentPage, searchQuery); // Fetch data based on search query
+    fetchDocentesData(currentPage, searchQuery);
   };
 
   const deleteDocente = useCallback((pk) => {
-    deleteEntity(`${API}api/docente/delete`, pk, setDocentes, "Docentecodigo");
+    deleteEntity(`${API}api/docente/delete`, pk, setDocentes, "DocenteID");
   }, [API]);
 
-  // Create a debounced function to fetch docentes data
-  const debouncedFetchDocentesData = useCallback(debounce(fetchDocentesData, 500), []); // Adjust the debounce delay as needed
+  const debouncedFetchDocentesData = useCallback(debounce(fetchDocentesData, 500), []);
 
   useEffect(() => {
-    fetchDocentesData(currentPage, searchQuery); // Fetch docentes when currentPage or searchQuery changes
-  }, [currentPage, searchQuery]);
-
-  useEffect(() => {
-    debouncedFetchDocentesData(currentPage, searchQuery); // Fetch data with debouncing
+    debouncedFetchDocentesData(currentPage, searchQuery);
   }, [searchQuery, currentPage, debouncedFetchDocentesData]);
 
   if (loading) {
@@ -70,11 +65,15 @@ function DocenteListClient({ initialData, totalPages }) {
 
   return (
     <div className="mt-5">
-      <h1 className="text-dark">Lista Docente</h1>
+      <h1 className="text-dark">Lista de Docentes</h1>
       <div className="d-flex gap-2 mb-3 mt-3">
         <Link className="btn btn-primary" href="/docente">Agregar Docente</Link>
-        {docentes.length > 0 && <Link className="btn btn-success" href={`${API}export/docente`}>Exportar</Link>}
-        <button type="button" className="btn btn-warning" data-bs-toggle="modal" data-bs-target="#Modal">Importar</button>
+        {docentes.length > 0 && (
+          <Link className="btn btn-success" href={`${API}export/docente`}>Exportar</Link>
+        )}
+        <button type="button" className="btn btn-warning" data-bs-toggle="modal" data-bs-target="#Modal">
+          Importar
+        </button>
       </div>
 
       <Modal title="Importar Docente">
@@ -87,57 +86,59 @@ function DocenteListClient({ initialData, totalPages }) {
         <thead>
           <tr>
             <th>Nombre</th>
-            <th>Apellidos</th>
+            <th>Apellido</th>
             <th>Sexo</th>
             <th>Estado Civil</th>
-            <th>Fecha</th>
+            <th>Nacimiento</th>
+            <th>Ingreso</th>
+            <th>Nacionalidad</th>
             <th>Teléfono</th>
-            <th>Dirección</th>
+            <th>Correo</th>
             <th>Estado</th>
             <th>Universidad</th>
-            <th>Facultad</th>
-            <th>Escuela</th>
-            <th>Tipo D.</th>
+            
+            <th>Tipo</th>
             <th>Categoría</th>
             <th>Acción</th>
           </tr>
         </thead>
         <tbody>
-          {docentes.length === 0 && <tr><td colSpan="15" className="text-center">No docentes found.</td></tr>}
-          {docentes.map((docente) => (
-            <tr key={docente.Docentecodigo}>
-              <td>{docente.nombre}</td>
-              <td>{docente.apellidos}</td>
-              <td>{docente.sexo}</td>
-              <td>{docente.estado_civil}</td>
-              <td>{docente.fecha_nacimiento}</td>
-              <td>{docente.telefono}</td>
-              <td>{docente.direccion}</td>
-              <td>{docente.estado}</td>
-              <td>{docente.universidadNombre}</td>
-              <td>{docente.facultadNombre}</td>
-              <td>{docente.escuelaNombre}</td>
-              <td>{docente.tipoNombre}</td>
-              <td>{docente.categoriaNombre}</td>
-              <td>
-                <Link className="btn btn-primary btn-sm" href={`/docenteEdit/${docente.Docentecodigo}`}>
-                  <Image src="/edit.svg" alt="editar" width={20} height={20} />
-                </Link>
-                <button className="btn btn-danger btn-sm mx-2" onClick={() => deleteDocente(docente.Docentecodigo)}>
-                  <Image src="/delete.svg" alt="borrar" width={20} height={20} />
-                </button>
-              </td>
+          {docentes.length === 0 ? (
+            <tr>
+              <td colSpan="16" className="text-center">No se encontraron docentes.</td>
             </tr>
-          ))}
+          ) : (
+            docentes.map((d) => (
+              <tr key={d.DocenteID}>
+                <td>{d.DocenteNombre}</td>
+                <td>{d.DocenteApellido}</td>
+                <td>{d.DocenteSexo}</td>
+                <td>{d.DocenteEstadoCivil}</td>
+                <td>{d.DocenteFechaNacimiento}</td>
+                <td>{d.DocenteFechaIngreso}</td>
+                <td>{d.DocenteNacionalidad}</td>
+                <td>{d.DocenteTelefono}</td>
+                <td>{d.DocenteCorreoElectronico}</td>
+                <td>{d.DocenteEstado}</td>
+                <td>{d.universidadNombre}</td>
+                <td>{d.tipoDocenteNombre}</td>
+                <td>{d.categoriaDocenteNombre}</td>
+                <td>
+                  <Link className="btn btn-primary btn-sm" href={`/docenteEdit/${d.DocenteID}`}>
+                    <Image src="/edit.svg" alt="editar" width={20} height={20} />
+                  </Link>
+                  <button className="btn btn-danger btn-sm mx-2" onClick={() => deleteDocente(d.DocenteID)}>
+                    <Image src="/delete.svg" alt="borrar" width={20} height={20} />
+                  </button>
+                </td>
+              </tr>
+            ))
+          )}
         </tbody>
       </Tables>
 
       {totalPages > 1 && (
-        <Pagination
-          page={currentPage}
-          totalPages={totalPages}
-          onPageChange={handlePageChange}
-        />
+        <Pagination page={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
       )}
     </div>
   );
