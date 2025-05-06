@@ -47,7 +47,7 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
       setLoading(false);
     }
   };
-
+  console.log("PERIODOS", periodos)
   useEffect(() => {
     if (selectedPeriodo) {
       fetchData(currentPage, searchQuery, selectedPeriodo);
@@ -58,7 +58,7 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
     const CargarPeriodos = async () => {
       try {
         const periodosData = await fetchPeriodos();
-        const nombres = periodosData.results.map((p) => p.nombre);
+        const nombres = periodosData.results.map((p) => p.PeriodoNombre);
   
         // Ordenamos los períodos del más reciente al más antiguo
         const nombresOrdenados = nombres.sort((a, b) => {
