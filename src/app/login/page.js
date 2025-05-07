@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Styles from "@styles/login.module.css";
 import Image from 'next/image';
 import Notification from "@components/Notification";
+
 export default function LoginPage() {
   const router = useRouter();
   const [username, setUsername] = useState("");
@@ -37,26 +38,31 @@ export default function LoginPage() {
       const data = await response.json();
       localStorage.setItem("accessToken", data.access);
       localStorage.setItem("refreshToken", data.refresh);
+      localStorage.setItem("user", JSON.stringify(data.user));
 
       
-      router.push("/");
-      Notification.alertLogin('Logeado...')
+      if (data.user.groups.includes("admin")) {
+        router.push("/admin");
+      } else {
+        router.push("/");
+      }
+
+      Notification.alertLogin('Logeado...');
     } catch (error) {
       setError(error.message);
     }
   };
 
   return (
-    // 
     <div className={Styles.login_container}>
       <div className={Styles.login_box}>
         <div className={Styles.left_section}>
-        <Image
-        src="/images-Photoroom.png"
-        alt="Logo de la Facultad de Ciencias"
-        width={200} 
-        height={200} 
-      />
+          <Image
+            src="/images-Photoroom.png"
+            alt="Logo de la Facultad de Ciencias"
+            width={200} 
+            height={200} 
+          />
           <h2 className={Styles.separacion}>FACULTAD DE CIENCIAS UASD</h2>
         </div>
         <div className={Styles.right_section}>
