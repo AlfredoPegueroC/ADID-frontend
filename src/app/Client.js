@@ -1,6 +1,12 @@
-"use client";
+'use client';
 
-import { useEffect, useState, useCallback, useRef } from "react";
+import {
+  useReactTable,
+  getCoreRowModel,
+  flexRender,
+} from '@tanstack/react-table';
+
+import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import Pagination from "@components/Pagination";
@@ -24,21 +30,23 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
   const [selectedPeriodo, setSelectedPeriodo] = useState("");
   const [periodoDestino, setPeriodoDestino] = useState("");
   const [copiando, setCopiando] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const API = process.env.NEXT_PUBLIC_API_KEY;
   const fileInputRef = useRef(null);
-  const [mostrarColumnasExtra, setMostrarColumnasExtra] = useState(true); //**** */
 
+  const [columnVisibility, setColumnVisibility] = useState({
+    facultadNombre: false,
+    escuelaNombre: false,
+    cupo: false,
+    inscripto: false
+  });
 
   const Api_import_URL = `${API}import/asignacion`;
 
   const fetchData = async (page, query, periodo = null) => {
     setLoading(true);
     try {
-      const { asignaciones, totalPages } = await fetchAsignacionData(
-        periodo,
-        page,
-        query
-      );
+      const { asignaciones, totalPages } = await fetchAsignacionData(periodo, page, query);
       setAsignaciones(asignaciones);
       setTotalPages(totalPages);
     } catch (error) {
@@ -47,7 +55,7 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
       setLoading(false);
     }
   };
-  console.log("PERIODOS", periodos)
+
   useEffect(() => {
     if (selectedPeriodo) {
       fetchData(currentPage, searchQuery, selectedPeriodo);
@@ -59,17 +67,14 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
       try {
         const periodosData = await fetchPeriodos();
         const nombres = periodosData.results.map((p) => p.PeriodoNombre);
-  
-        // Ordenamos los períodos del más reciente al más antiguo
+
         const nombresOrdenados = nombres.sort((a, b) => {
           const [aYear, aTerm] = a.split("-").map(Number);
           const [bYear, bTerm] = b.split("-").map(Number);
           return bYear !== aYear ? bYear - aYear : bTerm - aTerm;
         });
-  
+
         setPeriodos(nombresOrdenados);
-  
-        // Establecemos por defecto el más reciente
         if (nombresOrdenados.length > 0 && !selectedPeriodo) {
           setSelectedPeriodo(nombresOrdenados[0]);
         }
@@ -81,45 +86,9 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
   }, []);
 
   const handlePageChange = (page) => setCurrentPage(page);
-
   const handleSearchChange = (e) => setSearchQuery(e.target.value);
-
-  const handleSearchSubmit = (e) => {
-    e.preventDefault();
-    setCurrentPage(1);
-  };
-
-  const handlePeriodoChange = (e) => {
-    const periodo = e.target.value;
-    setSelectedPeriodo(periodo);
-    setCurrentPage(1);
-  };
-
-  const handleExcelUpload = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("periodo", selectedPeriodo);
-
-    fetch(`${API}api/asignacion/importar`, {
-      method: "POST",
-      body: formData,
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Error al importar Excel");
-        return res.json();
-      })
-      .then(() => {
-        alert("Importación exitosa");
-        fetchData(currentPage, searchQuery, selectedPeriodo);
-      })
-      .catch((err) => {
-        console.error(err);
-        alert("Ocurrió un error al importar el archivo.");
-      });
-  };
+  const handleSearchSubmit = (e) => { e.preventDefault(); setCurrentPage(1); };
+  const handlePeriodoChange = (e) => { setSelectedPeriodo(e.target.value); setCurrentPage(1); };
 
   const handleCopiarPeriodo = async () => {
     setCopiando(true);
@@ -127,14 +96,10 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
       const res = await fetch(`${API}api/asignacion/copiar`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          from_period: selectedPeriodo,
-          to_period: periodoDestino,
-        }),
+        body: JSON.stringify({ from_period: selectedPeriodo, to_period: periodoDestino }),
       });
 
       if (!res.ok) throw new Error("Error al copiar asignaciones");
-
       alert("Asignaciones copiadas correctamente");
       setSelectedPeriodo(periodoDestino);
     } catch (error) {
@@ -147,119 +112,87 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
 
   const deleteAsignacion = useCallback(
     (id) => {
-      deleteEntity(
-        `${API}api/asignacionDocente/delete`,
-        id,
-        setAsignaciones,
-        "ADIDcodigo"
-      );
+      deleteEntity(`${API}api/asignacionDocente/delete`, id, setAsignaciones, "ADIDcodigo");
     },
     [API]
   );
 
-  const debouncedSearchChange = useCallback(
-    debounce(handleSearchChange, 500),
-    []
-  );
+  const debouncedSearchChange = useCallback(debounce(handleSearchChange, 500), []);
+
+  const columns = useMemo(() => [
+    { accessorKey: 'nrc', header: 'NRC' },
+    { accessorKey: 'clave', header: 'Clave' },
+    { accessorKey: 'asignatura', header: 'Asignatura' },
+    { accessorKey: 'codigo', header: 'Código' },
+    { accessorKey: 'docenteNombre', header: 'Profesor' },
+    { accessorKey: 'seccion', header: 'Sección' },
+    { accessorKey: 'modalidad', header: 'Modalidad' },
+    { accessorKey: 'campus', header: 'Campus' },
+    { accessorKey: 'facultadNombre', header: 'Facultad' },
+    { accessorKey: 'escuelaNombre', header: 'Escuela' },
+    { accessorKey: 'tipo', header: 'Tipo' },
+    { accessorKey: 'cupo', header: 'Cupo' },
+    { accessorKey: 'inscripto', header: 'Inscripto' },
+    { accessorKey: 'horario', header: 'Horario' },
+    { accessorKey: 'dias', header: 'Días' },
+    { accessorKey: 'Aula', header: 'Aula' },
+    { accessorKey: 'creditos', header: 'CR' },
+    {
+      id: 'accion',
+      header: 'Acción',
+      cell: ({ row }) => (
+        <Link
+          className="btn btn-primary btn-sm"
+          href={`/asignacionEdit/${row.original.ADIDcodigo}?period=${selectedPeriodo}`}
+        >
+          <Image src="/edit.svg" alt="editar" width={20} height={20} />
+        </Link>
+      )
+    }
+  ], [selectedPeriodo]);
+
+  const table = useReactTable({
+    data: asignaciones,
+    columns,
+    state: { columnVisibility },
+    onColumnVisibilityChange: setColumnVisibility,
+    getCoreRowModel: getCoreRowModel(),
+  });
 
   return (
     <div className="mt-4">
-      <div className="d-flex gap-1 mb-3 mt-3">
-        
+      <div className="d-flex flex-wrap gap-2 mb-3">
+        <button type="button" className="btn btn-warning text-dark" data-bs-toggle="modal" data-bs-target="#Modal">Nueva Asignación</button>
+        <button type="button" className="btn btn-info text-white" data-bs-toggle="modal" data-bs-target="#modalcopiar">Editar Asignación</button>
+        <button type="button" className="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalcopiar">Crear Sección</button>
+        <Link className="btn btn-secondary" href={`${API}export/asignacionDocenteExport?period=${selectedPeriodo}`}>Exportar</Link>
 
-        <button
-          type="button"
-          className="btn btn-primary"
-          data-bs-toggle=""
-          data-bs-target=""
-        >
-          Consulta
-        </button>
-
-        <button
-          type="button"
-          className="btn btn-warning text-dark"
-          data-bs-toggle="modal"
-          data-bs-target="#Modal"
-        >
-          Nueva Asignación
-        </button>
-        <button
-          type="button"
-          className="btn btn-info text-white"
-          data-bs-toggle="modal"
-          data-bs-target="#modalcopiar"
-        >
-          Editar Asignación
-        </button>
-
-        <button
-          type="button"
-          className="btn btn-success"
-          data-bs-toggle="modal"
-          data-bs-target="#modalcopiar"
-        >
-          Crear Seccion
-        </button>
-
-        <Link
-          className="btn btn-secondary"
-          href={`${API}export/asignacionDocenteExport?period=${selectedPeriodo}`}
-        >
-          Exportar
-        </Link>
-
-        <button
-        type="button"
-        className="btn btn-outline-dark"
-        onClick={() => setMostrarColumnasExtra((prev) => !prev)}
-    >
-  {mostrarColumnasExtra ? "Ocultar detalles" : "Mostrar detalles"}
-</button>
-
-        <select
-          className="form w-auto"
-          value={selectedPeriodo}
-          onChange={handlePeriodoChange}
-        >
-          {periodos.map((p) => (
-            <option key={p} value={p}>
-              {p}
-            </option>
-          ))}
+        <select className="form-select w-auto" value={selectedPeriodo} onChange={handlePeriodoChange}>
+          {periodos.map((p) => (<option key={p} value={p}>{p}</option>))}
         </select>
-      </div>
-      <Modal title="Importar Asignación">
-        <ImportPage importURL={Api_import_URL} onSuccess={debouncedSearchChange} />
-      </Modal>
-      <Modal title="Editar asignaciones desde otro periodo" modelName="modalcopiar">
-        <div className="d-flex flex-column gap-4 my-4 border rounded p-3 bg-light text-black">
-          <div>
-            <h5>📄 Editar asignaciones desde otro periodo</h5>
-            <select
-              className="form-select w-auto d-inline-block me-2"
-              onChange={(e) => setPeriodoDestino(e.target.value)}
-              value={periodoDestino}
-            >
-              <option value="">Seleccionar periodo destino</option>
-              {periodos
-                .filter((p) => p !== selectedPeriodo)
-                .map((p) => (
-                  <option key={p} value={p}>
-                    {p}
-                  </option>
-                ))}
-            </select>
-            <button
-              className="btn btn-warning"
-              onClick={handleCopiarPeriodo}
-              disabled={!periodoDestino || copiando}
-            >
-              {copiando ? "Editar..." : "Editar asignaciones"}
-            </button>
+
+        <div className="dropdown">
+          <button className="btn btn-outline-dark dropdown-toggle" type="button" onClick={() => setDropdownOpen(!dropdownOpen)}>
+            Columnas
+          </button>
+          <div className={`dropdown-menu p-3 ${dropdownOpen ? 'show' : ''}`} style={{ minWidth: '200px' }}>
+            {table.getAllLeafColumns().map(column => (
+              <div className="form-check" key={column.id}>
+                <input
+                  type="checkbox"
+                  className="form-check-input"
+                  id={`col-${column.id}`}
+                  checked={column.getIsVisible()}
+                  onChange={column.getToggleVisibilityHandler()}
+                />
+                <label className="form-check-label" htmlFor={`col-${column.id}`}>
+                  {column.columnDef.header}
+                </label>
+              </div>
+            ))}
           </div>
         </div>
-      </Modal>
+      </div>
 
       <Search
         SearchSubmit={handleSearchSubmit}
@@ -268,75 +201,27 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
       />
 
       <Tables>
-      <thead>
-  <tr>
-    <th>NRC</th>
-    <th>Clave</th>
-    <th>Asignatura</th>
-    <th>Codigo</th>
-    <th>Profesor</th>
-    <th>Seccion</th>
-    <th>Modalidad</th>
-    <th>Campus</th>
-    {mostrarColumnasExtra && (
-      <>
-        <th>Facultad</th>
-        <th>Escuela</th>
-        <th>Tipo</th>
-      </>
-    )}
-    <th>Cupo</th>
-    <th>Inscripto</th>
-    <th>Horario</th>
-    <th>Dias</th>
-    <th>Aulas</th>
-    {mostrarColumnasExtra && <th>CR</th>}
-    <th>Accion</th>
-  </tr>
-</thead>
-        <tbody>
-          {asignaciones.length === 0 ? (
-            <tr>
-              <td colSpan="18" className="text-center">
-                No asignaciones encontradas para este periodo.
-              </td>
+        <thead>
+          {table.getHeaderGroups().map(headerGroup => (
+            <tr key={headerGroup.id}>
+              {headerGroup.headers.map(header => (
+                <th key={header.id}>
+                  {flexRender(header.column.columnDef.header, header.getContext())}
+                </th>
+              ))}
             </tr>
-          ) : (
-            asignaciones.map((asignacion) => (
-              <tr key={asignacion.ADIDcodigo}>
-                <td>{asignacion.nrc}</td>
-                <td>{asignacion.clave}</td>
-                <td>{asignacion.asignatura}</td>
-                <td>{asignacion.codigo}</td>
-                <td>{asignacion.docenteNombre}</td>
-                <td>{asignacion.seccion}</td>
-                <td>{asignacion.modalidad}</td>
-                <td>{asignacion.campus}</td>
-                <td>{asignacion.facultadNombre}</td>
-                <td>{asignacion.escuelaNombre}</td>
-                <td>{asignacion.tipo}</td>
-                <td>{asignacion.cupo}</td>
-                <td>{asignacion.inscripto}</td>
-                <td>{asignacion.horario}</td>
-                <td>{asignacion.dias}</td>
-                <td>{asignacion.Aula}</td>
-                <td>{asignacion.creditos}</td>
-                <td>
-                  <Link
-                    className="btn btn-primary btn-sm"
-                    href={`/asignacionEdit/${asignacion.ADIDcodigo}?period=${selectedPeriodo}`}
-                  >
-                    <Image
-                      src="/edit.svg"
-                      alt="editar"
-                      width={20}
-                      height={20}
-                    />
-                  </Link>
+          ))}
+        </thead>
+        <tbody>
+          {table.getRowModel().rows.map(row => (
+            <tr key={row.id}>
+              {row.getVisibleCells().map(cell => (
+                <td key={cell.id}>
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </td>
-              </tr>
-            ))
-          )}
+              ))}
+            </tr>
+          ))}
         </tbody>
       </Tables>
 
@@ -347,8 +232,28 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
           onPageChange={handlePageChange}
         />
       )}
+
+      <Modal title="Importar Asignación">
+        <ImportPage importURL={Api_import_URL} onSuccess={debouncedSearchChange} />
+      </Modal>
+
+      <Modal title="Editar asignaciones desde otro periodo" modelName="modalcopiar">
+        <div className="d-flex flex-column gap-4 my-4 border rounded p-3 bg-light text-black">
+          <div>
+            <h5>📄 Editar asignaciones desde otro periodo</h5>
+            <select className="form-select w-auto d-inline-block me-2" onChange={(e) => setPeriodoDestino(e.target.value)} value={periodoDestino}>
+              <option value="">Seleccionar periodo destino</option>
+              {periodos.filter(p => p !== selectedPeriodo).map(p => (
+                <option key={p} value={p}>{p}</option>
+              ))}
+            </select>
+            <button className="btn btn-warning" onClick={handleCopiarPeriodo} disabled={!periodoDestino || copiando}>
+              {copiando ? "Editando..." : "Editar asignaciones"}
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
-    
   );
 }
 

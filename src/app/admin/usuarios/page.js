@@ -86,6 +86,21 @@ export default function UsuarioPage() {
         />
       </div>
 
+      {/* Mostrar/Ocultar columnas */}
+      <div className="mb-3 d-flex gap-3 flex-wrap">
+        {table.getAllLeafColumns().map(column => (
+          <label key={column.id} className="form-check-label">
+            <input
+              type="checkbox"
+              className="form-check-input me-1"
+              checked={column.getIsVisible()}
+              onChange={column.getToggleVisibilityHandler()}
+            />
+            {column.columnDef.header()}
+          </label>
+        ))}
+      </div>
+
       <div className="table-responsive">
         <Tables>
           <thead className="table-light">
@@ -101,34 +116,15 @@ export default function UsuarioPage() {
                       header.column.columnDef.header,
                       header.getContext()
                     )}
-                    {{
-                      asc: ' 🔼',
-                      desc: ' 🔽',
-                    }[header.column.getIsSorted()] ?? null}
+                    {header.column.getIsSorted() === 'asc'
+                      ? ' 🔼'
+                      : header.column.getIsSorted() === 'desc'
+                      ? ' 🔽'
+                      : null}
                   </th>
                 ))}
               </tr>
             ))}
-            {/* Filtros individuales */}
-            {/* <tr>
-              {table.getHeaderGroups()[0].headers.map(header => (
-                <th key={header.id}>
-                  {header.column.getCanFilter() ? (
-                    <input
-                      type="text"
-                      className="form-control form-control-sm"
-                      placeholder={`Filtrar...`}
-                      value={
-                        header.column.getFilterValue() ?? ''
-                      }
-                      onChange={e =>
-                        header.column.setFilterValue(e.target.value)
-                      }
-                    />
-                  ) : null}
-                </th>
-              ))}
-            </tr> */}
           </thead>
 
           <tbody>
@@ -136,10 +132,7 @@ export default function UsuarioPage() {
               <tr key={row.id}>
                 {row.getVisibleCells().map(cell => (
                   <td key={cell.id}>
-                    {flexRender(
-                      cell.column.columnDef.cell,
-                      cell.getContext()
-                    )}
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>
                 ))}
               </tr>

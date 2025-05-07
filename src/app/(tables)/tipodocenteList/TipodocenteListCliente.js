@@ -8,8 +8,8 @@ import { debounce } from "lodash";
 import Pagination from "@components/Pagination";
 import Tables from "@components/Tables";
 import Search from "@components/search";
-import ImportExcel from "@components/forms/Import";
-import Modal from "@components/Modal";
+// import ImportExcel from "@components/forms/Import";
+// import Modal from "@components/Modal";
 import { fetchTipoDocentes } from "@api/tipoDocenteService";
 import withAuth from "@utils/withAuth";
 import { deleteEntity } from "@utils/delete";
@@ -52,14 +52,14 @@ function TipodocenteListClient({ initialData, totalPages }) {
             Exportar
           </Link>
         )}
-        <button type="button" className="btn btn-warning" data-bs-toggle="modal" data-bs-target="#Modal">
+        {/* <button type="button" className="btn btn-warning" data-bs-toggle="modal" data-bs-target="#Modal">
           Importar
-        </button>
+        </button> */}
       </div>
 
-      <Modal title="Importar Tipo Docente">
+      {/* <Modal title="Importar Tipo Docente">
         <ImportExcel importURL={Api_import_URL} onSuccess={debouncedFetchData} />
-      </Modal>
+      </Modal> */}
 
       <Search SearchSubmit={handleSearchSubmit} SearchChange={handleSearchChange} searchQuery={searchQuery} />
 
