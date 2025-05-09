@@ -32,7 +32,6 @@ export default function AsignacionForm() {
     creditos: "",
     tipo: "",
     accion: "",
-    usuario_registro: "",
     docenteFk: "",
     campusFk: "",
     universidadFk: "",
@@ -51,7 +50,7 @@ export default function AsignacionForm() {
           fetch(`${API}api/universidad`),
           fetch(`${API}api/facultad`),
           fetch(`${API}api/escuela`),
-          fetch(`${API}api/periodoAcademico`)
+          fetch(`${API}api/periodoacademico`)
         ]);
 
         const [docentesData, campusData, universidadesData, facultadesData, escuelasData, periodosData] = await Promise.all([
@@ -184,12 +183,8 @@ export default function AsignacionForm() {
           <input type="text" id="accion" name="accion" value={formData.accion} onChange={handleChange} />
         </div>
 
+    
         <div className={Styles.name_group}>
-          <label htmlFor="usuario_registro">Usuario Registro:</label>
-          <input type="text" id="usuario_registro" name="usuario_registro" value={formData.usuario_registro} onChange={handleChange} />
-        </div>
-
-        {/* <div className={Styles.name_group}>
           <label htmlFor="docenteFk">Docente:</label>
           <select id="docenteFk" name="docenteFk" value={formData.docenteFk} onChange={handleChange} required>
             <option value="" disabled>-- Seleccione un Docente --</option>
@@ -197,7 +192,7 @@ export default function AsignacionForm() {
               <option key={d.DocenteID} value={d.DocenteID}>{d.DocenteNombre} {d.DocenteApellido}</option>
             ))}
           </select>
-        </div> */}
+        </div>
 
         <div className={Styles.name_group}>
           <label htmlFor="campusFk">Campus:</label>

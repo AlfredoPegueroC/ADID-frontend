@@ -9,25 +9,34 @@ import {
   flexRender,
 } from '@tanstack/react-table';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import Tables from '@components/Tables';
 
 export default function UsuarioPage() {
-  const data = useMemo(
-    () => [
-      { id: 1, name: 'Alfredo Peguero', email: 'alfredo@example.com', role: 'Admin' },
-      { id: 2, name: 'Laura Garcia', email: 'laura@example.com', role: 'User' },
-      { id: 3, name: 'Carlos López', email: 'carlos@example.com', role: 'User' },
-      { id: 4, name: 'Ana Pérez', email: 'ana@example.com', role: 'Admin' },
-      { id: 5, name: 'Luis Jiménez', email: 'luis@example.com', role: 'User' },
-      { id: 6, name: 'Mario Castro', email: 'mario@example.com', role: 'User' },
-    ],
-    []
-  );
-
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [sorting, setSorting] = useState([]);
   const [columnFilters, setColumnFilters] = useState([]);
   const [globalFilter, setGlobalFilter] = useState('');
+
+  // ✅ Reemplaza esta URL con la tuya
+  const API = process.env.NEXT_PUBLIC_API_KEY;
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(`${API}api/usuarios`);
+        const result = await response.json();
+        setData(result);
+      } catch (error) {
+        console.error('Error al cargar los usuarios:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const columns = useMemo(
     () => [
@@ -37,8 +46,8 @@ export default function UsuarioPage() {
         footer: props => props.column.id,
       },
       {
-        accessorKey: 'name',
-        header: () => 'Name',
+        accessorKey: 'username',
+        header: () => 'Username',
         footer: props => props.column.id,
       },
       {
@@ -47,9 +56,20 @@ export default function UsuarioPage() {
         footer: props => props.column.id,
       },
       {
-        accessorKey: 'role',
-        header: () => 'Role',
+        accessorKey: 'first_name',
+        header: () => 'First Name',
         footer: props => props.column.id,
+      },
+      {
+        accessorKey: 'last_name',
+        header: () => 'Last Name',
+        footer: props => props.column.id,
+      },
+      {
+        accessorKey: 'groups',
+        header: () => 'Groups',
+        footer: props => props.column.id,
+        cell: info => info.getValue().join(', '), // para mostrar lista de grupos
       },
     ],
     []
@@ -70,6 +90,8 @@ export default function UsuarioPage() {
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
   });
+
+  if (loading) return <p>Cargando usuarios...</p>;
 
   return (
     <div>
@@ -112,10 +134,7 @@ export default function UsuarioPage() {
                     onClick={header.column.getToggleSortingHandler()}
                     style={{ cursor: 'pointer' }}
                   >
-                    {flexRender(
-                      header.column.columnDef.header,
-                      header.getContext()
-                    )}
+                    {flexRender(header.column.columnDef.header, header.getContext())}
                     {header.column.getIsSorted() === 'asc'
                       ? ' 🔼'
                       : header.column.getIsSorted() === 'desc'
@@ -143,8 +162,7 @@ export default function UsuarioPage() {
 
       <div className="d-flex justify-content-between align-items-center mt-3">
         <div>
-          Página {table.getState().pagination.pageIndex + 1} de{' '}
-          {table.getPageCount()}
+          Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}
         </div>
 
         <div className="btn-group">
