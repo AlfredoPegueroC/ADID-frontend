@@ -21,7 +21,47 @@ import { fetchAsignacionData } from "@api/asignacionService";
 import { fetchPeriodos } from "@api/periodoService";
 import { debounce } from "lodash";
 
+// ✅ Componente corregido para uso de useState
+function AccionCell({ row, api }) {
+  const [value, setValue] = useState(row.original.accion || '');
+  const [isUpdating, setIsUpdating] = useState(false);
 
+  const handleChange = async (e) => {
+    const newValue = e.target.value;
+    setValue(newValue);
+    setIsUpdating(true);
+
+    try {
+      const res = await fetch(`${api}api/asignacion/edit/${row.original.AsignacionID}/`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ accion: newValue }),
+      });
+
+      if (!res.ok) throw new Error('No se pudo actualizar');
+      Notification.alertSuccess("Modificado correctamente");
+    } catch (err) {
+      console.error('Error al actualizar:', err);
+      alert('Error al modificar el campo');
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  return (
+    <select
+      className="form-select form-select-sm"
+      value={value}
+      onChange={handleChange}
+      disabled={isUpdating}
+    >
+      <option value="Nueva">Nueva</option>
+      <option value="Editada">Editada</option>
+    </select>
+  );
+}
+
+// Componente principal
 function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
   const [asignaciones, setAsignaciones] = useState(initialData || []);
   const [currentPage, setCurrentPage] = useState(1);
@@ -69,7 +109,6 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
       try {
         const periodosData = await fetchPeriodos();
         const nombres = periodosData.results.map((p) => p.PeriodoNombre);
-
         const nombresOrdenados = nombres.sort((a, b) => {
           const [aYear, aTerm] = a.split("-").map(Number);
           const [bYear, bTerm] = b.split("-").map(Number);
@@ -155,45 +194,7 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
     {
       accessorKey: 'accion',
       header: 'Modificación',
-      cell: ({ row }) => {
-        const [value, setValue] = useState(row.original.accion || '');
-        const [isUpdating, setIsUpdating] = useState(false);
-
-        const handleChange = async (e) => {
-          const newValue = e.target.value;
-          setValue(newValue);
-          setIsUpdating(true);
-
-          try {
-            const res = await fetch(`${API}api/asignacion/edit/${row.original.AsignacionID}/`, {
-              method: 'PATCH',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ accion: newValue }),
-            });
-
-            if (!res.ok) throw new Error('No se pudo actualizar');
-
-            Notification.alertSuccess("Modificado Correctamente")
-          } catch (err) {
-            console.error('Error al actualizar:', err);
-            alert('Error al modificar el campo');
-          } finally {
-            setIsUpdating(false);
-          }
-        };
-
-        return (
-          <select
-            className="form-select form-select-sm"
-            value={value}
-            onChange={handleChange}
-            disabled={isUpdating}
-          >
-            <option value="Nueva">Nueva</option>
-            <option value="Editada">Editada</option>
-          </select>
-        );
-      }
+      cell: ({ row }) => <AccionCell row={row} api={API} />
     },
     {
       id: 'acciones',
@@ -207,7 +208,7 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
         </Link>
       )
     }
-  ], [selectedPeriodo]);
+  ], [selectedPeriodo, API]);
 
   const table = useReactTable({
     data: asignaciones,
