@@ -14,11 +14,13 @@ import Tables from "@components/Tables";
 import Search from "@components/search";
 import Modal from "@components/Modal";
 import ImportPage from "@components/forms/ImportAsignacion";
+import Notification from '@components/Notification';
 
 import { deleteEntity } from "@utils/delete";
 import { fetchAsignacionData } from "@api/asignacionService";
 import { fetchPeriodos } from "@api/periodoService";
 import { debounce } from "lodash";
+
 
 function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
   const [asignaciones, setAsignaciones] = useState(initialData || []);
@@ -32,13 +34,13 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
   const [copiando, setCopiando] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const API = process.env.NEXT_PUBLIC_API_KEY;
-  const fileInputRef = useRef(null);
+  const dropdownRef = useRef(null);
 
   const [columnVisibility, setColumnVisibility] = useState({
     facultadNombre: false,
     escuelaNombre: false,
     cupo: false,
-    inscripto: false
+    inscripto: false,
   });
 
   const Api_import_URL = `${API}import/asignacion`;
@@ -85,6 +87,19 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
     CargarPeriodos();
   }, []);
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   const handlePageChange = (page) => setCurrentPage(page);
   const handleSearchChange = (e) => setSearchQuery(e.target.value);
   const handleSearchSubmit = (e) => { e.preventDefault(); setCurrentPage(1); };
@@ -112,7 +127,7 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
 
   const deleteAsignacion = useCallback(
     (id) => {
-      deleteEntity(`${API}api/asignacionDocente/delete`, id, setAsignaciones, "ADIDcodigo");
+      deleteEntity(`${API}api/asignacionDocente/delete`, id, setAsignaciones, "AsignacionID");
     },
     [API]
   );
@@ -122,12 +137,12 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
   const columns = useMemo(() => [
     { accessorKey: 'nrc', header: 'NRC' },
     { accessorKey: 'clave', header: 'Clave' },
-    { accessorKey: 'asignatura', header: 'Asignatura' },
+    { accessorKey: 'nombre', header: 'Asignatura' },
     { accessorKey: 'codigo', header: 'Código' },
     { accessorKey: 'docenteNombre', header: 'Profesor' },
     { accessorKey: 'seccion', header: 'Sección' },
     { accessorKey: 'modalidad', header: 'Modalidad' },
-    { accessorKey: 'campus', header: 'Campus' },
+    { accessorKey: 'campusNombre', header: 'Campus' },
     { accessorKey: 'facultadNombre', header: 'Facultad' },
     { accessorKey: 'escuelaNombre', header: 'Escuela' },
     { accessorKey: 'tipo', header: 'Tipo' },
@@ -135,15 +150,58 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
     { accessorKey: 'inscripto', header: 'Inscripto' },
     { accessorKey: 'horario', header: 'Horario' },
     { accessorKey: 'dias', header: 'Días' },
-    { accessorKey: 'Aula', header: 'Aula' },
+    { accessorKey: 'aula', header: 'Aula' },
     { accessorKey: 'creditos', header: 'CR' },
     {
-      id: 'accion',
+      accessorKey: 'accion',
+      header: 'Modificación',
+      cell: ({ row }) => {
+        const [value, setValue] = useState(row.original.accion || '');
+        const [isUpdating, setIsUpdating] = useState(false);
+
+        const handleChange = async (e) => {
+          const newValue = e.target.value;
+          setValue(newValue);
+          setIsUpdating(true);
+
+          try {
+            const res = await fetch(`${API}api/asignacion/edit/${row.original.AsignacionID}/`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ accion: newValue }),
+            });
+
+            if (!res.ok) throw new Error('No se pudo actualizar');
+
+            Notification.alertSuccess("Modificado Correctamente")
+          } catch (err) {
+            console.error('Error al actualizar:', err);
+            alert('Error al modificar el campo');
+          } finally {
+            setIsUpdating(false);
+          }
+        };
+
+        return (
+          <select
+            className="form-select form-select-sm"
+            value={value}
+            onChange={handleChange}
+            disabled={isUpdating}
+          >
+            <option value="Nueva">Nueva</option>
+            <option value="Editada">Editada</option>
+          </select>
+        );
+      }
+    },
+    {
+      id: 'acciones',
       header: 'Acción',
       cell: ({ row }) => (
         <Link
           className="btn btn-primary btn-sm"
-          href={`/asignacionEdit/${row.original.ADIDcodigo}?period=${selectedPeriodo}`}
+          href={`/asignacionEdit/${row.original.AsignacionID}?period=${selectedPeriodo}`}
         >
           <Image src="/edit.svg" alt="editar" width={20} height={20} />
         </Link>
@@ -171,7 +229,7 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
           {periodos.map((p) => (<option key={p} value={p}>{p}</option>))}
         </select>
 
-        <div className="dropdown">
+        <div className="dropdown" ref={dropdownRef}>
           <button className="btn btn-outline-dark dropdown-toggle" type="button" onClick={() => setDropdownOpen(!dropdownOpen)}>
             Columnas
           </button>
@@ -200,30 +258,34 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
         searchQuery={searchQuery}
       />
 
-      <Tables>
-        <thead>
-          {table.getHeaderGroups().map(headerGroup => (
-            <tr key={headerGroup.id}>
-              {headerGroup.headers.map(header => (
-                <th key={header.id}>
-                  {flexRender(header.column.columnDef.header, header.getContext())}
-                </th>
-              ))}
-            </tr>
-          ))}
-        </thead>
-        <tbody>
-          {table.getRowModel().rows.map(row => (
-            <tr key={row.id}>
-              {row.getVisibleCells().map(cell => (
-                <td key={cell.id}>
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </Tables>
+      {asignaciones.length === 0 ? (
+        <p>No hay datos disponibles.</p>
+      ) : (
+        <Tables>
+          <thead>
+            {table.getHeaderGroups().map(headerGroup => (
+              <tr key={headerGroup.id}>
+                {headerGroup.headers.map(header => (
+                  <th key={header.id}>
+                    {flexRender(header.column.columnDef.header, header.getContext())}
+                  </th>
+                ))}
+              </tr>
+            ))}
+          </thead>
+          <tbody>
+            {table.getRowModel().rows.map(row => (
+              <tr key={row.id}>
+                {row.getVisibleCells().map(cell => (
+                  <td key={cell.id}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </Tables>
+      )}
 
       {totalPages > 1 && (
         <Pagination

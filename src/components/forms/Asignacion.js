@@ -86,10 +86,11 @@ export default function AsignacionForm() {
     }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => { 
     e.preventDefault();
+    console.log(formData)
     try {
-      const response = await fetch(`${API}api/asignacionDocente/create`, {
+      const response = await fetch(`${API}api/asignacion/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
