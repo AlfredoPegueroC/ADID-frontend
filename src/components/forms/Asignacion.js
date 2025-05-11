@@ -98,7 +98,7 @@ export default function AsignacionForm() {
 
       if (response.ok) {
         Notification.alertSuccess("Asignación creada con éxito");
-        router.push("/asignacionDocenteList");
+        router.push("/");
       } else {
         Notification.alertError("Error al registrar la asignación");
       }
@@ -179,10 +179,10 @@ export default function AsignacionForm() {
           <input type="text" id="tipo" name="tipo" value={formData.tipo} onChange={handleChange} />
         </div>
 
-        <div className={Styles.name_group}>
+        {/* <div className={Styles.name_group}>
           <label htmlFor="accion">Acción:</label>
           <input type="text" id="accion" name="accion" value={formData.accion} onChange={handleChange} />
-        </div>
+        </div> */}
 
     
         <div className={Styles.name_group}>
@@ -230,7 +230,7 @@ export default function AsignacionForm() {
           <select id="escuelaFk" name="escuelaFk" value={formData.escuelaFk} onChange={handleChange} required>
             <option value="" disabled>-- Seleccione una Escuela --</option>
             {escuelas.map((e) => (
-              <option key={e.EscuelaID} value={e.EscuelaID}>{e.EscuelaNombre}</option>
+              <option key={e.EscuelaId} value={e.EscuelaId}>{e.EscuelaNombre}</option>
             ))}
           </select>
         </div>
