@@ -14,54 +14,12 @@ import Tables from "@components/Tables";
 import Search from "@components/search";
 import Modal from "@components/Modal";
 import ImportPage from "@components/forms/ImportAsignacion";
-import Notification from '@components/Notification';
 
 import { deleteEntity } from "@utils/delete";
 import { fetchAsignacionData } from "@api/asignacionService";
 import { fetchPeriodos } from "@api/periodoService";
 import { debounce } from "lodash";
 
-// ✅ Componente corregido para uso de useState
-function AccionCell({ row, api }) {
-  const [value, setValue] = useState(row.original.accion || '');
-  const [isUpdating, setIsUpdating] = useState(false);
-
-  const handleChange = async (e) => {
-    const newValue = e.target.value;
-    setValue(newValue);
-    setIsUpdating(true);
-
-    try {
-      const res = await fetch(`${api}api/asignacion/edit/${row.original.AsignacionID}/`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ accion: newValue }),
-      });
-
-      if (!res.ok) throw new Error('No se pudo actualizar');
-      Notification.alertSuccess("Modificado correctamente");
-    } catch (err) {
-      console.error('Error al actualizar:', err);
-      alert('Error al modificar el campo');
-    } finally {
-      setIsUpdating(false);
-    }
-  };
-
-  return (
-    <select
-      className="form-select form-select-sm"
-      value={value}
-      onChange={handleChange}
-      disabled={isUpdating}
-    >
-      <option value="Nueva">Nueva</option>
-      <option value="Editada">Editada</option>
-    </select>
-  );
-}
-
-// Componente principal
 function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
   const [asignaciones, setAsignaciones] = useState(initialData || []);
   const [currentPage, setCurrentPage] = useState(1);
@@ -74,13 +32,13 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
   const [copiando, setCopiando] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const API = process.env.NEXT_PUBLIC_API_KEY;
-  const dropdownRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   const [columnVisibility, setColumnVisibility] = useState({
     facultadNombre: false,
     escuelaNombre: false,
     cupo: false,
-    inscripto: false,
+    inscripto: false
   });
 
   const Api_import_URL = `${API}import/asignacion`;
@@ -109,6 +67,7 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
       try {
         const periodosData = await fetchPeriodos();
         const nombres = periodosData.results.map((p) => p.PeriodoNombre);
+
         const nombresOrdenados = nombres.sort((a, b) => {
           const [aYear, aTerm] = a.split("-").map(Number);
           const [bYear, bTerm] = b.split("-").map(Number);
@@ -124,19 +83,6 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
       }
     };
     CargarPeriodos();
-  }, []);
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setDropdownOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
   }, []);
 
   const handlePageChange = (page) => setCurrentPage(page);
@@ -166,7 +112,7 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
 
   const deleteAsignacion = useCallback(
     (id) => {
-      deleteEntity(`${API}api/asignacionDocente/delete`, id, setAsignaciones, "AsignacionID");
+      deleteEntity(`${API}api/asignacionDocente/delete`, id, setAsignaciones, "ADIDcodigo");
     },
     [API]
   );
@@ -176,12 +122,12 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
   const columns = useMemo(() => [
     { accessorKey: 'nrc', header: 'NRC' },
     { accessorKey: 'clave', header: 'Clave' },
-    { accessorKey: 'nombre', header: 'Asignatura' },
+    { accessorKey: 'asignatura', header: 'Asignatura' },
     { accessorKey: 'codigo', header: 'Código' },
     { accessorKey: 'docenteNombre', header: 'Profesor' },
     { accessorKey: 'seccion', header: 'Sección' },
     { accessorKey: 'modalidad', header: 'Modalidad' },
-    { accessorKey: 'campusNombre', header: 'Campus' },
+    { accessorKey: 'campus', header: 'Campus' },
     { accessorKey: 'facultadNombre', header: 'Facultad' },
     { accessorKey: 'escuelaNombre', header: 'Escuela' },
     { accessorKey: 'tipo', header: 'Tipo' },
@@ -189,26 +135,21 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
     { accessorKey: 'inscripto', header: 'Inscripto' },
     { accessorKey: 'horario', header: 'Horario' },
     { accessorKey: 'dias', header: 'Días' },
-    { accessorKey: 'aula', header: 'Aula' },
+    { accessorKey: 'Aula', header: 'Aula' },
     { accessorKey: 'creditos', header: 'CR' },
     {
-      accessorKey: 'accion',
-      header: 'Modificación',
-      cell: ({ row }) => <AccionCell row={row} api={API} />
-    },
-    {
-      id: 'acciones',
+      id: 'accion',
       header: 'Acción',
       cell: ({ row }) => (
         <Link
           className="btn btn-primary btn-sm"
-          href={`/asignacionEdit/${row.original.AsignacionID}?period=${selectedPeriodo}`}
+          href={`/asignacionEdit/${row.original.ADIDcodigo}?period=${selectedPeriodo}`}
         >
           <Image src="/edit.svg" alt="editar" width={20} height={20} />
         </Link>
       )
     }
-  ], [selectedPeriodo, API]);
+  ], [selectedPeriodo]);
 
   const table = useReactTable({
     data: asignaciones,
@@ -230,7 +171,7 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
           {periodos.map((p) => (<option key={p} value={p}>{p}</option>))}
         </select>
 
-        <div className="dropdown" ref={dropdownRef}>
+        <div className="dropdown">
           <button className="btn btn-outline-dark dropdown-toggle" type="button" onClick={() => setDropdownOpen(!dropdownOpen)}>
             Columnas
           </button>
@@ -259,34 +200,30 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
         searchQuery={searchQuery}
       />
 
-      {asignaciones.length === 0 ? (
-        <p>No hay datos disponibles.</p>
-      ) : (
-        <Tables>
-          <thead>
-            {table.getHeaderGroups().map(headerGroup => (
-              <tr key={headerGroup.id}>
-                {headerGroup.headers.map(header => (
-                  <th key={header.id}>
-                    {flexRender(header.column.columnDef.header, header.getContext())}
-                  </th>
-                ))}
-              </tr>
-            ))}
-          </thead>
-          <tbody>
-            {table.getRowModel().rows.map(row => (
-              <tr key={row.id}>
-                {row.getVisibleCells().map(cell => (
-                  <td key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </Tables>
-      )}
+      <Tables>
+        <thead>
+          {table.getHeaderGroups().map(headerGroup => (
+            <tr key={headerGroup.id}>
+              {headerGroup.headers.map(header => (
+                <th key={header.id}>
+                  {flexRender(header.column.columnDef.header, header.getContext())}
+                </th>
+              ))}
+            </tr>
+          ))}
+        </thead>
+        <tbody>
+          {table.getRowModel().rows.map(row => (
+            <tr key={row.id}>
+              {row.getVisibleCells().map(cell => (
+                <td key={cell.id}>
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </Tables>
 
       {totalPages > 1 && (
         <Pagination

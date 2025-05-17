@@ -32,6 +32,7 @@ export default function AsignacionForm() {
     creditos: "",
     tipo: "",
     accion: "",
+    usuario_registro: "",
     docenteFk: "",
     campusFk: "",
     universidadFk: "",
@@ -50,7 +51,7 @@ export default function AsignacionForm() {
           fetch(`${API}api/universidad`),
           fetch(`${API}api/facultad`),
           fetch(`${API}api/escuela`),
-          fetch(`${API}api/periodoacademico`)
+          fetch(`${API}api/periodoAcademico`)
         ]);
 
         const [docentesData, campusData, universidadesData, facultadesData, escuelasData, periodosData] = await Promise.all([
@@ -86,11 +87,10 @@ export default function AsignacionForm() {
     }));
   };
 
-  const handleSubmit = async (e) => { 
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(formData)
     try {
-      const response = await fetch(`${API}api/asignacion/create`, {
+      const response = await fetch(`${API}api/asignacionDocente/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -98,7 +98,7 @@ export default function AsignacionForm() {
 
       if (response.ok) {
         Notification.alertSuccess("Asignación creada con éxito");
-        router.push("/");
+        router.push("/asignacionDocenteList");
       } else {
         Notification.alertError("Error al registrar la asignación");
       }
@@ -179,13 +179,17 @@ export default function AsignacionForm() {
           <input type="text" id="tipo" name="tipo" value={formData.tipo} onChange={handleChange} />
         </div>
 
-        {/* <div className={Styles.name_group}>
+        <div className={Styles.name_group}>
           <label htmlFor="accion">Acción:</label>
           <input type="text" id="accion" name="accion" value={formData.accion} onChange={handleChange} />
-        </div> */}
+        </div>
 
-    
         <div className={Styles.name_group}>
+          <label htmlFor="usuario_registro">Usuario Registro:</label>
+          <input type="text" id="usuario_registro" name="usuario_registro" value={formData.usuario_registro} onChange={handleChange} />
+        </div>
+
+        {/* <div className={Styles.name_group}>
           <label htmlFor="docenteFk">Docente:</label>
           <select id="docenteFk" name="docenteFk" value={formData.docenteFk} onChange={handleChange} required>
             <option value="" disabled>-- Seleccione un Docente --</option>
@@ -193,7 +197,7 @@ export default function AsignacionForm() {
               <option key={d.DocenteID} value={d.DocenteID}>{d.DocenteNombre} {d.DocenteApellido}</option>
             ))}
           </select>
-        </div>
+        </div> */}
 
         <div className={Styles.name_group}>
           <label htmlFor="campusFk">Campus:</label>
@@ -230,7 +234,7 @@ export default function AsignacionForm() {
           <select id="escuelaFk" name="escuelaFk" value={formData.escuelaFk} onChange={handleChange} required>
             <option value="" disabled>-- Seleccione una Escuela --</option>
             {escuelas.map((e) => (
-              <option key={e.EscuelaId} value={e.EscuelaId}>{e.EscuelaNombre}</option>
+              <option key={e.EscuelaID} value={e.EscuelaID}>{e.EscuelaNombre}</option>
             ))}
           </select>
         </div>

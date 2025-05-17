@@ -11,7 +11,6 @@ export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
-  const API = process.env.NEXT_PUBLIC_API_KEY;
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
@@ -20,37 +19,20 @@ export default function LoginPage() {
     }
   }, [router]);
 
-  const handleLogin = async (e) => {
+  const handleLogin = (e) => {
     e.preventDefault();
 
-    try {
-      const response = await fetch(`${API}api/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
-      });
+    const fakeUser = {
+      username: username || "admin",
+      groups: ["admin"]
+    };
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Login failed. Please check your credentials.");
-      }
+    localStorage.setItem("accessToken", "fake-token");
+    localStorage.setItem("refreshToken", "fake-refresh");
+    localStorage.setItem("user", JSON.stringify(fakeUser));
 
-      const data = await response.json();
-      localStorage.setItem("accessToken", data.access);
-      localStorage.setItem("refreshToken", data.refresh);
-      localStorage.setItem("user", JSON.stringify(data.user));
-
-      
-      if (data.user.groups.includes("admin")) {
-        router.push("/admin");
-      } else {
-        router.push("/");
-      }
-
-      Notification.alertLogin('Logeado...');
-    } catch (error) {
-      setError(error.message);
-    }
+    Notification.alertLogin("Modo desarrollo: sesión simulada.");
+    router.push("/admin");
   };
 
   return (
