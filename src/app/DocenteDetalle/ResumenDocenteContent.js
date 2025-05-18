@@ -1,14 +1,10 @@
 'use client';
 
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-export default function ResumenDocenteContent() {
-  const searchParams = useSearchParams();
+export default function ResumenDocenteContent({ docenteID, periodoParam }) {
   const router = useRouter();
-  const docenteID = searchParams.get('docente');
-  const periodoParam = searchParams.get('periodo');
-
   const [datos, setDatos] = useState(null);
   const [loading, setLoading] = useState(true);
   const [periodos, setPeriodos] = useState([]);
