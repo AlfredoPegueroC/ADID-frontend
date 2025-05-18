@@ -10,8 +10,8 @@ export async function fetchAsignacionData(periodo = null, page = 1, searchQuery 
     const data = await response.json()
    
     return {
-      asignaciones: mergedData,
-      totalPages: Math.ceil(asignacionData.count / 30),
+      asignaciones: data,
+      totalPages: Math.ceil(data.count / 30),
     };
   } catch (error) {
     console.error("Error fetching data:", error);
