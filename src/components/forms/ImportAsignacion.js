@@ -117,9 +117,9 @@ export default function ImportPage({ onSuccess }) {
             {periods.map((periodo) => (
               <option
                 key={periodo.periodoAcademicoCodigo}
-                value={periodo.nombre}
+                value={periodo.PeriodoID}
               >
-                {periodo.nombre}
+                {periodo.PeriodoNombre}
               </option>
             ))}
           </select>

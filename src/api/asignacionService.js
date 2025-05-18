@@ -3,7 +3,7 @@ export async function fetchAsignacionData(periodo = null, page = 1, searchQuery 
 
   try {
     const searchParam = searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : "";
-    const periodParam = periodo ? `&period=${periodo}` : "";
+    const periodParam = periodo ? `&periodo=${periodo}` : "";
     const response = await fetch(`${API}api/asignacion?page=${page}${periodParam}${searchParam}`)
 
     if(!response.ok) throw new Error("Failed to fetch docentes");

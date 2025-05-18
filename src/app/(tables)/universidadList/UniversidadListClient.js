@@ -9,8 +9,8 @@ import { debounce } from "lodash";
 import Pagination from "@components/Pagination";
 import Tables from "@components/Tables";
 import Search from "@components/search";
-// import Modal from "@components/Modal";
-// import ImportExcel from "@components/forms/Import";
+import Modal from "@components/Modal";
+import ImportExcel from "@components/forms/Import";
 
 // Utils
 import withAuth from "@utils/withAuth";
@@ -70,22 +70,22 @@ function UniversidadListClient({ initialData }) {
             Exportar
           </Link>
         )}
-        {/* <button
+        <button
           type="button"
           className="btn btn-warning"
           data-bs-toggle="modal"
           data-bs-target="#Modal"
         >
           Importar
-        </button> */}
+        </button>
       </div>
 
-      {/* <Modal title="Importar Universidad">
+      <Modal title="Importar Universidad">
         <ImportExcel
           importURL={`${process.env.NEXT_PUBLIC_API_KEY}import/universidad`}
           onSuccess={debouncedFetchData}
         />
-      </Modal> */}
+      </Modal>
 
       <Search
         SearchSubmit={(e) => {

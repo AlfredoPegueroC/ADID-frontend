@@ -21,7 +21,6 @@ import { fetchAsignacionData } from "@api/asignacionService";
 import { fetchPeriodos } from "@api/periodoService";
 import { debounce } from "lodash";
 
-// ✅ Componente corregido para uso de useState
 function AccionCell({ row, api }) {
   const [value, setValue] = useState(row.original.accion || '');
   const [isUpdating, setIsUpdating] = useState(false);
@@ -61,9 +60,8 @@ function AccionCell({ row, api }) {
   );
 }
 
-// Componente principal
 function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
-  const [asignaciones, setAsignaciones] = useState(initialData || []);
+  const [asignaciones, setAsignaciones] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(initialTotalPages);
   const [searchQuery, setSearchQuery] = useState("");
@@ -73,6 +71,7 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
   const [periodoDestino, setPeriodoDestino] = useState("");
   const [copiando, setCopiando] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [loadingPeriodos, setLoadingPeriodos] = useState(true);
   const API = process.env.NEXT_PUBLIC_API_KEY;
   const dropdownRef = useRef(null);
 
@@ -98,29 +97,42 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
     }
   };
 
+  // ✅ Cargar datos SOLO si ya hay período seleccionado y no está cargando
   useEffect(() => {
-    if (selectedPeriodo) {
+    if (!loadingPeriodos && selectedPeriodo !== "") {
       fetchData(currentPage, searchQuery, selectedPeriodo);
     }
-  }, [selectedPeriodo, currentPage, searchQuery]);
+  }, [selectedPeriodo, currentPage, searchQuery, loadingPeriodos]);
 
+  // ✅ Cargar periodos desde API o caché
   useEffect(() => {
     const CargarPeriodos = async () => {
+      setLoadingPeriodos(true);
+
+      const cached = localStorage.getItem("periodosCache");
+      if (cached) {
+        const periodosGuardados = JSON.parse(cached);
+        setPeriodos(periodosGuardados);
+        if (!selectedPeriodo && periodosGuardados.length > 0) {
+          setSelectedPeriodo(periodosGuardados[0]);
+        }
+        setLoadingPeriodos(false);
+        return;
+      }
+
       try {
         const periodosData = await fetchPeriodos();
         const nombres = periodosData.results.map((p) => p.PeriodoNombre);
-        const nombresOrdenados = nombres.sort((a, b) => {
-          const [aYear, aTerm] = a.split("-").map(Number);
-          const [bYear, bTerm] = b.split("-").map(Number);
-          return bYear !== aYear ? bYear - aYear : bTerm - aTerm;
-        });
-
-        setPeriodos(nombresOrdenados);
-        if (nombresOrdenados.length > 0 && !selectedPeriodo) {
-          setSelectedPeriodo(nombresOrdenados[0]);
+        const ordenados = nombres.sort((a, b) => b.localeCompare(a));
+        setPeriodos(ordenados);
+        localStorage.setItem("periodosCache", JSON.stringify(ordenados));
+        if (!selectedPeriodo && ordenados.length > 0) {
+          setSelectedPeriodo(ordenados[0]);
         }
       } catch (error) {
         console.error("Error al cargar periodos:", error);
+      } finally {
+        setLoadingPeriodos(false);
       }
     };
     CargarPeriodos();
@@ -132,11 +144,8 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
         setDropdownOpen(false);
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const handlePageChange = (page) => setCurrentPage(page);
@@ -166,7 +175,7 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
 
   const deleteAsignacion = useCallback(
     (id) => {
-      deleteEntity(`${API}api/asignacionDocente/delete`, id, setAsignaciones, "AsignacionID");
+      deleteEntity(`${API}api/asignacion/delete`, id, setAsignaciones, "AsignacionID");
     },
     [API]
   );
@@ -178,7 +187,18 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
     { accessorKey: 'clave', header: 'Clave' },
     { accessorKey: 'nombre', header: 'Asignatura' },
     { accessorKey: 'codigo', header: 'Código' },
-    { accessorKey: 'docenteNombre', header: 'Profesor' },
+    {
+      accessorKey: 'docenteNombre',
+      header: 'Profesor',
+      cell: ({ row }) => (
+        <Link
+          href={`/DocenteDetalle/?docente=${row.original.docenteFk}&periodo=${selectedPeriodo}`}
+          className="text-decoration-underline text-primary"
+        >
+          {row.original.docenteNombre}
+        </Link>
+      )
+    },
     { accessorKey: 'seccion', header: 'Sección' },
     { accessorKey: 'modalidad', header: 'Modalidad' },
     { accessorKey: 'campusNombre', header: 'Campus' },
@@ -200,10 +220,7 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
       id: 'acciones',
       header: 'Acción',
       cell: ({ row }) => (
-        <Link
-          className="btn btn-primary btn-sm"
-          href={`/asignacionEdit/${row.original.AsignacionID}?period=${selectedPeriodo}`}
-        >
+        <Link className="btn btn-primary btn-sm" href={`/asignacionEdit/${row.original.AsignacionID}?period=${selectedPeriodo}`}>
           <Image src="/edit.svg" alt="editar" width={20} height={20} />
         </Link>
       )
@@ -221,14 +238,18 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
   return (
     <div className="mt-4">
       <div className="d-flex flex-wrap gap-2 mb-3">
-        <button type="button" className="btn btn-warning text-dark" data-bs-toggle="modal" data-bs-target="#Modal">Nueva Asignación</button>
-        <button type="button" className="btn btn-info text-white" data-bs-toggle="modal" data-bs-target="#modalcopiar">Editar Asignación</button>
-        <button type="button" className="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalcopiar">Crear Sección</button>
+        <button className="btn btn-warning text-dark" data-bs-toggle="modal" data-bs-target="#Modal">Nueva Asignación</button>
+        <button className="btn btn-info text-white" data-bs-toggle="modal" data-bs-target="#modalcopiar">Editar Asignación</button>
+        <Link className="btn btn-success" href="/asignacion">Crear Sección</Link>
         <Link className="btn btn-secondary" href={`${API}export/asignacionDocenteExport?period=${selectedPeriodo}`}>Exportar</Link>
 
-        <select className="form-select w-auto" value={selectedPeriodo} onChange={handlePeriodoChange}>
-          {periodos.map((p) => (<option key={p} value={p}>{p}</option>))}
-        </select>
+        {loadingPeriodos ? (
+          <span className="text-muted">Cargando periodos...</span>
+        ) : (
+          <select className="form-select w-auto" value={selectedPeriodo} onChange={handlePeriodoChange}>
+            {periodos.map((p) => (<option key={p} value={p}>{p}</option>))}
+          </select>
+        )}
 
         <div className="dropdown" ref={dropdownRef}>
           <button className="btn btn-outline-dark dropdown-toggle" type="button" onClick={() => setDropdownOpen(!dropdownOpen)}>
@@ -244,32 +265,34 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
                   checked={column.getIsVisible()}
                   onChange={column.getToggleVisibilityHandler()}
                 />
-                <label className="form-check-label" htmlFor={`col-${column.id}`}>
-                  {column.columnDef.header}
-                </label>
+                <label className="form-check-label" htmlFor={`col-${column.id}`}>{column.columnDef.header}</label>
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      <Search
-        SearchSubmit={handleSearchSubmit}
-        SearchChange={debouncedSearchChange}
-        searchQuery={searchQuery}
-      />
+      <Search SearchSubmit={handleSearchSubmit} SearchChange={debouncedSearchChange} searchQuery={searchQuery} />
 
-      {asignaciones.length === 0 ? (
-        <p>No hay datos disponibles.</p>
+      {loading ? (
+        <p>Cargando asignaciones...</p>
+      ) : asignaciones.length === 0 ? (
+        selectedPeriodo ? (
+          <div className="alert alert-info" role="alert">
+            🛈 El período <strong>{selectedPeriodo}</strong> no tiene asignaciones registradas.
+          </div>
+        ) : (
+          <div className="alert alert-secondary" role="alert">
+            Seleccione un período para ver las asignaciones.
+          </div>
+        )
       ) : (
         <Tables>
           <thead>
             {table.getHeaderGroups().map(headerGroup => (
               <tr key={headerGroup.id}>
                 {headerGroup.headers.map(header => (
-                  <th key={header.id}>
-                    {flexRender(header.column.columnDef.header, header.getContext())}
-                  </th>
+                  <th key={header.id}>{flexRender(header.column.columnDef.header, header.getContext())}</th>
                 ))}
               </tr>
             ))}
@@ -278,9 +301,7 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
             {table.getRowModel().rows.map(row => (
               <tr key={row.id}>
                 {row.getVisibleCells().map(cell => (
-                  <td key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </td>
+                  <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
                 ))}
               </tr>
             ))}
@@ -289,11 +310,7 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
       )}
 
       {totalPages > 1 && (
-        <Pagination
-          page={currentPage}
-          totalPages={totalPages}
-          onPageChange={handlePageChange}
-        />
+        <Pagination page={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
       )}
 
       <Modal title="Importar Asignación">

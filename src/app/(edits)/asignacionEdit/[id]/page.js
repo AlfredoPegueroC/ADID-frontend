@@ -14,83 +14,71 @@ function AsignacionEdit({ params }) {
   const period = searchParams.get("period");
 
   const [asignacion, setAsignacion] = useState(null);
-
+  const [docentes, setDocentes] = useState([]);
   const [facultades, setFacultades] = useState([]);
   const [escuelas, setEscuelas] = useState([]);
-  const [docentes, setDocentes] = useState([]);
+  const [campus, setCampus] = useState([]);
   const [loading, setLoading] = useState(true);
   const API = process.env.NEXT_PUBLIC_API_KEY;
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const asignacionResponse = await fetch(`${API}api/asignacion/${id}/`);
-        if (!asignacionResponse.ok)
-          throw new Error("Fallo la llamada de datos asignacion");
-        const asignacionData = await asignacionResponse.json();
-        setAsignacion(asignacionData); //
+        const asignacionRes = await fetch(`${API}api/asignacion/${id}/`);
+        if (!asignacionRes.ok) throw new Error("Error cargando asignación");
+        const asignacionData = await asignacionRes.json();
+        setAsignacion(asignacionData);
 
-        const facultadesResponse = await fetch(`${API}api/facultad`);
-        if (!facultadesResponse.ok)
-          throw new Error("Failed to fetch facultades");
-        const facultadesData = await facultadesResponse.json();
-        setFacultades(facultadesData.results);
+        const [docRes, facRes, escRes, campusRes] = await Promise.all([
+          fetch(`${API}api/docente`),
+          fetch(`${API}api/facultad`),
+          fetch(`${API}api/escuela`),
+          fetch(`${API}api/campus`),
+        ]);
 
-        const escuelasResponse = await fetch(`${API}api/escuela`);
-        if (!escuelasResponse.ok) throw new Error("Failed to fetch escuelas");
-        const escuelasData = await escuelasResponse.json();
-        setEscuelas(escuelasData.results);
+        if (!docRes.ok || !facRes.ok || !escRes.ok || !campusRes.ok)
+          throw new Error("Error cargando catálogos");
 
-        const docenteResponse = await fetch(`${API}api/docente`);
-        if (!docenteResponse.ok) throw new Error("Failed to fetch docentes");
-        const docentesData = await docenteResponse.json();
-        setDocentes(docentesData.results);
-      } catch (error) {
-        console.error("Error al buscar los datos", error);
+        setDocentes((await docRes.json()).results);
+        setFacultades((await facRes.json()).results);
+        setEscuelas((await escRes.json()).results);
+        setCampus((await campusRes.json()).results);
+      } catch (err) {
+        console.error(err);
+        Notification.alertError("Error al cargar los datos.");
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, [id, API]);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!asignacion) return;
-
-    try {
-      const response = await fetch(`${API}api/asignacion/edit/${id}/`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(asignacion),
-      });
-
-      if (response.ok) {
-        Notification.alertSuccess("Asignacion se ha Actualizado!");
-        router.push(`/asignacionDocente/${period}`);
-      } else {
-        Notification.alertError("Fallo al Editar");
-        console.log(response.json());
-      }
-    } catch (error) {
-      console.error("Error updating Asignacion:", error);
-      Notification.alertError("Fallo al Editar");
-    }
-  };
+  }, [id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setAsignacion({ ...asignacion, [name]: value });
   };
-  if (loading) {
-    return (
-      <div className="spinner-container ">
-        <div className="spinner"></div>
-      </div>
-    );
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await fetch(`${API}api/asignacion/edit/${id}/`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(asignacion),
+      });
+
+      if (!res.ok) throw new Error("Fallo al actualizar");
+      Notification.alertSuccess("Asignación actualizada correctamente");
+      router.push(`/asignacionDocente/${period}`);
+    } catch (err) {
+      console.error(err);
+      Notification.alertError("Error al actualizar");
+    }
+  };
+
+  if (loading || !asignacion) {
+    return <div className="spinner-container"><div className="spinner" /></div>;
   }
 
   return (
@@ -102,238 +90,127 @@ function AsignacionEdit({ params }) {
           <div className={Styles.names}>
             <div className={Styles.name_group}>
               <label>NRC</label>
-              <input
-                type="text"
-                name="rnc"
-                value={asignacion.nrc || ""}
-                onChange={handleChange}
-                required
-                disabled
-              />
+              <input type="text" name="nrc" value={asignacion.nrc || ""} disabled />
             </div>
 
             <div className={Styles.name_group}>
               <label>Clave</label>
-              <input
-                type="text"
-                name="clave"
-                value={asignacion.clave || ""}
-                onChange={handleChange}
-                required
-              />
-            </div>
-            <div className={Styles.names}>
-              <div className={Styles.name_group}>
-                <label>Asignatura</label>
-                <input
-                  type="text"
-                  name="asignatura"
-                  value={asignacion.asignatura || ""}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-
-              <div className={Styles.name_group}>
-                <label>Código</label>
-                <input
-                  type="text"
-                  name="codigo"
-                  value={asignacion.codigo || ""}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-            </div>
-            <div className={Styles.names}>
-              <div className={Styles.name_group}>
-                <label>Profesor</label>
-                <select
-                  name="DocenteCodigo"
-                  value={asignacion?.DocenteCodigo || ""}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="" disabled>
-                    -- Seleccione un Profesor --
-                  </option>
-                  {docentes.map((docente) => (
-                    <option
-                      key={docente.Docentecodigo}
-                      value={docente.Docentecodigo}
-                    >
-                      {docente.nombre} {docente.apellidos}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className={Styles.name_group}>
-                <label>Sección</label>
-                <input
-                  type="text"
-                  name="seccion"
-                  value={asignacion.seccion || ""}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
+              <input type="text" name="clave" value={asignacion.clave || ""} onChange={handleChange} required />
             </div>
 
-            <div className={Styles.names}>
-              <div className={Styles.name_group}>
-                <label>Modalidad</label>
-                <input
-                  type="text"
-                  name="modalidad"
-                  value={asignacion.modalidad || ""}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-
-              <div className={Styles.name_group}>
-                <label>Campus</label>
-                <input
-                  type="text"
-                  name="campus"
-                  value={asignacion.campus || ""}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
+            <div className={Styles.name_group}>
+              <label>Nombre (Asignatura)</label>
+              <input type="text" name="nombre" value={asignacion.nombre || ""} onChange={handleChange} required />
             </div>
 
-            <div className={Styles.names}>
-              <div className={Styles.name_group}>
-                <label>Facultad</label>
-                <select
-                  name="facultadCodigo"
-                  value={asignacion?.facultadCodigo || ""}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="" disabled>
-                    -- Seleccione una Facultad --
-                  </option>
-                  {facultades.map((facultad) => (
-                    <option
-                      key={facultad.facultadCodigo}
-                      value={facultad.facultadCodigo}
-                    >
-                      {facultad.nombre}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className={Styles.name_group}>
-                <label>Escuela</label>
-                <select
-                  name="escuelaCodigo"
-                  value={asignacion?.escuelaCodigo || ""}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="" disabled>
-                    -- Seleccione una Escuela --
-                  </option>
-                  {escuelas.map((escuela) => (
-                    <option
-                      key={escuela.escuelaCodigo}
-                      value={escuela.escuelaCodigo}
-                    >
-                      {escuela.nombre}
-                    </option>
-                  ))}
-                </select>
-              </div>
+            <div className={Styles.name_group}>
+              <label>Código</label>
+              <input type="text" name="codigo" value={asignacion.codigo || ""} onChange={handleChange} />
             </div>
 
-            <div className={Styles.names}>
-              <div className={Styles.name_group}>
-                <label>Tipo</label>
-                <input
-                  type="text"
-                  name="tipo"
-                  value={asignacion.tipo || ""}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-
-              <div className={Styles.name_group}>
-                <label>Cupo</label>
-                <input
-                  type="number"
-                  name="cupo"
-                  value={asignacion.cupo || ""}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
+            <div className={Styles.name_group}>
+              <label>Sección</label>
+              <input type="text" name="seccion" value={asignacion.seccion || ""} onChange={handleChange} />
             </div>
-            <div className={Styles.names}>
-              <div className={Styles.name_group}>
-                <label>Inscripto</label>
-                <input
-                  type="number"
-                  name="inscripto"
-                  value={asignacion.inscripto || ""}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
 
-              <div className={Styles.name_group}>
-                <label>Horario</label>
-                <input
-                  type="text"
-                  name="horario"
-                  value={asignacion.horario || ""}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
+            <div className={Styles.name_group}>
+              <label>Modalidad</label>
+              <input type="text" name="modalidad" value={asignacion.modalidad || ""} onChange={handleChange} />
             </div>
-            <div className={Styles.names}>
-              <div className={Styles.name_group}>
-                <label>Días</label>
-                <input
-                  type="text"
-                  name="dias"
-                  value={asignacion.dias || ""}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
 
-              <div className={Styles.name_group}>
-                <label>Aula</label>
-                <input
-                  type="text"
-                  name="Aula"
-                  value={asignacion.Aula || ""}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
+            <div className={Styles.name_group}>
+              <label>Cupo</label>
+              <input type="number" name="cupo" value={asignacion.cupo || ""} onChange={handleChange} />
             </div>
+
+            <div className={Styles.name_group}>
+              <label>Inscripto</label>
+              <input type="number" name="inscripto" value={asignacion.inscripto || ""} onChange={handleChange} />
+            </div>
+
+            <div className={Styles.name_group}>
+              <label>Horario</label>
+              <input type="text" name="horario" value={asignacion.horario || ""} onChange={handleChange} />
+            </div>
+
+            <div className={Styles.name_group}>
+              <label>Días</label>
+              <input type="text" name="dias" value={asignacion.dias || ""} onChange={handleChange} />
+            </div>
+
+            <div className={Styles.name_group}>
+              <label>Aula</label>
+              <input type="text" name="aula" value={asignacion.aula || ""} onChange={handleChange} />
+            </div>
+
             <div className={Styles.name_group}>
               <label>Créditos</label>
-              <input
-                type="number"
-                name="creditos"
-                value={asignacion.creditos || ""}
-                onChange={handleChange}
-                required
-              />
+              <input type="number" name="creditos" value={asignacion.creditos || ""} onChange={handleChange} step="0.01" />
+            </div>
+
+            <div className={Styles.name_group}>
+              <label>Tipo</label>
+              <input type="text" name="tipo" value={asignacion.tipo || ""} onChange={handleChange} />
+            </div>
+
+            <div className={Styles.name_group}>
+              <label>Acción</label>
+              <select name="accion" value={asignacion.accion || "nuevo"} onChange={handleChange}>
+                <option value="nuevo">Nuevo</option>
+                <option value="modificado">Modificado</option>
+              </select>
+            </div>
+
+            <div className={Styles.name_group}>
+              <label>Docente</label>
+              <select name="docenteFk" value={asignacion.docenteFk || ""} onChange={handleChange} required>
+                <option value="">-- Seleccione un docente --</option>
+                {docentes.map((d) => (
+                  <option key={d.DocenteID} value={d.DocenteID}>
+                    {d.DocenteNombre} {d.DocenteApellido}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className={Styles.name_group}>
+              <label>Campus</label>
+              <select name="campusFk" value={asignacion.campusFk || ""} onChange={handleChange} required>
+                <option value="">-- Seleccione un campus --</option>
+                {campus.map((c) => (
+                  <option key={c.CampusID} value={c.CampusID}>
+                    {c.CampusNombre}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className={Styles.name_group}>
+              <label>Facultad</label>
+              <select name="facultadFk" value={asignacion.facultadFk || ""} onChange={handleChange} required>
+                <option value="">-- Seleccione una facultad --</option>
+                {facultades.map((f) => (
+                  <option key={f.FacultadID} value={f.FacultadID}>
+                    {f.FacultadNombre}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className={Styles.name_group}>
+              <label>Escuela</label>
+              <select name="escuelaFk" value={asignacion.escuelaFk || ""} onChange={handleChange} required>
+                <option value="">-- Seleccione una escuela --</option>
+                {escuelas.map((e) => (
+                  <option key={e.EscuelaId} value={e.EscuelaId}>
+                    {e.EscuelaNombre}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
-          <button type="submit" className={Styles.btn}>
-            Guardar
-          </button>
+          <button type="submit" className={Styles.btn}>Guardar</button>
         </form>
       </div>
     </FormLayout>
