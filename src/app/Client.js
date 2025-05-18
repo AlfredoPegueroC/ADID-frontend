@@ -14,6 +14,7 @@ import Tables from "@components/Tables";
 import Search from "@components/search";
 import Modal from "@components/Modal";
 import ImportPage from "@components/forms/ImportAsignacion";
+import Notification from '@components/Notification';
 
 import { deleteEntity } from "@utils/delete";
 import { fetchAsignacionData } from "@api/asignacionService";
@@ -72,13 +73,13 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [loadingPeriodos, setLoadingPeriodos] = useState(true);
   const API = process.env.NEXT_PUBLIC_API_KEY;
-  const fileInputRef = useRef(null);
+  const dropdownRef = useRef(null);
 
   const [columnVisibility, setColumnVisibility] = useState({
     facultadNombre: false,
     escuelaNombre: false,
     cupo: false,
-    inscripto: false
+    inscripto: false,
   });
 
   const Api_import_URL = `${API}import/asignacion`;
@@ -96,18 +97,15 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
     }
   };
 
-  // ✅ Cargar datos SOLO si ya hay período seleccionado y no está cargando
   useEffect(() => {
     if (!loadingPeriodos && selectedPeriodo !== "") {
       fetchData(currentPage, searchQuery, selectedPeriodo);
     }
   }, [selectedPeriodo, currentPage, searchQuery, loadingPeriodos]);
 
-  // ✅ Cargar periodos desde API o caché
   useEffect(() => {
     const CargarPeriodos = async () => {
       setLoadingPeriodos(true);
-
       const cached = localStorage.getItem("periodosCache");
       if (cached) {
         const periodosGuardados = JSON.parse(cached);
@@ -184,7 +182,7 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
   const columns = useMemo(() => [
     { accessorKey: 'nrc', header: 'NRC' },
     { accessorKey: 'clave', header: 'Clave' },
-    { accessorKey: 'asignatura', header: 'Asignatura' },
+    { accessorKey: 'nombre', header: 'Asignatura' },
     { accessorKey: 'codigo', header: 'Código' },
     {
       accessorKey: 'docenteNombre',
@@ -200,7 +198,7 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
     },
     { accessorKey: 'seccion', header: 'Sección' },
     { accessorKey: 'modalidad', header: 'Modalidad' },
-    { accessorKey: 'campus', header: 'Campus' },
+    { accessorKey: 'campusNombre', header: 'Campus' },
     { accessorKey: 'facultadNombre', header: 'Facultad' },
     { accessorKey: 'escuelaNombre', header: 'Escuela' },
     { accessorKey: 'tipo', header: 'Tipo' },
@@ -208,10 +206,15 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
     { accessorKey: 'inscripto', header: 'Inscripto' },
     { accessorKey: 'horario', header: 'Horario' },
     { accessorKey: 'dias', header: 'Días' },
-    { accessorKey: 'Aula', header: 'Aula' },
+    { accessorKey: 'aula', header: 'Aula' },
     { accessorKey: 'creditos', header: 'CR' },
     {
-      id: 'accion',
+      accessorKey: 'accion',
+      header: 'Modificación',
+      cell: ({ row }) => <AccionCell row={row} api={API} />
+    },
+    {
+      id: 'acciones',
       header: 'Acción',
       cell: ({ row }) => (
         <Link className="btn btn-primary btn-sm" href={`/asignacionEdit/${row.original.AsignacionID}?period=${selectedPeriodo}`}>
@@ -219,7 +222,7 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
         </Link>
       )
     }
-  ], [selectedPeriodo]);
+  ], [selectedPeriodo, API]);
 
   const table = useReactTable({
     data: asignaciones,
@@ -245,7 +248,7 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
           </select>
         )}
 
-        <div className="dropdown">
+        <div className="dropdown" ref={dropdownRef}>
           <button className="btn btn-outline-dark dropdown-toggle" type="button" onClick={() => setDropdownOpen(!dropdownOpen)}>
             Columnas
           </button>
@@ -269,7 +272,11 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
       <Search SearchSubmit={handleSearchSubmit} SearchChange={debouncedSearchChange} searchQuery={searchQuery} />
 
       {loading ? (
-        <p>Cargando asignaciones...</p>
+        <div className="d-flex justify-content-center my-5">
+          <div className="spinner-border text-primary" role="status" style={{ width: '3rem', height: '3rem' }}>
+            <span className="visually-hidden">Cargando...</span>
+          </div>
+        </div>
       ) : asignaciones.length === 0 ? (
         selectedPeriodo ? (
           <div className="alert alert-info" role="alert">

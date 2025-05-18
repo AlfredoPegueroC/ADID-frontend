@@ -8,9 +8,9 @@ export async function fetchAsignacionData(periodo = null, page = 1, searchQuery 
 
     if(!response.ok) throw new Error("Failed to fetch docentes");
     const data = await response.json()
-   
+    console.log("Fetched data:", data);
     return {
-      asignaciones: data,
+      asignaciones: data.results,
       totalPages: Math.ceil(data.count / 30),
     };
   } catch (error) {
