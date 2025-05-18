@@ -14,7 +14,6 @@ import Tables from "@components/Tables";
 import Search from "@components/search";
 import Modal from "@components/Modal";
 import ImportPage from "@components/forms/ImportAsignacion";
-import Notification from '@components/Notification';
 
 import { deleteEntity } from "@utils/delete";
 import { fetchAsignacionData } from "@api/asignacionService";
@@ -73,13 +72,13 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [loadingPeriodos, setLoadingPeriodos] = useState(true);
   const API = process.env.NEXT_PUBLIC_API_KEY;
-  const dropdownRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   const [columnVisibility, setColumnVisibility] = useState({
     facultadNombre: false,
     escuelaNombre: false,
     cupo: false,
-    inscripto: false,
+    inscripto: false
   });
 
   const Api_import_URL = `${API}import/asignacion`;
@@ -185,7 +184,7 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
   const columns = useMemo(() => [
     { accessorKey: 'nrc', header: 'NRC' },
     { accessorKey: 'clave', header: 'Clave' },
-    { accessorKey: 'nombre', header: 'Asignatura' },
+    { accessorKey: 'asignatura', header: 'Asignatura' },
     { accessorKey: 'codigo', header: 'Código' },
     {
       accessorKey: 'docenteNombre',
@@ -201,7 +200,7 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
     },
     { accessorKey: 'seccion', header: 'Sección' },
     { accessorKey: 'modalidad', header: 'Modalidad' },
-    { accessorKey: 'campusNombre', header: 'Campus' },
+    { accessorKey: 'campus', header: 'Campus' },
     { accessorKey: 'facultadNombre', header: 'Facultad' },
     { accessorKey: 'escuelaNombre', header: 'Escuela' },
     { accessorKey: 'tipo', header: 'Tipo' },
@@ -209,15 +208,10 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
     { accessorKey: 'inscripto', header: 'Inscripto' },
     { accessorKey: 'horario', header: 'Horario' },
     { accessorKey: 'dias', header: 'Días' },
-    { accessorKey: 'aula', header: 'Aula' },
+    { accessorKey: 'Aula', header: 'Aula' },
     { accessorKey: 'creditos', header: 'CR' },
     {
-      accessorKey: 'accion',
-      header: 'Modificación',
-      cell: ({ row }) => <AccionCell row={row} api={API} />
-    },
-    {
-      id: 'acciones',
+      id: 'accion',
       header: 'Acción',
       cell: ({ row }) => (
         <Link className="btn btn-primary btn-sm" href={`/asignacionEdit/${row.original.AsignacionID}?period=${selectedPeriodo}`}>
@@ -225,7 +219,7 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
         </Link>
       )
     }
-  ], [selectedPeriodo, API]);
+  ], [selectedPeriodo]);
 
   const table = useReactTable({
     data: asignaciones,
@@ -251,7 +245,7 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
           </select>
         )}
 
-        <div className="dropdown" ref={dropdownRef}>
+        <div className="dropdown">
           <button className="btn btn-outline-dark dropdown-toggle" type="button" onClick={() => setDropdownOpen(!dropdownOpen)}>
             Columnas
           </button>
