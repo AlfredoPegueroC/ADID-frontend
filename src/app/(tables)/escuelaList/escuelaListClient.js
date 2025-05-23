@@ -19,6 +19,7 @@ function EscuelaListClient() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
+  const [pageSize, setPageSize] = useState(10);
   const [error, setError] = useState(null);
 
   const API = process.env.NEXT_PUBLIC_API_KEY;
@@ -27,7 +28,7 @@ function EscuelaListClient() {
   const fetchData = useCallback(async () => {
     setError(null);
     try {
-      const { results, totalPages } = await fetchEscuelas(searchQuery, page);
+      const { results, totalPages } = await fetchEscuelas(searchQuery, page, pageSize);
       setEscuelas(results);
       setTotalPages(totalPages);
     } catch (error) {
@@ -36,7 +37,7 @@ function EscuelaListClient() {
     } finally {
       setLoading(false);
     }
-  }, [page, searchQuery]);
+  }, [page, searchQuery, pageSize]);
 
   useEffect(() => {
     fetchData();
@@ -52,7 +53,7 @@ function EscuelaListClient() {
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    fetchData();
+    setPage(1);
   };
 
   if (loading) {
@@ -67,24 +68,45 @@ function EscuelaListClient() {
     <div className="mt-5">
       <h1 className="text-dark">Lista de Escuelas</h1>
       {error && <div className="alert alert-danger">{error}</div>}
-      <div className="d-flex gap-2 mb-3 mt-3">
-        <Link className="btn btn-primary" href="/escuela">
-          Nueva Escuela
-        </Link>
-        {escuelas.length > 0 && (
-          <Link className="btn btn-success" href={`${API}export/escuela`}>
-            Exportar
+
+      <div className="d-flex justify-content-between align-items-center mb-3 mt-3">
+        <div className="d-flex gap-2">
+          <Link className="btn btn-primary" href="/escuela">
+            Nueva Escuela
           </Link>
-        )}
-        <button
-          type="button"
-          className="btn btn-warning"
-          data-bs-toggle="modal"
-          data-bs-target="#Modal"
-        >
-          Importar
-        </button>
+          {escuelas.length > 0 && (
+            <Link className="btn btn-success" href={`${API}export/escuela`}>
+              Exportar
+            </Link>
+          )}
+          <button
+            type="button"
+            className="btn btn-warning"
+            data-bs-toggle="modal"
+            data-bs-target="#Modal"
+          >
+            Importar
+          </button>
+        </div>
+
+        <div className="d-flex align-items-center gap-2">
+          <label className="fw-bold mb-0 text-black">Resultados por página:</label>
+          <select
+            className="form-select w-auto"
+            style={{ height: "38px" }}
+            value={pageSize}
+            onChange={(e) => {
+              setPageSize(Number(e.target.value));
+              setPage(1);
+            }}
+          >
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+          </select>
+        </div>
       </div>
+
       <Modal title="Importar Escuela">
         <ImportExcel importURL={Api_import_URL} onSuccess={fetchData} />
       </Modal>
@@ -119,7 +141,7 @@ function EscuelaListClient() {
           ) : (
             escuelas.map((escuela, index) => (
               <tr key={escuela.EscuelaCodigo}>
-                <th scope="row">{index + 1}</th>
+                <th scope="row">{index + 1 + (page - 1) * pageSize}</th>
                 <td>{escuela.EscuelaCodigo}</td>
                 <td>{escuela.EscuelaNombre}</td>
                 <td>{escuela.EscuelaDirectora}</td>

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { debounce } from "lodash";
@@ -15,10 +15,12 @@ import withAuth from "@utils/withAuth";
 import { deleteEntity } from "@utils/delete";
 import { fetchCategorias } from "@api/categoriaService";
 
-function CategoriaListClient({ initialData, totalPages }) {
+function CategoriaListClient({ initialData, totalPages: initialTotalPages }) {
   const [categorias, setCategorias] = useState(initialData);
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(initialTotalPages);
   const [searchQuery, setSearchQuery] = useState("");
+  const [pageSize, setPageSize] = useState(10);
 
   const API = process.env.NEXT_PUBLIC_API_KEY;
   const Api_import_URL = `${API}import/categoriaDocente`;
@@ -27,36 +29,73 @@ function CategoriaListClient({ initialData, totalPages }) {
     deleteEntity(`${API}api/categoriadocente/delete`, pk, setCategorias, "categoriaCodigo");
   };
 
+  const fetchData = async (query, page, size) => {
+    const { results, totalPages } = await fetchCategorias(query, page, size);
+    setCategorias(results);
+    setTotalPages(totalPages);
+  };
+
+  const debouncedFetchData = useCallback(
+    debounce(() => {
+      fetchData(searchQuery, currentPage, pageSize);
+    }, 300),
+    [searchQuery, currentPage, pageSize]
+  );
+
+  useEffect(() => {
+    debouncedFetchData();
+    return () => debouncedFetchData.cancel();
+  }, [debouncedFetchData]);
+
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
   };
 
-  const debouncedFetchData = debounce(async () => {
-    const { results } = await fetchCategorias(searchQuery, currentPage);
-    setCategorias(results);
-  }, 300);
-
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    debouncedFetchData();
+    setCurrentPage(1);
   };
 
   return (
     <div className="mt-5">
       <h1 className="text-dark">Lista Categorías de Docente</h1>
 
-      <div className="d-flex gap-2 mb-3 mt-3">
-        <Link className="btn btn-primary" href="/categoriadocente">
-          Nueva Categoría
-        </Link>
-        {categorias.length > 0 && (
-          <Link className="btn btn-success" href={`${API}export/categoriaDocente`}>
-            Exportar
+      <div className="d-flex justify-content-between align-items-center mb-3 mt-3">
+        <div className="d-flex gap-2">
+          <Link className="btn btn-primary" href="/categoriadocente">
+            Nueva Categoría
           </Link>
-        )}
-        <button type="button" className="btn btn-warning" data-bs-toggle="modal" data-bs-target="#Modal">
-          Importar
-        </button>
+          {categorias.length > 0 && (
+            <Link className="btn btn-success" href={`${API}export/categoriaDocente`}>
+              Exportar
+            </Link>
+          )}
+          <button
+            type="button"
+            className="btn btn-warning"
+            data-bs-toggle="modal"
+            data-bs-target="#Modal"
+          >
+            Importar
+          </button>
+        </div>
+
+        <div className="d-flex align-items-center gap-2">
+          <label className="fw-bold mb-0 text-black">Resultados por página:</label>
+          <select
+            className="form-select w-auto"
+            style={{ height: "38px" }}
+            value={pageSize}
+            onChange={(e) => {
+              setPageSize(Number(e.target.value));
+              setCurrentPage(1);
+            }}
+          >
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+          </select>
+        </div>
       </div>
 
       <Modal title="Importar Categoría">
@@ -90,13 +129,16 @@ function CategoriaListClient({ initialData, totalPages }) {
           ) : (
             categorias.map((categoria, index) => (
               <tr key={categoria.categoriaCodigo}>
-                <th scope="row">{index + 1 + (currentPage - 1) * 30}</th>
+                <th scope="row">{index + 1 + (currentPage - 1) * pageSize}</th>
                 <td>{categoria.categoriaCodigo}</td>
                 <td>{categoria.CategoriaNombre}</td>
                 <td>{categoria.CategoriaEstado}</td>
                 <td>{categoria.universidadNombre || "—"}</td>
                 <td>
-                  <Link href={`/categoriaEdit/${categoria.CategoriaID}`} className="btn btn-primary btn-sm">
+                  <Link
+                    href={`/categoriaEdit/${categoria.CategoriaID}`}
+                    className="btn btn-primary btn-sm"
+                  >
                     <Image src="/edit.svg" alt="editar" width={20} height={20} />
                   </Link>
                   <button
@@ -120,4 +162,3 @@ function CategoriaListClient({ initialData, totalPages }) {
 }
 
 export default withAuth(CategoriaListClient);
-

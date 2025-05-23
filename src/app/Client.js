@@ -15,6 +15,7 @@ import Search from "@components/search";
 import Modal from "@components/Modal";
 import ImportPage from "@components/forms/ImportAsignacion";
 import Notification from '@components/Notification';
+import withAuth from "@utils/withAuth";
 
 import { deleteEntity } from "@utils/delete";
 import { fetchAsignacionData } from "@api/asignacionService";
@@ -72,6 +73,8 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
   const [copiando, setCopiando] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [loadingPeriodos, setLoadingPeriodos] = useState(true);
+  const [pageSize, setPageSize] = useState(10);
+
   const API = process.env.NEXT_PUBLIC_API_KEY;
   const dropdownRef = useRef(null);
 
@@ -87,7 +90,7 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
   const fetchData = async (page, query, periodo = null) => {
     setLoading(true);
     try {
-      const { asignaciones, totalPages } = await fetchAsignacionData(periodo, page, query);
+      const { asignaciones, totalPages } = await fetchAsignacionData(periodo, page, query, pageSize);
       setAsignaciones(asignaciones);
       setTotalPages(totalPages);
     } catch (error) {
@@ -101,7 +104,7 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
     if (!loadingPeriodos && selectedPeriodo !== "") {
       fetchData(currentPage, searchQuery, selectedPeriodo);
     }
-  }, [selectedPeriodo, currentPage, searchQuery, loadingPeriodos]);
+  }, [selectedPeriodo, currentPage, searchQuery, pageSize, loadingPeriodos]);
 
   useEffect(() => {
     const CargarPeriodos = async () => {
@@ -234,7 +237,7 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
 
   return (
     <div className="mt-4">
-      <div className="d-flex flex-wrap gap-2 mb-3">
+      <div className="d-flex flex-wrap gap-2 align-items-center mb-3">
         <button className="btn btn-warning text-dark" data-bs-toggle="modal" data-bs-target="#Modal">Nueva Asignación</button>
         <button className="btn btn-info text-white" data-bs-toggle="modal" data-bs-target="#modalcopiar">Editar Asignación</button>
         <Link className="btn btn-success" href="/asignacion">Crear Sección</Link>
@@ -266,6 +269,23 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
               </div>
             ))}
           </div>
+        </div>
+
+        <div className="d-flex align-items-center gap-2 ms-auto">
+          <label className="fw-bold mb-0 text-black">Resultados por página:</label>
+          <select
+            className="form-select w-auto"
+            style={{ height: "38px" }}
+            value={pageSize}
+            onChange={(e) => {
+              setPageSize(Number(e.target.value));
+              setCurrentPage(1);
+            }}
+          >
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+          </select>
         </div>
       </div>
 
@@ -338,4 +358,4 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
   );
 }
 
-export default PrincipalListClient;
+export default withAuth(PrincipalListClient);

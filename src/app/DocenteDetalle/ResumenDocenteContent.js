@@ -61,14 +61,6 @@ export default function ResumenDocenteContent({ docenteID, periodoParam }) {
   return (
     <div className="container mt-4 text-black">
       <h2>Resumen del Docente</h2>
-      <div className="mb-3">
-        <label className="form-label"><strong>Seleccionar período:</strong></label>
-        <select className="form-select w-auto" value={selectedPeriodo} onChange={handlePeriodoChange}>
-          {periodos.map((p) => (
-            <option key={p} value={p}>{p}</option>
-          ))}
-        </select>
-      </div>
 
       {loading ? (
         <p>Cargando resumen...</p>
@@ -78,17 +70,48 @@ export default function ResumenDocenteContent({ docenteID, periodoParam }) {
         </div>
       ) : (
         <>
-          <p><strong>Nombre:</strong> {datos.docente}</p>
-          <p><strong>Período:</strong> {datos.periodo}</p>
+          <div className="d-flex flex-wrap align-items-center justify-content-between mb-3 mt-5">
+            <div>
+              <h3 className="mb-1">{datos.docente}</h3>
+              <span className="badge bg-primary me-2">{datos.facultad}</span>
+              <span className="badge bg-secondary">{datos.escuela}</span>
+            </div>
+            <div className="d-flex align-items-center mt-2 mt-md-0">
+              <label className="me-2 mb-0"><strong>Período:</strong></label>
+              <select className="form-select w-auto" value={selectedPeriodo} onChange={handlePeriodoChange}>
+                {periodos.map((p) => (
+                  <option key={p} value={p}>{p}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
           <p><strong>Total de Créditos:</strong> {datos.total_creditos}</p>
           <p><strong>Total de Materias:</strong> {datos.total_materias}</p>
 
-          <h4 className="mt-4">Asignaturas:</h4>
-          <ul>
-            {datos.asignaturas.map((asig, index) => (
-              <li key={index}>{asig}</li>
-            ))}
-          </ul>
+          <h5 className="mt-4">Asignaturas:</h5>
+          <div className="table-responsive">
+            <table className="table table-bordered table-hover mt-2">
+              <thead className="table-light">
+                <tr>
+                  <th>NRC</th>
+                  <th>Clave</th>
+                  <th>Código</th>
+                  <th>Nombre</th>
+                </tr>
+              </thead>
+              <tbody>
+                {datos.asignaturas.map((asig, index) => (
+                  <tr key={index}>
+                    <td>{asig.nrc}</td>
+                    <td>{asig.clave}</td>
+                    <td>{asig.codigo}</td>
+                    <td>{asig.nombre}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </>
       )}
     </div>

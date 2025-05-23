@@ -42,6 +42,7 @@ export default function AsignacionForm() {
   });
 
   useEffect(() => {
+    
     async function fetchData() {
       setIsLoading(true);
       try {
@@ -51,9 +52,13 @@ export default function AsignacionForm() {
           fetch(`${API}api/universidad`),
           fetch(`${API}api/facultad`),
           fetch(`${API}api/escuela`),
-          fetch(`${API}api/periodoAcademico`)
+          fetch(`${API}api/periodoacademico`)
         ]);
-
+       
+        
+        if (!docenteRes.ok || !campusRes.ok || !uniRes.ok || !facRes.ok || !escRes.ok || !perRes.ok) {
+          throw new Error("Error en la carga de datos");
+        }
         const [docentesData, campusData, universidadesData, facultadesData, escuelasData, periodosData] = await Promise.all([
           docenteRes.json(),
           campusRes.json(),
@@ -62,8 +67,10 @@ export default function AsignacionForm() {
           escRes.json(),
           perRes.json(),
         ]);
-
+        console.log(docentesData);
+        console.log(campusData);
         setDocentes(docentesData.results);
+        
         setCampus(campusData.results);
         setUniversidades(universidadesData.results);
         setFacultades(facultadesData.results);
@@ -112,7 +119,7 @@ export default function AsignacionForm() {
   return (
     <div className={Styles.container}>
       <form onSubmit={handleSubmit} className={Styles.form}>
-        <h1 className={Styles.title}>Registrar Asignación Docente</h1>
+        <h1 className={Styles.title}>Definir Asignación Docente</h1>
 
         <div className={Styles.name_group}>
           <label htmlFor="nrc">NRC:</label>
@@ -171,7 +178,7 @@ export default function AsignacionForm() {
 
         <div className={Styles.name_group}>
           <label htmlFor="creditos">Créditos:</label>
-          <input type="number" step="0.01" id="creditos" name="creditos" value={formData.creditos} onChange={handleChange} />
+          <input type="number" step="1" id="creditos" name="creditos" value={formData.creditos} onChange={handleChange} />
         </div>
 
         <div className={Styles.name_group}>
@@ -189,7 +196,7 @@ export default function AsignacionForm() {
           <input type="text" id="usuario_registro" name="usuario_registro" value={formData.usuario_registro} onChange={handleChange} />
         </div>
 
-        {/* <div className={Styles.name_group}>
+        <div className={Styles.name_group}>
           <label htmlFor="docenteFk">Docente:</label>
           <select id="docenteFk" name="docenteFk" value={formData.docenteFk} onChange={handleChange} required>
             <option value="" disabled>-- Seleccione un Docente --</option>
@@ -197,7 +204,7 @@ export default function AsignacionForm() {
               <option key={d.DocenteID} value={d.DocenteID}>{d.DocenteNombre} {d.DocenteApellido}</option>
             ))}
           </select>
-        </div> */}
+        </div>
 
         <div className={Styles.name_group}>
           <label htmlFor="campusFk">Campus:</label>

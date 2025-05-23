@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { debounce } from "lodash";
@@ -15,10 +15,12 @@ import { fetchFacultades } from "@api/facultadService";
 import withAuth from "@utils/withAuth";
 import { deleteEntity } from "@utils/delete";
 
-function FacultadListClient({ initialData, totalPages }) {
+function FacultadListClient({ initialData, totalPages: initialTotalPages }) {
   const [facultades, setFacultades] = useState(initialData);
   const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(initialTotalPages);
   const [searchQuery, setSearchQuery] = useState("");
+  const [pageSize, setPageSize] = useState(10);
 
   const API = process.env.NEXT_PUBLIC_API_KEY;
   const Api_import_URL = `${API}import/facultad`;
@@ -27,43 +29,77 @@ function FacultadListClient({ initialData, totalPages }) {
     deleteEntity(`${API}api/facultad/delete`, pk, setFacultades, "FacultadCodigo");
   };
 
+  const fetchData = async (page, query, size) => {
+    const response = await fetchFacultades(query, page, size);
+    setFacultades(response.results);
+    setTotalPages(response.totalPages);
+  };
+
+  const debouncedFetchData = useCallback(
+    debounce(() => {
+      fetchData(page, searchQuery, pageSize);
+    }, 300),
+    [page, searchQuery, pageSize]
+  );
+
+  useEffect(() => {
+    debouncedFetchData();
+    return () => debouncedFetchData.cancel();
+  }, [debouncedFetchData]);
+
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
+  };
+
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
-  };
-  console.log(facultades)
-  const debouncedFetchData = debounce(async () => {
-    const { results } = await fetchFacultades(searchQuery, page);
-    setFacultades(results);
-    console.log(results)
-  }, 300);
-
-  const handlePageChange = async (page) => {
-    const { results } = await fetchFacultades(searchQuery, page);
-    setFacultades(results);
-    setPage(page);
   };
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    debouncedFetchData();
+    setPage(1);
   };
 
   return (
     <div className="mt-5">
       <h1 className="text-dark">Lista de Facultades</h1>
 
-      <div className="d-flex gap-2 mb-3 mt-3">
-        <Link className="btn btn-primary" href="/facultad">
-          Nueva Facultad
-        </Link>
-        {facultades.length > 0 && (
-          <Link className="btn btn-success" href={`${API}export/facultad`}>
-            Exportar
+      <div className="d-flex justify-content-between align-items-center mb-3 mt-3">
+        <div className="d-flex gap-2">
+          <Link className="btn btn-primary" href="/facultad">
+            Nueva Facultad
           </Link>
-        )}
-        <button type="button" className="btn btn-warning" data-bs-toggle="modal" data-bs-target="#Modal">
-          Importar
-        </button>
+          {facultades.length > 0 && (
+            <Link className="btn btn-success" href={`${API}export/facultad`}>
+              Exportar
+            </Link>
+          )}
+          <button
+            type="button"
+            className="btn btn-warning"
+            data-bs-toggle="modal"
+            data-bs-target="#Modal"
+          >
+            Importar
+          </button>
+        </div>
+
+        <div className="d-flex align-items-center gap-2">
+          <label className="fw-bold mb-0 text-black">Resultados por página:</label>
+          <select
+            className="form-select w-auto"
+            style={{ height: "38px" }}
+            value={pageSize}
+            onChange={(e) => {
+              setPageSize(Number(e.target.value));
+              setPage(1);
+            }}
+          >
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+          </select>
+        </div>
       </div>
 
       <Modal title="Importar Facultad">

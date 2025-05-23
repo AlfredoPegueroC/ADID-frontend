@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { debounce } from "lodash";
@@ -8,60 +8,89 @@ import { debounce } from "lodash";
 import Pagination from "@components/Pagination";
 import Tables from "@components/Tables";
 import Search from "@components/search";
-// import ImportExcel from "@components/forms/Import";
-// import Modal from "@components/Modal";
-import { fetchTipoDocentes } from "@api/tipoDocenteService";
 import withAuth from "@utils/withAuth";
 import { deleteEntity } from "@utils/delete";
+import { fetchTipoDocentes } from "@api/tipoDocenteService";
 
-function TipodocenteListClient({ initialData, totalPages }) {
+function TipodocenteListClient({ initialData, totalPages: initialTotalPages }) {
   const [tipodocentes, setTipodocentes] = useState(initialData);
   const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(initialTotalPages);
   const [searchQuery, setSearchQuery] = useState("");
+  const [pageSize, setPageSize] = useState(10);
 
   const API = process.env.NEXT_PUBLIC_API_KEY;
-  const Api_import_URL = `${API}import/tipoDocente`;
 
   const deleteTipo = (pk) => {
     deleteEntity(`${API}api/tipodocente/delete`, pk, setTipodocentes, "TipoDocenteCodigo");
   };
 
+  const fetchData = async (query, page, size) => {
+    const { results, totalPages } = await fetchTipoDocentes(query, page, size);
+    setTipodocentes(results);
+    setTotalPages(totalPages);
+  };
+
+  const debouncedFetchData = useCallback(
+    debounce(() => {
+      fetchData(searchQuery, page, pageSize);
+    }, 300),
+    [searchQuery, page, pageSize]
+  );
+
+  useEffect(() => {
+    debouncedFetchData();
+    return () => debouncedFetchData.cancel();
+  }, [debouncedFetchData]);
+
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
   };
 
-  const debouncedFetchData = debounce(async () => {
-    const { results } = await fetchTipoDocentes(searchQuery, page);
-    setTipodocentes(results);
-  }, 300);
-
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    debouncedFetchData();
+    setPage(1);
   };
 
   return (
     <div className="mt-5">
       <h1 className="text-dark">Lista de Tipos de Docente</h1>
-      <div className="d-flex gap-2 mb-3 mt-3">
-        <Link className="btn btn-primary" href="/tipodocente">
-          Nuevo Tipo Docente
-        </Link>
-        {tipodocentes.length > 0 && (
-          <Link className="btn btn-success" href={`${API}export/tipoDocente`}>
-            Exportar
+
+      <div className="d-flex justify-content-between align-items-center mb-3 mt-3">
+        <div className="d-flex gap-2">
+          <Link className="btn btn-primary" href="/tipodocente">
+            Nuevo Tipo Docente
           </Link>
-        )}
-        {/* <button type="button" className="btn btn-warning" data-bs-toggle="modal" data-bs-target="#Modal">
-          Importar
-        </button> */}
+          {tipodocentes.length > 0 && (
+            <Link className="btn btn-success" href={`${API}export/tipoDocente`}>
+              Exportar
+            </Link>
+          )}
+        </div>
+
+        <div className="d-flex align-items-center gap-2">
+          <label className="fw-bold mb-0 text-black">Resultados por página:</label>
+          <select
+            className="form-select w-auto"
+            style={{ height: "38px" }}
+            value={pageSize}
+            onChange={(e) => {
+              setPageSize(Number(e.target.value));
+              setPage(1);
+            }}
+          >
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+          </select>
+        </div>
       </div>
 
-      {/* <Modal title="Importar Tipo Docente">
-        <ImportExcel importURL={Api_import_URL} onSuccess={debouncedFetchData} />
-      </Modal> */}
-
-      <Search SearchSubmit={handleSearchSubmit} SearchChange={handleSearchChange} searchQuery={searchQuery} />
+      <Search
+        SearchSubmit={handleSearchSubmit}
+        SearchChange={handleSearchChange}
+        searchQuery={searchQuery}
+      />
 
       <Tables>
         <thead>
@@ -84,13 +113,16 @@ function TipodocenteListClient({ initialData, totalPages }) {
           ) : (
             tipodocentes.map((tipo, index) => (
               <tr key={tipo.TipoDocenteCodigo}>
-                <th scope="row">{index + 1 + (page - 1) * 30}</th>
+                <th scope="row">{index + 1 + (page - 1) * pageSize}</th>
                 <td>{tipo.TipoDocenteCodigo}</td>
                 <td>{tipo.TipoDocenteDescripcion}</td>
                 <td>{tipo.TipoDocenteEstado}</td>
                 <td>{tipo.universidadNombre || "—"}</td>
                 <td>
-                  <Link className="btn btn-primary btn-sm" href={`/tipoEdit/${tipo.TipoDocenteID}`}>
+                  <Link
+                    className="btn btn-primary btn-sm"
+                    href={`/tipoEdit/${tipo.TipoDocenteID}`}
+                  >
                     <Image src="/edit.svg" alt="editar" width={20} height={20} />
                   </Link>
                   <button

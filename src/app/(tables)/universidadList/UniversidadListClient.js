@@ -23,12 +23,13 @@ function UniversidadListClient({ initialData }) {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(initialData.totalPages || 1);
   const [searchQuery, setSearchQuery] = useState("");
+  const [pageSize, setPageSize] = useState(10);
 
   const debouncedFetchData = useCallback(
     debounce(async () => {
       try {
         setLoading(true);
-        const { results, totalPages } = await fetchUniversidades(page, searchQuery);
+        const { results, totalPages } = await fetchUniversidades(page, searchQuery, pageSize);
         setUniversidades(results);
         setTotalPages(totalPages);
       } catch (error) {
@@ -37,7 +38,7 @@ function UniversidadListClient({ initialData }) {
         setLoading(false);
       }
     }, 500),
-    [page, searchQuery]
+    [page, searchQuery, pageSize]
   );
 
   useEffect(() => {
@@ -58,26 +59,47 @@ function UniversidadListClient({ initialData }) {
     <div>
       <h1 className="text-dark mt-5">Lista de Universidades</h1>
 
-      <div className="d-flex gap-1 mb-3 mt-3">
-        <Link className="btn btn-primary" href="/universidad">
-          Nueva Universidad
-        </Link>
-        {universidades.length > 0 && (
-          <Link
-            className="btn btn-success"
-            href={`${process.env.NEXT_PUBLIC_API_KEY}export/universidad`}
-          >
-            Exportar
+      <div className="d-flex justify-content-between align-items-center mb-3 mt-3">
+        <div className="d-flex gap-1">
+          <Link className="btn btn-primary" href="/universidad">
+            Nueva Universidad
           </Link>
-        )}
-        <button
-          type="button"
-          className="btn btn-warning"
-          data-bs-toggle="modal"
-          data-bs-target="#Modal"
-        >
-          Importar
-        </button>
+
+          {universidades.length > 0 && (
+            <Link
+              className="btn btn-success"
+              href={`${process.env.NEXT_PUBLIC_API_KEY}export/universidad`}
+            >
+              Exportar
+            </Link>
+          )}
+
+          <button
+            type="button"
+            className="btn btn-warning"
+            data-bs-toggle="modal"
+            data-bs-target="#Modal"
+          >
+            Importar
+          </button>
+        </div>
+
+        <div className="d-flex align-items-center gap-2">
+          <label className="fw-bold mb-0 text-black">Resultados por página:</label>
+          <select
+            className="form-select w-auto"
+            style={{ height: "38px" }}
+            value={pageSize}
+            onChange={(e) => {
+              setPageSize(Number(e.target.value));
+              setPage(1);
+            }}
+          >
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+          </select>
+        </div>
       </div>
 
       <Modal title="Importar Universidad">
@@ -124,7 +146,7 @@ function UniversidadListClient({ initialData }) {
           ) : (
             universidades.map((universidad, index) => (
               <tr key={universidad.UniversidadCodigo}>
-                <td>{index + 1 + (page - 1) * 30}</td>
+                <td>{index + 1 + (page - 1) * pageSize}</td>
                 <td>{universidad.UniversidadCodigo}</td>
                 <td>{universidad.UniversidadNombre}</td>
                 <td>{universidad.UniversidadDireccion}</td>

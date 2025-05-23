@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { debounce } from "lodash";
@@ -9,17 +9,18 @@ import Pagination from "@components/Pagination";
 import Tables from "@components/Tables";
 import Search from "@components/search";
 import Modal from "@components/Modal";
+import Periodo from "@components/forms/Periodo";
 
 import withAuth from "@utils/withAuth";
 import { deleteEntity } from "@utils/delete";
 import { fetchPeriodos } from "@api/periodoService";
-import Periodo from "@components/forms/Periodo";
 
 function PeriodoListClient({ initialData, totalPages: initialTotalPages }) {
   const [periodos, setPeriodos] = useState(initialData);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(initialTotalPages || 1);
   const [searchQuery, setSearchQuery] = useState("");
+  const [pageSize, setPageSize] = useState(10);
 
   const API = process.env.NEXT_PUBLIC_API_KEY;
 
@@ -27,54 +28,77 @@ function PeriodoListClient({ initialData, totalPages: initialTotalPages }) {
     deleteEntity(`${API}api/periodoacademico/delete`, pk, setPeriodos, "PeriodoCodigo");
   };
 
+  const fetchData = async (query, pageNum, size) => {
+    const { results, totalPages } = await fetchPeriodos(query, pageNum, size);
+    setPeriodos(results);
+    setTotalPages(totalPages);
+  };
+
+  const debouncedFetchData = useCallback(
+    debounce((query, pageNum, size) => {
+      fetchData(query, pageNum, size);
+    }, 300),
+    []
+  );
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    setPage(1);
+  };
+
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
   };
 
-  const debouncedFetchData = debounce(async (query, pageNum) => {
-    const { results, totalPages } = await fetchPeriodos(query, pageNum);
-    setPeriodos(results);
-    setTotalPages(totalPages);
-  }, 300);
-
-  const handleSearchSubmit = (e) => {
-    e.preventDefault();
-    debouncedFetchData(searchQuery, page);
-  };
-
   useEffect(() => {
-    debouncedFetchData(searchQuery, page);
+    debouncedFetchData(searchQuery, page, pageSize);
     return () => debouncedFetchData.cancel();
-  }, [searchQuery, page]);
+  }, [searchQuery, page, pageSize, debouncedFetchData]);
 
   return (
     <div className="mt-5">
       <h1 className="text-dark">Lista Periodo Académico</h1>
 
-      <div className="d-flex gap-2 mb-3 mt-3">
-        <button
-          type="button"
-          className="btn btn-primary"
-          data-bs-toggle="modal"
-          data-bs-target="#Modal"
-        >
-          Nuevo Periodo Académico
-        </button>
-        {periodos.length > 0 && (
-          <Link
-            className="btn btn-success"
-            href={`${API}export/periodoAcademico`}
+      <div className="d-flex justify-content-between align-items-center mb-3 mt-3">
+        <div className="d-flex gap-2">
+          <button
+            type="button"
+            className="btn btn-primary"
+            data-bs-toggle="modal"
+            data-bs-target="#Modal"
           >
-            Exportar
-          </Link>
-        )}
+            Nuevo Periodo Académico
+          </button>
+          {periodos.length > 0 && (
+            <Link className="btn btn-success" href={`${API}export/periodoAcademico`}>
+              Exportar
+            </Link>
+          )}
+        </div>
+
+        <div className="d-flex align-items-center gap-2">
+          <label className="fw-bold mb-0 text text-black">Resultados por página:</label>
+          <select
+            className="form-select w-auto"
+            style={{ height: "38px" }}
+            value={pageSize}
+            onChange={(e) => {
+              setPageSize(Number(e.target.value));
+              setPage(1);
+            }}
+          >
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+          </select>
+        </div>
       </div>
 
       <Modal title="Nuevo Periodo Académico">
         <Periodo
           title="Registrar Periodo"
           onSuccess={async () => {
-            const { results, totalPages } = await fetchPeriodos(searchQuery, page);
+            const { results, totalPages } = await fetchPeriodos(searchQuery, page, pageSize);
             setPeriodos(results);
             setTotalPages(totalPages);
           }}
@@ -112,7 +136,7 @@ function PeriodoListClient({ initialData, totalPages: initialTotalPages }) {
           ) : (
             periodos.map((periodo, index) => (
               <tr key={periodo.PeriodoCodigo}>
-                <td>{index + 1 + (page - 1) * 30}</td>
+                <td>{index + 1 + (page - 1) * pageSize}</td>
                 <td>{periodo.PeriodoCodigo}</td>
                 <td>{periodo.PeriodoNombre}</td>
                 <td>{periodo.PeriodoTipo}</td>

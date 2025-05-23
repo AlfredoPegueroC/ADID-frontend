@@ -13,17 +13,20 @@ import { deleteEntity } from "@utils/delete";
 import { fetchDocentes } from "@api/docenteService";
 import { debounce } from "lodash";
 
-function DocenteListClient({ initialData, totalPages }) {
+function DocenteListClient({ initialData, totalPages: initialTotalPages }) {
   const [docentes, setDocentes] = useState(initialData);
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(initialTotalPages);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [pageSize, setPageSize] = useState(10);
   const API = process.env.NEXT_PUBLIC_API_KEY;
 
-  const fetchDocentesData = async (page, query) => {
+  const fetchDocentesData = async (page, query, size) => {
     try {
-      const response = await fetchDocentes(query, page);
+      const response = await fetchDocentes(query, page, size);
       setDocentes(response.results);
+      setTotalPages(response.totalPages);
     } catch (error) {
       console.error("Error fetching docentes:", error);
     } finally {
@@ -33,7 +36,6 @@ function DocenteListClient({ initialData, totalPages }) {
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
-    fetchDocentesData(page, searchQuery);
   };
 
   const handleSearchChange = (e) => {
@@ -42,18 +44,24 @@ function DocenteListClient({ initialData, totalPages }) {
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    fetchDocentesData(currentPage, searchQuery);
+    setCurrentPage(1);
   };
 
   const deleteDocente = useCallback((pk) => {
     deleteEntity(`${API}api/docente/delete`, pk, setDocentes, "DocenteID");
   }, [API]);
 
-  const debouncedFetchDocentesData = useCallback(debounce(fetchDocentesData, 500), []);
+  const debouncedFetchDocentesData = useCallback(
+    debounce(() => {
+      fetchDocentesData(currentPage, searchQuery, pageSize);
+    }, 500),
+    [currentPage, searchQuery, pageSize]
+  );
 
   useEffect(() => {
-    debouncedFetchDocentesData(currentPage, searchQuery);
-  }, [searchQuery, currentPage, debouncedFetchDocentesData]);
+    debouncedFetchDocentesData();
+    return () => debouncedFetchDocentesData.cancel();
+  }, [debouncedFetchDocentesData]);
 
   if (loading) {
     return (
@@ -66,21 +74,48 @@ function DocenteListClient({ initialData, totalPages }) {
   return (
     <div className="mt-5">
       <h1 className="text-dark">Lista de Docentes</h1>
-      <div className="d-flex gap-2 mb-3 mt-3">
-        <Link className="btn btn-primary" href="/docente">Agregar Docente</Link>
-        {docentes.length > 0 && (
-          <Link className="btn btn-success" href={`${API}export/docente`}>Exportar</Link>
-        )}
-        <button type="button" className="btn btn-warning" data-bs-toggle="modal" data-bs-target="#Modal">
-          Importar
-        </button>
+
+      <div className="d-flex justify-content-between align-items-center mb-3 mt-3">
+        <div className="d-flex gap-2">
+          <Link className="btn btn-primary" href="/docente">Agregar Docente</Link>
+          {docentes.length > 0 && (
+            <Link className="btn btn-success" href={`${API}export/docente`}>Exportar</Link>
+          )}
+          <button type="button" className="btn btn-warning" data-bs-toggle="modal" data-bs-target="#Modal">
+            Importar
+          </button>
+        </div>
+
+        <div className="d-flex align-items-center gap-2">
+          <label className="fw-bold mb-0 text-black">Resultados por página:</label>
+          <select
+            className="form-select w-auto"
+            style={{ height: "38px" }}
+            value={pageSize}
+            onChange={(e) => {
+              setPageSize(Number(e.target.value));
+              setCurrentPage(1);
+            }}
+          >
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+          </select>
+        </div>
       </div>
 
       <Modal title="Importar Docente">
-        <ImportExcel importURL={`${API}import/docente`} onSuccess={() => fetchDocentesData(currentPage, searchQuery)} />
+        <ImportExcel
+          importURL={`${API}import/docente`}
+          onSuccess={() => fetchDocentesData(currentPage, searchQuery, pageSize)}
+        />
       </Modal>
 
-      <Search SearchSubmit={handleSearchSubmit} SearchChange={handleSearchChange} searchQuery={searchQuery} />
+      <Search
+        SearchSubmit={handleSearchSubmit}
+        SearchChange={handleSearchChange}
+        searchQuery={searchQuery}
+      />
 
       <Tables>
         <thead>
@@ -96,7 +131,6 @@ function DocenteListClient({ initialData, totalPages }) {
             <th>Correo</th>
             <th>Estado</th>
             <th>Universidad</th>
-            
             <th>Tipo</th>
             <th>Categoría</th>
             <th>Acción</th>
@@ -105,10 +139,10 @@ function DocenteListClient({ initialData, totalPages }) {
         <tbody>
           {docentes.length === 0 ? (
             <tr>
-              <td colSpan="16" className="text-center">No se encontraron docentes.</td>
+              <td colSpan="14" className="text-center">No se encontraron docentes.</td>
             </tr>
           ) : (
-            docentes.map((d) => (
+            docentes.map((d, index) => (
               <tr key={d.DocenteID}>
                 <td>{d.DocenteNombre}</td>
                 <td>{d.DocenteApellido}</td>

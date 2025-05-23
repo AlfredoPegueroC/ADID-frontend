@@ -13,17 +13,20 @@ import { deleteEntity } from "@utils/delete";
 import { fetchCampus } from "@api/campusService";
 import { debounce } from "lodash";
 
-function CampusListClient({ initialData, totalPages }) {
+function CampusListClient({ initialData, totalPages: initialTotalPages }) {
   const [campusList, setCampusList] = useState(initialData);
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [pageSize, setPageSize] = useState(10);
+  const [totalPages, setTotalPages] = useState(initialTotalPages);
   const API = process.env.NEXT_PUBLIC_API_KEY;
 
-  const fetchData = async (page, query) => {
+  const fetchData = async (page, query, size) => {
     try {
-      const response = await fetchCampus(query, page);
+      const response = await fetchCampus(query, page, size);
       setCampusList(response.results);
+      setTotalPages(response.totalPages);
     } catch (error) {
       console.error("Error fetching campus data:", error);
     } finally {
@@ -33,7 +36,6 @@ function CampusListClient({ initialData, totalPages }) {
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
-    fetchData(page, searchQuery);
   };
 
   const handleSearchChange = (e) => {
@@ -42,7 +44,7 @@ function CampusListClient({ initialData, totalPages }) {
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    fetchData(currentPage, searchQuery);
+    setCurrentPage(1);
   };
 
   const deleteCampus = useCallback((pk) => {
@@ -52,8 +54,8 @@ function CampusListClient({ initialData, totalPages }) {
   const debouncedFetch = useCallback(debounce(fetchData, 500), []);
 
   useEffect(() => {
-    debouncedFetch(currentPage, searchQuery);
-  }, [currentPage, searchQuery, debouncedFetch]);
+    debouncedFetch(currentPage, searchQuery, pageSize);
+  }, [currentPage, searchQuery, pageSize, debouncedFetch]);
 
   if (loading) {
     return (
@@ -66,16 +68,36 @@ function CampusListClient({ initialData, totalPages }) {
   return (
     <div className="mt-5">
       <h1 className="text-dark">Lista de Campus</h1>
-      <div className="d-flex gap-2 mb-3 mt-3">
-        <Link className="btn btn-primary" href="/campus">Agregar Campus</Link>
-        {campusList.length > 0 && (
-          <Link className="btn btn-success" href={`${API}export/campus`}>Exportar</Link>
-        )}
-        <button type="button" className="btn btn-warning" data-bs-toggle="modal" data-bs-target="#Modal">Importar</button>
+
+      <div className="d-flex justify-content-between align-items-center mb-3 mt-3">
+        <div className="d-flex gap-2">
+          <Link className="btn btn-primary" href="/campus">Agregar Campus</Link>
+          {campusList.length > 0 && (
+            <Link className="btn btn-success" href={`${API}export/campus`}>Exportar</Link>
+          )}
+          <button type="button" className="btn btn-warning" data-bs-toggle="modal" data-bs-target="#Modal">Importar</button>
+        </div>
+
+        <div className="d-flex align-items-center gap-2">
+          <label className="fw-bold mb-0 text-black">Resultados por página:</label>
+          <select
+            className="form-select w-auto"
+            style={{ height: "38px" }}
+            value={pageSize}
+            onChange={(e) => {
+              setPageSize(Number(e.target.value));
+              setCurrentPage(1);
+            }}
+          >
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+          </select>
+        </div>
       </div>
 
       <Modal title="Importar Campus">
-        <ImportExcel importURL={`${API}import/campus`} onSuccess={() => fetchData(currentPage, searchQuery)} />
+        <ImportExcel importURL={`${API}import/campus`} onSuccess={() => fetchData(currentPage, searchQuery, pageSize)} />
       </Modal>
 
       <Search SearchSubmit={handleSearchSubmit} SearchChange={handleSearchChange} searchQuery={searchQuery} />
