@@ -9,48 +9,45 @@ import {
   flexRender,
 } from '@tanstack/react-table';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import Tables from '@components/Tables';
 
 export default function UsuarioPage() {
-  const data = useMemo(
-    () => [
-      { id: 1, name: 'Alfredo Peguero', email: 'alfredo@example.com', role: 'Admin' },
-      { id: 2, name: 'Laura Garcia', email: 'laura@example.com', role: 'User' },
-      { id: 3, name: 'Carlos López', email: 'carlos@example.com', role: 'User' },
-      { id: 4, name: 'Ana Pérez', email: 'ana@example.com', role: 'Admin' },
-      { id: 5, name: 'Luis Jiménez', email: 'luis@example.com', role: 'User' },
-      { id: 6, name: 'Mario Castro', email: 'mario@example.com', role: 'User' },
-    ],
-    []
-  );
-
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [sorting, setSorting] = useState([]);
   const [columnFilters, setColumnFilters] = useState([]);
   const [globalFilter, setGlobalFilter] = useState('');
 
+  useEffect(() => {
+    const fetchUsuarios = async () => {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_KEY}api/usuarios`);
+        const usuarios = await res.json();
+
+        const formateados = usuarios.map(user => ({
+          username: user.username,
+          name: `${user.first_name} ${user.last_name}`,
+          email: user.email,
+          role: user.groups.includes('admin') ? 'Admin' : 'User',
+        }));
+
+        setData(formateados);
+      } catch (err) {
+        console.error('Error cargando usuarios:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUsuarios();
+  }, []);
+
   const columns = useMemo(
     () => [
-      {
-        accessorKey: 'id',
-        header: () => 'ID',
-        footer: props => props.column.id,
-      },
-      {
-        accessorKey: 'name',
-        header: () => 'Name',
-        footer: props => props.column.id,
-      },
-      {
-        accessorKey: 'email',
-        header: () => 'Email',
-        footer: props => props.column.id,
-      },
-      {
-        accessorKey: 'role',
-        header: () => 'Role',
-        footer: props => props.column.id,
-      },
+      { accessorKey: 'username', header: () => 'Usuario' },
+      { accessorKey: 'name', header: () => 'Nombre' },
+      { accessorKey: 'email', header: () => 'Email' },
+      { accessorKey: 'role', header: () => 'Rol' },
     ],
     []
   );
@@ -71,6 +68,8 @@ export default function UsuarioPage() {
     getPaginationRowModel: getPaginationRowModel(),
   });
 
+  if (loading) return <div className="text-center mt-5">Cargando usuarios...</div>;
+
   return (
     <div>
       <h2 className="mb-4">Usuarios Registrados</h2>
@@ -86,21 +85,7 @@ export default function UsuarioPage() {
         />
       </div>
 
-      {/* Mostrar/Ocultar columnas */}
-      <div className="mb-3 d-flex gap-3 flex-wrap">
-        {table.getAllLeafColumns().map(column => (
-          <label key={column.id} className="form-check-label">
-            <input
-              type="checkbox"
-              className="form-check-input me-1"
-              checked={column.getIsVisible()}
-              onChange={column.getToggleVisibilityHandler()}
-            />
-            {column.columnDef.header()}
-          </label>
-        ))}
-      </div>
-
+      {/* Tabla */}
       <div className="table-responsive">
         <Tables>
           <thead className="table-light">
@@ -112,10 +97,7 @@ export default function UsuarioPage() {
                     onClick={header.column.getToggleSortingHandler()}
                     style={{ cursor: 'pointer' }}
                   >
-                    {flexRender(
-                      header.column.columnDef.header,
-                      header.getContext()
-                    )}
+                    {flexRender(header.column.columnDef.header, header.getContext())}
                     {header.column.getIsSorted() === 'asc'
                       ? ' 🔼'
                       : header.column.getIsSorted() === 'desc'
@@ -141,6 +123,7 @@ export default function UsuarioPage() {
         </Tables>
       </div>
 
+      {/* Paginación */}
       <div className="d-flex justify-content-between align-items-center mt-3">
         <div>
           Página {table.getState().pagination.pageIndex + 1} de{' '}
