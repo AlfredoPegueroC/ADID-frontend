@@ -12,6 +12,7 @@ import withAuth from "@utils/withAuth";
 import { deleteEntity } from "@utils/delete";
 import { fetchDocentes } from "@api/docenteService";
 import { debounce } from "lodash";
+import { exportDocentesToPDF } from "@utils/ExportPDF/exportDocentePDF";
 
 function DocenteListClient({ initialData, totalPages: initialTotalPages }) {
   const [docentes, setDocentes] = useState(initialData);
@@ -47,9 +48,12 @@ function DocenteListClient({ initialData, totalPages: initialTotalPages }) {
     setCurrentPage(1);
   };
 
-  const deleteDocente = useCallback((pk) => {
-    deleteEntity(`${API}api/docente/delete`, pk, setDocentes, "DocenteID");
-  }, [API]);
+  const deleteDocente = useCallback(
+    (pk) => {
+      deleteEntity(`${API}api/docente/delete`, pk, setDocentes, "DocenteID");
+    },
+    [API]
+  );
 
   const debouncedFetchDocentesData = useCallback(
     debounce(() => {
@@ -77,17 +81,38 @@ function DocenteListClient({ initialData, totalPages: initialTotalPages }) {
 
       <div className="d-flex justify-content-between align-items-center mb-3 mt-3">
         <div className="d-flex gap-2">
-          <Link className="btn btn-primary" href="/docente">Agregar Docente</Link>
+          <Link className="btn btn-primary" href="/docente">
+            Agregar Docente
+          </Link>
           {docentes.length > 0 && (
-            <Link className="btn btn-success" href={`${API}export/docente`}>Exportar</Link>
+            <>
+              <Link className="btn btn-success" href={`${API}export/docente`}>
+                Exportar
+              </Link>
+              <button
+                className="btn btn-danger"
+                onClick={() =>
+                  exportDocentesToPDF(docentes, currentPage, pageSize)
+                }
+              >
+                Exportar PDF
+              </button>
+            </>
           )}
-          <button type="button" className="btn btn-warning" data-bs-toggle="modal" data-bs-target="#Modal">
+          <button
+            type="button"
+            className="btn btn-warning"
+            data-bs-toggle="modal"
+            data-bs-target="#Modal"
+          >
             Importar
           </button>
         </div>
 
         <div className="d-flex align-items-center gap-2">
-          <label className="fw-bold mb-0 text-black">Resultados por página:</label>
+          <label className="fw-bold mb-0 text-black">
+            Resultados por página:
+          </label>
           <select
             className="form-select w-auto"
             style={{ height: "38px" }}
@@ -107,7 +132,9 @@ function DocenteListClient({ initialData, totalPages: initialTotalPages }) {
       <Modal title="Importar Docente">
         <ImportExcel
           importURL={`${API}import/docente`}
-          onSuccess={() => fetchDocentesData(currentPage, searchQuery, pageSize)}
+          onSuccess={() =>
+            fetchDocentesData(currentPage, searchQuery, pageSize)
+          }
         />
       </Modal>
 
@@ -139,7 +166,9 @@ function DocenteListClient({ initialData, totalPages: initialTotalPages }) {
         <tbody>
           {docentes.length === 0 ? (
             <tr>
-              <td colSpan="14" className="text-center">No se encontraron docentes.</td>
+              <td colSpan="14" className="text-center">
+                No se encontraron docentes.
+              </td>
             </tr>
           ) : (
             docentes.map((d, index) => (
@@ -158,11 +187,27 @@ function DocenteListClient({ initialData, totalPages: initialTotalPages }) {
                 <td>{d.tipoDocenteNombre}</td>
                 <td>{d.categoriaDocenteNombre}</td>
                 <td>
-                  <Link className="btn btn-primary btn-sm" href={`/docenteEdit/${d.DocenteID}`}>
-                    <Image src="/edit.svg" alt="editar" width={20} height={20} />
+                  <Link
+                    className="btn btn-primary btn-sm"
+                    href={`/docenteEdit/${d.DocenteID}`}
+                  >
+                    <Image
+                      src="/edit.svg"
+                      alt="editar"
+                      width={20}
+                      height={20}
+                    />
                   </Link>
-                  <button className="btn btn-danger btn-sm mx-2" onClick={() => deleteDocente(d.DocenteID)}>
-                    <Image src="/delete.svg" alt="borrar" width={20} height={20} />
+                  <button
+                    className="btn btn-danger btn-sm mx-2"
+                    onClick={() => deleteDocente(d.DocenteID)}
+                  >
+                    <Image
+                      src="/delete.svg"
+                      alt="borrar"
+                      width={20}
+                      height={20}
+                    />
                   </button>
                 </td>
               </tr>
@@ -172,7 +217,11 @@ function DocenteListClient({ initialData, totalPages: initialTotalPages }) {
       </Tables>
 
       {totalPages > 1 && (
-        <Pagination page={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
+        <Pagination
+          page={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
       )}
     </div>
   );

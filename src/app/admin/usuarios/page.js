@@ -11,6 +11,7 @@ import {
 
 import { useMemo, useState, useEffect } from 'react';
 import Tables from '@components/Tables';
+import Notification from '@components/Notification';
 
 export default function UsuarioPage() {
   const [data, setData] = useState([]);
@@ -26,10 +27,12 @@ export default function UsuarioPage() {
         const usuarios = await res.json();
 
         const formateados = usuarios.map(user => ({
+          id: user.id,
           username: user.username,
           name: `${user.first_name} ${user.last_name}`,
           email: user.email,
           role: user.groups.includes('admin') ? 'Admin' : 'User',
+          is_active: user.is_active,
         }));
 
         setData(formateados);
@@ -48,8 +51,54 @@ export default function UsuarioPage() {
       { accessorKey: 'name', header: () => 'Nombre' },
       { accessorKey: 'email', header: () => 'Email' },
       { accessorKey: 'role', header: () => 'Rol' },
+      {
+        accessorKey: 'is_active',
+        header: () => 'Estado',
+        cell: ({ row }) => {
+          const { username, is_active } = row.original;
+
+          const handleEstadoChange = async (e) => {
+            const nuevoEstado = e.target.value === 'true';
+
+            try {
+              const res = await fetch(`${process.env.NEXT_PUBLIC_API_KEY}api/usuarios/${row.original.id}/`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ is_active: nuevoEstado }),
+              });
+
+              if (res.ok) {
+                Notification.alertLogin(`Estado actualizado para ${username}`);
+                setData(prev =>
+                  prev.map(user =>
+                    user.id === row.original.id
+                      ? { ...user, is_active: nuevoEstado }
+                      : user
+                  )
+                );
+              } else {
+                Notification.alertError(`Error al actualizar estado de ${username}`);
+              }
+            } catch (error) {
+              console.error(error);
+              Notification.alertError('Error de red al cambiar estado');
+            }
+          };
+
+          return (
+            <select
+              className="form-select form-select-sm"
+              value={is_active}
+              onChange={handleEstadoChange}
+            >
+              <option value="true">Activo</option>
+              <option value="false">Inactivo</option>
+            </select>
+          );
+        }
+      }
     ],
-    []
+    [data]
   );
 
   const table = useReactTable({

@@ -109,6 +109,7 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
   useEffect(() => {
     const CargarPeriodos = async () => {
       setLoadingPeriodos(true);
+      
       const cached = localStorage.getItem("periodosCache");
       if (cached) {
         const periodosGuardados = JSON.parse(cached);

@@ -10,7 +10,7 @@ import Tables from "@components/Tables";
 import Search from "@components/search";
 import ImportExcel from "@components/forms/Import";
 import Modal from "@components/Modal";
-
+import { exportFacultadesToPDF } from "@utils/ExportPDF/exportFacultadPDF";
 import { fetchFacultades } from "@api/facultadService";
 import withAuth from "@utils/withAuth";
 import { deleteEntity } from "@utils/delete";
@@ -26,7 +26,12 @@ function FacultadListClient({ initialData, totalPages: initialTotalPages }) {
   const Api_import_URL = `${API}import/facultad`;
 
   const deleteFacultad = (pk) => {
-    deleteEntity(`${API}api/facultad/delete`, pk, setFacultades, "FacultadCodigo");
+    deleteEntity(
+      `${API}api/facultad/delete`,
+      pk,
+      setFacultades,
+      "FacultadCodigo"
+    );
   };
 
   const fetchData = async (page, query, size) => {
@@ -70,9 +75,20 @@ function FacultadListClient({ initialData, totalPages: initialTotalPages }) {
             Nueva Facultad
           </Link>
           {facultades.length > 0 && (
-            <Link className="btn btn-success" href={`${API}export/facultad`}>
-              Exportar
-            </Link>
+            <>
+              <Link className="btn btn-success" href={`${API}export/facultad`}>
+                Exportar
+              </Link>
+
+              <button
+                className="btn btn-danger"
+                onClick={() =>
+                  exportFacultadesToPDF(facultades, page, pageSize)
+                }
+              >
+                Exportar PDF
+              </button>
+            </>
           )}
           <button
             type="button"
@@ -85,7 +101,9 @@ function FacultadListClient({ initialData, totalPages: initialTotalPages }) {
         </div>
 
         <div className="d-flex align-items-center gap-2">
-          <label className="fw-bold mb-0 text-black">Resultados por página:</label>
+          <label className="fw-bold mb-0 text-black">
+            Resultados por página:
+          </label>
           <select
             className="form-select w-auto"
             style={{ height: "38px" }}
@@ -103,7 +121,10 @@ function FacultadListClient({ initialData, totalPages: initialTotalPages }) {
       </div>
 
       <Modal title="Importar Facultad">
-        <ImportExcel importURL={Api_import_URL} onSuccess={debouncedFetchData} />
+        <ImportExcel
+          importURL={Api_import_URL}
+          onSuccess={debouncedFetchData}
+        />
       </Modal>
 
       <Search
@@ -147,13 +168,23 @@ function FacultadListClient({ initialData, totalPages: initialTotalPages }) {
                     className="btn btn-primary btn-sm"
                     href={`/facultadEdit/${facultad.FacultadID}`}
                   >
-                    <Image src="/edit.svg" alt="editar" width={20} height={20} />
+                    <Image
+                      src="/edit.svg"
+                      alt="editar"
+                      width={20}
+                      height={20}
+                    />
                   </Link>
                   <button
                     className="btn btn-danger btn-sm mx-2"
                     onClick={() => deleteFacultad(facultad.FacultadID)}
                   >
-                    <Image src="/delete.svg" alt="borrar" width={20} height={20} />
+                    <Image
+                      src="/delete.svg"
+                      alt="borrar"
+                      width={20}
+                      height={20}
+                    />
                   </button>
                 </td>
               </tr>
@@ -163,7 +194,11 @@ function FacultadListClient({ initialData, totalPages: initialTotalPages }) {
       </Tables>
 
       {totalPages > 1 && (
-        <Pagination page={page} totalPages={totalPages} onPageChange={handlePageChange} />
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
       )}
     </div>
   );

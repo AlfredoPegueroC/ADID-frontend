@@ -11,6 +11,8 @@ import Search from "@components/search";
 import Tables from "@components/Tables";
 import Pagination from "@components/Pagination";
 
+import { exportCategoriasToPDF } from "@utils/ExportPDF/exportCategoriaPDF";
+
 import withAuth from "@utils/withAuth";
 import { deleteEntity } from "@utils/delete";
 import { fetchCategorias } from "@api/categoriaService";
@@ -26,7 +28,12 @@ function CategoriaListClient({ initialData, totalPages: initialTotalPages }) {
   const Api_import_URL = `${API}import/categoriaDocente`;
 
   const deleteCategoria = (pk) => {
-    deleteEntity(`${API}api/categoriadocente/delete`, pk, setCategorias, "categoriaCodigo");
+    deleteEntity(
+      `${API}api/categoriadocente/delete`,
+      pk,
+      setCategorias,
+      "categoriaCodigo"
+    );
   };
 
   const fetchData = async (query, page, size) => {
@@ -66,9 +73,23 @@ function CategoriaListClient({ initialData, totalPages: initialTotalPages }) {
             Nueva Categoría
           </Link>
           {categorias.length > 0 && (
-            <Link className="btn btn-success" href={`${API}export/categoriaDocente`}>
-              Exportar
-            </Link>
+            <>
+              <Link
+                className="btn btn-success"
+                href={`${API}export/categoriaDocente`}
+              >
+                Exportar
+              </Link>
+
+              <button
+                className="btn btn-danger"
+                onClick={() =>
+                  exportCategoriasToPDF(categorias, currentPage, pageSize)
+                }
+              >
+                Exportar PDF
+              </button>
+            </>
           )}
           <button
             type="button"
@@ -81,7 +102,9 @@ function CategoriaListClient({ initialData, totalPages: initialTotalPages }) {
         </div>
 
         <div className="d-flex align-items-center gap-2">
-          <label className="fw-bold mb-0 text-black">Resultados por página:</label>
+          <label className="fw-bold mb-0 text-black">
+            Resultados por página:
+          </label>
           <select
             className="form-select w-auto"
             style={{ height: "38px" }}
@@ -99,7 +122,10 @@ function CategoriaListClient({ initialData, totalPages: initialTotalPages }) {
       </div>
 
       <Modal title="Importar Categoría">
-        <ImportExcel importURL={Api_import_URL} onSuccess={debouncedFetchData} />
+        <ImportExcel
+          importURL={Api_import_URL}
+          onSuccess={debouncedFetchData}
+        />
       </Modal>
 
       <Search
@@ -139,13 +165,23 @@ function CategoriaListClient({ initialData, totalPages: initialTotalPages }) {
                     href={`/categoriaEdit/${categoria.CategoriaID}`}
                     className="btn btn-primary btn-sm"
                   >
-                    <Image src="/edit.svg" alt="editar" width={20} height={20} />
+                    <Image
+                      src="/edit.svg"
+                      alt="editar"
+                      width={20}
+                      height={20}
+                    />
                   </Link>
                   <button
                     className="btn btn-danger btn-sm mx-2"
                     onClick={() => deleteCategoria(categoria.CategoriaID)}
                   >
-                    <Image src="/delete.svg" alt="borrar" width={20} height={20} />
+                    <Image
+                      src="/delete.svg"
+                      alt="borrar"
+                      width={20}
+                      height={20}
+                    />
                   </button>
                 </td>
               </tr>
@@ -155,7 +191,11 @@ function CategoriaListClient({ initialData, totalPages: initialTotalPages }) {
       </Tables>
 
       {totalPages > 1 && (
-        <Pagination page={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+        <Pagination
+          page={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
       )}
     </div>
   );

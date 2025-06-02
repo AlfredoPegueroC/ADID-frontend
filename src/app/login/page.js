@@ -3,14 +3,15 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Styles from "@styles/login.module.css";
-import Image from 'next/image';
-import Notification from "@components/Notification";
+import Image from "next/image";
 
 export default function LoginPage() {
   const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
+
+  const API = process.env.NEXT_PUBLIC_API_KEY
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
@@ -19,20 +20,52 @@ export default function LoginPage() {
     }
   }, [router]);
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
 
-    const fakeUser = {
-      username: username || "admin",
-      groups: ["admin"]
-    };
+    try {
+      const response = await fetch(`${API}/api/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
 
-    localStorage.setItem("accessToken", "fake-token");
-    localStorage.setItem("refreshToken", "fake-refresh");
-    localStorage.setItem("user", JSON.stringify(fakeUser));
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Login failed. Please check your credentials.");
+      }
 
-    Notification.alertLogin("Modo desarrollo: sesión simulada.");
-    router.push("/admin");
+      const data = await response.json();
+      localStorage.setItem("accessToken", data.access);
+      localStorage.setItem("refreshToken", data.refresh);
+
+      // Obtener el usuario actual usando el token
+      const userRes = await fetch(`${API}/api/usuarios`, {
+        headers: {
+          Authorization: `Bearer ${data.access}`,
+        },
+      });
+
+      if (!userRes.ok) throw new Error("No se pudo obtener el usuario");
+
+      const users = await userRes.json();
+      const user = users.find(u => u.username === username);
+      if (!user) throw new Error("Usuario no encontrado");
+
+      localStorage.setItem("user", JSON.stringify(user));
+
+      alert("Login exitoso");
+
+      // Redirigir según el grupo
+      if (user.groups.includes("admin")) {
+        router.push("/admin");
+      } else {
+        router.push("/");
+      }
+
+    } catch (error) {
+      setError(error.message);
+    }
   };
 
   return (
@@ -42,8 +75,8 @@ export default function LoginPage() {
           <Image
             src="/images-Photoroom.png"
             alt="Logo de la Facultad de Ciencias"
-            width={200} 
-            height={200} 
+            width={200}
+            height={200}
           />
           <h2 className={Styles.separacion}>FACULTAD DE CIENCIAS UASD</h2>
         </div>

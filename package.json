@@ -11,6 +11,8 @@
   "dependencies": {
     "@tanstack/react-table": "^8.21.3",
     "bootstrap": "^5.3.3",
+    "jspdf": "^3.0.1",
+    "jspdf-autotable": "^5.0.2",
     "lodash": "^4.17.21",
     "next": "^15.1.7",
     "react": "^19.0.0",

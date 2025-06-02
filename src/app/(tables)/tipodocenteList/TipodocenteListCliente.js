@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { debounce } from "lodash";
 
+import { exportTipoDocenteToPDF } from "@utils/ExportPDF/exportTipoPDF";
 import Pagination from "@components/Pagination";
 import Tables from "@components/Tables";
 import Search from "@components/search";
@@ -22,7 +23,12 @@ function TipodocenteListClient({ initialData, totalPages: initialTotalPages }) {
   const API = process.env.NEXT_PUBLIC_API_KEY;
 
   const deleteTipo = (pk) => {
-    deleteEntity(`${API}api/tipodocente/delete`, pk, setTipodocentes, "TipoDocenteCodigo");
+    deleteEntity(
+      `${API}api/tipodocente/delete`,
+      pk,
+      setTipodocentes,
+      "TipoDocenteCodigo"
+    );
   };
 
   const fetchData = async (query, page, size) => {
@@ -62,14 +68,29 @@ function TipodocenteListClient({ initialData, totalPages: initialTotalPages }) {
             Nuevo Tipo Docente
           </Link>
           {tipodocentes.length > 0 && (
-            <Link className="btn btn-success" href={`${API}export/tipoDocente`}>
-              Exportar
-            </Link>
+            <>
+              <Link
+                className="btn btn-success"
+                href={`${API}export/tipoDocente`}
+              >
+                Exportar
+              </Link>
+              <button
+                className="btn btn-danger"
+                onClick={() =>
+                  exportTipoDocenteToPDF(tipodocentes, page, pageSize)
+                }
+              >
+                Exportar PDF
+              </button>
+            </>
           )}
         </div>
 
         <div className="d-flex align-items-center gap-2">
-          <label className="fw-bold mb-0 text-black">Resultados por página:</label>
+          <label className="fw-bold mb-0 text-black">
+            Resultados por página:
+          </label>
           <select
             className="form-select w-auto"
             style={{ height: "38px" }}
@@ -123,13 +144,23 @@ function TipodocenteListClient({ initialData, totalPages: initialTotalPages }) {
                     className="btn btn-primary btn-sm"
                     href={`/tipoEdit/${tipo.TipoDocenteID}`}
                   >
-                    <Image src="/edit.svg" alt="editar" width={20} height={20} />
+                    <Image
+                      src="/edit.svg"
+                      alt="editar"
+                      width={20}
+                      height={20}
+                    />
                   </Link>
                   <button
                     className="btn btn-danger btn-sm mx-2"
                     onClick={() => deleteTipo(tipo.TipoDocenteID)}
                   >
-                    <Image src="/delete.svg" alt="borrar" width={20} height={20} />
+                    <Image
+                      src="/delete.svg"
+                      alt="borrar"
+                      width={20}
+                      height={20}
+                    />
                   </button>
                 </td>
               </tr>
@@ -139,7 +170,11 @@ function TipodocenteListClient({ initialData, totalPages: initialTotalPages }) {
       </Tables>
 
       {totalPages > 1 && (
-        <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
+        />
       )}
     </div>
   );

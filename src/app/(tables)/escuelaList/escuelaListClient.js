@@ -12,6 +12,7 @@ import withAuth from "@utils/withAuth";
 import { deleteEntity } from "@utils/delete";
 import { debounce } from "lodash";
 import { fetchEscuelas } from "@api/escuelaService";
+import { exportEscuelasToPDF } from "@utils/ExportPDF/exportEscuelaPDF";
 
 function EscuelaListClient() {
   const [escuelas, setEscuelas] = useState([]);
@@ -28,7 +29,11 @@ function EscuelaListClient() {
   const fetchData = useCallback(async () => {
     setError(null);
     try {
-      const { results, totalPages } = await fetchEscuelas(searchQuery, page, pageSize);
+      const { results, totalPages } = await fetchEscuelas(
+        searchQuery,
+        page,
+        pageSize
+      );
       setEscuelas(results);
       setTotalPages(totalPages);
     } catch (error) {
@@ -75,9 +80,17 @@ function EscuelaListClient() {
             Nueva Escuela
           </Link>
           {escuelas.length > 0 && (
-            <Link className="btn btn-success" href={`${API}export/escuela`}>
-              Exportar
-            </Link>
+            <>
+              <Link className="btn btn-success" href={`${API}export/escuela`}>
+                Exportar
+              </Link>
+              <button
+                className="btn btn-danger"
+                onClick={() => exportEscuelasToPDF(escuelas, page, pageSize)}
+              >
+                Exportar PDF
+              </button>
+            </>
           )}
           <button
             type="button"
@@ -90,7 +103,9 @@ function EscuelaListClient() {
         </div>
 
         <div className="d-flex align-items-center gap-2">
-          <label className="fw-bold mb-0 text-black">Resultados por página:</label>
+          <label className="fw-bold mb-0 text-black">
+            Resultados por página:
+          </label>
           <select
             className="form-select w-auto"
             style={{ height: "38px" }}
@@ -154,13 +169,23 @@ function EscuelaListClient() {
                     className="btn btn-primary btn-sm"
                     href={`/escuelaEdit/${escuela.EscuelaId}`}
                   >
-                    <Image src="/edit.svg" alt="editar" width={20} height={20} />
+                    <Image
+                      src="/edit.svg"
+                      alt="editar"
+                      width={20}
+                      height={20}
+                    />
                   </Link>
                   <button
                     className="btn btn-danger btn-sm mx-2"
                     onClick={() => deleteEscuela(escuela.EscuelaId)}
                   >
-                    <Image src="/delete.svg" alt="borrar" width={20} height={20} />
+                    <Image
+                      src="/delete.svg"
+                      alt="borrar"
+                      width={20}
+                      height={20}
+                    />
                   </button>
                 </td>
               </tr>
@@ -170,7 +195,11 @@ function EscuelaListClient() {
       </Tables>
 
       {totalPages > 1 && (
-        <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
+        />
       )}
     </div>
   );

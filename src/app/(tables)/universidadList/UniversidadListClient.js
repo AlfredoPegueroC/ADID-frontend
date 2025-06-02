@@ -11,6 +11,7 @@ import Tables from "@components/Tables";
 import Search from "@components/search";
 import Modal from "@components/Modal";
 import ImportExcel from "@components/forms/Import";
+import { exportUniversidadesToPDF } from "@utils/ExportPDF/exportUniversidadesToPDF";
 
 // Utils
 import withAuth from "@utils/withAuth";
@@ -29,7 +30,11 @@ function UniversidadListClient({ initialData }) {
     debounce(async () => {
       try {
         setLoading(true);
-        const { results, totalPages } = await fetchUniversidades(page, searchQuery, pageSize);
+        const { results, totalPages } = await fetchUniversidades(
+          page,
+          searchQuery,
+          pageSize
+        );
         setUniversidades(results);
         setTotalPages(totalPages);
       } catch (error) {
@@ -82,10 +87,21 @@ function UniversidadListClient({ initialData }) {
           >
             Importar
           </button>
+
+          <button
+            className="btn btn-danger"
+            onClick={() =>
+              exportUniversidadesToPDF(universidades, page, pageSize)
+            }
+          >
+            Exportar PDF
+          </button>
         </div>
 
         <div className="d-flex align-items-center gap-2">
-          <label className="fw-bold mb-0 text-black">Resultados por página:</label>
+          <label className="fw-bold mb-0 text-black">
+            Resultados por página:
+          </label>
           <select
             className="form-select w-auto"
             style={{ height: "38px" }}
@@ -168,13 +184,23 @@ function UniversidadListClient({ initialData }) {
                     href={`/universidadEdit/${universidad.UniversidadID}`}
                     className="btn btn-primary btn-sm"
                   >
-                    <Image src="/edit.svg" alt="editar" width={20} height={20} />
+                    <Image
+                      src="/edit.svg"
+                      alt="editar"
+                      width={20}
+                      height={20}
+                    />
                   </Link>
                   <button
                     className="btn btn-danger btn-sm mx-2"
                     onClick={() => handleDelete(universidad.UniversidadID)}
                   >
-                    <Image src="/delete.svg" alt="borrar" width={20} height={20} />
+                    <Image
+                      src="/delete.svg"
+                      alt="borrar"
+                      width={20}
+                      height={20}
+                    />
                   </button>
                 </td>
               </tr>
@@ -184,7 +210,11 @@ function UniversidadListClient({ initialData }) {
       </Tables>
 
       {totalPages > 1 && (
-        <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
+        />
       )}
     </div>
   );

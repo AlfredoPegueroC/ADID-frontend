@@ -13,6 +13,8 @@ import { deleteEntity } from "@utils/delete";
 import { fetchCampus } from "@api/campusService";
 import { debounce } from "lodash";
 
+import { exportCampusToPDF } from "@utils/ExportPDF/exportCampusPDF";
+
 function CampusListClient({ initialData, totalPages: initialTotalPages }) {
   const [campusList, setCampusList] = useState(initialData);
   const [currentPage, setCurrentPage] = useState(1);
@@ -47,9 +49,17 @@ function CampusListClient({ initialData, totalPages: initialTotalPages }) {
     setCurrentPage(1);
   };
 
-  const deleteCampus = useCallback((pk) => {
-    deleteEntity(`${API}api/campus/delete`, pk, setCampusList, "CampusCodigo");
-  }, [API]);
+  const deleteCampus = useCallback(
+    (pk) => {
+      deleteEntity(
+        `${API}api/campus/delete`,
+        pk,
+        setCampusList,
+        "CampusCodigo"
+      );
+    },
+    [API]
+  );
 
   const debouncedFetch = useCallback(debounce(fetchData, 500), []);
 
@@ -71,15 +81,38 @@ function CampusListClient({ initialData, totalPages: initialTotalPages }) {
 
       <div className="d-flex justify-content-between align-items-center mb-3 mt-3">
         <div className="d-flex gap-2">
-          <Link className="btn btn-primary" href="/campus">Agregar Campus</Link>
+          <Link className="btn btn-primary" href="/campus">
+            Agregar Campus
+          </Link>
           {campusList.length > 0 && (
-            <Link className="btn btn-success" href={`${API}export/campus`}>Exportar</Link>
+            <>
+              <Link className="btn btn-success" href={`${API}export/campus`}>
+                Exportar
+              </Link>
+              <button
+                className="btn btn-danger"
+                onClick={() =>
+                  exportCampusToPDF(campusList, currentPage, pageSize)
+                }
+              >
+                Exportar PDF
+              </button>
+            </>
           )}
-          <button type="button" className="btn btn-warning" data-bs-toggle="modal" data-bs-target="#Modal">Importar</button>
+          <button
+            type="button"
+            className="btn btn-warning"
+            data-bs-toggle="modal"
+            data-bs-target="#Modal"
+          >
+            Importar
+          </button>
         </div>
 
         <div className="d-flex align-items-center gap-2">
-          <label className="fw-bold mb-0 text-black">Resultados por página:</label>
+          <label className="fw-bold mb-0 text-black">
+            Resultados por página:
+          </label>
           <select
             className="form-select w-auto"
             style={{ height: "38px" }}
@@ -97,10 +130,17 @@ function CampusListClient({ initialData, totalPages: initialTotalPages }) {
       </div>
 
       <Modal title="Importar Campus">
-        <ImportExcel importURL={`${API}import/campus`} onSuccess={() => fetchData(currentPage, searchQuery, pageSize)} />
+        <ImportExcel
+          importURL={`${API}import/campus`}
+          onSuccess={() => fetchData(currentPage, searchQuery, pageSize)}
+        />
       </Modal>
 
-      <Search SearchSubmit={handleSearchSubmit} SearchChange={handleSearchChange} searchQuery={searchQuery} />
+      <Search
+        SearchSubmit={handleSearchSubmit}
+        SearchChange={handleSearchChange}
+        searchQuery={searchQuery}
+      />
 
       <Tables>
         <thead>
@@ -119,7 +159,9 @@ function CampusListClient({ initialData, totalPages: initialTotalPages }) {
         <tbody>
           {campusList.length === 0 ? (
             <tr>
-              <td colSpan="9" className="text-center">No se encontraron campus.</td>
+              <td colSpan="9" className="text-center">
+                No se encontraron campus.
+              </td>
             </tr>
           ) : (
             campusList.map((c) => (
@@ -133,11 +175,27 @@ function CampusListClient({ initialData, totalPages: initialTotalPages }) {
                 <td>{c.CampusCorreoContacto}</td>
                 <td>{c.CampusEstado}</td>
                 <td>
-                  <Link className="btn btn-primary btn-sm" href={`/campusEdit/${c.CampusCodigo}`}>
-                    <Image src="/edit.svg" alt="editar" width={20} height={20} />
+                  <Link
+                    className="btn btn-primary btn-sm"
+                    href={`/campusEdit/${c.CampusCodigo}`}
+                  >
+                    <Image
+                      src="/edit.svg"
+                      alt="editar"
+                      width={20}
+                      height={20}
+                    />
                   </Link>
-                  <button className="btn btn-danger btn-sm mx-2" onClick={() => deleteCampus(c.CampusCodigo)}>
-                    <Image src="/delete.svg" alt="borrar" width={20} height={20} />
+                  <button
+                    className="btn btn-danger btn-sm mx-2"
+                    onClick={() => deleteCampus(c.CampusCodigo)}
+                  >
+                    <Image
+                      src="/delete.svg"
+                      alt="borrar"
+                      width={20}
+                      height={20}
+                    />
                   </button>
                 </td>
               </tr>
@@ -147,7 +205,11 @@ function CampusListClient({ initialData, totalPages: initialTotalPages }) {
       </Tables>
 
       {totalPages > 1 && (
-        <Pagination page={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
+        <Pagination
+          page={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
       )}
     </div>
   );
