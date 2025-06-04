@@ -11,50 +11,40 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
 
-  const API = process.env.NEXT_PUBLIC_API_KEY
+  const API = process.env.NEXT_PUBLIC_API_KEY;
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
     if (token) {
       router.push("/");
     }
-  }, [router]);
+  }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setError(null); // Limpiar errores previos
 
     try {
-      const response = await fetch(`${API}/api/login`, {
+      const response = await fetch(`${API}api/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Login failed. Please check your credentials.");
+        let errorMessage = "Error al iniciar sesión";
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch {}
+        throw new Error(errorMessage);
       }
 
-      const data = await response.json();
-      localStorage.setItem("accessToken", data.access);
-      localStorage.setItem("refreshToken", data.refresh);
+      const { access, refresh, user } = await response.json();
 
-      // Obtener el usuario actual usando el token
-      const userRes = await fetch(`${API}/api/usuarios`, {
-        headers: {
-          Authorization: `Bearer ${data.access}`,
-        },
-      });
-
-      if (!userRes.ok) throw new Error("No se pudo obtener el usuario");
-
-      const users = await userRes.json();
-      const user = users.find(u => u.username === username);
-      if (!user) throw new Error("Usuario no encontrado");
-
+      localStorage.setItem("accessToken", access);
+      localStorage.setItem("refreshToken", refresh);
       localStorage.setItem("user", JSON.stringify(user));
-
-      alert("Login exitoso");
 
       // Redirigir según el grupo
       if (user.groups.includes("admin")) {
@@ -63,8 +53,8 @@ export default function LoginPage() {
         router.push("/");
       }
 
-    } catch (error) {
-      setError(error.message);
+    } catch (err) {
+      setError(err.message);
     }
   };
 
@@ -87,7 +77,6 @@ export default function LoginPage() {
             <input
               type="text"
               id="username"
-              name="username"
               placeholder="Usuario"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
@@ -97,7 +86,6 @@ export default function LoginPage() {
             <input
               type="password"
               id="password"
-              name="password"
               placeholder="Contraseña"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
