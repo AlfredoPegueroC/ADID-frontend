@@ -1,6 +1,17 @@
 .container {
-margin-top: 1.5rem;
+  margin: 2rem auto;
+  padding: 2.5rem;
+  max-width: 800px;
 
+  background-color: #fdfdfd; /* Blanco puro, pero más suave */
+  border: 1px solid #becffa; /* Gris claro sofisticado */
+  border-radius: 20px;
+
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.04),
+    0 8px 20px rgba(0, 0, 0, 0.06); /* Sombras suaves para dar profundidad */
+
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
 
@@ -110,11 +121,11 @@ margin-top: 1.5rem;
    display: flex;                /* Usamos flexbox para alinear el contenido */
   justify-content: center;      /* Centra el texto horizontalmente */
   align-items: center;          /* Centra el texto verticalmente */
-  width: 90%;                  /* Asegura que el botón ocupe todo el ancho del contenedor */
+  width: 30%;                  /* Asegura que el botón ocupe todo el ancho del contenedor */
   height: 50px;                 /* Ajusta la altura del botón */
   font-size: 1.25rem;           /* Tamaño del texto */
   padding: 1rem;                /* Espaciado dentro del botón */
-  margin-top: 1rem;             /* Espaciado superior */
+  margin-top: 0.3rem;             /* Espaciado superior */
   cursor: pointer;             
   border: none;                
   color: white;                
@@ -194,5 +205,12 @@ margin-top: 1.5rem;
     flex-direction: column;
   }
 }
+
+.btn_group {
+  grid-column: span 3; /* Ocupa las 3 columnas del grid */
+  display: flex;
+  justify-content: center; /* Centra horizontalmente */
+}
+
 
 

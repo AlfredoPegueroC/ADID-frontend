@@ -378,7 +378,11 @@ export default function DocenteForm() {
           </select>
         </div>
 
-        <button type="submit" className={Styles.btn}>Enviar</button>
+        <div className={Styles.btn_group}>
+          <button type="submit" className={Styles.btn}>
+            Enviar
+          </button>
+        </div>
       </form>
     </div>
   );

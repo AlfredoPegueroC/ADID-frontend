@@ -97,6 +97,7 @@ export default function CampusForm() {
             name="CampusCodigo"
             value={formData.CampusCodigo}
             onChange={handleChange}
+            placeholder="Ingrese el código del campus"
             required
           />
         </div>
@@ -109,6 +110,7 @@ export default function CampusForm() {
             name="CampusNombre"
             value={formData.CampusNombre}
             onChange={handleChange}
+            placeholder="Ingrese el nombre del campus"
             required
           />
         </div>
@@ -121,6 +123,7 @@ export default function CampusForm() {
             name="CampusDireccion"
             value={formData.CampusDireccion}
             onChange={handleChange}
+            placeholder="Ingrese la dirección del campus"
           />
         </div>
 
@@ -132,6 +135,7 @@ export default function CampusForm() {
             name="CampusPais"
             value={formData.CampusPais}
             onChange={handleChange}
+            placeholder="Ingrese el país"
           />
         </div>
 
@@ -143,6 +147,7 @@ export default function CampusForm() {
             name="CampusProvincia"
             value={formData.CampusProvincia}
             onChange={handleChange}
+            placeholder="Ingrese la provincia"
           />
         </div>
 
@@ -154,6 +159,7 @@ export default function CampusForm() {
             name="CampusCiudad"
             value={formData.CampusCiudad}
             onChange={handleChange}
+            placeholder="Ingrese la ciudad"
           />
         </div>
 
@@ -165,6 +171,7 @@ export default function CampusForm() {
             name="CampusTelefono"
             value={formData.CampusTelefono}
             onChange={handleChange}
+            placeholder="Ingrese el teléfono"
           />
         </div>
 
@@ -176,6 +183,7 @@ export default function CampusForm() {
             name="CampusCorreoContacto"
             value={formData.CampusCorreoContacto}
             onChange={handleChange}
+            placeholder="Ingrese el correo electrónico"
           />
         </div>
 
@@ -212,9 +220,11 @@ export default function CampusForm() {
           </select>
         </div>
 
-        <button type="submit" className={Styles.btn}>
-          Enviar
-        </button>
+        <div className={Styles.btn_group}>
+          <button type="submit" className={Styles.btn}>
+            Enviar
+          </button>
+        </div>
       </form>
     </div>
   );

@@ -207,9 +207,11 @@ export default function Facultad({ title }) {
           </select>
         </div>
 
+        <div className={Styles.btn_group}>
         <button type="submit" className={Styles.btn}>
           Enviar
         </button>
+      </div>
       </form>
     </div>
   );

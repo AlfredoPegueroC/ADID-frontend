@@ -12,7 +12,7 @@ export default function Universidad({ title }) {
   const API = process.env.NEXT_PUBLIC_API_KEY;
 
   const [formData, setFormData] = useState({
-    UniversidadCodigo: "", // ✅ Agregado
+    UniversidadCodigo: "",
     UniversidadNombre: "",
     UniversidadDireccion: "",
     UniversidadTelefono: "",
@@ -65,7 +65,6 @@ export default function Universidad({ title }) {
       >
         <h1 className={Styles.title}>{title}</h1>
 
-        {/* ✅ Campo para Código de la Universidad */}
         <div className={Styles.name_group}>
           <label htmlFor="UniversidadCodigo">Código de la Universidad</label>
           <input
@@ -74,6 +73,7 @@ export default function Universidad({ title }) {
             value={formData.UniversidadCodigo}
             onChange={handleChange}
             required
+            placeholder="Ej: U1234"
           />
         </div>
 
@@ -85,6 +85,7 @@ export default function Universidad({ title }) {
             value={formData.UniversidadNombre}
             onChange={handleChange}
             required
+            placeholder="Nombre completo de la universidad"
           />
         </div>
 
@@ -96,6 +97,7 @@ export default function Universidad({ title }) {
             value={formData.UniversidadDireccion}
             onChange={handleChange}
             required
+            placeholder="Calle, número, barrio, ciudad"
           />
         </div>
 
@@ -107,6 +109,7 @@ export default function Universidad({ title }) {
             value={formData.UniversidadTelefono}
             onChange={handleChange}
             required
+            placeholder="Ej: +1 809 123 4567"
           />
         </div>
 
@@ -118,6 +121,7 @@ export default function Universidad({ title }) {
             value={formData.UniversidadEmail}
             onChange={handleChange}
             required
+            placeholder="correo@universidad.edu"
           />
         </div>
 
@@ -129,6 +133,7 @@ export default function Universidad({ title }) {
             value={formData.UniversidadSitioWeb}
             onChange={handleChange}
             required
+            placeholder="https://www.universidad.edu"
           />
         </div>
 
@@ -140,6 +145,7 @@ export default function Universidad({ title }) {
             value={formData.UniversidadRector}
             onChange={handleChange}
             required
+            placeholder="Nombre completo del rector"
           />
         </div>
 
@@ -151,15 +157,19 @@ export default function Universidad({ title }) {
             onChange={handleChange}
             required
           >
-            <option value="">-- Seleccione --</option>
+            <option value="" disabled>
+              -- Seleccione el estado --
+            </option>
             <option value="Activo">Activo</option>
             <option value="Inactivo">Inactivo</option>
           </select>
         </div>
 
-        <button type="submit" className={Styles.btn}>
-          Enviar
-        </button>
+        <div className={Styles.btn_group}>
+          <button type="submit" className={Styles.btn}>
+            Enviar
+          </button>
+        </div>
       </form>
     </div>
   );

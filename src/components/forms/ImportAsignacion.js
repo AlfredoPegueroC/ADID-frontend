@@ -1,46 +1,41 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Styles from "@styles/form.module.css";
+import styles from "@styles/form.module.css";
 import Notification from "../Notification";
 
-export default function ImportPage({ onSuccess }) {
+export default function ImportFileForm({ onSuccess }) {
   const [file, setFile] = useState(null);
   const [periods, setPeriods] = useState([]);
-  const [selectedPeriod, setSelectedPeriod] = useState(""); 
+  const [selectedPeriod, setSelectedPeriod] = useState("");
   const [message, setMessage] = useState("");
 
   const API = process.env.NEXT_PUBLIC_API_KEY;
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchPeriods = async () => {
       try {
-        const periodoResponse = await fetch(
-          `${API}api/periodoacademico`
-        );
-        if (!periodoResponse.ok) throw new Error("Failed to fetch periodo");
-        const periodoData = await periodoResponse.json();
-        setPeriods(periodoData.results);
+        const res = await fetch(`${API}api/periodoacademico`);
+        if (!res.ok) throw new Error("Error al obtener los periodos");
+        const data = await res.json();
+        setPeriods(data.results);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Error fetching periods:", error);
       }
     };
-    fetchData();
+    fetchPeriods();
   }, []);
 
-
-  const handleFileChange = (event) => {
-    setFile(event.target.files[0]);
+  const handleFileChange = (e) => {
+    setFile(e.target.files[0]);
   };
 
-  // Handle period selection change
-  const handlePeriodSelectChange = (event) => {
-    setSelectedPeriod(event.target.value);
+  const handlePeriodChange = (e) => {
+    setSelectedPeriod(e.target.value);
   };
 
-  // Handle form submission
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
     if (!file) {
       setMessage("Por favor, selecciona un archivo.");
@@ -57,80 +52,80 @@ export default function ImportPage({ onSuccess }) {
     formData.append("period", selectedPeriod);
 
     try {
-      const response = await fetch(`${API}import/asignacion`, {
+      const res = await fetch(`${API}import/asignacion`, {
         method: "POST",
         body: formData,
       });
 
-      const result = await response.json();
-      console.log("Error", result.error)
-      console.log("Failed records", result.failed_records)
-      if(result.failed_records) {
-        Notification.alertLogin(`Error en ${result.failed_records[0]} registros, revisa el archivo y vuelve a intentarlo.`)
+      const result = await res.json();
+
+      if (result.failed_records) {
+        Notification.alertLogin(
+          `Error en ${result.failed_records[0]} registros, revisa el archivo y vuelve a intentarlo.`
+        );
         return;
       }
-      
-      if (response.ok) {
-        Notification.alertSuccess(result.message || "Import successful");
+
+      if (res.ok) {
+        Notification.alertSuccess(result.message || "Importación exitosa.");
         if (onSuccess) onSuccess();
-        document.querySelector("#myform").reset();
+        document.querySelector("#import-form").reset();
       } else {
-        Notification.alertError(result.error || "Error durante la importacion.");
+        Notification.alertError(result.error || "Error durante la importación.");
       }
     } catch (error) {
-      Notification.alertError("Error mientras subiendo el archivo excel");
+      Notification.alertError("Error al subir el archivo Excel.");
     }
   };
 
   return (
     <div>
-      <form id="myform" onSubmit={handleSubmit} className={Styles.form}>
-        <h1 className={Styles.title}>Subir Archivo Excel</h1>
+      <form id="import-form" onSubmit={handleSubmit} className={styles.form}>
+        <h1 className={styles.title}>Subir Archivo Excel</h1>
 
-        <div className={Styles.name_group}>
-          <label htmlFor="excel_file" className={Styles.label}>
+        <div className={styles.inputGroup}>
+          <label htmlFor="excel_file" className={styles.label}>
             Selecciona un archivo Excel:
           </label>
           <input
             type="file"
-            className={Styles.archivo}
+            className={styles.fileInput}
             onChange={handleFileChange}
             accept=".xls,.xlsx"
             required
           />
         </div>
 
-        <div className={Styles.name_group}>
-          <label htmlFor="periodoAcademicoCodigo" className={Styles.label}>
+        <div className={styles.inputGroup}>
+          <label htmlFor="periodoAcademicoCodigo" className={styles.label}>
             Periodo Académico:
           </label>
           <select
             id="periodoAcademicoCodigo"
             value={selectedPeriod}
-            onChange={handlePeriodSelectChange}
+            onChange={handlePeriodChange}
             required
-            className={Styles.input}
+            className={styles.select}
           >
             <option value="" disabled>
               -- Seleccione un Periodo --
             </option>
             {periods.map((periodo) => (
-              <option
-                key={periodo.periodoAcademicoCodigo}
-                value={periodo.PeriodoID}
-              >
+              <option key={periodo.periodoAcademicoCodigo} value={periodo.PeriodoID}>
                 {periodo.PeriodoNombre}
               </option>
             ))}
           </select>
         </div>
 
-        <button type="submit" className={Styles.btn}>
-          Subir Excel
-        </button>
+        <div className={styles.buttonWrapper}>
+          <button type="submit" className={styles.submitButton}>
+            Enviar
+          </button>
+        </div>
       </form>
 
-      {message && <p className="alert alert-info mt-3">{message}</p>}
+      {message && <p className={styles.alert}>{message}</p>}
     </div>
   );
 }
