@@ -4,9 +4,11 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Styles from "@styles/login.module.css";
 import Image from "next/image";
-
+import { useAuth } from "@contexts/AuthContext"; 
 export default function LoginPage() {
   const router = useRouter();
+  const { login } = useAuth(); 
+
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
@@ -22,7 +24,7 @@ export default function LoginPage() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError(null); // Limpiar errores previos
+    setError(null);
 
     try {
       const response = await fetch(`${API}api/login`, {
@@ -42,11 +44,9 @@ export default function LoginPage() {
 
       const { access, refresh, user } = await response.json();
 
-      localStorage.setItem("accessToken", access);
-      localStorage.setItem("refreshToken", refresh);
-      localStorage.setItem("user", JSON.stringify(user));
+      // Guardar en el contexto y en localStorage automáticamente
+      login({ user, access, refresh });
 
-      // Redirigir según el grupo
       if (user.groups.includes("admin")) {
         router.push("/admin");
       } else {

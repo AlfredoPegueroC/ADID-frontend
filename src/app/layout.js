@@ -5,7 +5,8 @@ import "./globals.css";
 import Navbar from "@components/Navbar";
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
-import { ToastContainer, Bounce  } from "react-toastify";
+import { ToastContainer, Bounce } from "react-toastify";
+import { AuthProvider } from "@contexts/AuthContext";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -30,23 +31,25 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${backgroundClass}`}
       >
-        {!isLoginPage && <Navbar />}
-        <div className="container-fluid px-3">
-          <ToastContainer
-            position="top-right"
-            autoClose={1000}
-            hideProgressBar={false}
-            newestOnTop={false}
-            closeOnClick={false}
-            rtl={false}
-            pauseOnFocusLoss
-            draggable
-            pauseOnHover
-            theme="colored"
-            transition={Bounce}
-          />
-          {children}
-        </div>
+        <AuthProvider>
+          {!isLoginPage && <Navbar />}
+          <div className="container-fluid px-3">
+            <ToastContainer
+              position="top-right"
+              autoClose={1000}
+              hideProgressBar={false}
+              newestOnTop={false}
+              closeOnClick={false}
+              rtl={false}
+              pauseOnFocusLoss
+              draggable
+              pauseOnHover
+              theme="colored"
+              transition={Bounce}
+            />
+            {children}
+          </div>
+        </AuthProvider>
       </body>
     </html>
   );
