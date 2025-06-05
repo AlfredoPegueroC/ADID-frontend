@@ -62,7 +62,7 @@ export default function Navbar() {
         />
 
         <Link className="navbar-brand text-white" href="/">
-          Asignacion Docente - UASD
+          SYSAD - UASD
         </Link>
 
         <button
