@@ -4,9 +4,31 @@ import autoTable from "jspdf-autotable";
 export function exportTipoDocenteToPDF(tipos, page, pageSize) {
   const doc = new jsPDF({ orientation: "landscape" });
 
-  const headers = [
-    ["#", "Código", "Descripción", "Estado", "Universidad"]
-  ];
+  
+  doc.addImage("/LogoUASD.jpg", "jpg", 250, 11, 20, 20);
+
+
+  doc.setFontSize(14);
+  doc.setFont("helvetica", "bold");
+  doc.text("Universidad Autónoma de Santo Domingo", 14, 15);
+
+
+  const fecha = new Date();
+  const fechaVisible = fecha.toLocaleDateString();
+  const fechaArchivo = `${fecha.getDate().toString().padStart(2, "0")}-${(fecha.getMonth() + 1)
+    .toString()
+    .padStart(2, "0")}-${fecha.getFullYear()}`;
+
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "normal");
+  doc.text(`Fecha de creación: ${fechaVisible}`, 14, 21);
+
+  doc.setFontSize(12);
+  doc.setFont("helvetica", "bold");
+  doc.text("Lista de Tipos de Docente", 14, 30);
+
+  // Datos
+  const headers = [["#", "Código", "Descripción", "Universidad"]];
 
   const data = tipos.map((tipo, index) => [
     index + 1 + (page - 1) * pageSize,
@@ -15,21 +37,11 @@ export function exportTipoDocenteToPDF(tipos, page, pageSize) {
     tipo.universidadNombre || "—"
   ]);
 
-  const fecha = new Date();
-  const fechaVisible = fecha.toLocaleDateString();
-  const fechaArchivo = `${fecha.getDate().toString().padStart(2, "0")}-${(fecha.getMonth() + 1)
-    .toString()
-    .padStart(2, "0")}-${fecha.getFullYear()}`;
-
-  doc.setFontSize(12);
-  doc.text("Lista de Tipos de Docente", 14, 15);
-  doc.setFontSize(10);
-  doc.text(`Fecha de creación: ${fechaVisible}`, 14, 22);
 
   autoTable(doc, {
     head: headers,
     body: data,
-    startY: 28,
+    startY: 36,
     styles: {
       fontSize: 9,
       cellPadding: 2,
@@ -42,5 +54,6 @@ export function exportTipoDocenteToPDF(tipos, page, pageSize) {
     },
   });
 
+  // 💾 Guardar PDF
   doc.save(`tipos_docente_${fechaArchivo}.pdf`);
 }

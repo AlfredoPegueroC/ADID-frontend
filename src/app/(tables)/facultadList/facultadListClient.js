@@ -140,6 +140,8 @@ function FacultadListClient({ initialData, totalPages: initialTotalPages }) {
             <th>Nombre</th>
             <th>Decano</th>
             <th>Teléfono</th>
+            <th>Dirección</th>
+            <th>Correo</th>
             <th>Estado</th>
             <th>Universidad</th>
             <th>Campus</th>
@@ -149,7 +151,7 @@ function FacultadListClient({ initialData, totalPages: initialTotalPages }) {
         <tbody>
           {facultades.length === 0 ? (
             <tr>
-              <td colSpan="8" className="text-center">
+              <td colSpan="10" className="text-center">
                 No se han encontrado facultades.
               </td>
             </tr>
@@ -160,6 +162,8 @@ function FacultadListClient({ initialData, totalPages: initialTotalPages }) {
                 <td>{facultad.FacultadNombre}</td>
                 <td>{facultad.FacultadDecano}</td>
                 <td>{facultad.FacultadTelefono}</td>
+                <td>{facultad.FacultadDireccion}</td>
+                <td>{facultad.FacultadEmail}</td>
                 <td>{facultad.FacultadEstado}</td>
                 <td>{facultad.universidadNombre || "—"}</td>
                 <td>{facultad.campusNombre || "—"}</td>
@@ -168,23 +172,13 @@ function FacultadListClient({ initialData, totalPages: initialTotalPages }) {
                     className="btn btn-primary btn-sm"
                     href={`/facultadEdit/${facultad.FacultadID}`}
                   >
-                    <Image
-                      src="/edit.svg"
-                      alt="editar"
-                      width={20}
-                      height={20}
-                    />
+                    Editar
                   </Link>
                   <button
                     className="btn btn-danger btn-sm mx-2"
                     onClick={() => deleteFacultad(facultad.FacultadID)}
                   >
-                    <Image
-                      src="/delete.svg"
-                      alt="borrar"
-                      width={20}
-                      height={20}
-                    />
+                    Eliminar
                   </button>
                 </td>
               </tr>
@@ -205,3 +199,4 @@ function FacultadListClient({ initialData, totalPages: initialTotalPages }) {
 }
 
 export default withAuth(FacultadListClient);
+

@@ -36,7 +36,8 @@ export default function ImportExcel({ title, importURL, onSuccess }) {
         if (onSuccess) onSuccess();
         document.querySelector("#myform").reset();
       } else {
-        Notification.alertError(result.error || "Error al Importar");
+        Notification.alertLogin(result.errores[0] || "Error al Importar");
+        console.log("Error details:", result);
       }
     } catch (error) {
       Notification.alertError("An error occurred while uploading the file.");

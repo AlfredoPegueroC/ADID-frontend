@@ -4,19 +4,31 @@ import autoTable from "jspdf-autotable";
 export function exportDocentesToPDF(docentes, currentPage, pageSize) {
   const doc = new jsPDF({ orientation: "landscape" });
 
+  // 🖼️ Logo
+  doc.addImage("/LogoUASD.jpg", "jpg", 250, 11, 20, 20); // x, y, width, height
+
+  // 🏫 Nombre institucional
+  doc.setFontSize(14);
+  doc.setFont("helvetica", "bold");
+  doc.text("Universidad Autónoma de Santo Domingo", 14, 15);
+
+  // 📅 Fecha
   const fecha = new Date();
   const fechaVisible = fecha.toLocaleDateString();
   const fechaArchivo = `${fecha.getDate().toString().padStart(2, "0")}-${(fecha.getMonth() + 1)
     .toString()
     .padStart(2, "0")}-${fecha.getFullYear()}`;
 
-  doc.setFontSize(12);
-  doc.text("Sistema de Gestión Académica", 14, 15);
   doc.setFontSize(10);
-  doc.text("Universidad Nacional", 14, 22);
-  doc.text(`Fecha de creación: ${fechaVisible}`, 14, 29);
+  doc.setFont("helvetica", "normal");
+  doc.text(`Fecha de creación: ${fechaVisible}`, 14, 21);
 
-  // Encabezados: sin Estado, Tipo, ni Categoría
+  // 📋 Título
+  doc.setFontSize(12);
+  doc.setFont("helvetica", "bold");
+  doc.text("Lista de Docentes", 14, 30);
+
+  // Encabezados
   const headers = [[
     "#", "Nombre", "Apellido", "Sexo", "Estado Civil", "Nacimiento",
     "Ingreso", "Nacionalidad", "Teléfono", "Correo", "Universidad"
@@ -37,10 +49,11 @@ export function exportDocentesToPDF(docentes, currentPage, pageSize) {
     d.universidadNombre || "—"
   ]);
 
+  // Tabla
   autoTable(doc, {
     head: headers,
     body: data,
-    startY: 40,
+    startY: 36,
     styles: {
       fontSize: 8,
       cellPadding: 2,
@@ -60,5 +73,6 @@ export function exportDocentesToPDF(docentes, currentPage, pageSize) {
     },
   });
 
+  // Guardar PDF
   doc.save(`docentes_${fechaArchivo}.pdf`);
 }

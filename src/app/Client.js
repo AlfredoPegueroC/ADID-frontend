@@ -222,7 +222,7 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
       header: 'Acción',
       cell: ({ row }) => (
         <Link className="btn btn-primary btn-sm" href={`/asignacionEdit/${row.original.AsignacionID}?period=${selectedPeriodo}`}>
-          <Image src="/edit.svg" alt="editar" width={20} height={20} />
+          Editar
         </Link>
       )
     }

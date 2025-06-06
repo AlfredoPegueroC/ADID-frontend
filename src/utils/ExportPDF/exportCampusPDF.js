@@ -4,18 +4,30 @@ import autoTable from "jspdf-autotable";
 export function exportCampusToPDF(campusList, currentPage, pageSize) {
   const doc = new jsPDF({ orientation: "landscape" });
 
+ 
+  doc.addImage("/LogoUASD.jpg", "jpg", 250, 11, 20, 20); // x, y, width, height
+
+ 
+  doc.setFontSize(14);
+  doc.setFont("helvetica", "bold");
+  doc.text("Universidad Autónoma de Santo Domingo", 14, 15);
+
   const fecha = new Date();
   const fechaVisible = fecha.toLocaleDateString();
   const fechaArchivo = `${fecha.getDate().toString().padStart(2, "0")}-${(fecha.getMonth() + 1)
     .toString()
     .padStart(2, "0")}-${fecha.getFullYear()}`;
 
-  doc.setFontSize(12);
-  doc.text("Sistema de Gestión Académica", 14, 15);
   doc.setFontSize(10);
-  doc.text("Universidad Nacional", 14, 22);
-  doc.text(`Fecha de creación: ${fechaVisible}`, 14, 29);
+  doc.setFont("helvetica", "normal");
+  doc.text(`Fecha de creación: ${fechaVisible}`, 14, 21);
 
+  // 📋 Título
+  doc.setFontSize(12);
+  doc.setFont("helvetica", "bold");
+  doc.text("Lista de Campus", 14, 30);
+
+  // Tabla
   const headers = [
     ["#", "Nombre", "Dirección", "Ciudad", "Provincia", "País", "Teléfono", "Correo"]
   ];
@@ -34,7 +46,7 @@ export function exportCampusToPDF(campusList, currentPage, pageSize) {
   autoTable(doc, {
     head: headers,
     body: data,
-    startY: 40,
+    startY: 36,
     styles: {
       fontSize: 9,
       cellPadding: 2,

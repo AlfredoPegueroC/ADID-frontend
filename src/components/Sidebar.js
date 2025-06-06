@@ -22,6 +22,8 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
           <Link href="/admin" className={Styles.navLink}>Dashboard</Link>
           <Link href="/admin/usuarios" className={Styles.navLink}>Usuarios</Link>
           <Link href="/admin/registrar" className={Styles.navLink}>Registrar</Link>
+          <Link href="/admin/logs" className={Styles.navLink}>Logs</Link>
+
         </nav>
       )}
     </div>

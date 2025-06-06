@@ -4,31 +4,43 @@ import autoTable from "jspdf-autotable";
 export function exportEscuelasToPDF(escuelas, page, pageSize) {
   const doc = new jsPDF({ orientation: "landscape" });
 
+  // 🖼️ Logo
+  doc.addImage("/LogoUASD.jpg", "jpg", 250, 11, 20, 20);
+
+  // 🏫 Nombre institucional
+  doc.setFontSize(14);
+  doc.setFont("helvetica", "bold");
+  doc.text("Universidad Autónoma de Santo Domingo", 14, 15);
+
+  // 📅 Fecha
   const fecha = new Date();
   const fechaVisible = fecha.toLocaleDateString();
   const fechaArchivo = `${fecha.getDate().toString().padStart(2, "0")}-${(fecha.getMonth() + 1)
     .toString()
     .padStart(2, "0")}-${fecha.getFullYear()}`;
 
-  // Encabezado
-  doc.setFontSize(12);
-  doc.text("Sistema de Gestión Académica", 14, 15);
   doc.setFontSize(10);
-  doc.text("Universidad Nacional", 14, 22);
-  doc.text(`Fecha de creación: ${fechaVisible}`, 14, 29);
+  doc.setFont("helvetica", "normal");
+  doc.text(`Fecha de creación: ${fechaVisible}`, 14, 21);
 
-  // Encabezados de tabla (sin Estado)
+  // 📋 Título
+  doc.setFontSize(12);
+  doc.setFont("helvetica", "bold");
+  doc.text("Lista de Escuelas", 14, 30);
+
+  // Encabezados
   const headers = [
-    ["#", "Código", "Nombre", "Directora", "Teléfono", "Universidad", "Facultad"]
+    ["#", "Código", "Nombre", "Directora", "Teléfono", "Correo", "Universidad", "Facultad"]
   ];
 
-  // Datos (sin Estado)
+  // Datos
   const data = escuelas.map((e, index) => [
     index + 1 + (page - 1) * pageSize,
     e.EscuelaCodigo,
     e.EscuelaNombre,
     e.EscuelaDirectora,
     e.EscuelaTelefono,
+    e.EscuelaCorreo || "—",
     e.universidadNombre || "—",
     e.facultadNombre || "—"
   ]);
@@ -37,7 +49,7 @@ export function exportEscuelasToPDF(escuelas, page, pageSize) {
   autoTable(doc, {
     head: headers,
     body: data,
-    startY: 40,
+    startY: 36,
     styles: {
       fontSize: 9,
       cellPadding: 2,
@@ -48,11 +60,12 @@ export function exportEscuelasToPDF(escuelas, page, pageSize) {
       2: { cellWidth: 35 },  // Nombre
       3: { cellWidth: 35 },  // Directora
       4: { cellWidth: 25 },  // Teléfono
-      5: { cellWidth: 45 },  // Universidad
-      6: { cellWidth: 45 },  // Facultad
+      5: { cellWidth: 40 },  // Correo
+      6: { cellWidth: 45 },  // Universidad
+      7: { cellWidth: 45 },  // Facultad
     },
   });
 
-  // Guardar archivo
+  // Guardar PDF
   doc.save(`escuelas_${fechaArchivo}.pdf`);
 }

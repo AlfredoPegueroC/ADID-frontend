@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import Pagination from "@components/Pagination";
 import Tables from "@components/Tables";
 import ImportExcel from "@components/forms/Import";
@@ -135,21 +134,22 @@ function EscuelaListClient() {
       <Tables>
         <thead>
           <tr>
-            <th scope="col">#</th>
-            <th scope="col">Código</th>
-            <th scope="col">Nombre</th>
-            <th scope="col">Directora</th>
-            <th scope="col">Teléfono</th>
-            <th scope="col">Estado</th>
-            <th scope="col">Universidad</th>
-            <th scope="col">Facultad</th>
-            <th scope="col">Acción</th>
+            <th>#</th>
+            <th>Código</th>
+            <th>Nombre</th>
+            <th>Directora</th>
+            <th>Teléfono</th>
+            <th>Correo</th>
+            <th>Estado</th>
+            <th>Universidad</th>
+            <th>Facultad</th>
+            <th>Acción</th>
           </tr>
         </thead>
         <tbody>
           {escuelas.length === 0 ? (
             <tr>
-              <td colSpan="9" className="text-center">
+              <td colSpan="10" className="text-center">
                 No se han encontrado escuelas.
               </td>
             </tr>
@@ -161,6 +161,7 @@ function EscuelaListClient() {
                 <td>{escuela.EscuelaNombre}</td>
                 <td>{escuela.EscuelaDirectora}</td>
                 <td>{escuela.EscuelaTelefono}</td>
+                <td>{escuela.EscuelaCorreo}</td>
                 <td>{escuela.EscuelaEstado}</td>
                 <td>{escuela.universidadNombre || "—"}</td>
                 <td>{escuela.facultadNombre || "—"}</td>
@@ -169,23 +170,13 @@ function EscuelaListClient() {
                     className="btn btn-primary btn-sm"
                     href={`/escuelaEdit/${escuela.EscuelaId}`}
                   >
-                    <Image
-                      src="/edit.svg"
-                      alt="editar"
-                      width={20}
-                      height={20}
-                    />
+                    Editar
                   </Link>
                   <button
                     className="btn btn-danger btn-sm mx-2"
                     onClick={() => deleteEscuela(escuela.EscuelaId)}
                   >
-                    <Image
-                      src="/delete.svg"
-                      alt="borrar"
-                      width={20}
-                      height={20}
-                    />
+                    Eliminar
                   </button>
                 </td>
               </tr>
@@ -195,11 +186,7 @@ function EscuelaListClient() {
       </Tables>
 
       {totalPages > 1 && (
-        <Pagination
-          page={page}
-          totalPages={totalPages}
-          onPageChange={setPage}
-        />
+        <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
       )}
     </div>
   );

@@ -12,7 +12,6 @@ import withAuth from "@utils/withAuth";
 import { deleteEntity } from "@utils/delete";
 import { fetchCampus } from "@api/campusService";
 import { debounce } from "lodash";
-
 import { exportCampusToPDF } from "@utils/ExportPDF/exportCampusPDF";
 
 function CampusListClient({ initialData, totalPages: initialTotalPages }) {
@@ -51,12 +50,7 @@ function CampusListClient({ initialData, totalPages: initialTotalPages }) {
 
   const deleteCampus = useCallback(
     (pk) => {
-      deleteEntity(
-        `${API}api/campus/delete`,
-        pk,
-        setCampusList,
-        "CampusCodigo"
-      );
+      deleteEntity(`${API}api/campus/delete`, pk, setCampusList, "CampusCodigo");
     },
     [API]
   );
@@ -145,6 +139,7 @@ function CampusListClient({ initialData, totalPages: initialTotalPages }) {
       <Tables>
         <thead>
           <tr>
+            <th>Código</th>
             <th>Nombre</th>
             <th>Dirección</th>
             <th>Ciudad</th>
@@ -159,13 +154,14 @@ function CampusListClient({ initialData, totalPages: initialTotalPages }) {
         <tbody>
           {campusList.length === 0 ? (
             <tr>
-              <td colSpan="9" className="text-center">
+              <td colSpan="10" className="text-center">
                 No se encontraron campus.
               </td>
             </tr>
           ) : (
             campusList.map((c) => (
               <tr key={c.CampusCodigo}>
+                <td>{c.CampusCodigo}</td>
                 <td>{c.CampusNombre}</td>
                 <td>{c.CampusDireccion}</td>
                 <td>{c.CampusCiudad}</td>
@@ -179,23 +175,13 @@ function CampusListClient({ initialData, totalPages: initialTotalPages }) {
                     className="btn btn-primary btn-sm"
                     href={`/campusEdit/${c.CampusCodigo}`}
                   >
-                    <Image
-                      src="/edit.svg"
-                      alt="editar"
-                      width={20}
-                      height={20}
-                    />
+                    Editar
                   </Link>
                   <button
                     className="btn btn-danger btn-sm mx-2"
                     onClick={() => deleteCampus(c.CampusCodigo)}
                   >
-                    <Image
-                      src="/delete.svg"
-                      alt="borrar"
-                      width={20}
-                      height={20}
-                    />
+                    Borrar
                   </button>
                 </td>
               </tr>

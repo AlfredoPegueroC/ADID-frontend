@@ -4,23 +4,33 @@ import autoTable from "jspdf-autotable";
 export function exportCategoriasToPDF(categorias, currentPage, pageSize) {
   const doc = new jsPDF({ orientation: "landscape" });
 
+  // 🖼️ Logo
+  doc.addImage("/LogoUASD.jpg", "jpg", 250, 11, 20, 20); // x, y, width, height
+
+  // 🏫 Nombre de la universidad
+  doc.setFontSize(14);
+  doc.setFont("helvetica", "bold");
+  doc.text("Universidad Autónoma de Santo Domingo", 14, 15);
+
+  // 📅 Fecha
   const fecha = new Date();
   const fechaVisible = fecha.toLocaleDateString();
   const fechaArchivo = `${fecha.getDate().toString().padStart(2, "0")}-${(fecha.getMonth() + 1)
     .toString()
     .padStart(2, "0")}-${fecha.getFullYear()}`;
 
-  // Encabezado
-  doc.setFontSize(12);
-  doc.text("Sistema de Gestión Académica", 14, 15);
   doc.setFontSize(10);
-  doc.text("Universidad Nacional", 14, 22);
-  doc.text(`Fecha de creación: ${fechaVisible}`, 14, 29);
+  doc.setFont("helvetica", "normal");
+  doc.text(`Fecha de creación: ${fechaVisible}`, 14, 21);
 
-  // Encabezados de tabla (sin Estado)
+
+  doc.setFontSize(12);
+  doc.setFont("helvetica", "bold");
+  doc.text("Lista de Categorías de Docente", 14, 30);
+
+  // Tabla
   const headers = [["#", "Código", "Nombre", "Universidad"]];
 
-  // Datos
   const data = categorias.map((cat, index) => [
     index + 1 + (currentPage - 1) * pageSize,
     cat.categoriaCodigo,
@@ -31,7 +41,7 @@ export function exportCategoriasToPDF(categorias, currentPage, pageSize) {
   autoTable(doc, {
     head: headers,
     body: data,
-    startY: 40,
+    startY: 36,
     styles: {
       fontSize: 9,
       cellPadding: 2,
