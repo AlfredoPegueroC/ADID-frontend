@@ -128,10 +128,12 @@ function UniversidadListClient({ initialData }) {
       <Search
         SearchSubmit={(e) => {
           e.preventDefault();
+          setPage(1);
           debouncedFetchData();
         }}
         SearchChange={(e) => {
           setSearchQuery(e.target.value);
+          setPage(1);
           debouncedFetchData();
         }}
         searchQuery={searchQuery}
@@ -221,3 +223,18 @@ function UniversidadListClient({ initialData }) {
 }
 
 export default withAuth(UniversidadListClient);
+
+// export async function getServerSideProps(context) {
+//   const { page = 1, searchQuery = "", pageSize = 10 } = context.query;
+//   const initialData = await fetchUniversidades(
+//     Number(page),
+//     searchQuery,
+//     Number(pageSize)
+//   );
+
+//   return {
+//     props: {
+//       initialData,
+//     },
+//   };
+// }

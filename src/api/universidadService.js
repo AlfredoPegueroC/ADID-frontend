@@ -1,10 +1,14 @@
 // lib/universidadService.js
-export async function fetchUniversidades(page, searchQuery) {
+export async function fetchUniversidades(page = 1, searchQuery = "", pageSize = 10) {
   const API = process.env.NEXT_PUBLIC_API_KEY;
-  const searchParam = searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : "";
-  
+
+  const params = new URLSearchParams();
+  params.append("page", page);
+  params.append("page_size", pageSize);
+  if (searchQuery) params.append("search", searchQuery);
+
   try {
-    const response = await fetch(`${API}api/universidad?page=${page}${searchParam}`, {
+    const response = await fetch(`${API}api/universidad?${params.toString()}`, {
       cache: "no-store",
     });
 
@@ -13,10 +17,10 @@ export async function fetchUniversidades(page, searchQuery) {
     const data = await response.json();
     return {
       results: data.results || [],
-      totalPages: Math.ceil(data.count / 30),
+      totalPages: Math.ceil(data.count / pageSize),
     };
   } catch (error) {
     console.error("Error fetching data:", error);
-    return { universidades: [], totalPages: 1 };
+    return { results: [], totalPages: 1 };
   }
 }
