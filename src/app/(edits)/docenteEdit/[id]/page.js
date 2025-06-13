@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import FormLayout from "@components/layouts/FormLayout";
 import withAuth from "@utils/withAuth";
-import Styles from "@styles/form.module.css";
+import Styles from "@styles/test.module.css";
 import Notification from "@components/Notification";
 
 function DocenteEdit({ params }) {

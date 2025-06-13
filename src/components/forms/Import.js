@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Notification from "../Notification";
-import Styles from "@styles/form.module.css";
+import Styles from "@styles/test.module.css";
 
 export default function ImportExcel({ title, importURL, onSuccess }) {
   const [file, setFile] = useState(null);
