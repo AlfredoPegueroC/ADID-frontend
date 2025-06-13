@@ -1,24 +1,26 @@
-export async function fetchFacultades(searchQuery = "", page = 1) {
+export async function fetchFacultades(page = 1, searchQuery = "", pageSize = 10) {
   const API = process.env.NEXT_PUBLIC_API_KEY;
 
+  const params = new URLSearchParams();
+  params.append("page", page);
+  params.append("page_size", pageSize);
+  if (searchQuery) params.append("search", searchQuery);
+
   try {
-    const searchParam = searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : "";
+    const response = await fetch(`${API}api/facultad?${params.toString()}`, {
+      cache: "no-store",
+    });
 
-    const response = await fetch(`${API}api/facultad?page=${page}${searchParam}`);
-
-    if (!response.ok) {
-      throw new Error("Failed to fetch facultades");
-    }
+    if (!response.ok) throw new Error("Failed to fetch facultades");
 
     const data = await response.json();
 
     return {
-      results: data.results, // ya incluyen universidadNombre correctamente
-      totalPages: Math.ceil(data.count / 30),
+      results: data.results || [],
+      totalPages: Math.ceil(data.count / pageSize),
     };
   } catch (error) {
     console.error("Error fetching facultades:", error);
     return { results: [], totalPages: 1 };
   }
 }
-

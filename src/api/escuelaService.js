@@ -1,23 +1,23 @@
-export async function fetchEscuelas(searchQuery = "", page = 1) {
+export async function fetchEscuelas(page = 1, searchQuery = "", pageSize = 10) {
   const API = process.env.NEXT_PUBLIC_API_KEY;
 
-  try {
-    const searchParam = searchQuery
-      ? `&search=${encodeURIComponent(searchQuery)}`
-      : "";
-    const response = await fetch(
-      `${API}api/escuela?page=${page}${searchParam}`
-    );
+  const params = new URLSearchParams();
+  params.append("page", page);
+  params.append("page_size", pageSize);
+  if (searchQuery) params.append("search", searchQuery);
 
-    if (!response.ok) {
-      throw new Error("Failed to fetch escuelas");
-    }
+  try {
+    const response = await fetch(`${API}api/escuela?${params.toString()}`, {
+      cache: "no-store",
+    });
+
+    if (!response.ok) throw new Error("Failed to fetch escuelas");
 
     const data = await response.json();
 
     return {
-      results: data.results,
-      totalPages: Math.ceil(data.count / 30),
+      results: data.results || [],
+      totalPages: Math.ceil(data.count / pageSize),
     };
   } catch (error) {
     console.error("Error fetching escuelas:", error);
