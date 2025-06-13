@@ -12,7 +12,6 @@ import Tables from "@components/Tables";
 import Pagination from "@components/Pagination";
 
 import { exportCategoriasToPDF } from "@utils/ExportPDF/exportCategoriaPDF";
-
 import withAuth from "@utils/withAuth";
 import { deleteEntity } from "@utils/delete";
 import { fetchCategorias } from "@api/categoriaService";
@@ -23,36 +22,34 @@ function CategoriaListClient({ initialData, totalPages: initialTotalPages }) {
   const [totalPages, setTotalPages] = useState(initialTotalPages);
   const [searchQuery, setSearchQuery] = useState("");
   const [pageSize, setPageSize] = useState(10);
+  const [loading, setLoading] = useState(true);
 
   const API = process.env.NEXT_PUBLIC_API_KEY;
-  const Api_import_URL = `${API}import/categoriaDocente`;
+  const importURL = `${API}import/categoriaDocente`;
 
-  const deleteCategoria = (pk) => {
-    deleteEntity(
-      `${API}api/categoriadocente/delete`,
-      pk,
-      setCategorias,
-      "categoriaCodigo"
-    );
+  const fetchCategoriasData = async (query, page, size) => {
+    try {
+      const { results, totalPages } = await fetchCategorias(query, page, size);
+      setCategorias(results);
+      setTotalPages(totalPages);
+    } catch (error) {
+      console.error("Error al obtener categorías:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const fetchData = async (query, page, size) => {
-    const { results, totalPages } = await fetchCategorias(query, page, size);
-    setCategorias(results);
-    setTotalPages(totalPages);
-  };
-
-  const debouncedFetchData = useCallback(
+  const debouncedFetchCategorias = useCallback(
     debounce(() => {
-      fetchData(searchQuery, currentPage, pageSize);
-    }, 300),
+      fetchCategoriasData(searchQuery, currentPage, pageSize);
+    }, 400),
     [searchQuery, currentPage, pageSize]
   );
 
   useEffect(() => {
-    debouncedFetchData();
-    return () => debouncedFetchData.cancel();
-  }, [debouncedFetchData]);
+    debouncedFetchCategorias();
+    return () => debouncedFetchCategorias.cancel();
+  }, [debouncedFetchCategorias]);
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
@@ -61,6 +58,15 @@ function CategoriaListClient({ initialData, totalPages: initialTotalPages }) {
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     setCurrentPage(1);
+  };
+
+  const deleteCategoria = (pk) => {
+    deleteEntity(
+      `${API}api/categoriadocente/delete`,
+      pk,
+      setCategorias,
+      "CategoriaID"
+    );
   };
 
   return (
@@ -80,7 +86,6 @@ function CategoriaListClient({ initialData, totalPages: initialTotalPages }) {
               >
                 Exportar
               </Link>
-
               <button
                 className="btn btn-danger"
                 onClick={() =>
@@ -102,9 +107,7 @@ function CategoriaListClient({ initialData, totalPages: initialTotalPages }) {
         </div>
 
         <div className="d-flex align-items-center gap-2">
-          <label className="fw-bold mb-0 text-black">
-            Resultados por página:
-          </label>
+          <label className="fw-bold mb-0 text-black">Resultados por página:</label>
           <select
             className="form-select w-auto"
             style={{ height: "38px" }}
@@ -122,10 +125,7 @@ function CategoriaListClient({ initialData, totalPages: initialTotalPages }) {
       </div>
 
       <Modal title="Importar Categoría">
-        <ImportExcel
-          importURL={Api_import_URL}
-          onSuccess={debouncedFetchData}
-        />
+        <ImportExcel importURL={importURL} onSuccess={debouncedFetchCategorias} />
       </Modal>
 
       <Search
@@ -154,7 +154,7 @@ function CategoriaListClient({ initialData, totalPages: initialTotalPages }) {
             </tr>
           ) : (
             categorias.map((categoria, index) => (
-              <tr key={categoria.categoriaCodigo}>
+              <tr key={categoria.CategoriaID}>
                 <th scope="row">{index + 1 + (currentPage - 1) * pageSize}</th>
                 <td>{categoria.categoriaCodigo}</td>
                 <td>{categoria.CategoriaNombre}</td>
@@ -165,23 +165,13 @@ function CategoriaListClient({ initialData, totalPages: initialTotalPages }) {
                     href={`/categoriaEdit/${categoria.CategoriaID}`}
                     className="btn btn-primary btn-sm"
                   >
-                    <Image
-                      src="/edit.svg"
-                      alt="editar"
-                      width={20}
-                      height={20}
-                    />
+                    <Image src="/edit.svg" alt="editar" width={20} height={20} />
                   </Link>
                   <button
                     className="btn btn-danger btn-sm mx-2"
                     onClick={() => deleteCategoria(categoria.CategoriaID)}
                   >
-                    <Image
-                      src="/delete.svg"
-                      alt="borrar"
-                      width={20}
-                      height={20}
-                    />
+                    <Image src="/delete.svg" alt="borrar" width={20} height={20} />
                   </button>
                 </td>
               </tr>

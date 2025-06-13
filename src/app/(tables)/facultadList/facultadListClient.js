@@ -34,7 +34,7 @@ function FacultadListClient({ initialData, totalPages: initialTotalPages }) {
     );
   };
 
-  const fetchData = async (page, query, size) => {
+  const fetchData = async (query, page, size) => {
     const response = await fetchFacultades(query, page, size);
     setFacultades(response.results);
     setTotalPages(response.totalPages);
@@ -42,19 +42,15 @@ function FacultadListClient({ initialData, totalPages: initialTotalPages }) {
 
   const debouncedFetchData = useCallback(
     debounce(() => {
-      fetchData(page, searchQuery, pageSize);
+      fetchData(searchQuery, page, pageSize);
     }, 300),
-    [page, searchQuery, pageSize]
+    [searchQuery, page, pageSize]
   );
 
   useEffect(() => {
     debouncedFetchData();
     return () => debouncedFetchData.cancel();
   }, [debouncedFetchData]);
-
-  const handlePageChange = (newPage) => {
-    setPage(newPage);
-  };
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
@@ -79,7 +75,6 @@ function FacultadListClient({ initialData, totalPages: initialTotalPages }) {
               <Link className="btn btn-success" href={`${API}export/facultad`}>
                 Exportar
               </Link>
-
               <button
                 className="btn btn-danger"
                 onClick={() =>
@@ -191,7 +186,7 @@ function FacultadListClient({ initialData, totalPages: initialTotalPages }) {
         <Pagination
           page={page}
           totalPages={totalPages}
-          onPageChange={handlePageChange}
+          onPageChange={setPage}
         />
       )}
     </div>
@@ -199,4 +194,3 @@ function FacultadListClient({ initialData, totalPages: initialTotalPages }) {
 }
 
 export default withAuth(FacultadListClient);
-

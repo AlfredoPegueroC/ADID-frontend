@@ -27,14 +27,10 @@ function UniversidadListClient({ initialData }) {
   const [pageSize, setPageSize] = useState(10);
 
   const debouncedFetchData = useCallback(
-    debounce(async () => {
+    debounce(async (page, search, size) => {
       try {
         setLoading(true);
-        const { results, totalPages } = await fetchUniversidades(
-          page,
-          searchQuery,
-          pageSize
-        );
+        const { results, totalPages } = await fetchUniversidades(page, search, size);
         setUniversidades(results);
         setTotalPages(totalPages);
       } catch (error) {
@@ -43,13 +39,13 @@ function UniversidadListClient({ initialData }) {
         setLoading(false);
       }
     }, 500),
-    [page, searchQuery, pageSize]
+    []
   );
 
   useEffect(() => {
-    debouncedFetchData();
+    debouncedFetchData(page, searchQuery, pageSize);
     return () => debouncedFetchData.cancel();
-  }, [debouncedFetchData]);
+  }, [page, searchQuery, pageSize, debouncedFetchData]);
 
   const handleDelete = (pk) => {
     deleteEntity(
@@ -90,9 +86,7 @@ function UniversidadListClient({ initialData }) {
 
           <button
             className="btn btn-danger"
-            onClick={() =>
-              exportUniversidadesToPDF(universidades, page, pageSize)
-            }
+            onClick={() => exportUniversidadesToPDF(universidades, page, pageSize)}
           >
             Exportar PDF
           </button>
@@ -107,7 +101,8 @@ function UniversidadListClient({ initialData }) {
             style={{ height: "38px" }}
             value={pageSize}
             onChange={(e) => {
-              setPageSize(Number(e.target.value));
+              const newSize = Number(e.target.value);
+              setPageSize(newSize);
               setPage(1);
             }}
           >
@@ -121,20 +116,18 @@ function UniversidadListClient({ initialData }) {
       <Modal title="Importar Universidad">
         <ImportExcel
           importURL={`${process.env.NEXT_PUBLIC_API_KEY}import/universidad`}
-          onSuccess={debouncedFetchData}
+          onSuccess={() => debouncedFetchData(page, searchQuery, pageSize)}
         />
       </Modal>
 
       <Search
-        SearchSubmit={(e) => {
-          e.preventDefault();
-          setPage(1);
-          debouncedFetchData();
-        }}
+        SearchSubmit={(e) => e.preventDefault()}
         SearchChange={(e) => {
-          setSearchQuery(e.target.value);
-          setPage(1);
-          debouncedFetchData();
+          const newValue = e.target.value;
+          if (newValue !== searchQuery) {
+            setSearchQuery(newValue);
+            setPage(1);
+          }
         }}
         searchQuery={searchQuery}
       />
@@ -186,23 +179,13 @@ function UniversidadListClient({ initialData }) {
                     href={`/universidadEdit/${universidad.UniversidadID}`}
                     className="btn btn-primary btn-sm"
                   >
-                    <Image
-                      src="/edit.svg"
-                      alt="editar"
-                      width={20}
-                      height={20}
-                    />
+                    <Image src="/edit.svg" alt="editar" width={20} height={20} />
                   </Link>
                   <button
                     className="btn btn-danger btn-sm mx-2"
                     onClick={() => handleDelete(universidad.UniversidadID)}
                   >
-                    <Image
-                      src="/delete.svg"
-                      alt="borrar"
-                      width={20}
-                      height={20}
-                    />
+                    <Image src="/delete.svg" alt="borrar" width={20} height={20} />
                   </button>
                 </td>
               </tr>
@@ -212,17 +195,14 @@ function UniversidadListClient({ initialData }) {
       </Tables>
 
       {totalPages > 1 && (
-        <Pagination
-          page={page}
-          totalPages={totalPages}
-          onPageChange={setPage}
-        />
+        <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
       )}
     </div>
   );
 }
 
 export default withAuth(UniversidadListClient);
+
 
 // export async function getServerSideProps(context) {
 //   const { page = 1, searchQuery = "", pageSize = 10 } = context.query;

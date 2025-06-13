@@ -11,19 +11,19 @@ import Search from "@components/search";
 import withAuth from "@utils/withAuth";
 import { deleteEntity } from "@utils/delete";
 import { fetchCampus } from "@api/campusService";
-import { debounce } from "lodash";
 import { exportCampusToPDF } from "@utils/ExportPDF/exportCampusPDF";
 
 function CampusListClient({ initialData, totalPages: initialTotalPages }) {
   const [campusList, setCampusList] = useState(initialData);
   const [currentPage, setCurrentPage] = useState(1);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [pageSize, setPageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(initialTotalPages);
   const API = process.env.NEXT_PUBLIC_API_KEY;
 
   const fetchData = async (page, query, size) => {
+    setLoading(true);
     try {
       const response = await fetchCampus(query, page, size);
       setCampusList(response.results);
@@ -37,6 +37,7 @@ function CampusListClient({ initialData, totalPages: initialTotalPages }) {
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
+    fetchData(page, searchQuery, pageSize);
   };
 
   const handleSearchChange = (e) => {
@@ -46,6 +47,14 @@ function CampusListClient({ initialData, totalPages: initialTotalPages }) {
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     setCurrentPage(1);
+    fetchData(1, searchQuery, pageSize);
+  };
+
+  const handlePageSizeChange = (e) => {
+    const newSize = Number(e.target.value);
+    setPageSize(newSize);
+    setCurrentPage(1);
+    fetchData(1, searchQuery, newSize);
   };
 
   const deleteCampus = useCallback(
@@ -55,11 +64,9 @@ function CampusListClient({ initialData, totalPages: initialTotalPages }) {
     [API]
   );
 
-  const debouncedFetch = useCallback(debounce(fetchData, 500), []);
-
   useEffect(() => {
-    debouncedFetch(currentPage, searchQuery, pageSize);
-  }, [currentPage, searchQuery, pageSize, debouncedFetch]);
+    fetchData(currentPage, searchQuery, pageSize);
+  }, []);
 
   if (loading) {
     return (
@@ -111,10 +118,7 @@ function CampusListClient({ initialData, totalPages: initialTotalPages }) {
             className="form-select w-auto"
             style={{ height: "38px" }}
             value={pageSize}
-            onChange={(e) => {
-              setPageSize(Number(e.target.value));
-              setCurrentPage(1);
-            }}
+            onChange={handlePageSizeChange}
           >
             <option value={10}>10</option>
             <option value={25}>25</option>
@@ -202,3 +206,4 @@ function CampusListClient({ initialData, totalPages: initialTotalPages }) {
 }
 
 export default withAuth(CampusListClient);
+

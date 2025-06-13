@@ -19,6 +19,7 @@ function TipodocenteListClient({ initialData, totalPages: initialTotalPages }) {
   const [totalPages, setTotalPages] = useState(initialTotalPages);
   const [searchQuery, setSearchQuery] = useState("");
   const [pageSize, setPageSize] = useState(10);
+  const [loading, setLoading] = useState(false);
 
   const API = process.env.NEXT_PUBLIC_API_KEY;
 
@@ -31,18 +32,28 @@ function TipodocenteListClient({ initialData, totalPages: initialTotalPages }) {
     );
   };
 
-  const fetchData = async (query, page, size) => {
-    const { results, totalPages } = await fetchTipoDocentes(query, page, size);
-    setTipodocentes(results);
-    setTotalPages(totalPages);
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const { results, totalPages } = await fetchTipoDocentes(
+        searchQuery,
+        page,
+        pageSize
+      );
+      setTipodocentes(results);
+      setTotalPages(totalPages);
+    } catch (error) {
+      console.error("Error al obtener los datos:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const debouncedFetchData = useCallback(
-    debounce(() => {
-      fetchData(searchQuery, page, pageSize);
-    }, 300),
-    [searchQuery, page, pageSize]
-  );
+  const debouncedFetchData = useCallback(debounce(fetchData, 300), [
+    searchQuery,
+    page,
+    pageSize,
+  ]);
 
   useEffect(() => {
     debouncedFetchData();
@@ -51,11 +62,11 @@ function TipodocenteListClient({ initialData, totalPages: initialTotalPages }) {
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
+    setPage(1); // Reset page when searching
   };
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    setPage(1);
   };
 
   return (
@@ -97,7 +108,7 @@ function TipodocenteListClient({ initialData, totalPages: initialTotalPages }) {
             value={pageSize}
             onChange={(e) => {
               setPageSize(Number(e.target.value));
-              setPage(1);
+              setPage(1); // Reiniciar a la primera página
             }}
           >
             <option value={10}>10</option>

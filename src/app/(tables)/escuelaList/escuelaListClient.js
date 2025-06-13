@@ -15,58 +15,55 @@ import { exportEscuelasToPDF } from "@utils/ExportPDF/exportEscuelaPDF";
 
 function EscuelaListClient() {
   const [escuelas, setEscuelas] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [pageSize, setPageSize] = useState(10);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const API = process.env.NEXT_PUBLIC_API_KEY;
   const Api_import_URL = `${API}import/escuela`;
 
-  const fetchData = useCallback(async () => {
+  const fetchData = async (page, query, size) => {
+    setLoading(true);
     setError(null);
     try {
-      const { results, totalPages } = await fetchEscuelas(
-        searchQuery,
-        page,
-        pageSize
-      );
+      const { results, totalPages } = await fetchEscuelas(query, page, size);
       setEscuelas(results);
       setTotalPages(totalPages);
     } catch (error) {
-      setError(error.message);
       console.error("Error fetching data:", error);
+      setError("Error al cargar los datos.");
     } finally {
       setLoading(false);
     }
-  }, [page, searchQuery, pageSize]);
+  };
+
+  const debouncedFetchData = useCallback(
+    debounce(() => {
+      fetchData(page, searchQuery, pageSize);
+    }, 300),
+    [page, searchQuery, pageSize]
+  );
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    debouncedFetchData();
+    return () => debouncedFetchData.cancel();
+  }, [debouncedFetchData]);
 
   const deleteEscuela = (pk) => {
     deleteEntity(`${API}api/escuela/delete`, pk, setEscuelas, "EscuelaCodigo");
   };
 
-  const handleSearchChange = debounce((e) => {
+  const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
-  }, 300);
+  };
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     setPage(1);
   };
-
-  if (loading) {
-    return (
-      <div className="spinner-container">
-        <div className="spinner"></div>
-      </div>
-    );
-  }
 
   return (
     <div className="mt-5">
@@ -85,7 +82,9 @@ function EscuelaListClient() {
               </Link>
               <button
                 className="btn btn-danger"
-                onClick={() => exportEscuelasToPDF(escuelas, page, pageSize)}
+                onClick={() =>
+                  exportEscuelasToPDF(escuelas, page, pageSize)
+                }
               >
                 Exportar PDF
               </button>
@@ -122,7 +121,7 @@ function EscuelaListClient() {
       </div>
 
       <Modal title="Importar Escuela">
-        <ImportExcel importURL={Api_import_URL} onSuccess={fetchData} />
+        <ImportExcel importURL={Api_import_URL} onSuccess={debouncedFetchData} />
       </Modal>
 
       <Search
@@ -131,65 +130,74 @@ function EscuelaListClient() {
         searchQuery={searchQuery}
       />
 
-      <Tables>
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Código</th>
-            <th>Nombre</th>
-            <th>Directora</th>
-            <th>Teléfono</th>
-            <th>Correo</th>
-            <th>Estado</th>
-            <th>Universidad</th>
-            <th>Facultad</th>
-            <th>Acción</th>
-          </tr>
-        </thead>
-        <tbody>
-          {escuelas.length === 0 ? (
+      {loading ? (
+        <div className="text-center">Cargando...</div>
+      ) : (
+        <Tables>
+          <thead>
             <tr>
-              <td colSpan="10" className="text-center">
-                No se han encontrado escuelas.
-              </td>
+              <th>#</th>
+              <th>Código</th>
+              <th>Nombre</th>
+              <th>Directora</th>
+              <th>Teléfono</th>
+              <th>Correo</th>
+              <th>Estado</th>
+              <th>Universidad</th>
+              <th>Facultad</th>
+              <th>Acción</th>
             </tr>
-          ) : (
-            escuelas.map((escuela, index) => (
-              <tr key={escuela.EscuelaCodigo}>
-                <th scope="row">{index + 1 + (page - 1) * pageSize}</th>
-                <td>{escuela.EscuelaCodigo}</td>
-                <td>{escuela.EscuelaNombre}</td>
-                <td>{escuela.EscuelaDirectora}</td>
-                <td>{escuela.EscuelaTelefono}</td>
-                <td>{escuela.EscuelaCorreo}</td>
-                <td>{escuela.EscuelaEstado}</td>
-                <td>{escuela.universidadNombre || "—"}</td>
-                <td>{escuela.facultadNombre || "—"}</td>
-                <td>
-                  <Link
-                    className="btn btn-primary btn-sm"
-                    href={`/escuelaEdit/${escuela.EscuelaId}`}
-                  >
-                    Editar
-                  </Link>
-                  <button
-                    className="btn btn-danger btn-sm mx-2"
-                    onClick={() => deleteEscuela(escuela.EscuelaId)}
-                  >
-                    Eliminar
-                  </button>
+          </thead>
+          <tbody>
+            {escuelas.length === 0 ? (
+              <tr>
+                <td colSpan="10" className="text-center">
+                  No se han encontrado escuelas.
                 </td>
               </tr>
-            ))
-          )}
-        </tbody>
-      </Tables>
+            ) : (
+              escuelas.map((escuela, index) => (
+                <tr key={escuela.EscuelaCodigo}>
+                  <th scope="row">{index + 1 + (page - 1) * pageSize}</th>
+                  <td>{escuela.EscuelaCodigo}</td>
+                  <td>{escuela.EscuelaNombre}</td>
+                  <td>{escuela.EscuelaDirectora}</td>
+                  <td>{escuela.EscuelaTelefono}</td>
+                  <td>{escuela.EscuelaCorreo}</td>
+                  <td>{escuela.EscuelaEstado}</td>
+                  <td>{escuela.universidadNombre || "—"}</td>
+                  <td>{escuela.facultadNombre || "—"}</td>
+                  <td>
+                    <Link
+                      className="btn btn-primary btn-sm"
+                      href={`/escuelaEdit/${escuela.EscuelaId}`}
+                    >
+                      Editar
+                    </Link>
+                    <button
+                      className="btn btn-danger btn-sm mx-2"
+                      onClick={() => deleteEscuela(escuela.EscuelaId)}
+                    >
+                      Eliminar
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </Tables>
+      )}
 
       {totalPages > 1 && (
-        <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
+        />
       )}
     </div>
   );
 }
 
 export default withAuth(EscuelaListClient);
+

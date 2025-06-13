@@ -44,16 +44,22 @@ function PeriodoListClient({ initialData, totalPages: initialTotalPages }) {
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     setPage(1);
+    fetchData(searchQuery, 1, pageSize);
   };
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
   };
 
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
+    fetchData(searchQuery, newPage, pageSize);
+  };
+
   useEffect(() => {
     debouncedFetchData(searchQuery, page, pageSize);
     return () => debouncedFetchData.cancel();
-  }, [searchQuery, page, pageSize, debouncedFetchData]);
+  }, [searchQuery, pageSize, debouncedFetchData]);
 
   return (
     <div className="mt-5">
@@ -83,8 +89,10 @@ function PeriodoListClient({ initialData, totalPages: initialTotalPages }) {
             style={{ height: "38px" }}
             value={pageSize}
             onChange={(e) => {
-              setPageSize(Number(e.target.value));
+              const newSize = Number(e.target.value);
+              setPageSize(newSize);
               setPage(1);
+              fetchData(searchQuery, 1, newSize);
             }}
           >
             <option value={10}>10</option>
@@ -166,10 +174,11 @@ function PeriodoListClient({ initialData, totalPages: initialTotalPages }) {
       </Tables>
 
       {totalPages > 1 && (
-        <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+        <Pagination page={page} totalPages={totalPages} onPageChange={handlePageChange} />
       )}
     </div>
   );
 }
 
 export default withAuth(PeriodoListClient);
+

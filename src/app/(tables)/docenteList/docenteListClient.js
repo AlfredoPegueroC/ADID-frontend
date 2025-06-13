@@ -15,29 +15,44 @@ import { debounce } from "lodash";
 import { exportDocentesToPDF } from "@utils/ExportPDF/exportDocentePDF";
 
 function DocenteListClient({ initialData, totalPages: initialTotalPages }) {
-  const [docentes, setDocentes] = useState(initialData);
+  const [docentes, setDocentes] = useState(initialData || []);
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(initialTotalPages);
+  const [totalPages, setTotalPages] = useState(initialTotalPages || 1);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [pageSize, setPageSize] = useState(10);
+  const [error, setError] = useState(null);
+
   const API = process.env.NEXT_PUBLIC_API_KEY;
 
-  const fetchDocentesData = async (page, query, size) => {
+  const fetchDocentesData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
     try {
-      const response = await fetchDocentes(query, page, size);
+      const response = await fetchDocentes(searchQuery, currentPage, pageSize);
       setDocentes(response.results);
       setTotalPages(response.totalPages);
     } catch (error) {
+      setError("Error al cargar los docentes.");
       console.error("Error fetching docentes:", error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [searchQuery, currentPage, pageSize]);
 
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
-  };
+  const debouncedFetch = useCallback(debounce(fetchDocentesData, 500), [fetchDocentesData]);
+
+  useEffect(() => {
+    debouncedFetch();
+    return () => debouncedFetch.cancel();
+  }, [debouncedFetch]);
+
+  const deleteDocente = useCallback(
+    (pk) => {
+      deleteEntity(`${API}api/docente/delete`, pk, setDocentes, "DocenteID");
+    },
+    [API]
+  );
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
@@ -48,24 +63,10 @@ function DocenteListClient({ initialData, totalPages: initialTotalPages }) {
     setCurrentPage(1);
   };
 
-  const deleteDocente = useCallback(
-    (pk) => {
-      deleteEntity(`${API}api/docente/delete`, pk, setDocentes, "DocenteID");
-    },
-    [API]
-  );
-
-  const debouncedFetchDocentesData = useCallback(
-    debounce(() => {
-      fetchDocentesData(currentPage, searchQuery, pageSize);
-    }, 500),
-    [currentPage, searchQuery, pageSize]
-  );
-
-  useEffect(() => {
-    debouncedFetchDocentesData();
-    return () => debouncedFetchDocentesData.cancel();
-  }, [debouncedFetchDocentesData]);
+  const handlePageSizeChange = (e) => {
+    setPageSize(Number(e.target.value));
+    setCurrentPage(1);
+  };
 
   if (loading) {
     return (
@@ -78,6 +79,7 @@ function DocenteListClient({ initialData, totalPages: initialTotalPages }) {
   return (
     <div className="mt-5">
       <h1 className="text-dark">Lista de Docentes</h1>
+      {error && <div className="alert alert-danger">{error}</div>}
 
       <div className="d-flex justify-content-between align-items-center mb-3 mt-3">
         <div className="d-flex gap-2">
@@ -91,9 +93,7 @@ function DocenteListClient({ initialData, totalPages: initialTotalPages }) {
               </Link>
               <button
                 className="btn btn-danger"
-                onClick={() =>
-                  exportDocentesToPDF(docentes, currentPage, pageSize)
-                }
+                onClick={() => exportDocentesToPDF(docentes, currentPage, pageSize)}
               >
                 Exportar PDF
               </button>
@@ -117,10 +117,7 @@ function DocenteListClient({ initialData, totalPages: initialTotalPages }) {
             className="form-select w-auto"
             style={{ height: "38px" }}
             value={pageSize}
-            onChange={(e) => {
-              setPageSize(Number(e.target.value));
-              setCurrentPage(1);
-            }}
+            onChange={handlePageSizeChange}
           >
             <option value={10}>10</option>
             <option value={25}>25</option>
@@ -132,9 +129,7 @@ function DocenteListClient({ initialData, totalPages: initialTotalPages }) {
       <Modal title="Importar Docente">
         <ImportExcel
           importURL={`${API}import/docente`}
-          onSuccess={() =>
-            fetchDocentesData(currentPage, searchQuery, pageSize)
-          }
+          onSuccess={fetchDocentesData}
         />
       </Modal>
 
@@ -183,31 +178,21 @@ function DocenteListClient({ initialData, totalPages: initialTotalPages }) {
                 <td>{d.DocenteTelefono}</td>
                 <td>{d.DocenteCorreoElectronico}</td>
                 <td>{d.DocenteEstado}</td>
-                <td>{d.universidadNombre}</td>
-                <td>{d.tipoDocenteNombre}</td>
-                <td>{d.categoriaDocenteNombre}</td>
+                <td>{d.universidadNombre || "—"}</td>
+                <td>{d.tipoDocenteNombre || "—"}</td>
+                <td>{d.categoriaDocenteNombre || "—"}</td>
                 <td>
                   <Link
                     className="btn btn-primary btn-sm"
                     href={`/docenteEdit/${d.DocenteID}`}
                   >
-                    <Image
-                      src="/edit.svg"
-                      alt="editar"
-                      width={20}
-                      height={20}
-                    />
+                    <Image src="/edit.svg" alt="editar" width={20} height={20} />
                   </Link>
                   <button
                     className="btn btn-danger btn-sm mx-2"
                     onClick={() => deleteDocente(d.DocenteID)}
                   >
-                    <Image
-                      src="/delete.svg"
-                      alt="borrar"
-                      width={20}
-                      height={20}
-                    />
+                    <Image src="/delete.svg" alt="borrar" width={20} height={20} />
                   </button>
                 </td>
               </tr>
@@ -220,7 +205,7 @@ function DocenteListClient({ initialData, totalPages: initialTotalPages }) {
         <Pagination
           page={currentPage}
           totalPages={totalPages}
-          onPageChange={handlePageChange}
+          onPageChange={setCurrentPage}
         />
       )}
     </div>
