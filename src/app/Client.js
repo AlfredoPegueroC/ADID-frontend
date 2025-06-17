@@ -106,38 +106,45 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
     }
   }, [selectedPeriodo, currentPage, searchQuery, pageSize, loadingPeriodos]);
 
-  useEffect(() => {
-    const CargarPeriodos = async () => {
-      setLoadingPeriodos(true);
-      
-      const cached = localStorage.getItem("periodosCache");
-      if (cached) {
-        const periodosGuardados = JSON.parse(cached);
-        setPeriodos(periodosGuardados);
-        if (!selectedPeriodo && periodosGuardados.length > 0) {
-          setSelectedPeriodo(periodosGuardados[0]);
-        }
-        setLoadingPeriodos(false);
-        return;
-      }
+useEffect(() => {
+  const cargarPeriodos = async () => {
+    setLoadingPeriodos(true);
 
-      try {
-        const periodosData = await fetchPeriodos();
-        const nombres = periodosData.results.map((p) => p.PeriodoNombre);
-        const ordenados = nombres.sort((a, b) => b.localeCompare(a));
-        setPeriodos(ordenados);
-        localStorage.setItem("periodosCache", JSON.stringify(ordenados));
-        if (!selectedPeriodo && ordenados.length > 0) {
-          setSelectedPeriodo(ordenados[0]);
-        }
-      } catch (error) {
-        console.error("Error al cargar periodos:", error);
-      } finally {
-        setLoadingPeriodos(false);
+    const cached = localStorage.getItem("periodosCache");
+    if (cached) {
+      const periodosGuardados = JSON.parse(cached);
+      setPeriodos(periodosGuardados);
+      if (!selectedPeriodo && periodosGuardados.length > 0) {
+        setSelectedPeriodo(periodosGuardados[0]);
       }
-    };
-    CargarPeriodos();
-  }, []);
+      setLoadingPeriodos(false);
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API}api/periodoacademico`);
+      if (!res.ok) throw new Error("Error al obtener los periodos");
+      const periodosData = await res.json();
+
+      const nombres = periodosData.results.map((p) => p.PeriodoNombre);
+      const ordenados = nombres.sort((a, b) => b.localeCompare(a));
+
+      setPeriodos(ordenados);
+      localStorage.setItem("periodosCache", JSON.stringify(ordenados));
+
+      if (!selectedPeriodo && ordenados.length > 0) {
+        setSelectedPeriodo(ordenados[0]);
+      }
+    } catch (error) {
+      console.error("Error al cargar periodos:", error);
+    } finally {
+      setLoadingPeriodos(false);
+    }
+  };
+
+  cargarPeriodos();
+}, []);
+
 
   useEffect(() => {
     const handleClickOutside = (event) => {

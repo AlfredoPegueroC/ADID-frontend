@@ -173,13 +173,13 @@ function PeriodoListClient({ initialData, totalPages: initialTotalPages }) {
                     className="btn btn-primary btn-sm"
                     href={`/periodoEdit/${periodo.PeriodoID}`}
                   >
-                    <Image src="/edit.svg" alt="editar" width={20} height={20} />
+                    editar
                   </Link>
                   <button
                     className="btn btn-danger btn-sm mx-2"
                     onClick={() => deletePeriodo(periodo.PeriodoID)}
                   >
-                    <Image src="/delete.svg" alt="borrar" width={20} height={20} />
+                    borrar
                   </button>
                 </td>
               </tr>

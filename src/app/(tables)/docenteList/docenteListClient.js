@@ -186,13 +186,13 @@ function DocenteListClient({ initialData, totalPages: initialTotalPages }) {
                     className="btn btn-primary btn-sm"
                     href={`/docenteEdit/${d.DocenteID}`}
                   >
-                    <Image src="/edit.svg" alt="editar" width={20} height={20} />
+                    editar
                   </Link>
                   <button
                     className="btn btn-danger btn-sm mx-2"
                     onClick={() => deleteDocente(d.DocenteID)}
                   >
-                    <Image src="/delete.svg" alt="borrar" width={20} height={20} />
+                    borrar
                   </button>
                 </td>
               </tr>

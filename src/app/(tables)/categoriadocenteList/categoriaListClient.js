@@ -183,13 +183,13 @@ function CategoriaListClient({ initialData, totalPages: initialTotalPages }) {
                     href={`/categoriaEdit/${categoria.CategoriaID}`}
                     className="btn btn-primary btn-sm"
                   >
-                    <Image src="/edit.svg" alt="editar" width={20} height={20} />
+                    editar
                   </Link>
                   <button
                     className="btn btn-danger btn-sm mx-2"
                     onClick={() => deleteCategoria(categoria.CategoriaID)}
                   >
-                    <Image src="/delete.svg" alt="borrar" width={20} height={20} />
+                   borrar
                   </button>
                 </td>
               </tr>

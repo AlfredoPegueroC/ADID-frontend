@@ -13,14 +13,14 @@ export async function fetchAsignacionData(
   if (searchQuery) params.append("search", searchQuery);
 
   try {
-    const response = await fetch(`${API}api/asignacion?${params.toString()}`, {
+    const response = await fetch(`${API}api/asignacion`, {
       cache: "no-store",
     });
-
+    console.log("Fetched data:", response);
     if (!response.ok) throw new Error("Failed to fetch asignaciones");
 
     const data = await response.json();
-    console.log("Fetched data:", data);
+    
 
     return {
       asignaciones: data.results || [],

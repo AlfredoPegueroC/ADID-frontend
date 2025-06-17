@@ -177,7 +177,7 @@ function FacultadListClient({ initialData, totalPages: initialTotalPages }) {
                     className="btn btn-danger btn-sm mx-2"
                     onClick={() => deleteFacultad(facultad.FacultadCodigo)} // Usamos FacultadCodigo para eliminar
                   >
-                    Eliminar
+                    borrar
                   </button>
                 </td>
               </tr>

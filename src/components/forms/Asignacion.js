@@ -100,7 +100,7 @@ export default function AsignacionForm() {
       console.log("Response:", formData);
       if (response.ok) {
         Notification.alertSuccess("Asignación creada con éxito");
-        router.push("/asignacionDocenteList");
+        // router.push("/asignacionDocenteList"); cambiar a la lista de asignaciones
       } else {
         Notification.alertError("Error al registrar la asignación");
       }

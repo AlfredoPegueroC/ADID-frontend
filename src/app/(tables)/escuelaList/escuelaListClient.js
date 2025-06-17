@@ -178,7 +178,7 @@ function EscuelaListClient() {
                       className="btn btn-danger btn-sm mx-2"
                       onClick={() => deleteEscuela(escuela.EscuelaId)}
                     >
-                      Eliminar
+                      borrar
                     </button>
                   </td>
                 </tr>
