@@ -29,7 +29,7 @@ function EscuelaListClient() {
     setLoading(true);
     setError(null);
     try {
-      const { results, totalPages } = await fetchEscuelas(query, page, size);
+      const { results, totalPages } = await fetchEscuelas(page,query, size);
       setEscuelas(results);
       setTotalPages(totalPages);
     } catch (error) {

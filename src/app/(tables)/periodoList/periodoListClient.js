@@ -21,30 +21,44 @@ function PeriodoListClient({ initialData, totalPages: initialTotalPages }) {
   const [totalPages, setTotalPages] = useState(initialTotalPages || 1);
   const [searchQuery, setSearchQuery] = useState("");
   const [pageSize, setPageSize] = useState(10);
+  const [loading, setLoading] = useState(false);
 
   const API = process.env.NEXT_PUBLIC_API_KEY;
 
   const deletePeriodo = (pk) => {
-    deleteEntity(`${API}api/periodoacademico/delete`, pk, setPeriodos, "PeriodoCodigo");
+    deleteEntity(`${API}api/periodoacademico/delete`, pk, setPeriodos, "PeriodoID");
   };
 
-  const fetchData = async (query, pageNum, size) => {
-    const { results, totalPages } = await fetchPeriodos(query, pageNum, size);
-    setPeriodos(results);
-    setTotalPages(totalPages);
+  const fetchData = async (pageNum, query, size) => {
+    setLoading(true);
+    try {
+      const { results, totalPages } = await fetchPeriodos(pageNum, query, size);
+      setPeriodos(results);
+      setTotalPages(totalPages);
+    } catch (error) {
+      console.error("Error al obtener periodos:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const debouncedFetchData = useCallback(
-    debounce((query, pageNum, size) => {
-      fetchData(query, pageNum, size);
-    }, 300),
+    debounce((pageNum, query, size) => {
+      fetchData(pageNum, query, size);
+    }, 400),
     []
   );
+
+  // useEffect para buscar y paginar con debounce
+  useEffect(() => {
+    debouncedFetchData(page, searchQuery, pageSize);
+    return () => debouncedFetchData.cancel();
+  }, [page, searchQuery, pageSize, debouncedFetchData]);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     setPage(1);
-    fetchData(searchQuery, 1, pageSize);
+    fetchData(1, searchQuery, pageSize);
   };
 
   const handleSearchChange = (e) => {
@@ -53,13 +67,15 @@ function PeriodoListClient({ initialData, totalPages: initialTotalPages }) {
 
   const handlePageChange = (newPage) => {
     setPage(newPage);
-    fetchData(searchQuery, newPage, pageSize);
+    // No hace falta fetchData aquí porque useEffect con debounce lo hace
   };
 
-  useEffect(() => {
-    debouncedFetchData(searchQuery, page, pageSize);
-    return () => debouncedFetchData.cancel();
-  }, [searchQuery, pageSize, debouncedFetchData]);
+  const handlePageSizeChange = (e) => {
+    const newSize = Number(e.target.value);
+    setPageSize(newSize);
+    setPage(1);
+    // No hace falta llamar fetchData explícitamente por useEffect
+  };
 
   return (
     <div className="mt-5">
@@ -83,17 +99,12 @@ function PeriodoListClient({ initialData, totalPages: initialTotalPages }) {
         </div>
 
         <div className="d-flex align-items-center gap-2">
-          <label className="fw-bold mb-0 text text-black">Resultados por página:</label>
+          <label className="fw-bold mb-0 text-black">Resultados por página:</label>
           <select
             className="form-select w-auto"
             style={{ height: "38px" }}
             value={pageSize}
-            onChange={(e) => {
-              const newSize = Number(e.target.value);
-              setPageSize(newSize);
-              setPage(1);
-              fetchData(searchQuery, 1, newSize);
-            }}
+            onChange={handlePageSizeChange}
           >
             <option value={10}>10</option>
             <option value={25}>25</option>
@@ -106,9 +117,7 @@ function PeriodoListClient({ initialData, totalPages: initialTotalPages }) {
         <Periodo
           title="Registrar Periodo"
           onSuccess={async () => {
-            const { results, totalPages } = await fetchPeriodos(searchQuery, page, pageSize);
-            setPeriodos(results);
-            setTotalPages(totalPages);
+            await fetchData(page, searchQuery, pageSize);
           }}
         />
       </Modal>
@@ -135,7 +144,13 @@ function PeriodoListClient({ initialData, totalPages: initialTotalPages }) {
           </tr>
         </thead>
         <tbody>
-          {periodos.length === 0 ? (
+          {loading ? (
+            <tr>
+              <td colSpan="10" className="text-center">
+                Cargando...
+              </td>
+            </tr>
+          ) : periodos.length === 0 ? (
             <tr>
               <td colSpan="10" className="text-center">
                 No se encontraron periodos académicos.
@@ -143,7 +158,7 @@ function PeriodoListClient({ initialData, totalPages: initialTotalPages }) {
             </tr>
           ) : (
             periodos.map((periodo, index) => (
-              <tr key={periodo.PeriodoCodigo}>
+              <tr key={periodo.PeriodoID}>
                 <td>{index + 1 + (page - 1) * pageSize}</td>
                 <td>{periodo.PeriodoCodigo}</td>
                 <td>{periodo.PeriodoNombre}</td>

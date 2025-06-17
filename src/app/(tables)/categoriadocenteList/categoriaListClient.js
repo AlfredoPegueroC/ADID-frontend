@@ -22,14 +22,16 @@ function CategoriaListClient({ initialData, totalPages: initialTotalPages }) {
   const [totalPages, setTotalPages] = useState(initialTotalPages);
   const [searchQuery, setSearchQuery] = useState("");
   const [pageSize, setPageSize] = useState(10);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   const API = process.env.NEXT_PUBLIC_API_KEY;
   const importURL = `${API}import/categoriaDocente`;
 
-  const fetchCategoriasData = async (query, page, size) => {
+  // Función para cargar datos
+  const fetchCategoriasData = async (page, query, size) => {
+    setLoading(true);
     try {
-      const { results, totalPages } = await fetchCategorias(query, page, size);
+      const { results, totalPages } = await fetchCategorias(page, query, size);
       setCategorias(results);
       setTotalPages(totalPages);
     } catch (error) {
@@ -39,27 +41,34 @@ function CategoriaListClient({ initialData, totalPages: initialTotalPages }) {
     }
   };
 
+  // debounce para búsqueda y cambios rápidos
   const debouncedFetchCategorias = useCallback(
-    debounce(() => {
-      fetchCategoriasData(searchQuery, currentPage, pageSize);
+    debounce((page, query, size) => {
+      fetchCategoriasData(page, query, size);
     }, 400),
-    [searchQuery, currentPage, pageSize]
+    []
   );
 
+  // Efecto para cargar datos cuando cambian búsqueda, página o tamaño de página
   useEffect(() => {
-    debouncedFetchCategorias();
+    debouncedFetchCategorias(currentPage, searchQuery, pageSize);
+    // Cancelar debounce al desmontar o cambiar parámetros
     return () => debouncedFetchCategorias.cancel();
-  }, [debouncedFetchCategorias]);
+  }, [searchQuery, currentPage, pageSize, debouncedFetchCategorias]);
 
+  // Cuando se envía el formulario de búsqueda, reiniciamos la página
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    setCurrentPage(1);
+    // Nota: no es necesario llamar fetch aquí porque el useEffect ya se activa
+  };
+
+  // Cambiar texto búsqueda
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
   };
 
-  const handleSearchSubmit = (e) => {
-    e.preventDefault();
-    setCurrentPage(1);
-  };
-
+  // Borrar categoría
   const deleteCategoria = (pk) => {
     deleteEntity(
       `${API}api/categoriadocente/delete`,
@@ -78,6 +87,7 @@ function CategoriaListClient({ initialData, totalPages: initialTotalPages }) {
           <Link className="btn btn-primary" href="/categoriadocente">
             Nueva Categoría
           </Link>
+
           {categorias.length > 0 && (
             <>
               <Link
@@ -86,6 +96,7 @@ function CategoriaListClient({ initialData, totalPages: initialTotalPages }) {
               >
                 Exportar
               </Link>
+
               <button
                 className="btn btn-danger"
                 onClick={() =>
@@ -96,6 +107,7 @@ function CategoriaListClient({ initialData, totalPages: initialTotalPages }) {
               </button>
             </>
           )}
+
           <button
             type="button"
             className="btn btn-warning"
@@ -114,7 +126,7 @@ function CategoriaListClient({ initialData, totalPages: initialTotalPages }) {
             value={pageSize}
             onChange={(e) => {
               setPageSize(Number(e.target.value));
-              setCurrentPage(1);
+              setCurrentPage(1); // Reiniciar página al cambiar tamaño
             }}
           >
             <option value={10}>10</option>
@@ -125,7 +137,7 @@ function CategoriaListClient({ initialData, totalPages: initialTotalPages }) {
       </div>
 
       <Modal title="Importar Categoría">
-        <ImportExcel importURL={importURL} onSuccess={debouncedFetchCategorias} />
+        <ImportExcel importURL={importURL} onSuccess={() => fetchCategoriasData(searchQuery, currentPage, pageSize)} />
       </Modal>
 
       <Search
@@ -146,7 +158,13 @@ function CategoriaListClient({ initialData, totalPages: initialTotalPages }) {
           </tr>
         </thead>
         <tbody>
-          {categorias.length === 0 ? (
+          {loading ? (
+            <tr>
+              <td colSpan="6" className="text-center">
+                Cargando...
+              </td>
+            </tr>
+          ) : categorias.length === 0 ? (
             <tr>
               <td colSpan="6" className="text-center">
                 No se encontraron categorías.

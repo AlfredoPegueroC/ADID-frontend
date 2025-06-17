@@ -15,6 +15,7 @@ export async function fetchTipoDocentes(page = 1, searchQuery = "", pageSize = 1
     if (!response.ok) throw new Error("Failed to fetch tipo docentes");
 
     const data = await response.json();
+    console.log("Tipo docentes data:", data);
     return {
       results: data.results || [],
       totalPages: Math.ceil(data.count / pageSize),

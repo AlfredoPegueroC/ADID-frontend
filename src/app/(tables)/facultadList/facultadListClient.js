@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { debounce } from "lodash";
 
 import Pagination from "@components/Pagination";
@@ -34,19 +33,30 @@ function FacultadListClient({ initialData, totalPages: initialTotalPages }) {
     );
   };
 
-  const fetchData = async (query, page, size) => {
-    const response = await fetchFacultades(query, page, size);
-    setFacultades(response.results);
-    setTotalPages(response.totalPages);
+  const fetchData = async (page, query, size) => {
+    try {
+      const response = await fetchFacultades(page, query, size);
+      setFacultades(response.results);
+      setTotalPages(response.totalPages);
+    } catch (error) {
+      console.error("Error fetching facultades:", error);
+    }
   };
 
+  // Corregido el orden de los parámetros
   const debouncedFetchData = useCallback(
     debounce(() => {
-      fetchData(searchQuery, page, pageSize);
+      fetchData(page, searchQuery, pageSize);
     }, 300),
-    [searchQuery, page, pageSize]
+    [page, searchQuery, pageSize]
   );
 
+  // Ejecutar fetchData cuando cambian page o pageSize
+  useEffect(() => {
+    fetchData(page, searchQuery, pageSize);
+  }, [page, pageSize]);
+
+  // Ejecutar búsqueda con debounce al cambiar searchQuery o página
   useEffect(() => {
     debouncedFetchData();
     return () => debouncedFetchData.cancel();
@@ -59,6 +69,7 @@ function FacultadListClient({ initialData, totalPages: initialTotalPages }) {
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     setPage(1);
+    fetchData(1, searchQuery, pageSize);
   };
 
   return (
@@ -77,9 +88,7 @@ function FacultadListClient({ initialData, totalPages: initialTotalPages }) {
               </Link>
               <button
                 className="btn btn-danger"
-                onClick={() =>
-                  exportFacultadesToPDF(facultades, page, pageSize)
-                }
+                onClick={() => exportFacultadesToPDF(facultades, page, pageSize)}
               >
                 Exportar PDF
               </button>
@@ -96,9 +105,7 @@ function FacultadListClient({ initialData, totalPages: initialTotalPages }) {
         </div>
 
         <div className="d-flex align-items-center gap-2">
-          <label className="fw-bold mb-0 text-black">
-            Resultados por página:
-          </label>
+          <label className="fw-bold mb-0 text-black">Resultados por página:</label>
           <select
             className="form-select w-auto"
             style={{ height: "38px" }}
@@ -116,10 +123,7 @@ function FacultadListClient({ initialData, totalPages: initialTotalPages }) {
       </div>
 
       <Modal title="Importar Facultad">
-        <ImportExcel
-          importURL={Api_import_URL}
-          onSuccess={debouncedFetchData}
-        />
+        <ImportExcel importURL={Api_import_URL} onSuccess={debouncedFetchData} />
       </Modal>
 
       <Search
@@ -171,7 +175,7 @@ function FacultadListClient({ initialData, totalPages: initialTotalPages }) {
                   </Link>
                   <button
                     className="btn btn-danger btn-sm mx-2"
-                    onClick={() => deleteFacultad(facultad.FacultadID)}
+                    onClick={() => deleteFacultad(facultad.FacultadCodigo)} // Usamos FacultadCodigo para eliminar
                   >
                     Eliminar
                   </button>
@@ -183,11 +187,7 @@ function FacultadListClient({ initialData, totalPages: initialTotalPages }) {
       </Tables>
 
       {totalPages > 1 && (
-        <Pagination
-          page={page}
-          totalPages={totalPages}
-          onPageChange={setPage}
-        />
+        <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
       )}
     </div>
   );

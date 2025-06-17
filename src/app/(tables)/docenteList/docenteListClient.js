@@ -29,7 +29,7 @@ function DocenteListClient({ initialData, totalPages: initialTotalPages }) {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetchDocentes(searchQuery, currentPage, pageSize);
+      const response = await fetchDocentes(currentPage, searchQuery, pageSize);
       setDocentes(response.results);
       setTotalPages(response.totalPages);
     } catch (error) {
@@ -38,7 +38,7 @@ function DocenteListClient({ initialData, totalPages: initialTotalPages }) {
     } finally {
       setLoading(false);
     }
-  }, [searchQuery, currentPage, pageSize]);
+  }, [currentPage, searchQuery, pageSize]);
 
   const debouncedFetch = useCallback(debounce(fetchDocentesData, 500), [fetchDocentesData]);
 

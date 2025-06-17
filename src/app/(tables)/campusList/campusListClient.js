@@ -25,7 +25,7 @@ function CampusListClient({ initialData, totalPages: initialTotalPages }) {
   const fetchData = async (page, query, size) => {
     setLoading(true);
     try {
-      const response = await fetchCampus(query, page, size);
+      const response = await fetchCampus(page, query, size);
       setCampusList(response.results);
       setTotalPages(response.totalPages);
     } catch (error) {
