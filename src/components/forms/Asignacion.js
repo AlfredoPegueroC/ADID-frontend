@@ -92,12 +92,12 @@ export default function AsignacionForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(`${API}api/asignacionDocente/create`, {
+      const response = await fetch(`${API}api/asignacion/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
-
+      console.log("Response:", formData);
       if (response.ok) {
         Notification.alertSuccess("Asignación creada con éxito");
         router.push("/asignacionDocenteList");
@@ -392,7 +392,7 @@ export default function AsignacionForm() {
               -- Seleccione una Escuela --
             </option>
             {escuelas.map((e) => (
-              <option key={e.EscuelaID} value={e.EscuelaID}>
+              <option key={e.EscuelaId} value={e.EscuelaId}>
                 {e.EscuelaNombre}
               </option>
             ))}
@@ -412,7 +412,7 @@ export default function AsignacionForm() {
               -- Seleccione un Periodo --
             </option>
             {periodos.map((p) => (
-              <option key={p.PeriodoAcademicoID} value={p.PeriodoAcademicoID}>
+              <option key={p.PeriodoID} value={p.PeriodoID}>
                 {p.PeriodoNombre}
               </option>
             ))}
