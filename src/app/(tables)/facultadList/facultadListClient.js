@@ -53,12 +53,7 @@ function FacultadListClient({ initialData, totalPages: initialTotalPages }) {
 
   // Función para eliminar facultad localmente y en backend
   const deleteFacultad = (pk) => {
-    deleteEntity(
-      `${API}api/facultad/delete`,
-      pk,
-      setFacultades,
-      "FacultadID"
-    );
+    deleteEntity(`${API}api/facultad/delete`, pk, setFacultades, "FacultadID");
   };
 
   const handleSearchChange = (e) => {
@@ -88,7 +83,9 @@ function FacultadListClient({ initialData, totalPages: initialTotalPages }) {
               </Link>
               <button
                 className="btn btn-danger"
-                onClick={() => exportFacultadesToPDF(facultades, page, pageSize)}
+                onClick={() =>
+                  exportFacultadesToPDF(facultades, page, pageSize)
+                }
               >
                 Exportar PDF
               </button>
@@ -102,10 +99,17 @@ function FacultadListClient({ initialData, totalPages: initialTotalPages }) {
           >
             Importar
           </button>
+          <Search
+            SearchSubmit={handleSearchSubmit}
+            SearchChange={handleSearchChange}
+            searchQuery={searchQuery}
+          />
         </div>
 
         <div className="d-flex align-items-center gap-2">
-          <label className="fw-bold mb-0 text-black">Resultados por página:</label>
+          <label className="fw-bold mb-0 text-black">
+            Resultados por página:
+          </label>
           <select
             className="form-select w-auto"
             style={{ height: "38px" }}
@@ -123,14 +127,11 @@ function FacultadListClient({ initialData, totalPages: initialTotalPages }) {
       </div>
 
       <Modal title="Importar Facultad">
-        <ImportExcel importURL={Api_import_URL} onSuccess={() => fetchData(page, searchQuery, pageSize)} />
+        <ImportExcel
+          importURL={Api_import_URL}
+          onSuccess={() => fetchData(page, searchQuery, pageSize)}
+        />
       </Modal>
-
-      <Search
-        SearchSubmit={handleSearchSubmit}
-        SearchChange={handleSearchChange}
-        searchQuery={searchQuery}
-      />
 
       <Tables>
         <thead>
@@ -193,11 +194,14 @@ function FacultadListClient({ initialData, totalPages: initialTotalPages }) {
       </Tables>
 
       {totalPages > 1 && (
-        <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
+        />
       )}
     </div>
   );
 }
 
 export default withAuth(FacultadListClient);
-

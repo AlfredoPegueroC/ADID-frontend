@@ -94,7 +94,9 @@ function CampusListClient({ initialData, totalPages: initialTotalPages }) {
               </Link>
               <button
                 className="btn btn-danger"
-                onClick={() => exportCampusToPDF(campusList, currentPage, pageSize)}
+                onClick={() =>
+                  exportCampusToPDF(campusList, currentPage, pageSize)
+                }
               >
                 Exportar PDF
               </button>
@@ -108,10 +110,17 @@ function CampusListClient({ initialData, totalPages: initialTotalPages }) {
           >
             Importar
           </button>
+          <Search
+            SearchSubmit={handleSearchSubmit}
+            SearchChange={handleSearchChange}
+            searchQuery={searchQuery}
+          />
         </div>
 
         <div className="d-flex align-items-center gap-2">
-          <label className="fw-bold mb-0 text-black">Resultados por página:</label>
+          <label className="fw-bold mb-0 text-black">
+            Resultados por página:
+          </label>
           <select
             className="form-select w-auto"
             style={{ height: "38px" }}
@@ -131,12 +140,6 @@ function CampusListClient({ initialData, totalPages: initialTotalPages }) {
           onSuccess={() => fetchData(currentPage, searchQuery, pageSize)}
         />
       </Modal>
-
-      <Search
-        SearchSubmit={handleSearchSubmit}
-        SearchChange={handleSearchChange}
-        searchQuery={searchQuery}
-      />
 
       {loading ? (
         <div className="text-center">Cargando...</div>
@@ -208,4 +211,3 @@ function CampusListClient({ initialData, totalPages: initialTotalPages }) {
 }
 
 export default withAuth(CampusListClient);
-

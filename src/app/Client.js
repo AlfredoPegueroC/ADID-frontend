@@ -107,46 +107,6 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
     }
   }, [selectedPeriodo, currentPage, searchQuery, pageSize, loadingPeriodos]);
 
-// useEffect(() => {
-  
-//   const cargarPeriodos = async () => {
-//     setLoadingPeriodos(true);
-
-//     // const cached = localStorage.getItem("periodosCache");
-//     // if (cached) {
-//     //   const periodosGuardados = JSON.parse(cached);
-//     //   setPeriodos(periodosGuardados);
-//     //   if (!selectedPeriodo && periodosGuardados.length > 0) {
-//     //     setSelectedPeriodo(periodosGuardados[0]);
-//     //   }
-//     //   setLoadingPeriodos(false);
-//     //   return;
-//     // }
-//     console.log("Cargando periodos desde API...");
-//     try {
-//       const res = await fetch(`${API}api/periodoacademico`);
-//       if (!res.ok) throw new Error("Error al obtener los periodos");
-//       const periodosData = await res.json();
-//       console.log("Periodos obtenidos:", periodosData);
-
-//       const nombres = periodosData.results.map((p) => p.PeriodoNombre);
-//       const ordenados = nombres.sort((a, b) => b.localeCompare(a));
-
-//       setPeriodos(ordenados);
-//       localStorage.setItem("periodosCache", JSON.stringify(ordenados));
-
-//       if (!selectedPeriodo && ordenados.length > 0) {
-//         setSelectedPeriodo(ordenados[0]);
-//       }
-//     } catch (error) {
-//       console.error("Error al cargar periodos:", error);
-//     } finally {
-//       setLoadingPeriodos(false);
-//     }
-//   };
-
-//   cargarPeriodos();
-// }, []);
 
 useEffect(() => {
   const cargarPeriodos = async () => {
@@ -325,6 +285,8 @@ useEffect(() => {
             ))}
           </div>
         </div>
+        <Search SearchSubmit={handleSearchSubmit} SearchChange={debouncedSearchChange} searchQuery={searchQuery} />
+
 
         <div className="d-flex align-items-center gap-2 ms-auto">
           <label className="fw-bold mb-0 text-black">Resultados por página:</label>
@@ -344,46 +306,53 @@ useEffect(() => {
         </div>
       </div>
 
-      <Search SearchSubmit={handleSearchSubmit} SearchChange={debouncedSearchChange} searchQuery={searchQuery} />
+      
 
       {loading ? (
-        <div className="d-flex justify-content-center my-5">
-          <div className="spinner-border text-primary" role="status" style={{ width: '3rem', height: '3rem' }}>
-            <span className="visually-hidden">Cargando...</span>
-          </div>
-        </div>
-      ) : asignaciones.length === 0 ? (
-        selectedPeriodo ? (
-          <div className="alert alert-info" role="alert">
-            🛈 El período <strong>{selectedPeriodo}</strong> no tiene asignaciones registradas.
-          </div>
-        ) : (
-          <div className="alert alert-secondary" role="alert">
-            Seleccione un período para ver las asignaciones.
-          </div>
-        )
+  <div className="d-flex justify-content-center my-5">
+    <div
+      className="spinner-border text-primary"
+      role="status"
+      style={{ width: "3rem", height: "3rem" }}
+    >
+      <span className="visually-hidden">Cargando...</span>
+    </div>
+  </div>
+) : (
+  <Tables>
+    <thead>
+      {table.getHeaderGroups().map((headerGroup) => (
+        <tr key={headerGroup.id}>
+          {headerGroup.headers.map((header) => (
+            <th key={header.id}>
+              {flexRender(header.column.columnDef.header, header.getContext())}
+            </th>
+          ))}
+        </tr>
+      ))}
+    </thead>
+    <tbody>
+      {table.getRowModel().rows.length === 0 ? (
+        <tr>
+          <td colSpan={table.getAllLeafColumns().length} className="text-center py-4">
+            No se encontraron resultados.
+          </td>
+        </tr>
       ) : (
-        <Tables>
-          <thead>
-            {table.getHeaderGroups().map(headerGroup => (
-              <tr key={headerGroup.id}>
-                {headerGroup.headers.map(header => (
-                  <th key={header.id}>{flexRender(header.column.columnDef.header, header.getContext())}</th>
-                ))}
-              </tr>
+        table.getRowModel().rows.map((row) => (
+          <tr key={row.id}>
+            {row.getVisibleCells().map((cell) => (
+              <td key={cell.id}>
+                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+              </td>
             ))}
-          </thead>
-          <tbody>
-            {table.getRowModel().rows.map(row => (
-              <tr key={row.id}>
-                {row.getVisibleCells().map(cell => (
-                  <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </Tables>
+          </tr>
+        ))
       )}
+    </tbody>
+  </Tables>
+)}
+
 
       {totalPages > 1 && (
         <Pagination page={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />

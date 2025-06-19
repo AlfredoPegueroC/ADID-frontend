@@ -30,7 +30,11 @@ function UniversidadListClient({ initialData }) {
     debounce(async (page, search, size) => {
       try {
         setLoading(true);
-        const { results, totalPages } = await fetchUniversidades(page, search, size);
+        const { results, totalPages } = await fetchUniversidades(
+          page,
+          search,
+          size
+        );
         setUniversidades(results);
         setTotalPages(totalPages);
       } catch (error) {
@@ -61,7 +65,7 @@ function UniversidadListClient({ initialData }) {
       <h1 className="text-dark mt-5">Lista de Universidades</h1>
 
       <div className="d-flex justify-content-between align-items-center mb-3 mt-3">
-        <div className="d-flex gap-1">
+        <div className="d-flex gap-2">
           <Link className="btn btn-primary" href="/universidad">
             Nueva Universidad
           </Link>
@@ -76,7 +80,9 @@ function UniversidadListClient({ initialData }) {
               </Link>
               <button
                 className="btn btn-danger"
-                onClick={() => exportUniversidadesToPDF(universidades, page, pageSize)}
+                onClick={() =>
+                  exportUniversidadesToPDF(universidades, page, pageSize)
+                }
               >
                 Exportar PDF
               </button>
@@ -91,10 +97,22 @@ function UniversidadListClient({ initialData }) {
           >
             Importar
           </button>
+
+          <Search
+            SearchSubmit={(e) => e.preventDefault()}
+            SearchChange={(e) => {
+              const newValue = e.target.value;
+              setSearchQuery(newValue);
+              setPage(1);
+            }}
+            searchQuery={searchQuery}
+          />
         </div>
 
         <div className="d-flex align-items-center gap-2">
-          <label className="fw-bold mb-0 text-black">Resultados por página:</label>
+          <label className="fw-bold mb-0 text-black">
+            Resultados por página:
+          </label>
           <select
             className="form-select w-auto"
             style={{ height: "38px" }}
@@ -119,16 +137,6 @@ function UniversidadListClient({ initialData }) {
         />
       </Modal>
 
-      <Search
-        SearchSubmit={(e) => e.preventDefault()}
-        SearchChange={(e) => {
-          const newValue = e.target.value;
-          setSearchQuery(newValue);
-          setPage(1);
-        }}
-        searchQuery={searchQuery}
-      />
-
       <Tables>
         <thead>
           <tr>
@@ -147,11 +155,15 @@ function UniversidadListClient({ initialData }) {
         <tbody>
           {loading ? (
             <tr>
-              <td colSpan="10" className="text-center">Cargando...</td>
+              <td colSpan="10" className="text-center">
+                Cargando...
+              </td>
             </tr>
           ) : universidades.length === 0 ? (
             <tr>
-              <td colSpan="10" className="text-center">No se encontraron universidades.</td>
+              <td colSpan="10" className="text-center">
+                No se encontraron universidades.
+              </td>
             </tr>
           ) : (
             universidades.map((universidad, index) => (
@@ -194,14 +206,17 @@ function UniversidadListClient({ initialData }) {
       </Tables>
 
       {totalPages > 1 && (
-        <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
+        />
       )}
     </div>
   );
 }
 
 export default withAuth(UniversidadListClient);
-
 
 // export async function getServerSideProps(context) {
 //   const { page = 1, searchQuery = "", pageSize = 10 } = context.query;

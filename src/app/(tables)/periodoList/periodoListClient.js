@@ -26,7 +26,12 @@ function PeriodoListClient({ initialData, totalPages: initialTotalPages }) {
   const API = process.env.NEXT_PUBLIC_API_KEY;
 
   const deletePeriodo = (pk) => {
-    deleteEntity(`${API}api/periodoacademico/delete`, pk, setPeriodos, "PeriodoID");
+    deleteEntity(
+      `${API}api/periodoacademico/delete`,
+      pk,
+      setPeriodos,
+      "PeriodoID"
+    );
   };
 
   const fetchData = async (pageNum, query, size) => {
@@ -92,14 +97,24 @@ function PeriodoListClient({ initialData, totalPages: initialTotalPages }) {
             Nuevo Periodo Académico
           </button>
           {periodos.length > 0 && (
-            <Link className="btn btn-success" href={`${API}export/periodoAcademico`}>
+            <Link
+              className="btn btn-success"
+              href={`${API}export/periodoAcademico`}
+            >
               Exportar
             </Link>
           )}
+          <Search
+            SearchSubmit={handleSearchSubmit}
+            SearchChange={handleSearchChange}
+            searchQuery={searchQuery}
+          />
         </div>
 
         <div className="d-flex align-items-center gap-2">
-          <label className="fw-bold mb-0 text-black">Resultados por página:</label>
+          <label className="fw-bold mb-0 text-black">
+            Resultados por página:
+          </label>
           <select
             className="form-select w-auto"
             style={{ height: "38px" }}
@@ -121,12 +136,6 @@ function PeriodoListClient({ initialData, totalPages: initialTotalPages }) {
           }}
         />
       </Modal>
-
-      <Search
-        SearchSubmit={handleSearchSubmit}
-        SearchChange={handleSearchChange}
-        searchQuery={searchQuery}
-      />
 
       <Tables>
         <thead>
@@ -189,11 +198,14 @@ function PeriodoListClient({ initialData, totalPages: initialTotalPages }) {
       </Tables>
 
       {totalPages > 1 && (
-        <Pagination page={page} totalPages={totalPages} onPageChange={handlePageChange} />
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
       )}
     </div>
   );
 }
 
 export default withAuth(PeriodoListClient);
-

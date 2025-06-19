@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import Styles from "@styles/form.module.css";
+import Styles from "@styles/test.module.css";
 import Notification from "../Notification";
 
 export default function Periodo({ title, onSuccess }) {

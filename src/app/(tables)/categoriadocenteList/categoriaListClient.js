@@ -116,10 +116,18 @@ function CategoriaListClient({ initialData, totalPages: initialTotalPages }) {
           >
             Importar
           </button>
+
+          <Search
+            SearchSubmit={handleSearchSubmit}
+            SearchChange={handleSearchChange}
+            searchQuery={searchQuery}
+          />
         </div>
 
         <div className="d-flex align-items-center gap-2">
-          <label className="fw-bold mb-0 text-black">Resultados por página:</label>
+          <label className="fw-bold mb-0 text-black">
+            Resultados por página:
+          </label>
           <select
             className="form-select w-auto"
             style={{ height: "38px" }}
@@ -137,14 +145,13 @@ function CategoriaListClient({ initialData, totalPages: initialTotalPages }) {
       </div>
 
       <Modal title="Importar Categoría">
-        <ImportExcel importURL={importURL} onSuccess={() => fetchCategoriasData(searchQuery, currentPage, pageSize)} />
+        <ImportExcel
+          importURL={importURL}
+          onSuccess={() =>
+            fetchCategoriasData(searchQuery, currentPage, pageSize)
+          }
+        />
       </Modal>
-
-      <Search
-        SearchSubmit={handleSearchSubmit}
-        SearchChange={handleSearchChange}
-        searchQuery={searchQuery}
-      />
 
       <Tables>
         <thead>
@@ -189,7 +196,7 @@ function CategoriaListClient({ initialData, totalPages: initialTotalPages }) {
                     className="btn btn-danger btn-sm mx-2"
                     onClick={() => deleteCategoria(categoria.CategoriaID)}
                   >
-                   borrar
+                    borrar
                   </button>
                 </td>
               </tr>

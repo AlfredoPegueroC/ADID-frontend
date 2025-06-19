@@ -40,7 +40,9 @@ function DocenteListClient({ initialData, totalPages: initialTotalPages }) {
     }
   }, [currentPage, searchQuery, pageSize]);
 
-  const debouncedFetch = useCallback(debounce(fetchDocentesData, 500), [fetchDocentesData]);
+  const debouncedFetch = useCallback(debounce(fetchDocentesData, 500), [
+    fetchDocentesData,
+  ]);
 
   useEffect(() => {
     debouncedFetch();
@@ -93,7 +95,9 @@ function DocenteListClient({ initialData, totalPages: initialTotalPages }) {
               </Link>
               <button
                 className="btn btn-danger"
-                onClick={() => exportDocentesToPDF(docentes, currentPage, pageSize)}
+                onClick={() =>
+                  exportDocentesToPDF(docentes, currentPage, pageSize)
+                }
               >
                 Exportar PDF
               </button>
@@ -107,6 +111,11 @@ function DocenteListClient({ initialData, totalPages: initialTotalPages }) {
           >
             Importar
           </button>
+          <Search
+            SearchSubmit={handleSearchSubmit}
+            SearchChange={handleSearchChange}
+            searchQuery={searchQuery}
+          />
         </div>
 
         <div className="d-flex align-items-center gap-2">
@@ -132,12 +141,6 @@ function DocenteListClient({ initialData, totalPages: initialTotalPages }) {
           onSuccess={fetchDocentesData}
         />
       </Modal>
-
-      <Search
-        SearchSubmit={handleSearchSubmit}
-        SearchChange={handleSearchChange}
-        searchQuery={searchQuery}
-      />
 
       <Tables>
         <thead>

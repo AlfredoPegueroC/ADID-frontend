@@ -101,10 +101,17 @@ function EscuelaListClient() {
           >
             Importar
           </button>
+          <Search
+            SearchSubmit={handleSearchSubmit}
+            SearchChange={handleSearchChange}
+            searchQuery={searchQuery}
+          />
         </div>
 
         <div className="d-flex align-items-center gap-2">
-          <label className="fw-bold mb-0 text-black">Resultados por página:</label>
+          <label className="fw-bold mb-0 text-black">
+            Resultados por página:
+          </label>
           <select
             className="form-select w-auto"
             style={{ height: "38px" }}
@@ -122,14 +129,11 @@ function EscuelaListClient() {
       </div>
 
       <Modal title="Importar Escuela">
-        <ImportExcel importURL={Api_import_URL} onSuccess={() => fetchData(page, searchQuery, pageSize)} />
+        <ImportExcel
+          importURL={Api_import_URL}
+          onSuccess={() => fetchData(page, searchQuery, pageSize)}
+        />
       </Modal>
-
-      <Search
-        SearchSubmit={handleSearchSubmit}
-        SearchChange={handleSearchChange}
-        searchQuery={searchQuery}
-      />
 
       {loading ? (
         <div className="text-center">Cargando...</div>
@@ -190,11 +194,14 @@ function EscuelaListClient() {
       )}
 
       {totalPages > 1 && (
-        <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
+        />
       )}
     </div>
   );
 }
 
 export default withAuth(EscuelaListClient);
-

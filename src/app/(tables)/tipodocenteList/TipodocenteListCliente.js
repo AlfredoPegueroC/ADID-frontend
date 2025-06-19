@@ -11,7 +11,7 @@ import Search from "@components/search";
 import Tables from "@components/Tables";
 import Pagination from "@components/Pagination";
 
-import { exportTipoDocenteToPDF } from "@utils/ExportPDF/exportTipoPDF"
+import { exportTipoDocenteToPDF } from "@utils/ExportPDF/exportTipoPDF";
 import withAuth from "@utils/withAuth";
 import { deleteEntity } from "@utils/delete";
 import { fetchTipoDocentes } from "@api/tipoDocenteService";
@@ -31,7 +31,11 @@ function TipoDocenteListClient({ initialData, totalPages: initialTotalPages }) {
   const fetchTipoDocentesData = async (page, query, size) => {
     setLoading(true);
     try {
-      const { results, totalPages } = await fetchTipoDocentes(page, query, size);
+      const { results, totalPages } = await fetchTipoDocentes(
+        page,
+        query,
+        size
+      );
       setTipos(results);
       setTotalPages(totalPages);
     } catch (error) {
@@ -70,12 +74,7 @@ function TipoDocenteListClient({ initialData, totalPages: initialTotalPages }) {
 
   // Borrar tipo docente
   const deleteTipoDocente = (pk) => {
-    deleteEntity(
-      `${API}api/tipodocente/delete`,
-      pk,
-      setTipos,
-      "TipoDocenteID"
-    );
+    deleteEntity(`${API}api/tipodocente/delete`, pk, setTipos, "TipoDocenteID");
   };
 
   return (
@@ -99,7 +98,9 @@ function TipoDocenteListClient({ initialData, totalPages: initialTotalPages }) {
 
               <button
                 className="btn btn-danger"
-                onClick={() => exportTipoDocenteToPDF(tipos, currentPage, pageSize)}
+                onClick={() =>
+                  exportTipoDocenteToPDF(tipos, currentPage, pageSize)
+                }
               >
                 Exportar PDF
               </button>
@@ -114,10 +115,18 @@ function TipoDocenteListClient({ initialData, totalPages: initialTotalPages }) {
           >
             Importar
           </button>
+
+          <Search
+            SearchSubmit={handleSearchSubmit}
+            SearchChange={handleSearchChange}
+            searchQuery={searchQuery}
+          />
         </div>
 
         <div className="d-flex align-items-center gap-2">
-          <label className="fw-bold mb-0 text-black">Resultados por página:</label>
+          <label className="fw-bold mb-0 text-black">
+            Resultados por página:
+          </label>
           <select
             className="form-select w-auto"
             style={{ height: "38px" }}
@@ -134,15 +143,11 @@ function TipoDocenteListClient({ initialData, totalPages: initialTotalPages }) {
       <Modal title="Importar Tipo de Docente">
         <ImportExcel
           importURL={importURL}
-          onSuccess={() => fetchTipoDocentesData(searchQuery, currentPage, pageSize)}
+          onSuccess={() =>
+            fetchTipoDocentesData(searchQuery, currentPage, pageSize)
+          }
         />
       </Modal>
-
-      <Search
-        SearchSubmit={handleSearchSubmit}
-        SearchChange={handleSearchChange}
-        searchQuery={searchQuery}
-      />
 
       <Tables>
         <thead>
