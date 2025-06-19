@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import Pagination from "@components/Pagination";
 import Tables from "@components/Tables";
 import Modal from "@components/Modal";
@@ -10,16 +9,17 @@ import ImportExcel from "@components/forms/Import";
 import Search from "@components/search";
 import withAuth from "@utils/withAuth";
 import { deleteEntity } from "@utils/delete";
+import { debounce } from "lodash";
 import { fetchCampus } from "@api/campusService";
 import { exportCampusToPDF } from "@utils/ExportPDF/exportCampusPDF";
 
 function CampusListClient({ initialData, totalPages: initialTotalPages }) {
-  const [campusList, setCampusList] = useState(initialData);
+  const [campusList, setCampusList] = useState(initialData || []);
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [pageSize, setPageSize] = useState(10);
-  const [totalPages, setTotalPages] = useState(initialTotalPages);
+  const [totalPages, setTotalPages] = useState(initialTotalPages || 1);
   const API = process.env.NEXT_PUBLIC_API_KEY;
 
   const fetchData = async (page, query, size) => {
@@ -35,46 +35,48 @@ function CampusListClient({ initialData, totalPages: initialTotalPages }) {
     }
   };
 
+  // debounce para evitar múltiples llamadas rápidas
+  const debouncedFetchData = useCallback(
+    debounce((page, query, size) => {
+      fetchData(page, query, size);
+    }, 300),
+    []
+  );
+
+  // Llama al fetchData con debounce cuando cambian page, query o pageSize
+  useEffect(() => {
+    debouncedFetchData(currentPage, searchQuery, pageSize);
+    return () => debouncedFetchData.cancel();
+  }, [currentPage, searchQuery, pageSize, debouncedFetchData]);
+
+  // Actualizar lista localmente sin hacer fetch tras eliminación
+  const deleteCampus = useCallback(
+    (pk) => {
+      deleteEntity(`${API}api/campus/delete`, pk, setCampusList, "CampusID");
+    },
+    [API]
+  );
+
   const handlePageChange = (page) => {
     setCurrentPage(page);
-    fetchData(page, searchQuery, pageSize);
   };
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
+    setCurrentPage(1);
   };
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     setCurrentPage(1);
-    fetchData(1, searchQuery, pageSize);
+    // No fetch explícito, lo hará el useEffect con debounce
   };
 
   const handlePageSizeChange = (e) => {
     const newSize = Number(e.target.value);
     setPageSize(newSize);
     setCurrentPage(1);
-    fetchData(1, searchQuery, newSize);
   };
-
-  const deleteCampus = useCallback(
-    (pk) => {
-      deleteEntity(`${API}api/campus/delete`, pk, setCampusList, "CampusCodigo");
-    },
-    [API]
-  );
-
-  useEffect(() => {
-    fetchData(currentPage, searchQuery, pageSize);
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="spinner-container">
-        <div className="spinner"></div>
-      </div>
-    );
-  }
 
   return (
     <div className="mt-5">
@@ -92,9 +94,7 @@ function CampusListClient({ initialData, totalPages: initialTotalPages }) {
               </Link>
               <button
                 className="btn btn-danger"
-                onClick={() =>
-                  exportCampusToPDF(campusList, currentPage, pageSize)
-                }
+                onClick={() => exportCampusToPDF(campusList, currentPage, pageSize)}
               >
                 Exportar PDF
               </button>
@@ -111,9 +111,7 @@ function CampusListClient({ initialData, totalPages: initialTotalPages }) {
         </div>
 
         <div className="d-flex align-items-center gap-2">
-          <label className="fw-bold mb-0 text-black">
-            Resultados por página:
-          </label>
+          <label className="fw-bold mb-0 text-black">Resultados por página:</label>
           <select
             className="form-select w-auto"
             style={{ height: "38px" }}
@@ -140,59 +138,63 @@ function CampusListClient({ initialData, totalPages: initialTotalPages }) {
         searchQuery={searchQuery}
       />
 
-      <Tables>
-        <thead>
-          <tr>
-            <th>Código</th>
-            <th>Nombre</th>
-            <th>Dirección</th>
-            <th>Ciudad</th>
-            <th>Provincia</th>
-            <th>País</th>
-            <th>Teléfono</th>
-            <th>Correo</th>
-            <th>Estado</th>
-            <th>Acción</th>
-          </tr>
-        </thead>
-        <tbody>
-          {campusList.length === 0 ? (
+      {loading ? (
+        <div className="text-center">Cargando...</div>
+      ) : (
+        <Tables>
+          <thead>
             <tr>
-              <td colSpan="10" className="text-center">
-                No se encontraron campus.
-              </td>
+              <th>Código</th>
+              <th>Nombre</th>
+              <th>Dirección</th>
+              <th>Ciudad</th>
+              <th>Provincia</th>
+              <th>País</th>
+              <th>Teléfono</th>
+              <th>Correo</th>
+              <th>Estado</th>
+              <th>Acción</th>
             </tr>
-          ) : (
-            campusList.map((c) => (
-              <tr key={c.CampusCodigo}>
-                <td>{c.CampusCodigo}</td>
-                <td>{c.CampusNombre}</td>
-                <td>{c.CampusDireccion}</td>
-                <td>{c.CampusCiudad}</td>
-                <td>{c.CampusProvincia}</td>
-                <td>{c.CampusPais}</td>
-                <td>{c.CampusTelefono}</td>
-                <td>{c.CampusCorreoContacto}</td>
-                <td>{c.CampusEstado}</td>
-                <td>
-                  <Link
-                    className="btn btn-primary btn-sm"
-                    href={`/campusEdit/${c.CampusCodigo}`}
-                  >
-                    Editar
-                  </Link>
-                  <button
-                    className="btn btn-danger btn-sm mx-2"
-                    onClick={() => deleteCampus(c.CampusCodigo)}
-                  >
-                    Borrar
-                  </button>
+          </thead>
+          <tbody>
+            {campusList.length === 0 ? (
+              <tr>
+                <td colSpan="10" className="text-center">
+                  No se encontraron campus.
                 </td>
               </tr>
-            ))
-          )}
-        </tbody>
-      </Tables>
+            ) : (
+              campusList.map((c) => (
+                <tr key={c.CampusCodigo}>
+                  <td>{c.CampusCodigo}</td>
+                  <td>{c.CampusNombre}</td>
+                  <td>{c.CampusDireccion}</td>
+                  <td>{c.CampusCiudad}</td>
+                  <td>{c.CampusProvincia}</td>
+                  <td>{c.CampusPais}</td>
+                  <td>{c.CampusTelefono}</td>
+                  <td>{c.CampusCorreoContacto}</td>
+                  <td>{c.CampusEstado}</td>
+                  <td>
+                    <Link
+                      className="btn btn-primary btn-sm"
+                      href={`/campusEdit/${c.CampusID}`}
+                    >
+                      Editar
+                    </Link>
+                    <button
+                      className="btn btn-danger btn-sm mx-2"
+                      onClick={() => deleteCampus(c.CampusID)}
+                    >
+                      Borrar
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </Tables>
+      )}
 
       {totalPages > 1 && (
         <Pagination
