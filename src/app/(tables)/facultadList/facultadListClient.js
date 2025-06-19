@@ -20,50 +20,50 @@ function FacultadListClient({ initialData, totalPages: initialTotalPages }) {
   const [totalPages, setTotalPages] = useState(initialTotalPages);
   const [searchQuery, setSearchQuery] = useState("");
   const [pageSize, setPageSize] = useState(10);
+  const [loading, setLoading] = useState(false);
 
   const API = process.env.NEXT_PUBLIC_API_KEY;
   const Api_import_URL = `${API}import/facultad`;
 
-  const deleteFacultad = (pk) => {
-    deleteEntity(
-      `${API}api/facultad/delete`,
-      pk,
-      setFacultades,
-      "FacultadCodigo"
-    );
-  };
-
   const fetchData = async (page, query, size) => {
+    setLoading(true);
     try {
       const response = await fetchFacultades(page, query, size);
       setFacultades(response.results);
       setTotalPages(response.totalPages);
     } catch (error) {
       console.error("Error fetching facultades:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Corregido el orden de los parámetros
   const debouncedFetchData = useCallback(
-    debounce(() => {
-      fetchData(page, searchQuery, pageSize);
+    debounce((page, query, size) => {
+      fetchData(page, query, size);
     }, 300),
-    [page, searchQuery, pageSize]
+    []
   );
 
-  // Ejecutar fetchData cuando cambian page o pageSize
+  // Carga inicial y cada vez que cambian page, searchQuery o pageSize
   useEffect(() => {
-    fetchData(page, searchQuery, pageSize);
-  }, [page, pageSize]);
-
-  // Ejecutar búsqueda con debounce al cambiar searchQuery o página
-  useEffect(() => {
-    debouncedFetchData();
+    debouncedFetchData(page, searchQuery, pageSize);
     return () => debouncedFetchData.cancel();
-  }, [debouncedFetchData]);
+  }, [page, searchQuery, pageSize, debouncedFetchData]);
+
+  // Función para eliminar facultad localmente y en backend
+  const deleteFacultad = (pk) => {
+    deleteEntity(
+      `${API}api/facultad/delete`,
+      pk,
+      setFacultades,
+      "FacultadID"
+    );
+  };
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
+    setPage(1); // reinicia la página al cambiar búsqueda
   };
 
   const handleSearchSubmit = (e) => {
@@ -123,7 +123,7 @@ function FacultadListClient({ initialData, totalPages: initialTotalPages }) {
       </div>
 
       <Modal title="Importar Facultad">
-        <ImportExcel importURL={Api_import_URL} onSuccess={debouncedFetchData} />
+        <ImportExcel importURL={Api_import_URL} onSuccess={() => fetchData(page, searchQuery, pageSize)} />
       </Modal>
 
       <Search
@@ -148,7 +148,13 @@ function FacultadListClient({ initialData, totalPages: initialTotalPages }) {
           </tr>
         </thead>
         <tbody>
-          {facultades.length === 0 ? (
+          {loading ? (
+            <tr>
+              <td colSpan="10" className="text-center">
+                Cargando...
+              </td>
+            </tr>
+          ) : facultades.length === 0 ? (
             <tr>
               <td colSpan="10" className="text-center">
                 No se han encontrado facultades.
@@ -156,7 +162,7 @@ function FacultadListClient({ initialData, totalPages: initialTotalPages }) {
             </tr>
           ) : (
             facultades.map((facultad) => (
-              <tr key={facultad.FacultadCodigo}>
+              <tr key={facultad.FacultadID}>
                 <td>{facultad.FacultadCodigo}</td>
                 <td>{facultad.FacultadNombre}</td>
                 <td>{facultad.FacultadDecano}</td>
@@ -175,7 +181,7 @@ function FacultadListClient({ initialData, totalPages: initialTotalPages }) {
                   </Link>
                   <button
                     className="btn btn-danger btn-sm mx-2"
-                    onClick={() => deleteFacultad(facultad.FacultadCodigo)} // Usamos FacultadCodigo para eliminar
+                    onClick={() => deleteFacultad(facultad.FacultadID)}
                   >
                     borrar
                   </button>
@@ -194,3 +200,4 @@ function FacultadListClient({ initialData, totalPages: initialTotalPages }) {
 }
 
 export default withAuth(FacultadListClient);
+

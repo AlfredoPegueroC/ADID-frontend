@@ -29,7 +29,7 @@ function EscuelaListClient() {
     setLoading(true);
     setError(null);
     try {
-      const { results, totalPages } = await fetchEscuelas(page,query, size);
+      const { results, totalPages } = await fetchEscuelas(page, query, size);
       setEscuelas(results);
       setTotalPages(totalPages);
     } catch (error) {
@@ -40,29 +40,34 @@ function EscuelaListClient() {
     }
   };
 
+  // Usamos debounce para evitar llamadas muy rápidas
   const debouncedFetchData = useCallback(
-    debounce(() => {
-      fetchData(page, searchQuery, pageSize);
+    debounce((page, query, size) => {
+      fetchData(page, query, size);
     }, 300),
-    [page, searchQuery, pageSize]
+    []
   );
 
+  // Cada vez que cambia page, searchQuery o pageSize, llamamos a la API con debounce
   useEffect(() => {
-    debouncedFetchData();
+    debouncedFetchData(page, searchQuery, pageSize);
     return () => debouncedFetchData.cancel();
-  }, [debouncedFetchData]);
+  }, [page, searchQuery, pageSize, debouncedFetchData]);
 
+  // Eliminar escuela y actualizar localmente sin refetch
   const deleteEscuela = (pk) => {
-    deleteEntity(`${API}api/escuela/delete`, pk, setEscuelas, "EscuelaCodigo");
+    deleteEntity(`${API}api/escuela/delete`, pk, setEscuelas, "EscuelaId");
   };
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
+    setPage(1); // Reiniciar página al cambiar búsqueda
   };
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     setPage(1);
+    // No llamamos fetchData directo, porque el efecto con debounce se encargará
   };
 
   return (
@@ -82,9 +87,7 @@ function EscuelaListClient() {
               </Link>
               <button
                 className="btn btn-danger"
-                onClick={() =>
-                  exportEscuelasToPDF(escuelas, page, pageSize)
-                }
+                onClick={() => exportEscuelasToPDF(escuelas, page, pageSize)}
               >
                 Exportar PDF
               </button>
@@ -101,9 +104,7 @@ function EscuelaListClient() {
         </div>
 
         <div className="d-flex align-items-center gap-2">
-          <label className="fw-bold mb-0 text-black">
-            Resultados por página:
-          </label>
+          <label className="fw-bold mb-0 text-black">Resultados por página:</label>
           <select
             className="form-select w-auto"
             style={{ height: "38px" }}
@@ -121,7 +122,7 @@ function EscuelaListClient() {
       </div>
 
       <Modal title="Importar Escuela">
-        <ImportExcel importURL={Api_import_URL} onSuccess={debouncedFetchData} />
+        <ImportExcel importURL={Api_import_URL} onSuccess={() => fetchData(page, searchQuery, pageSize)} />
       </Modal>
 
       <Search
@@ -157,7 +158,7 @@ function EscuelaListClient() {
               </tr>
             ) : (
               escuelas.map((escuela, index) => (
-                <tr key={escuela.EscuelaCodigo}>
+                <tr key={escuela.EscuelaId}>
                   <th scope="row">{index + 1 + (page - 1) * pageSize}</th>
                   <td>{escuela.EscuelaCodigo}</td>
                   <td>{escuela.EscuelaNombre}</td>
@@ -189,11 +190,7 @@ function EscuelaListClient() {
       )}
 
       {totalPages > 1 && (
-        <Pagination
-          page={page}
-          totalPages={totalPages}
-          onPageChange={setPage}
-        />
+        <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
       )}
     </div>
   );

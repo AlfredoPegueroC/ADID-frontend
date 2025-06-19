@@ -8,7 +8,6 @@ import {
 
 import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import Pagination from "@components/Pagination";
 import Tables from "@components/Tables";
 import Search from "@components/search";
@@ -86,13 +85,15 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
   });
 
   const Api_import_URL = `${API}import/asignacion`;
-
+  
   const fetchData = async (page, query, periodo = null) => {
     setLoading(true);
     try {
       const { asignaciones, totalPages } = await fetchAsignacionData(periodo, page, query, pageSize);
       setAsignaciones(asignaciones);
       setTotalPages(totalPages);
+      
+    
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
@@ -106,34 +107,79 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
     }
   }, [selectedPeriodo, currentPage, searchQuery, pageSize, loadingPeriodos]);
 
+// useEffect(() => {
+  
+//   const cargarPeriodos = async () => {
+//     setLoadingPeriodos(true);
+
+//     // const cached = localStorage.getItem("periodosCache");
+//     // if (cached) {
+//     //   const periodosGuardados = JSON.parse(cached);
+//     //   setPeriodos(periodosGuardados);
+//     //   if (!selectedPeriodo && periodosGuardados.length > 0) {
+//     //     setSelectedPeriodo(periodosGuardados[0]);
+//     //   }
+//     //   setLoadingPeriodos(false);
+//     //   return;
+//     // }
+//     console.log("Cargando periodos desde API...");
+//     try {
+//       const res = await fetch(`${API}api/periodoacademico`);
+//       if (!res.ok) throw new Error("Error al obtener los periodos");
+//       const periodosData = await res.json();
+//       console.log("Periodos obtenidos:", periodosData);
+
+//       const nombres = periodosData.results.map((p) => p.PeriodoNombre);
+//       const ordenados = nombres.sort((a, b) => b.localeCompare(a));
+
+//       setPeriodos(ordenados);
+//       localStorage.setItem("periodosCache", JSON.stringify(ordenados));
+
+//       if (!selectedPeriodo && ordenados.length > 0) {
+//         setSelectedPeriodo(ordenados[0]);
+//       }
+//     } catch (error) {
+//       console.error("Error al cargar periodos:", error);
+//     } finally {
+//       setLoadingPeriodos(false);
+//     }
+//   };
+
+//   cargarPeriodos();
+// }, []);
+
 useEffect(() => {
   const cargarPeriodos = async () => {
     setLoadingPeriodos(true);
 
-    const cached = localStorage.getItem("periodosCache");
-    if (cached) {
-      const periodosGuardados = JSON.parse(cached);
-      setPeriodos(periodosGuardados);
-      if (!selectedPeriodo && periodosGuardados.length > 0) {
-        setSelectedPeriodo(periodosGuardados[0]);
-      }
-      setLoadingPeriodos(false);
-      return;
-    }
-
     try {
-      const res = await fetch(`${API}api/periodoacademico`);
-      if (!res.ok) throw new Error("Error al obtener los periodos");
-      const periodosData = await res.json();
+      const cached = localStorage.getItem("periodosCache");
+      let periodosFinal = [];
 
-      const nombres = periodosData.results.map((p) => p.PeriodoNombre);
-      const ordenados = nombres.sort((a, b) => b.localeCompare(a));
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          console.log("🧠 Periodos cargados desde cache");
+          periodosFinal = parsed;
+        }
+      }
 
-      setPeriodos(ordenados);
-      localStorage.setItem("periodosCache", JSON.stringify(ordenados));
+      // Si no hay cache válido, pedirlo al servidor
+      if (periodosFinal.length === 0) {
+        const res = await fetch(`${API}api/periodoacademico`);
+        if (!res.ok) throw new Error("Error al obtener los periodos");
 
-      if (!selectedPeriodo && ordenados.length > 0) {
-        setSelectedPeriodo(ordenados[0]);
+        const periodosData = await res.json();
+        const nombres = periodosData.results.map((p) => p.PeriodoNombre);
+        periodosFinal = nombres.sort((a, b) => b.localeCompare(a));
+
+        localStorage.setItem("periodosCache", JSON.stringify(periodosFinal));
+        console.log("📡 Periodos cargados desde API");
+      }
+
+      setPeriodos(periodosFinal);
+      if (!selectedPeriodo && periodosFinal.length > 0) {
+        setSelectedPeriodo(periodosFinal[0]);
       }
     } catch (error) {
       console.error("Error al cargar periodos:", error);
@@ -144,6 +190,7 @@ useEffect(() => {
 
   cargarPeriodos();
 }, []);
+
 
 
   useEffect(() => {

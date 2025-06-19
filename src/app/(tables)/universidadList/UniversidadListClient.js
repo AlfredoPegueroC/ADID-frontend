@@ -5,7 +5,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { debounce } from "lodash";
 
-// Components
 import Pagination from "@components/Pagination";
 import Tables from "@components/Tables";
 import Search from "@components/search";
@@ -13,18 +12,19 @@ import Modal from "@components/Modal";
 import ImportExcel from "@components/forms/Import";
 import { exportUniversidadesToPDF } from "@utils/ExportPDF/exportUniversidadesToPDF";
 
-// Utils
 import withAuth from "@utils/withAuth";
 import { deleteEntity } from "@utils/delete";
 import { fetchUniversidades } from "@api/universidadService";
 
 function UniversidadListClient({ initialData }) {
-  const [universidades, setUniversidades] = useState(initialData.results || []);
+  const [universidades, setUniversidades] = useState([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(initialData.totalPages || 1);
   const [searchQuery, setSearchQuery] = useState("");
   const [pageSize, setPageSize] = useState(10);
+
+  const API = process.env.NEXT_PUBLIC_API_KEY;
 
   const debouncedFetchData = useCallback(
     debounce(async (page, search, size) => {
@@ -34,7 +34,7 @@ function UniversidadListClient({ initialData }) {
         setUniversidades(results);
         setTotalPages(totalPages);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Error fetching universidades:", error);
       } finally {
         setLoading(false);
       }
@@ -49,10 +49,10 @@ function UniversidadListClient({ initialData }) {
 
   const handleDelete = (pk) => {
     deleteEntity(
-      `${process.env.NEXT_PUBLIC_API_KEY}api/universidad/delete`,
+      `${API}api/universidad/delete`,
       pk,
       setUniversidades,
-      "UniversidadCodigo"
+      "UniversidadID"
     );
   };
 
@@ -67,12 +67,20 @@ function UniversidadListClient({ initialData }) {
           </Link>
 
           {universidades.length > 0 && (
-            <Link
-              className="btn btn-success"
-              href={`${process.env.NEXT_PUBLIC_API_KEY}export/universidad`}
-            >
-              Exportar
-            </Link>
+            <>
+              <Link
+                className="btn btn-success"
+                href={`${API}export/universidad`}
+              >
+                Exportar
+              </Link>
+              <button
+                className="btn btn-danger"
+                onClick={() => exportUniversidadesToPDF(universidades, page, pageSize)}
+              >
+                Exportar PDF
+              </button>
+            </>
           )}
 
           <button
@@ -83,19 +91,10 @@ function UniversidadListClient({ initialData }) {
           >
             Importar
           </button>
-
-          <button
-            className="btn btn-danger"
-            onClick={() => exportUniversidadesToPDF(universidades, page, pageSize)}
-          >
-            Exportar PDF
-          </button>
         </div>
 
         <div className="d-flex align-items-center gap-2">
-          <label className="fw-bold mb-0 text-black">
-            Resultados por página:
-          </label>
+          <label className="fw-bold mb-0 text-black">Resultados por página:</label>
           <select
             className="form-select w-auto"
             style={{ height: "38px" }}
@@ -115,7 +114,7 @@ function UniversidadListClient({ initialData }) {
 
       <Modal title="Importar Universidad">
         <ImportExcel
-          importURL={`${process.env.NEXT_PUBLIC_API_KEY}import/universidad`}
+          importURL={`${API}import/universidad`}
           onSuccess={() => debouncedFetchData(page, searchQuery, pageSize)}
         />
       </Modal>
@@ -124,10 +123,8 @@ function UniversidadListClient({ initialData }) {
         SearchSubmit={(e) => e.preventDefault()}
         SearchChange={(e) => {
           const newValue = e.target.value;
-          if (newValue !== searchQuery) {
-            setSearchQuery(newValue);
-            setPage(1);
-          }
+          setSearchQuery(newValue);
+          setPage(1);
         }}
         searchQuery={searchQuery}
       />
@@ -148,11 +145,13 @@ function UniversidadListClient({ initialData }) {
           </tr>
         </thead>
         <tbody>
-          {universidades.length === 0 ? (
+          {loading ? (
             <tr>
-              <td colSpan="10" className="text-center">
-                No se encontraron universidades.
-              </td>
+              <td colSpan="10" className="text-center">Cargando...</td>
+            </tr>
+          ) : universidades.length === 0 ? (
+            <tr>
+              <td colSpan="10" className="text-center">No se encontraron universidades.</td>
             </tr>
           ) : (
             universidades.map((universidad, index) => (
