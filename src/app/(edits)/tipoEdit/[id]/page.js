@@ -2,34 +2,41 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Styles from "@styles/test.module.css";
 import Notification from "@components/Notification";
 import FormLayout from "@components/layouts/FormLayout";
 import withAuth from "@utils/withAuth";
+import Styles from "@styles/form.module.css"; // ✅ Estilo unificado
+import { use } from 'react';
 
 function TipoEdit({ params }) {
   const router = useRouter();
-  const { id } = React.use(params);
+  const { id } = use(params);
+
   const API = process.env.NEXT_PUBLIC_API_KEY;
-  const [tipo, setTipo] = useState(null);
+
+  const [tipo, setTipo] = useState({
+    TipoDocenteCodigo: "",
+    TipoDocenteDescripcion: "",
+    TipoDocenteEstado: "",
+    TipoDocente_UniversidadFK: "",
+  });
+
   const [universidades, setUniversidades] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const tipoResponse = await fetch(`${API}api/tipodocente/${id}/`);
-        if (!tipoResponse.ok) throw new Error("Failed to fetch tipo");
-        const tipoData = await tipoResponse.json();
+        const tipoRes = await fetch(`${API}api/tipodocente/${id}/`);
+        const tipoData = await tipoRes.json();
         setTipo(tipoData);
 
-        const universidadesResponse = await fetch(`${API}api/universidad`);
-        if (!universidadesResponse.ok)
-          throw new Error("Failed to fetch universidades");
-        const universidadesData = await universidadesResponse.json();
-        setUniversidades(universidadesData.results);
-      } catch (error) {
-        console.error("Error fetching data:", error);
+        const uniRes = await fetch(`${API}api/universidad`);
+        const uniData = await uniRes.json();
+        setUniversidades(uniData.results);
+      } catch (err) {
+        console.error("Error:", err);
+        Notification.alertError("Error al cargar los datos.");
       } finally {
         setLoading(false);
       }
@@ -38,12 +45,16 @@ function TipoEdit({ params }) {
     fetchData();
   }, [id, API]);
 
+  const handleChange = (e) => {
+    const { id, value } = e.target;
+    setTipo((prev) => ({ ...prev, [id]: value }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!tipo) return;
 
     try {
-      const response = await fetch(`${API}api/tipodocente/edit/${id}/`, {
+      const res = await fetch(`${API}api/tipodocente/edit/${id}/`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -51,105 +62,93 @@ function TipoEdit({ params }) {
         body: JSON.stringify(tipo),
       });
 
-      if (response.ok) {
-        Notification.alertSuccess("Tipo Docente Editado.");
+      if (res.ok) {
+        Notification.alertSuccess("Tipo Docente actualizado.");
         router.push("/tipodocenteList");
       } else {
-        Notification.alertError("Fallo al Editar.");
+        Notification.alertError("Error al actualizar.");
       }
-    } catch (error) {
-      console.error("Error updating tipo:", error);
-      Notification.alertError("Fallo al Editar.");
+    } catch (err) {
+      console.error("Error:", err);
+      Notification.alertError("Fallo al editar.");
     }
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setTipo({ ...tipo, [name]: value });
   };
 
   if (loading) {
     return (
-      <div className="spinner-container ">
+      <div className="spinner-container">
         <div className="spinner"></div>
       </div>
     );
   }
 
   return (
-    <FormLayout>
-      <div className={Styles.container}>
-        <form onSubmit={handleSubmit} className={Styles.form}>
-          <h1 className={Styles.title}>Editar Tipo Docente</h1>
+    <div className={Styles.container}>
+      <form onSubmit={handleSubmit} className={Styles.form}>
+        <h1 className={Styles.title}>Editar Tipo Docente</h1>
 
-          <div className={Styles.name_group}>
-            <label htmlFor="TipoDocenteCodigo">Código</label>
-            <input
-              type="text"
-              id="TipoDocenteCodigo"
-              name="TipoDocenteCodigo"
-              value={tipo.TipoDocenteCodigo || ""}
-              onChange={handleChange}
-              required
-            />
-          </div>
+        <div className={Styles.name_group}>
+          <label htmlFor="TipoDocenteCodigo">Código</label>
+          <input
+            type="text"
+            id="TipoDocenteCodigo"
+            value={tipo.TipoDocenteCodigo}
+            onChange={handleChange}
+            required
+            placeholder="Ej: T001"
+          />
+        </div>
 
-          <div className={Styles.name_group}>
-            <label htmlFor="TipoDocenteDescripcion">Descripción</label>
-            <input
-              type="text"
-              id="TipoDocenteDescripcion"
-              name="TipoDocenteDescripcion"
-              value={tipo.TipoDocenteDescripcion || ""}
-              onChange={handleChange}
-              required
-            />
-          </div>
+        <div className={Styles.name_group}>
+          <label htmlFor="TipoDocenteDescripcion">Descripción</label>
+          <input
+            type="text"
+            id="TipoDocenteDescripcion"
+            value={tipo.TipoDocenteDescripcion}
+            onChange={handleChange}
+            required
+            placeholder="Ej: Docente a tiempo completo"
+          />
+        </div>
 
-          <div className={Styles.name_group}>
-            <label htmlFor="TipoDocenteEstado">Estado</label>
-            <select
-              id="TipoDocenteEstado"
-              name="TipoDocenteEstado"
-              value={tipo?.TipoDocenteEstado || ""}
-              onChange={handleChange}
-              required
-            >
-              <option value="">-- Seleccione Estado --</option>
-              <option value="Activo">Activo</option>
-              <option value="Inactivo">Inactivo</option>
-            </select>
-          </div>
+        <div className={Styles.name_group}>
+          <label htmlFor="TipoDocenteEstado">Estado</label>
+          <select
+            id="TipoDocenteEstado"
+            value={tipo.TipoDocenteEstado}
+            onChange={handleChange}
+            required
+          >
+            <option value="">-- Seleccione Estado --</option>
+            <option value="Activo">Activo</option>
+            <option value="Inactivo">Inactivo</option>
+          </select>
+        </div>
 
-          <div className={Styles.name_group}>
-            <label htmlFor="TipoDocente_UniversidadFK">Universidad</label>
-            <select
-              id="TipoDocente_UniversidadFK"
-              name="TipoDocente_UniversidadFK"
-              value={tipo?.TipoDocente_UniversidadFK || ""}
-              onChange={handleChange}
-              required
-            >
-              <option value="" disabled>
-                -- Seleccione una Universidad --
+        <div className={Styles.name_group}>
+          <label htmlFor="TipoDocente_UniversidadFK">Universidad</label>
+          <select
+            id="TipoDocente_UniversidadFK"
+            value={tipo.TipoDocente_UniversidadFK}
+            onChange={handleChange}
+            required
+          >
+            <option value="">-- Seleccione una Universidad --</option>
+            {universidades.map((u) => (
+              <option key={u.UniversidadID} value={u.UniversidadID}>
+                {u.UniversidadNombre}
               </option>
-              {universidades.map((u) => (
-                <option
-                  key={u.UniversidadID}
-                  value={u.UniversidadID}
-                >
-                  {u.UniversidadNombre}
-                </option>
-              ))}
-            </select>
-          </div>
+            ))}
+          </select>
+        </div>
 
+        <div className={Styles.btn_group}>
           <button type="submit" className={Styles.btn}>
             Guardar Cambios
           </button>
-        </form>
-      </div>
-    </FormLayout>
+        </div>
+      </form>
+    </div>
   );
 }
 

@@ -6,12 +6,15 @@ import FormLayout from "@components/layouts/FormLayout";
 import withAuth from "@utils/withAuth";
 import Styles from "@styles/test.module.css";
 import Notification from "@components/Notification";
+import { use } from 'react';
 
 function AsignacionEdit({ params }) {
   const router = useRouter();
-  const { id } = React.use(params);
+  const { id } = use(params);
   const searchParams = useSearchParams();
   const period = searchParams.get("period");
+
+  const API = process.env.NEXT_PUBLIC_API_KEY;
 
   const [asignacion, setAsignacion] = useState(null);
   const [docentes, setDocentes] = useState([]);
@@ -19,10 +22,9 @@ function AsignacionEdit({ params }) {
   const [escuelas, setEscuelas] = useState([]);
   const [campus, setCampus] = useState([]);
   const [loading, setLoading] = useState(true);
-  const API = process.env.NEXT_PUBLIC_API_KEY;
 
   useEffect(() => {
-    const fetchData = async () => {
+    async function fetchData() {
       try {
         const asignacionRes = await fetch(`${API}api/asignacion/${id}/`);
         if (!asignacionRes.ok) throw new Error("Error cargando asignación");
@@ -36,20 +38,26 @@ function AsignacionEdit({ params }) {
           fetch(`${API}api/campus`),
         ]);
 
-        if (!docRes.ok || !facRes.ok || !escRes.ok || !campusRes.ok)
+        if (!docRes.ok || !facRes.ok || !escRes.ok || !campusRes.ok) {
           throw new Error("Error cargando catálogos");
+        }
 
-        setDocentes((await docRes.json()).results);
-        setFacultades((await facRes.json()).results);
-        setEscuelas((await escRes.json()).results);
-        setCampus((await campusRes.json()).results);
-      } catch (err) {
-        console.error(err);
+        const docentesData = await docRes.json();
+        const facultadesData = await facRes.json();
+        const escuelasData = await escRes.json();
+        const campusData = await campusRes.json();
+
+        setDocentes(docentesData.results);
+        setFacultades(facultadesData.results);
+        setEscuelas(escuelasData.results);
+        setCampus(campusData.results);
+      } catch (error) {
+        console.error(error);
         Notification.alertError("Error al cargar los datos.");
       } finally {
         setLoading(false);
       }
-    };
+    }
 
     fetchData();
   }, [id]);
@@ -70,22 +78,26 @@ function AsignacionEdit({ params }) {
 
       if (!res.ok) throw new Error("Fallo al actualizar");
       Notification.alertSuccess("Asignación actualizada correctamente");
-      router.push(`/asignacionDocente/${period}`);
-    } catch (err) {
-      console.error(err);
+      router.push(`/`);
+    } catch (error) {
+      console.error(error);
       Notification.alertError("Error al actualizar");
     }
   };
 
   if (loading || !asignacion) {
-    return <div className="spinner-container"><div className="spinner" /></div>;
+    return (
+      <div className="spinner-container">
+        <div className="spinner" />
+      </div>
+    );
   }
 
   return (
     <FormLayout>
       <div className={Styles.container}>
         <form className={Styles.form} onSubmit={handleSubmit}>
-          <h1>Editar Asignación</h1>
+          <h1 className={Styles.title}>Editar Asignación</h1>
 
           <div className={Styles.names}>
             <div className={Styles.name_group}>
@@ -218,3 +230,4 @@ function AsignacionEdit({ params }) {
 }
 
 export default withAuth(AsignacionEdit);
+

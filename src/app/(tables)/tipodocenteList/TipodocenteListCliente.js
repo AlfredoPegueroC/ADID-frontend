@@ -2,7 +2,6 @@
 
 import React, { useState, useCallback, useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { debounce } from "lodash";
 
 import Modal from "@components/Modal";
@@ -183,7 +182,7 @@ function TipoDocenteListClient({ initialData, totalPages: initialTotalPages }) {
                 <td>{tipo.universidadNombre || "—"}</td>
                 <td>
                   <Link
-                    href={`/tipodocenteEdit/${tipo.TipoDocenteID}`}
+                    href={`/tipoEdit/${tipo.TipoDocenteID}`}
                     className="btn btn-primary btn-sm"
                   >
                     editar
