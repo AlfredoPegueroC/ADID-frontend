@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { debounce } from "lodash";
 
 import Pagination from "@components/Pagination";
@@ -26,30 +25,37 @@ function UniversidadListClient({ initialData }) {
 
   const API = process.env.NEXT_PUBLIC_API_KEY;
 
-  const debouncedFetchData = useCallback(
-    debounce(async (page, search, size) => {
-      try {
-        setLoading(true);
-        const { results, totalPages } = await fetchUniversidades(
-          page,
-          search,
-          size
-        );
-        setUniversidades(results);
-        setTotalPages(totalPages);
-      } catch (error) {
-        console.error("Error fetching universidades:", error);
-      } finally {
-        setLoading(false);
-      }
-    }, 500),
-    []
-  );
+  const debouncedSearch = useRef(
+    debounce((value) => {
+      setSearchQuery(value);
+    }, 500)
+  ).current;
+
+ 
+  useEffect(() => {
+    setPage(1);
+  }, [searchQuery]);
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const { results, totalPages } = await fetchUniversidades(
+        page,
+        searchQuery,
+        pageSize
+      );
+      setUniversidades(results);
+      setTotalPages(totalPages);
+    } catch (error) {
+      console.error("Error fetching universidades:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [page, searchQuery, pageSize]);
 
   useEffect(() => {
-    debouncedFetchData(page, searchQuery, pageSize);
-    return () => debouncedFetchData.cancel();
-  }, [page, searchQuery, pageSize, debouncedFetchData]);
+    fetchData();
+  }, [fetchData]);
 
   const handleDelete = (pk) => {
     deleteEntity(
@@ -58,6 +64,11 @@ function UniversidadListClient({ initialData }) {
       setUniversidades,
       "UniversidadID"
     );
+  };
+
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    debouncedSearch(value);
   };
 
   return (
@@ -100,11 +111,7 @@ function UniversidadListClient({ initialData }) {
 
           <Search
             SearchSubmit={(e) => e.preventDefault()}
-            SearchChange={(e) => {
-              const newValue = e.target.value;
-              setSearchQuery(newValue);
-              setPage(1);
-            }}
+            SearchChange={handleSearchChange}
             searchQuery={searchQuery}
           />
         </div>
@@ -118,8 +125,7 @@ function UniversidadListClient({ initialData }) {
             style={{ height: "38px" }}
             value={pageSize}
             onChange={(e) => {
-              const newSize = Number(e.target.value);
-              setPageSize(newSize);
+              setPageSize(Number(e.target.value));
               setPage(1);
             }}
           >
@@ -133,7 +139,7 @@ function UniversidadListClient({ initialData }) {
       <Modal title="Importar Universidad">
         <ImportExcel
           importURL={`${API}import/universidad`}
-          onSuccess={() => debouncedFetchData(page, searchQuery, pageSize)}
+          onSuccess={() => fetchData()}
         />
       </Modal>
 
@@ -206,17 +212,15 @@ function UniversidadListClient({ initialData }) {
       </Tables>
 
       {totalPages > 1 && (
-        <Pagination
-          page={page}
-          totalPages={totalPages}
-          onPageChange={setPage}
-        />
+        <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
       )}
     </div>
   );
 }
 
 export default withAuth(UniversidadListClient);
+
+
 
 // export async function getServerSideProps(context) {
 //   const { page = 1, searchQuery = "", pageSize = 10 } = context.query;

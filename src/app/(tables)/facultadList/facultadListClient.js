@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import { debounce } from "lodash";
 
@@ -25,10 +25,11 @@ function FacultadListClient({ initialData, totalPages: initialTotalPages }) {
   const API = process.env.NEXT_PUBLIC_API_KEY;
   const Api_import_URL = `${API}import/facultad`;
 
-  const fetchData = async (page, query, size) => {
+  // ✅ Cambio 1: refactor para que fetchData dependa del estado y no reciba parámetros externos
+  const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await fetchFacultades(page, query, size);
+      const response = await fetchFacultades(page, searchQuery, pageSize);
       setFacultades(response.results);
       setTotalPages(response.totalPages);
     } catch (error) {
@@ -36,35 +37,36 @@ function FacultadListClient({ initialData, totalPages: initialTotalPages }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, searchQuery, pageSize]);
 
-  const debouncedFetchData = useCallback(
-    debounce((page, query, size) => {
-      fetchData(page, query, size);
-    }, 300),
-    []
-  );
+  // ✅ Cambio 2: uso de debounce para actualizar el query, no para hacer el fetch
+  const debouncedSearch = useRef(
+    debounce((value) => {
+      setSearchQuery(value); // solo actualiza el query
+    }, 300)
+  ).current;
 
-  // Carga inicial y cada vez que cambian page, searchQuery o pageSize
+  // ✅ Cambio 3: cada vez que cambia el query, se va a la página 1
   useEffect(() => {
-    debouncedFetchData(page, searchQuery, pageSize);
-    return () => debouncedFetchData.cancel();
-  }, [page, searchQuery, pageSize, debouncedFetchData]);
+    setPage(1);
+  }, [searchQuery]);
 
-  // Función para eliminar facultad localmente y en backend
+  // ✅ Cambio 4: fetchData centralizado en useEffect
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
   const deleteFacultad = (pk) => {
     deleteEntity(`${API}api/facultad/delete`, pk, setFacultades, "FacultadID");
   };
 
   const handleSearchChange = (e) => {
-    setSearchQuery(e.target.value);
-    setPage(1); // reinicia la página al cambiar búsqueda
+    debouncedSearch(e.target.value); // ✅ solo actualiza el searchQuery
   };
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     setPage(1);
-    fetchData(1, searchQuery, pageSize);
   };
 
   return (
@@ -129,7 +131,7 @@ function FacultadListClient({ initialData, totalPages: initialTotalPages }) {
       <Modal title="Importar Facultad">
         <ImportExcel
           importURL={Api_import_URL}
-          onSuccess={() => fetchData(page, searchQuery, pageSize)}
+          onSuccess={() => fetchData()}
         />
       </Modal>
 
@@ -205,3 +207,4 @@ function FacultadListClient({ initialData, totalPages: initialTotalPages }) {
 }
 
 export default withAuth(FacultadListClient);
+
