@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import Notification from "../Notification";
 import Styles from "@styles/form.module.css";
 
-export default function CampusForm() {
+export default function CampusForm({ title }) {
   const router = useRouter();
   const [formData, setFormData] = useState({
     CampusCodigo: "",
@@ -87,7 +87,7 @@ export default function CampusForm() {
   return (
     <div className={Styles.container}>
       <form onSubmit={handleSubmit} className={Styles.form}>
-        <h1 className={Styles.title}>Registrar Campus</h1>
+        <h1 className={Styles.title}>{title}</h1>
 
         <div className={Styles.name_group}>
           <label htmlFor="CampusCodigo">Código del Campus:</label>

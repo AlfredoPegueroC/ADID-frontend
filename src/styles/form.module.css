@@ -7,13 +7,10 @@
   border: 1px solid #becffa; /* Gris claro sofisticado */
   border-radius: 20px;
 
-  box-shadow:
-    0 2px 4px rgba(0, 0, 0, 0.04),
-    0 8px 20px rgba(0, 0, 0, 0.06); /* Sombras suaves para dar profundidad */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04), 0 8px 20px rgba(0, 0, 0, 0.06); /* Sombras suaves para dar profundidad */
 
   transition: box-shadow 0.3s ease, border-color 0.3s ease;
 }
-
 
 @media (min-width: 768px) {
   .container {
@@ -25,11 +22,11 @@
   font-weight: 700;
   color: hsl(185, 24%, 22%);
   margin-top: 0.2rem;
-   grid-column: span 3; /* Que ocupe las 3 columnas del grid */
+  grid-column: span 3; /* Que ocupe las 3 columnas del grid */
   margin-top: 0;
   text-align: center;
 }
-.archivo{
+.archivo {
   color: black;
 }
 .form {
@@ -46,7 +43,7 @@
 .form select:focus {
   outline: 1px solid hsl(169, 82%, 27%);
 }
-.form select{
+.form select {
   background: #fff;
   padding-block: 1rem;
   padding-inline: 1rem;
@@ -58,9 +55,9 @@
   padding-inline: 1rem;
   border-radius: 5px;
   border: 1px solid hsl(169, 82%, 27%);
-  font-size: 1rem; 
+  font-size: 1rem;
   width: 100%; /* O prueba con 70%, 60%, etc */
-  line-height: 1.5rem; 
+  line-height: 1.5rem;
 }
 
 .form select {
@@ -88,7 +85,6 @@
 
 .name_group {
   width: 100%;
-
 }
 
 @media (min-width: 600px) {
@@ -103,7 +99,7 @@
 }
 .name_group {
   /* position: relative; */
- display: flex;
+  display: flex;
   flex-direction: column;
   gap: 0.5rem;
 
@@ -118,21 +114,21 @@
 }
 
 .btn {
-   display: flex;                /* Usamos flexbox para alinear el contenido */
-  justify-content: center;      /* Centra el texto horizontalmente */
-  align-items: center;          /* Centra el texto verticalmente */
-  width: 30%;                  /* Asegura que el botón ocupe todo el ancho del contenedor */
-  height: 50px;                 /* Ajusta la altura del botón */
-  font-size: 1.25rem;           /* Tamaño del texto */
-  padding: 1rem;                /* Espaciado dentro del botón */
-  margin-top: 0.3rem;             /* Espaciado superior */
-  cursor: pointer;             
-  border: none;                
-  color: white;                
-  font-weight: 300;             
-  letter-spacing: 1px;          
-  background: hsl(169, 82%, 27%); 
-  border-radius: 15px;  
+  display: flex; /* Usamos flexbox para alinear el contenido */
+  justify-content: center; /* Centra el texto horizontalmente */
+  align-items: center; /* Centra el texto verticalmente */
+  width: 30%; /* Asegura que el botón ocupe todo el ancho del contenedor */
+  height: 50px; /* Ajusta la altura del botón */
+  font-size: 1.25rem; /* Tamaño del texto */
+  padding: 1rem; /* Espaciado dentro del botón */
+  margin-top: 0.3rem; /* Espaciado superior */
+  cursor: pointer;
+  border: none;
+  color: white;
+  font-weight: 300;
+  letter-spacing: 1px;
+  background: hsl(169, 82%, 27%);
+  border-radius: 15px;
 }
 
 /* SUCCEED*/
@@ -154,11 +150,10 @@
   gap: 1rem;
 }
 
-@media (max-width: 768px){
-  .success{
+@media (max-width: 768px) {
+  .success {
     padding: 0.5rem 1rem;
-  transform: translateY(-100%) translateX(-5%);
-
+    transform: translateY(-100%) translateX(-5%);
   }
 }
 
@@ -211,6 +206,3 @@
   display: flex;
   justify-content: center; /* Centra horizontalmente */
 }
-
-
-

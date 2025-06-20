@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import Notification from "../Notification";
 import Styles from "@styles/form.module.css";
 
-export default function DocenteForm() {
+export default function DocenteForm({ title }) {
   const router = useRouter();
   const [universidades, setUniversidades] = useState([]);
   const [tiposDocente, setTiposDocente] = useState([]);
@@ -119,7 +119,7 @@ export default function DocenteForm() {
   return (
     <div className={Styles.container}>
       <form onSubmit={handleSubmit} className={Styles.form}>
-        <h1 className={Styles.title}>Registrar Docente</h1>
+        <h1 className={Styles.title}>{title}</h1>
 
         <div className={Styles.name_group}>
           <label htmlFor="DocenteCodigo">Código:</label>

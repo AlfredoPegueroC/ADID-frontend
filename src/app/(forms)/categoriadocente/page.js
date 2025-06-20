@@ -8,7 +8,7 @@ import withAuth from "@/src/utils/withAuth";
 function CategoriaDocenteFormPage(){
   return (
     <FormLayout>
-      <CategoriaDocenteForm/>
+      <CategoriaDocenteForm title="Definir Categoria de Docente" />
     </FormLayout>
   )
 }

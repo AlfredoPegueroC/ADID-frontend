@@ -8,7 +8,7 @@ import withAuth from "@/src/utils/withAuth";
 function DocenteFormPage(){
   return (
     <FormLayout>
-      <DocenteForm/>
+      <DocenteForm title="Definir Docente" />
     </FormLayout>
   )
 }

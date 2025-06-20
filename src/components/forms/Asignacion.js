@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import Notification from "../Notification";
 import Styles from "@styles/form.module.css";
 
-export default function AsignacionForm() {
+export default function AsignacionForm({ title }) {
   const router = useRouter();
   const API = process.env.NEXT_PUBLIC_API_KEY;
 
@@ -114,7 +114,7 @@ export default function AsignacionForm() {
   return (
     <div className={Styles.container}>
       <form onSubmit={handleSubmit} className={Styles.form}>
-        <h1 className={Styles.title}>Definir Asignación Docente</h1>
+        <h1 className={Styles.title}>{title}</h1>
 
         <div className={Styles.name_group}>
           <label htmlFor="nrc">NRC:</label>

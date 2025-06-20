@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Notification from "../Notification";
 import Styles from "@styles/form.module.css";
 
-export default function TipoDocenteForm() {
+export default function TipoDocenteForm({title}) {
   const router = useRouter();
   const API = process.env.NEXT_PUBLIC_API_KEY;
 
@@ -75,7 +75,7 @@ export default function TipoDocenteForm() {
   return (
     <div className={Styles.container}>
       <form onSubmit={handleSubmit} className={Styles.form}>
-        <h1 className={Styles.title}>Registrar Tipo de Docente</h1>
+        <h1 className={Styles.title}>{title}</h1>
 
         <div className={Styles.name_group}>
           <label htmlFor="TipoDocenteCodigo">Código:</label>

@@ -7,7 +7,7 @@ import withAuth from "@utils/withAuth"
 function AsignacionFormPage(){
   return(
     <FormLayout>
-      <AsignacionForm/>
+      <AsignacionForm title={"Definir Asignación Docente"}/>
     </FormLayout>
   )
 }

@@ -7,7 +7,7 @@ import withAuth from "@/src/utils/withAuth";
 function EscuelaFormPage(){
   return (
     <FormLayout>
-      <Escuela title="Registrar escuela"/>
+      <Escuela title="Definir Escuela"/>
     </FormLayout>
   )
 }

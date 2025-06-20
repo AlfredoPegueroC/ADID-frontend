@@ -7,7 +7,7 @@ import withAuth from '@/src/utils/withAuth';
 function UniversidadFormPage() {
     return (
         <FormLayout>
-            <Universidad title="Registrar Univerdad" />
+            <Universidad title="Definir Universidad" />
         </FormLayout>
     );
 }

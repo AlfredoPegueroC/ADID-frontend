@@ -7,7 +7,7 @@ import withAuth from "@/src/utils/withAuth";
 function FacultadFormPage(){
   return (
     <FormLayout>
-      <Facultad title="Registrar Facultad"/>
+      <Facultad title="Definir Facultad"/>
     </FormLayout>
   )
   

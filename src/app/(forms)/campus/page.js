@@ -7,7 +7,7 @@ import withAuth from "@/src/utils/withAuth";
 function CampusFormPage(){
   return(
     <FormLayout>
-      <CampusForm/>
+      <CampusForm title={"Definir Campus"}/>
     </FormLayout>
   )
 }
