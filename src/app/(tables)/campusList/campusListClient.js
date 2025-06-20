@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import Pagination from "@components/Pagination";
 import Tables from "@components/Tables";
@@ -22,10 +22,11 @@ function CampusListClient({ initialData, totalPages: initialTotalPages }) {
   const [totalPages, setTotalPages] = useState(initialTotalPages || 1);
   const API = process.env.NEXT_PUBLIC_API_KEY;
 
-  const fetchData = async (page, query, size) => {
+  // fetchData usa estados actuales
+  const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await fetchCampus(page, query, size);
+      const response = await fetchCampus(currentPage, searchQuery, pageSize);
       setCampusList(response.results);
       setTotalPages(response.totalPages);
     } catch (error) {
@@ -33,23 +34,26 @@ function CampusListClient({ initialData, totalPages: initialTotalPages }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage, searchQuery, pageSize]);
 
-  // debounce para evitar múltiples llamadas rápidas
-  const debouncedFetchData = useCallback(
-    debounce((page, query, size) => {
-      fetchData(page, query, size);
-    }, 300),
-    []
-  );
+  // Debounce para actualización de búsqueda
+  const debouncedSearch = useRef(
+    debounce((value) => {
+      setSearchQuery(value);
+    }, 300)
+  ).current;
 
-  // Llama al fetchData con debounce cuando cambian page, query o pageSize
+  // Reset página a 1 si cambia búsqueda
   useEffect(() => {
-    debouncedFetchData(currentPage, searchQuery, pageSize);
-    return () => debouncedFetchData.cancel();
-  }, [currentPage, searchQuery, pageSize, debouncedFetchData]);
+    setCurrentPage(1);
+  }, [searchQuery]);
 
-  // Actualizar lista localmente sin hacer fetch tras eliminación
+  // Carga datos cada vez que cambia página, búsqueda o tamaño de página
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  // Eliminar campus
   const deleteCampus = useCallback(
     (pk) => {
       deleteEntity(`${API}api/campus/delete`, pk, setCampusList, "CampusID");
@@ -57,24 +61,20 @@ function CampusListClient({ initialData, totalPages: initialTotalPages }) {
     [API]
   );
 
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
-  };
-
+  // Manejo cambio búsqueda
   const handleSearchChange = (e) => {
-    setSearchQuery(e.target.value);
-    setCurrentPage(1);
+    debouncedSearch(e.target.value);
   };
 
+  // Manejo submit búsqueda
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     setCurrentPage(1);
-    // No fetch explícito, lo hará el useEffect con debounce
   };
 
+  // Cambio tamaño página
   const handlePageSizeChange = (e) => {
-    const newSize = Number(e.target.value);
-    setPageSize(newSize);
+    setPageSize(Number(e.target.value));
     setCurrentPage(1);
   };
 
@@ -137,28 +137,34 @@ function CampusListClient({ initialData, totalPages: initialTotalPages }) {
       <Modal title="Importar Campus">
         <ImportExcel
           importURL={`${API}import/campus`}
-          onSuccess={() => fetchData(currentPage, searchQuery, pageSize)}
+          onSuccess={fetchData}
         />
       </Modal>
 
-      {loading ? (
-        <div className="text-center">Cargando...</div>
-      ) : (
-        <Tables>
-          <thead>
+      <Tables>
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Nombre</th>
+            <th>Dirección</th>
+            <th>Ciudad</th>
+            <th>Provincia</th>
+            <th>País</th>
+            <th>Teléfono</th>
+            <th>Correo</th>
+            <th>Estado</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        {loading ? (
+          <tbody>
             <tr>
-              <th>Código</th>
-              <th>Nombre</th>
-              <th>Dirección</th>
-              <th>Ciudad</th>
-              <th>Provincia</th>
-              <th>País</th>
-              <th>Teléfono</th>
-              <th>Correo</th>
-              <th>Estado</th>
-              <th>Acción</th>
+              <td colSpan="10" className="text-center">
+                Cargando...
+              </td>
             </tr>
-          </thead>
+          </tbody>
+        ) : (
           <tbody>
             {campusList.length === 0 ? (
               <tr>
@@ -196,14 +202,14 @@ function CampusListClient({ initialData, totalPages: initialTotalPages }) {
               ))
             )}
           </tbody>
-        </Tables>
-      )}
+        )}
+      </Tables>
 
       {totalPages > 1 && (
         <Pagination
           page={currentPage}
           totalPages={totalPages}
-          onPageChange={handlePageChange}
+          onPageChange={setCurrentPage}
         />
       )}
     </div>
@@ -211,3 +217,5 @@ function CampusListClient({ initialData, totalPages: initialTotalPages }) {
 }
 
 export default withAuth(CampusListClient);
+
+

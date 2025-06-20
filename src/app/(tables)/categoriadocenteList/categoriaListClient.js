@@ -60,7 +60,7 @@ function CategoriaListClient({ initialData, totalPages: initialTotalPages }) {
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     setCurrentPage(1);
-    // Nota: no es necesario llamar fetch aquí porque el useEffect ya se activa
+    // No es necesario llamar fetch aquí porque el useEffect ya se activa
   };
 
   // Cambiar texto búsqueda
@@ -147,9 +147,7 @@ function CategoriaListClient({ initialData, totalPages: initialTotalPages }) {
       <Modal title="Importar Categoría">
         <ImportExcel
           importURL={importURL}
-          onSuccess={() =>
-            fetchCategoriasData(searchQuery, currentPage, pageSize)
-          }
+          onSuccess={() => fetchCategoriasData(currentPage, searchQuery, pageSize)}
         />
       </Modal>
 
@@ -164,45 +162,49 @@ function CategoriaListClient({ initialData, totalPages: initialTotalPages }) {
             <th>Acción</th>
           </tr>
         </thead>
-        <tbody>
-          {loading ? (
+        {loading ? (
+          <tbody>
             <tr>
               <td colSpan="6" className="text-center">
                 Cargando...
               </td>
             </tr>
-          ) : categorias.length === 0 ? (
-            <tr>
-              <td colSpan="6" className="text-center">
-                No se encontraron categorías.
-              </td>
-            </tr>
-          ) : (
-            categorias.map((categoria, index) => (
-              <tr key={categoria.CategoriaID}>
-                <th scope="row">{index + 1 + (currentPage - 1) * pageSize}</th>
-                <td>{categoria.categoriaCodigo}</td>
-                <td>{categoria.CategoriaNombre}</td>
-                <td>{categoria.CategoriaEstado}</td>
-                <td>{categoria.universidadNombre || "—"}</td>
-                <td>
-                  <Link
-                    href={`/categoriaEdit/${categoria.CategoriaID}`}
-                    className="btn btn-primary btn-sm"
-                  >
-                    editar
-                  </Link>
-                  <button
-                    className="btn btn-danger btn-sm mx-2"
-                    onClick={() => deleteCategoria(categoria.CategoriaID)}
-                  >
-                    borrar
-                  </button>
+          </tbody>
+        ) : (
+          <tbody>
+            {categorias.length === 0 ? (
+              <tr>
+                <td colSpan="6" className="text-center">
+                  No se encontraron categorías.
                 </td>
               </tr>
-            ))
-          )}
-        </tbody>
+            ) : (
+              categorias.map((categoria, index) => (
+                <tr key={categoria.CategoriaID}>
+                  <th scope="row">{index + 1 + (currentPage - 1) * pageSize}</th>
+                  <td>{categoria.categoriaCodigo}</td>
+                  <td>{categoria.CategoriaNombre}</td>
+                  <td>{categoria.CategoriaEstado}</td>
+                  <td>{categoria.universidadNombre || "—"}</td>
+                  <td>
+                    <Link
+                      href={`/categoriaEdit/${categoria.CategoriaID}`}
+                      className="btn btn-primary btn-sm"
+                    >
+                      editar
+                    </Link>
+                    <button
+                      className="btn btn-danger btn-sm mx-2"
+                      onClick={() => deleteCategoria(categoria.CategoriaID)}
+                    >
+                      borrar
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        )}
       </Tables>
 
       {totalPages > 1 && (
