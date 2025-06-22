@@ -86,25 +86,15 @@ function TipoDocenteListClient({ initialData, totalPages: initialTotalPages }) {
             Nuevo Tipo
           </Link>
 
-          {tipos.length > 0 && (
-            <>
-              <Link
-                className="btn btn-success"
-                href={`${API}export/tipoDocente`}
-              >
-                Exportar
-              </Link>
-
-              <button
-                className="btn btn-danger"
-                onClick={() =>
-                  exportTipoDocenteToPDF(tipos, currentPage, pageSize)
-                }
-              >
-                Exportar PDF
-              </button>
-            </>
-          )}
+          <Link className="btn btn-success" href={`${API}export/tipoDocente`}>
+            Exportar Excel
+          </Link>
+          <button
+            className={`btn btn-danger ${tipos.length === 0 ? "disabled" : ""}`}
+            onClick={() => exportTipoDocenteToPDF(tipos, currentPage, pageSize)}
+          >
+            Exportar PDF
+          </button>
 
           <button
             type="button"
@@ -112,7 +102,7 @@ function TipoDocenteListClient({ initialData, totalPages: initialTotalPages }) {
             data-bs-toggle="modal"
             data-bs-target="#Modal"
           >
-            Importar
+            Importar Excel
           </button>
 
           <Search
@@ -151,7 +141,6 @@ function TipoDocenteListClient({ initialData, totalPages: initialTotalPages }) {
       <Tables>
         <thead>
           <tr>
-            <th>#</th>
             <th>Código</th>
             <th>Descripción</th>
             <th>Estado</th>
@@ -175,7 +164,6 @@ function TipoDocenteListClient({ initialData, totalPages: initialTotalPages }) {
           ) : (
             tipos.map((tipo, index) => (
               <tr key={tipo.TipoDocenteID}>
-                <th scope="row">{index + 1 + (currentPage - 1) * pageSize}</th>
                 <td>{tipo.TipoDocenteCodigo}</td>
                 <td>{tipo.TipoDocenteDescripcion}</td>
                 <td>{tipo.TipoDocenteEstado}</td>

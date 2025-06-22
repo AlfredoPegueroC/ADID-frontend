@@ -31,7 +31,6 @@ function UniversidadListClient({ initialData }) {
     }, 500)
   ).current;
 
- 
   useEffect(() => {
     setPage(1);
   }, [searchQuery]);
@@ -81,24 +80,17 @@ function UniversidadListClient({ initialData }) {
             Nueva Universidad
           </Link>
 
-          {universidades.length > 0 && (
-            <>
-              <Link
-                className="btn btn-success"
-                href={`${API}export/universidad`}
-              >
-                Exportar
-              </Link>
-              <button
-                className="btn btn-danger"
-                onClick={() =>
-                  exportUniversidadesToPDF(universidades, page, pageSize)
-                }
-              >
-                Exportar PDF
-              </button>
-            </>
-          )}
+          <Link className={`btn btn-success`} href={`${API}export/universidad`}>
+            Exportar Excel
+          </Link>
+          <button
+            className={`btn btn-danger ${universidades.length === 0 ? "disabled" : ""}`}
+            onClick={() =>
+              exportUniversidadesToPDF(universidades, page, pageSize)
+            }
+          >
+            Exportar PDF
+          </button>
 
           <button
             type="button"
@@ -106,7 +98,7 @@ function UniversidadListClient({ initialData }) {
             data-bs-toggle="modal"
             data-bs-target="#Modal"
           >
-            Importar
+            Importar Excel
           </button>
 
           <Search
@@ -146,7 +138,7 @@ function UniversidadListClient({ initialData }) {
       <Tables>
         <thead>
           <tr>
-            <th>#</th>
+           
             <th>Código</th>
             <th>Nombre</th>
             <th>Dirección</th>
@@ -174,7 +166,6 @@ function UniversidadListClient({ initialData }) {
           ) : (
             universidades.map((universidad, index) => (
               <tr key={universidad.UniversidadCodigo}>
-                <td>{index + 1 + (page - 1) * pageSize}</td>
                 <td>{universidad.UniversidadCodigo}</td>
                 <td>{universidad.UniversidadNombre}</td>
                 <td>{universidad.UniversidadDireccion}</td>
@@ -212,15 +203,17 @@ function UniversidadListClient({ initialData }) {
       </Tables>
 
       {totalPages > 1 && (
-        <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
+        />
       )}
     </div>
   );
 }
 
 export default withAuth(UniversidadListClient);
-
-
 
 // export async function getServerSideProps(context) {
 //   const { page = 1, searchQuery = "", pageSize = 10 } = context.query;

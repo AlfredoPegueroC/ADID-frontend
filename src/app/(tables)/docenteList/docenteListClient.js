@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import Pagination from "@components/Pagination";
 import Tables from "@components/Tables";
@@ -13,69 +13,68 @@ import { fetchDocentes } from "@api/docenteService";
 import { debounce } from "lodash";
 import { exportDocentesToPDF } from "@utils/ExportPDF/exportDocentePDF";
 
-function DocenteListClient({ initialData, totalPages: initialTotalPages }) {
-  const [docentes, setDocentes] = useState(initialData || []);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(initialTotalPages || 1);
-  const [loading, setLoading] = useState(true);
+function DocenteListClient() {
+  const [docentes, setDocentes] = useState([]);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [pageSize, setPageSize] = useState(10);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const API = process.env.NEXT_PUBLIC_API_KEY;
+  const Api_import_URL = `${API}import/docente`;
 
-  const fetchDocentesData = useCallback(async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetchDocentes(currentPage, searchQuery, pageSize);
-      setDocentes(response.results);
-      setTotalPages(response.totalPages);
+      const { results, totalPages } = await fetchDocentes(
+        page,
+        searchQuery,
+        pageSize
+      );
+      setDocentes(results);
+      setTotalPages(totalPages);
     } catch (error) {
       setError("Error al cargar los docentes.");
-      console.error("Error fetching docentes:", error);
+      console.error("Error al cargar docentes:", error);
     } finally {
       setLoading(false);
     }
-  }, [currentPage, searchQuery, pageSize]);
+  }, [page, searchQuery, pageSize]);
 
-  const debouncedFetch = useCallback(debounce(fetchDocentesData, 500), [
-    fetchDocentesData,
-  ]);
+  const debouncedSearch = useRef(
+    debounce((value) => {
+      setSearchQuery(value);
+    }, 300)
+  ).current;
 
   useEffect(() => {
-    debouncedFetch();
-    return () => debouncedFetch.cancel();
-  }, [debouncedFetch]);
+    setPage(1);
+  }, [searchQuery]);
 
-  const deleteDocente = useCallback(
-    (pk) => {
-      deleteEntity(`${API}api/docente/delete`, pk, setDocentes, "DocenteID");
-    },
-    [API]
-  );
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  const deleteDocente = (pk) => {
+    deleteEntity(`${API}api/docente/delete`, pk, setDocentes, "DocenteID");
+  };
 
   const handleSearchChange = (e) => {
-    setSearchQuery(e.target.value);
+    debouncedSearch(e.target.value);
   };
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    setCurrentPage(1);
+    setPage(1);
   };
 
   const handlePageSizeChange = (e) => {
     setPageSize(Number(e.target.value));
-    setCurrentPage(1);
+    setPage(1);
   };
-
-  if (loading) {
-    return (
-      <div className="spinner-container">
-        <div className="spinner"></div>
-      </div>
-    );
-  }
 
   return (
     <div className="mt-5">
@@ -87,28 +86,24 @@ function DocenteListClient({ initialData, totalPages: initialTotalPages }) {
           <Link className="btn btn-primary" href="/docente">
             Agregar Docente
           </Link>
-          {docentes.length > 0 && (
-            <>
-              <Link className="btn btn-success" href={`${API}export/docente`}>
-                Exportar
-              </Link>
-              <button
-                className="btn btn-danger"
-                onClick={() =>
-                  exportDocentesToPDF(docentes, currentPage, pageSize)
-                }
-              >
-                Exportar PDF
-              </button>
-            </>
-          )}
+
+          <Link className="btn btn-success" href={`${API}export/docente`}>
+            Exportar Excel
+          </Link>
+          <button
+            className={`btn btn-danger ${docentes.length === 0 ? "disabled" : ""}`}
+            onClick={() => exportDocentesToPDF(docentes, page, pageSize)}
+          >
+            Exportar PDF
+          </button>
+
           <button
             type="button"
             className="btn btn-warning"
             data-bs-toggle="modal"
             data-bs-target="#Modal"
           >
-            Importar
+            Importar Excel
           </button>
           <Search
             SearchSubmit={handleSearchSubmit}
@@ -135,15 +130,13 @@ function DocenteListClient({ initialData, totalPages: initialTotalPages }) {
       </div>
 
       <Modal title="Importar Docente">
-        <ImportExcel
-          importURL={`${API}import/docente`}
-          onSuccess={fetchDocentesData}
-        />
+        <ImportExcel importURL={Api_import_URL} onSuccess={() => fetchData()} />
       </Modal>
 
       <Tables>
         <thead>
           <tr>
+            <th>Codigo</th>
             <th>Nombre</th>
             <th>Apellido</th>
             <th>Sexo</th>
@@ -161,15 +154,18 @@ function DocenteListClient({ initialData, totalPages: initialTotalPages }) {
           </tr>
         </thead>
         <tbody>
-          {docentes.length === 0 ? (
+          {loading ? (
             <tr>
-              <td colSpan="14" className="text-center">
-                No se encontraron docentes.
-              </td>
+              <td colSpan="15" className="text-center">Cargando...</td>
+            </tr>
+          ) : docentes.length === 0 ? (
+            <tr>
+              <td colSpan="15" className="text-center">No se encontraron docentes.</td>
             </tr>
           ) : (
-            docentes.map((d, index) => (
+            docentes.map((d) => (
               <tr key={d.DocenteID}>
+                <td>{d.DocenteCodigo}</td>
                 <td>{d.DocenteNombre}</td>
                 <td>{d.DocenteApellido}</td>
                 <td>{d.DocenteSexo}</td>
@@ -188,13 +184,13 @@ function DocenteListClient({ initialData, totalPages: initialTotalPages }) {
                     className="btn btn-primary btn-sm"
                     href={`/docenteEdit/${d.DocenteID}`}
                   >
-                    editar
+                    Editar
                   </Link>
                   <button
                     className="btn btn-danger btn-sm mx-2"
                     onClick={() => deleteDocente(d.DocenteID)}
                   >
-                    borrar
+                    Borrar
                   </button>
                 </td>
               </tr>
@@ -205,9 +201,9 @@ function DocenteListClient({ initialData, totalPages: initialTotalPages }) {
 
       {totalPages > 1 && (
         <Pagination
-          page={currentPage}
+          page={page}
           totalPages={totalPages}
-          onPageChange={setCurrentPage}
+          onPageChange={setPage}
         />
       )}
     </div>

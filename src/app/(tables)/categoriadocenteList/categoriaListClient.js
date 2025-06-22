@@ -88,8 +88,7 @@ function CategoriaListClient({ initialData, totalPages: initialTotalPages }) {
             Nueva Categoría
           </Link>
 
-          {categorias.length > 0 && (
-            <>
+          
               <Link
                 className="btn btn-success"
                 href={`${API}export/categoriaDocente`}
@@ -98,15 +97,14 @@ function CategoriaListClient({ initialData, totalPages: initialTotalPages }) {
               </Link>
 
               <button
-                className="btn btn-danger"
+                className={`btn btn-danger ${categorias.length === 0 ? "disabled" : ""}`}
                 onClick={() =>
                   exportCategoriasToPDF(categorias, currentPage, pageSize)
                 }
               >
                 Exportar PDF
               </button>
-            </>
-          )}
+          
 
           <button
             type="button"
@@ -114,7 +112,7 @@ function CategoriaListClient({ initialData, totalPages: initialTotalPages }) {
             data-bs-toggle="modal"
             data-bs-target="#Modal"
           >
-            Importar
+            Importar Excel
           </button>
 
           <Search
@@ -154,7 +152,6 @@ function CategoriaListClient({ initialData, totalPages: initialTotalPages }) {
       <Tables>
         <thead>
           <tr>
-            <th>#</th>
             <th>Código</th>
             <th>Nombre</th>
             <th>Estado</th>
@@ -181,7 +178,6 @@ function CategoriaListClient({ initialData, totalPages: initialTotalPages }) {
             ) : (
               categorias.map((categoria, index) => (
                 <tr key={categoria.CategoriaID}>
-                  <th scope="row">{index + 1 + (currentPage - 1) * pageSize}</th>
                   <td>{categoria.categoriaCodigo}</td>
                   <td>{categoria.CategoriaNombre}</td>
                   <td>{categoria.CategoriaEstado}</td>

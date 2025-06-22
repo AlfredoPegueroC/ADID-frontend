@@ -78,28 +78,24 @@ function FacultadListClient({ initialData, totalPages: initialTotalPages }) {
           <Link className="btn btn-primary" href="/facultad">
             Nueva Facultad
           </Link>
-          {facultades.length > 0 && (
-            <>
-              <Link className="btn btn-success" href={`${API}export/facultad`}>
-                Exportar
-              </Link>
-              <button
-                className="btn btn-danger"
-                onClick={() =>
-                  exportFacultadesToPDF(facultades, page, pageSize)
-                }
-              >
-                Exportar PDF
-              </button>
-            </>
-          )}
+
+          <Link className="btn btn-success" href={`${API}export/facultad`}>
+            Exportar Excel
+          </Link>
+          <button
+            className={`btn btn-danger ${facultades.length === 0 ? "disabled" : ""}`}
+            onClick={() => exportFacultadesToPDF(facultades, page, pageSize)}
+          >
+            Exportar PDF
+          </button>
+
           <button
             type="button"
             className="btn btn-warning"
             data-bs-toggle="modal"
             data-bs-target="#Modal"
           >
-            Importar
+            Importar Excel
           </button>
           <Search
             SearchSubmit={handleSearchSubmit}
@@ -129,10 +125,7 @@ function FacultadListClient({ initialData, totalPages: initialTotalPages }) {
       </div>
 
       <Modal title="Importar Facultad">
-        <ImportExcel
-          importURL={Api_import_URL}
-          onSuccess={() => fetchData()}
-        />
+        <ImportExcel importURL={Api_import_URL} onSuccess={() => fetchData()} />
       </Modal>
 
       <Tables>
@@ -207,4 +200,3 @@ function FacultadListClient({ initialData, totalPages: initialTotalPages }) {
 }
 
 export default withAuth(FacultadListClient);
-

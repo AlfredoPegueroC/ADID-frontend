@@ -1,22 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Notification from "../Notification";
 import Styles from "@styles/test.module.css";
 
 export default function ImportExcel({ title, importURL, onSuccess }) {
   const [file, setFile] = useState(null);
   const [message, setMessage] = useState("");
+  const inputRef = useRef(null);
 
   const handleFileChange = (event) => {
     setFile(event.target.files[0]);
+    setMessage("");
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
     if (!file) {
-      setMessage("Por favor, Selecionar un arhivo");
+      setMessage("Por favor, seleccionar un archivo");
       return;
     }
 
@@ -30,17 +32,60 @@ export default function ImportExcel({ title, importURL, onSuccess }) {
       });
 
       const result = await response.json();
+      console.log("Response status escuela:", result);
 
       if (response.ok) {
-        Notification.alertSuccess(result.message || "Se ha importado.")
+        // if (Array.isArray(result.duplicados) && result.duplicados.length > 0) {
+        //   Notification.alertLogin(
+        //     `Se omitieron ${result.duplicados.length} duplicados: ` + result.duplicados[0]
+        //   );
+        // }
+
+        if (
+          Array.isArray(result.nombres_duplicados) &&
+          result.nombres_duplicados.length > 0
+        ) {
+          Notification.alertLogin(
+            `Nombres duplicado: ` + result.nombres_duplicados[0]
+          );
+        } else {
+          Notification.alertSuccess(result.message || "Se ha importado.");
+        }
+
+        // if (
+        //   Array.isArray(result.directoras_duplicadas) &&
+        //   result.directoras_duplicadas.length > 0
+        // ) {
+        //   Notification.alertLogin(
+        //     `Director@s duplicad@s omitid@s:\n` +
+        //       result.directoras_duplicadas.slice(0, 5).join("\n")
+        //   );
+        // }
+
+        if (Array.isArray(result.errores) && result.errores.length > 0) {
+          Notification.alertError(
+            `Errores encontrados:\n` + result.errores[0].join("\n")
+          );
+        }
+
         if (onSuccess) onSuccess();
-        document.querySelector("#myform").reset();
+
+        // Limpiar archivo y resetear input
+        setFile(null);
+        if (inputRef.current) {
+          inputRef.current.value = null;
+        }
+        setMessage("");
       } else {
-        Notification.alertLogin(result.errores[0] || "Error al Importar");
-        console.log("Error details:", result);
+        const errorMsg =
+          result.error ||
+          (Array.isArray(result.errores) ? result.errores[0] : null) ||
+          "Error al importar";
+        Notification.alertError(errorMsg);
       }
     } catch (error) {
-      Notification.alertError("An error occurred while uploading the file.");
+      console.error("Import error:", error);
+      Notification.alertError("Error al subir el documento excel.");
     }
   };
 
@@ -53,6 +98,7 @@ export default function ImportExcel({ title, importURL, onSuccess }) {
             Selecciona un archivo Excel
           </label>
           <input
+            ref={inputRef}
             type="file"
             className={Styles.archivo}
             id="excel_file"

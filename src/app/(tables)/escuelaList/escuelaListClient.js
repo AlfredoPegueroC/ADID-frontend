@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import Pagination from "@components/Pagination";
 import Tables from "@components/Tables";
@@ -19,87 +19,91 @@ function EscuelaListClient() {
   const [totalPages, setTotalPages] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [pageSize, setPageSize] = useState(10);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const API = process.env.NEXT_PUBLIC_API_KEY;
   const Api_import_URL = `${API}import/escuela`;
 
-  const fetchData = async (page, query, size) => {
+  // ✅ fetchData depende del estado, no de parámetros externos
+  const fetchData = useCallback(async () => {
     setLoading(true);
-    setError(null);
     try {
-      const { results, totalPages } = await fetchEscuelas(page, query, size);
+      const { results, totalPages } = await fetchEscuelas(
+        page,
+        searchQuery,
+        pageSize
+      );
       setEscuelas(results);
       setTotalPages(totalPages);
     } catch (error) {
-      console.error("Error fetching data:", error);
-      setError("Error al cargar los datos.");
+      console.error("Error al cargar escuelas:", error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, searchQuery, pageSize]);
 
-  // Usamos debounce para evitar llamadas muy rápidas
-  const debouncedFetchData = useCallback(
-    debounce((page, query, size) => {
-      fetchData(page, query, size);
-    }, 300),
-    []
-  );
+  // ✅ actualiza solo el query con debounce
+  const debouncedSearch = useRef(
+    debounce((value) => {
+      setSearchQuery(value);
+    }, 300)
+  ).current;
 
-  // Cada vez que cambia page, searchQuery o pageSize, llamamos a la API con debounce
+  // ✅ reset de página cuando cambia el query
   useEffect(() => {
-    debouncedFetchData(page, searchQuery, pageSize);
-    return () => debouncedFetchData.cancel();
-  }, [page, searchQuery, pageSize, debouncedFetchData]);
+    setPage(1);
+  }, [searchQuery]);
 
-  // Eliminar escuela y actualizar localmente sin refetch
+  // ✅ ejecuta fetch centralizado
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
   const deleteEscuela = (pk) => {
     deleteEntity(`${API}api/escuela/delete`, pk, setEscuelas, "EscuelaId");
   };
 
   const handleSearchChange = (e) => {
-    setSearchQuery(e.target.value);
-    setPage(1); // Reiniciar página al cambiar búsqueda
+    debouncedSearch(e.target.value);
   };
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     setPage(1);
-    // No llamamos fetchData directo, porque el efecto con debounce se encargará
+  };
+
+  const handlePageSizeChange = (e) => {
+    setPageSize(Number(e.target.value));
+    setPage(1);
   };
 
   return (
     <div className="mt-5">
       <h1 className="text-dark">Lista de Escuelas</h1>
-      {error && <div className="alert alert-danger">{error}</div>}
 
       <div className="d-flex justify-content-between align-items-center mb-3 mt-3">
         <div className="d-flex gap-2">
           <Link className="btn btn-primary" href="/escuela">
             Nueva Escuela
           </Link>
-          {escuelas.length > 0 && (
-            <>
-              <Link className="btn btn-success" href={`${API}export/escuela`}>
-                Exportar
-              </Link>
-              <button
-                className="btn btn-danger"
-                onClick={() => exportEscuelasToPDF(escuelas, page, pageSize)}
-              >
-                Exportar PDF
-              </button>
-            </>
-          )}
+
+          <Link className="btn btn-success" href={`${API}export/escuela`}>
+            Exportar Excel
+          </Link>
+          <button
+            className={`btn btn-danger ${escuelas.length === 0 ? "disabled" : ""}`}
+            onClick={() => exportEscuelasToPDF(escuelas, page, pageSize)}
+          >
+            Exportar PDF
+          </button>
+
           <button
             type="button"
             className="btn btn-warning"
             data-bs-toggle="modal"
             data-bs-target="#Modal"
           >
-            Importar
+            Importar Excel
           </button>
           <Search
             SearchSubmit={handleSearchSubmit}
@@ -116,10 +120,7 @@ function EscuelaListClient() {
             className="form-select w-auto"
             style={{ height: "38px" }}
             value={pageSize}
-            onChange={(e) => {
-              setPageSize(Number(e.target.value));
-              setPage(1);
-            }}
+            onChange={handlePageSizeChange}
           >
             <option value={10}>10</option>
             <option value={25}>25</option>
@@ -129,69 +130,66 @@ function EscuelaListClient() {
       </div>
 
       <Modal title="Importar Escuela">
-        <ImportExcel
-          importURL={Api_import_URL}
-          onSuccess={() => fetchData(page, searchQuery, pageSize)}
-        />
+        <ImportExcel importURL={Api_import_URL} onSuccess={() => fetchData()} />
       </Modal>
 
-      {loading ? (
-        <div className="text-center">Cargando...</div>
-      ) : (
-        <Tables>
-          <thead>
+      <Tables>
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Nombre</th>
+            <th>Directora</th>
+            <th>Teléfono</th>
+            <th>Correo</th>
+            <th>Estado</th>
+            <th>Universidad</th>
+            <th>Facultad</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody>
+          {loading ? (
             <tr>
-              <th>#</th>
-              <th>Código</th>
-              <th>Nombre</th>
-              <th>Directora</th>
-              <th>Teléfono</th>
-              <th>Correo</th>
-              <th>Estado</th>
-              <th>Universidad</th>
-              <th>Facultad</th>
-              <th>Acción</th>
+              <td colSpan="10" className="text-center">
+                Cargando...
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {escuelas.length === 0 ? (
-              <tr>
-                <td colSpan="10" className="text-center">
-                  No se han encontrado escuelas.
+          ) : escuelas.length === 0 ? (
+            <tr>
+              <td colSpan="10" className="text-center">
+                No se han encontrado escuelas.
+              </td>
+            </tr>
+          ) : (
+            escuelas.map((escuela, index) => (
+              <tr key={escuela.EscuelaId}>
+                <td>{escuela.EscuelaCodigo}</td>
+                <td>{escuela.EscuelaNombre}</td>
+                <td>{escuela.EscuelaDirectora}</td>
+                <td>{escuela.EscuelaTelefono}</td>
+                <td>{escuela.EscuelaCorreo}</td>
+                <td>{escuela.EscuelaEstado}</td>
+                <td>{escuela.universidadNombre || "—"}</td>
+                <td>{escuela.facultadNombre || "—"}</td>
+                <td>
+                  <Link
+                    className="btn btn-primary btn-sm"
+                    href={`/escuelaEdit/${escuela.EscuelaId}`}
+                  >
+                    Editar
+                  </Link>
+                  <button
+                    className="btn btn-danger btn-sm mx-2"
+                    onClick={() => deleteEscuela(escuela.EscuelaId)}
+                  >
+                    borrar
+                  </button>
                 </td>
               </tr>
-            ) : (
-              escuelas.map((escuela, index) => (
-                <tr key={escuela.EscuelaId}>
-                  <th scope="row">{index + 1 + (page - 1) * pageSize}</th>
-                  <td>{escuela.EscuelaCodigo}</td>
-                  <td>{escuela.EscuelaNombre}</td>
-                  <td>{escuela.EscuelaDirectora}</td>
-                  <td>{escuela.EscuelaTelefono}</td>
-                  <td>{escuela.EscuelaCorreo}</td>
-                  <td>{escuela.EscuelaEstado}</td>
-                  <td>{escuela.universidadNombre || "—"}</td>
-                  <td>{escuela.facultadNombre || "—"}</td>
-                  <td>
-                    <Link
-                      className="btn btn-primary btn-sm"
-                      href={`/escuelaEdit/${escuela.EscuelaId}`}
-                    >
-                      Editar
-                    </Link>
-                    <button
-                      className="btn btn-danger btn-sm mx-2"
-                      onClick={() => deleteEscuela(escuela.EscuelaId)}
-                    >
-                      borrar
-                    </button>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </Tables>
-      )}
+            ))
+          )}
+        </tbody>
+      </Tables>
 
       {totalPages > 1 && (
         <Pagination

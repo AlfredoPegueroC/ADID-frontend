@@ -96,14 +96,14 @@ function PeriodoListClient({ initialData, totalPages: initialTotalPages }) {
           >
             Nuevo Periodo Académico
           </button>
-          {periodos.length > 0 && (
-            <Link
-              className="btn btn-success"
-              href={`${API}export/periodoAcademico`}
-            >
-              Exportar
-            </Link>
-          )}
+
+          <Link
+            className="btn btn-success"
+            href={`${API}export/periodoAcademico`}
+          >
+            Exportar Excel
+          </Link>
+
           <Search
             SearchSubmit={handleSearchSubmit}
             SearchChange={handleSearchChange}
