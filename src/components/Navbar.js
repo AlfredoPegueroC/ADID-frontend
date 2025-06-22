@@ -52,7 +52,7 @@ export default function Navbar() {
 
   return (
     <nav className={`${Style.navbar} navbar navbar-expand-lg`}>
-      <div className="container-fluid d-flex mx-2.5 py-1">
+      <div className={`${Style.container}  container-fluid d-flex mx-2.5 py-1`}>
         <img
           src="/LogoUASD.jpg"
           alt="Logo de la app"
