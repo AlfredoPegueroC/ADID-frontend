@@ -31,10 +31,10 @@ function CategoriaEdit({ params }) {
         const catData = await catRes.json();
         setCategoria(catData);
 
-        const univRes = await fetch(`${API}api/universidad`);
+        const univRes = await fetch(`${API}universidades`);
         if (!univRes.ok) throw new Error("Error al cargar universidades.");
         const univData = await univRes.json();
-        setUniversidades(univData.results);
+        setUniversidades(univData);
       } catch (error) {
         console.error("Error:", error);
         Notification.alertError("Error al cargar los datos.");
@@ -126,10 +126,10 @@ function CategoriaEdit({ params }) {
           </div>
 
           <div className={Styles.name_group}>
-            <label htmlFor="CategoriaDocente_UniversidadFK">Universidad</label>
+            <label htmlFor="Categoria_UniversidadFK">Universidad</label>
             <select
-              id="CategoriaDocente_UniversidadFK"
-              value={categoria.CategoriaDocente_UniversidadFK || ""}
+              id="Categoria_UniversidadFK"
+              value={categoria.Categoria_UniversidadFK || ""}
               onChange={handleChange}
               required
             >

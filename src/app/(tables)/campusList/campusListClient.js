@@ -144,6 +144,7 @@ function CampusListClient({ initialData, totalPages: initialTotalPages }) {
             <th>Provincia</th>
             <th>País</th>
             <th>Teléfono</th>
+            <th>Universidad</th>
             <th>Correo</th>
             <th>Estado</th>
             <th>Acción</th>
@@ -175,12 +176,13 @@ function CampusListClient({ initialData, totalPages: initialTotalPages }) {
                   <td>{c.CampusProvincia}</td>
                   <td>{c.CampusPais}</td>
                   <td>{c.CampusTelefono}</td>
+                  <td>{c.universidadNombre}</td>
                   <td>{c.CampusCorreoContacto}</td>
                   <td>{c.CampusEstado}</td>
                   <td>
                     <Link
                       className="btn btn-primary btn-sm"
-                      href={`/campusEdit/${c.CampusID}`}
+                      href={`/campusEdit/${c.CampusCodigo}`}
                     >
                       Editar
                     </Link>

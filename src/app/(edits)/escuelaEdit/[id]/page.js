@@ -32,8 +32,8 @@ function EditEscuela({ params }) {
     async function fetchData() {
       try {
         const escuelaResponse = await fetch(`${API}api/escuela/${id}/`);
-        const facultadesResponse = await fetch(`${API}api/facultad`);
-        const universidadesResponse = await fetch(`${API}api/universidad`);
+        const facultadesResponse = await fetch(`${API}facultades`);
+        const universidadesResponse = await fetch(`${API}universidades`);
 
         if (!escuelaResponse.ok || !facultadesResponse.ok || !universidadesResponse.ok)
           throw new Error("Error fetching data");
@@ -43,8 +43,8 @@ function EditEscuela({ params }) {
         const universidadesData = await universidadesResponse.json();
 
         setEscuela(escuelaData);
-        setFacultades(facultadesData.results);
-        setUniversidades(universidadesData.results);
+        setFacultades(facultadesData);
+        setUniversidades(universidadesData);
       } catch (error) {
         console.error("Error:", error);
         Notification.alertError("Error al cargar los datos.");

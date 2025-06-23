@@ -206,3 +206,27 @@
   display: flex;
   justify-content: center; /* Centra horizontalmente */
 }
+
+.dropdown {
+  position: absolute;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 100%;
+  max-height: 200px;
+  /* overflow-y: auto; */
+  z-index: 10;
+  padding: 0;
+  margin-top: 5rem;
+  list-style: none;
+}
+
+.dropdownItem {
+  padding: 8px 12px;
+  cursor: pointer;
+  color: #000;
+}
+
+.dropdownItem:hover {
+  background-color: #f0f0f0;
+}

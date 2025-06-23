@@ -31,9 +31,9 @@ function TipoEdit({ params }) {
         const tipoData = await tipoRes.json();
         setTipo(tipoData);
 
-        const uniRes = await fetch(`${API}api/universidad`);
+        const uniRes = await fetch(`${API}universidades`);
         const uniData = await uniRes.json();
-        setUniversidades(uniData.results);
+        setUniversidades(uniData);
       } catch (err) {
         console.error("Error:", err);
         Notification.alertError("Error al cargar los datos.");

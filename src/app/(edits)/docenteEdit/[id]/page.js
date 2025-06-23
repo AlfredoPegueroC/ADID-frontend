@@ -27,20 +27,21 @@ function DocenteEdit({ params }) {
         const docenteData = await docenteResponse.json();
         setDocente(docenteData);
 
-        const universidadesData = await (await fetch(`${API}api/universidad`)).json();
-        setUniversidades(universidadesData.results);
+        const universidadesData = await (await fetch(`${API}universidades`)).json();
+        setUniversidades(universidadesData);
 
-        const facultadesData = await (await fetch(`${API}api/facultad`)).json();
-        setFacultades(facultadesData.results);
+        const facultadesData = await (await fetch(`${API}facultades`)).json();
+        setFacultades(facultadesData);
 
-        const escuelasData = await (await fetch(`${API}api/escuela`)).json();
-        setEscuelas(escuelasData.results);
+        const escuelasData = await (await fetch(`${API}escuelas`)).json();
+        setEscuelas(escuelasData);
 
-        const tiposData = await (await fetch(`${API}api/tipodocente`)).json();
-        setTipos(tiposData.results);
+        const tiposData = await (await fetch(`${API}tipodocentes`)).json();
+        setTipos(tiposData);
 
-        const categoriasData = await (await fetch(`${API}api/categoriaDocente`)).json();
-        setCategorias(categoriasData.results);
+        const categoriasData = await (await fetch(`${API}categoriadocentes`)).json();
+        setCategorias(categoriasData);
+        console.log("Data fetched successfully", categoriasData);
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {

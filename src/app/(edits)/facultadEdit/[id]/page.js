@@ -37,13 +37,13 @@ function EditFacultad({ params }) {
         const facultadData = await facultadRes.json();
         setFacultad(facultadData);
 
-        const univRes = await fetch(`${API}api/universidad`);
-        const campusRes = await fetch(`${API}api/campus`);
+        const univRes = await fetch(`${API}universidades`);
+        const campusRes = await fetch(`${API}campus`);
         const universidadesData = await univRes.json();
         const campusData = await campusRes.json();
 
-        setUniversidades(universidadesData.results);
-        setCampusList(campusData.results);
+        setUniversidades(universidadesData);
+        setCampusList(campusData);
       } catch (error) {
         Notification.alertError("Error al cargar datos.");
         console.error(error);
