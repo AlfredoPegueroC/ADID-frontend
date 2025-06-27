@@ -34,32 +34,40 @@ export default function ImportExcel({ title, importURL, onSuccess }) {
       });
 
       const result = await response.json();
+      console.log("Response status escuela:", result);
 
       if (response.ok) {
-        if (
+        // Mostrar solo un mensaje prioritario
+        if (Array.isArray(result.duplicados) && result.duplicados.length > 0) {
+          Notification.alertLogin(
+            `Se omitieron ${result.duplicados.length} duplicados: ${result.duplicados[0]}`
+          );
+        } else if (
           Array.isArray(result.nombres_duplicados) &&
           result.nombres_duplicados.length > 0
         ) {
+          Notification.alertLogin(`Nombre duplicado: ${result.nombres_duplicados[0]}`);
+        } else if (
+          Array.isArray(result.directoras_duplicadas) &&
+          result.directoras_duplicadas.length > 0
+        ) {
           Notification.alertLogin(
-            `Nombres duplicados: ` + result.nombres_duplicados[0]
+            `Director@s duplicad@s omitid@s:\n${result.directoras_duplicadas
+              .slice(0, 5)
+              .join("\n")}`
           );
+        } else if (Array.isArray(result.errores) && result.errores.length > 0) {
+          Notification.alertError(`Errores encontrados:\n${result.errores[0]}`);
         } else {
           Notification.alertSuccess(result.message || "Se ha importado.");
         }
 
-        if (Array.isArray(result.errores) && result.errores.length > 0) {
-          Notification.alertError(
-            `Errores encontrados:\n` + result.errores[0].join("\n")
-          );
-        }
-
         if (onSuccess) onSuccess();
 
+        // Limpiar archivo e input
         setFile(null);
-        if (inputRef.current) {
-          inputRef.current.value = null;
-        }
         setMessage("");
+        if (inputRef.current) inputRef.current.value = null;
       } else {
         const errorMsg =
           result.error ||
@@ -77,7 +85,7 @@ export default function ImportExcel({ title, importURL, onSuccess }) {
 
   return (
     <div>
-      <h1 className={Styles.title}>Importar Archivo Excel</h1>
+      <h1 className={Styles.title}>{title || "Importar Archivo Excel"}</h1>
       <form onSubmit={handleSubmit} id="myform" className={Styles.form}>
         <div className={Styles.name_group}>
           <label htmlFor="excel_file" className={Styles.label}>
@@ -91,6 +99,7 @@ export default function ImportExcel({ title, importURL, onSuccess }) {
             name="excel_file"
             onChange={handleFileChange}
             accept=".xls,.xlsx"
+            disabled={loading}
             required
           />
         </div>
