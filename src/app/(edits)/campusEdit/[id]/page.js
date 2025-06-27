@@ -4,7 +4,8 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import withAuth from "@utils/withAuth";
 import Notification from "@components/Notification";
-import Styles from "@styles/form.module.css"; // usa el mismo estilo que facultad
+import Styles from "@styles/form.module.css";
+import Select from "react-select";
 import { use } from 'react';
 function EditCampus({ params }) {
   const router = useRouter();
@@ -26,19 +27,35 @@ function EditCampus({ params }) {
 
   const [universidades, setUniversidades] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
       try {
         const campusRes = await fetch(`${API}api/campus/${id}/`);
-        const campusData = await campusRes.json();
-        setCampus(campusData);
-
         const univRes = await fetch(`${API}universidades`);
+
+        if (!campusRes.ok || !univRes.ok) throw new Error("Error al cargar datos");
+
+        const campusData = await campusRes.json();
         const universidadesData = await univRes.json();
-        setUniversidades(universidadesData);
+
+        setCampus({
+          ...campusData,
+          Campus_UniversidadFK:
+            typeof campusData.Campus_UniversidadFK === "object"
+              ? campusData.Campus_UniversidadFK.UniversidadID
+              : campusData.Campus_UniversidadFK,
+        });
+
+        setUniversidades(
+          universidadesData.map((u) => ({
+            label: u.UniversidadNombre,
+            value: u.UniversidadID,
+          }))
+        );
       } catch (error) {
-        console.error("Error cargando datos:", error);
+        console.error("Error:", error);
         Notification.alertError("Error al cargar datos del campus.");
       } finally {
         setLoading(false);
@@ -48,27 +65,21 @@ function EditCampus({ params }) {
     fetchData();
   }, [id, API]);
 
-  // 🔧 Normaliza el ID de universidad si viene como objeto
-  useEffect(() => {
-    if (
-      campus?.Campus_UniversidadFK &&
-      typeof campus.Campus_UniversidadFK === "object" &&
-      campus.Campus_UniversidadFK.UniversidadID
-    ) {
-      setCampus((prev) => ({
-        ...prev,
-        Campus_UniversidadFK: campus.Campus_UniversidadFK.UniversidadID,
-      }));
-    }
-  }, [campus.Campus_UniversidadFK]);
-
   const handleChange = (e) => {
     const { id, value } = e.target;
     setCampus((prev) => ({ ...prev, [id]: value }));
   };
 
+  const handleUniversidadChange = (selectedOption) => {
+    setCampus((prev) => ({
+      ...prev,
+      Campus_UniversidadFK: selectedOption ? selectedOption.value : "",
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitting(true);
 
     try {
       const response = await fetch(`${API}api/campus/edit/${id}/`, {
@@ -86,6 +97,8 @@ function EditCampus({ params }) {
     } catch (err) {
       console.error("Error en actualización:", err);
       Notification.alertError("Ocurrió un error inesperado.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -102,7 +115,6 @@ function EditCampus({ params }) {
       <form onSubmit={handleSubmit} className={Styles.form}>
         <h1 className={Styles.title}>Editar Campus</h1>
 
-        {/* Código */}
         <div className={Styles.name_group}>
           <label htmlFor="CampusCodigo">Código</label>
           <input
@@ -115,7 +127,6 @@ function EditCampus({ params }) {
           />
         </div>
 
-        {/* Nombre */}
         <div className={Styles.name_group}>
           <label htmlFor="CampusNombre">Nombre</label>
           <input
@@ -128,7 +139,6 @@ function EditCampus({ params }) {
           />
         </div>
 
-        {/* Dirección */}
         <div className={Styles.name_group}>
           <label htmlFor="CampusDireccion">Dirección</label>
           <input
@@ -141,7 +151,6 @@ function EditCampus({ params }) {
           />
         </div>
 
-        {/* Ciudad */}
         <div className={Styles.name_group}>
           <label htmlFor="CampusCiudad">Ciudad</label>
           <input
@@ -154,7 +163,6 @@ function EditCampus({ params }) {
           />
         </div>
 
-        {/* Provincia */}
         <div className={Styles.name_group}>
           <label htmlFor="CampusProvincia">Provincia</label>
           <input
@@ -167,7 +175,6 @@ function EditCampus({ params }) {
           />
         </div>
 
-        {/* País */}
         <div className={Styles.name_group}>
           <label htmlFor="CampusPais">País</label>
           <input
@@ -180,7 +187,6 @@ function EditCampus({ params }) {
           />
         </div>
 
-        {/* Teléfono */}
         <div className={Styles.name_group}>
           <label htmlFor="CampusTelefono">Teléfono</label>
           <input
@@ -193,7 +199,6 @@ function EditCampus({ params }) {
           />
         </div>
 
-        {/* Correo */}
         <div className={Styles.name_group}>
           <label htmlFor="CampusCorreoContacto">Correo de Contacto</label>
           <input
@@ -206,25 +211,17 @@ function EditCampus({ params }) {
           />
         </div>
 
-        {/* Universidad */}
         <div className={Styles.name_group}>
-          <label htmlFor="Campus_UniversidadFK">Universidad</label>
-          <select
-            id="Campus_UniversidadFK"
-            value={campus.Campus_UniversidadFK}
-            onChange={handleChange}
-            required
-          >
-            <option value="">-- Seleccione una Universidad --</option>
-            {universidades.map((u) => (
-              <option key={u.UniversidadID} value={u.UniversidadID}>
-                {u.UniversidadNombre}
-              </option>
-            ))}
-          </select>
+          <label>Universidad</label>
+          <Select
+            options={universidades}
+            value={universidades.find((u) => u.value === campus.Campus_UniversidadFK) || null}
+            onChange={handleUniversidadChange}
+            placeholder="Seleccione una universidad"
+            isClearable
+          />
         </div>
 
-        {/* Estado */}
         <div className={Styles.name_group}>
           <label htmlFor="CampusEstado">Estado</label>
           <select
@@ -239,10 +236,9 @@ function EditCampus({ params }) {
           </select>
         </div>
 
-        {/* Botón */}
         <div className={Styles.btn_group}>
-          <button type="submit" className={Styles.btn}>
-            Guardar Cambios
+          <button type="submit" className={Styles.btn} disabled={submitting}>
+            {submitting ? "Guardando..." : "Guardar Cambios"}
           </button>
         </div>
       </form>

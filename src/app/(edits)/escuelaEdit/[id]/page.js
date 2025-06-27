@@ -2,12 +2,11 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import FormLayout from "@components/layouts/FormLayout";
 import withAuth from "@utils/withAuth";
 import Notification from "@components/Notification";
-import Styles from "@styles/form.module.css"; // ✅ hoja de estilos estándar
+import Styles from "@styles/form.module.css";
+import Select from "react-select";
 import { use } from 'react';
-
 function EditEscuela({ params }) {
   const router = useRouter();
   const { id } = use(params);
@@ -27,6 +26,7 @@ function EditEscuela({ params }) {
   const [facultades, setFacultades] = useState([]);
   const [universidades, setUniversidades] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
@@ -43,8 +43,14 @@ function EditEscuela({ params }) {
         const universidadesData = await universidadesResponse.json();
 
         setEscuela(escuelaData);
-        setFacultades(facultadesData);
-        setUniversidades(universidadesData);
+
+        setFacultades(
+          facultadesData.map((f) => ({ label: f.FacultadNombre, value: f.FacultadID }))
+        );
+
+        setUniversidades(
+          universidadesData.map((u) => ({ label: u.UniversidadNombre, value: u.UniversidadID }))
+        );
       } catch (error) {
         console.error("Error:", error);
         Notification.alertError("Error al cargar los datos.");
@@ -54,15 +60,23 @@ function EditEscuela({ params }) {
     }
 
     fetchData();
-  }, [id, API]);
+  }, [id]);
 
   const handleChange = (e) => {
     const { id, value } = e.target;
     setEscuela((prev) => ({ ...prev, [id]: value }));
   };
 
+  const handleSelectChange = (field) => (selectedOption) => {
+    setEscuela((prev) => ({
+      ...prev,
+      [field]: selectedOption ? selectedOption.value : "",
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitting(true);
     try {
       const response = await fetch(`${API}api/escuela/edit/${id}/`, {
         method: "PATCH",
@@ -79,6 +93,8 @@ function EditEscuela({ params }) {
     } catch (error) {
       console.error("Error:", error);
       Notification.alertError("Fallo al editar la escuela.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -152,37 +168,25 @@ function EditEscuela({ params }) {
         </div>
 
         <div className={Styles.name_group}>
-          <label htmlFor="Escuela_UniversidadFK">Universidad</label>
-          <select
-            id="Escuela_UniversidadFK"
-            value={escuela.Escuela_UniversidadFK}
-            onChange={handleChange}
-            required
-          >
-            <option value="">Seleccione una universidad</option>
-            {universidades.map((u) => (
-              <option key={u.UniversidadID} value={u.UniversidadID}>
-                {u.UniversidadNombre}
-              </option>
-            ))}
-          </select>
+          <label>Universidad</label>
+          <Select
+            options={universidades}
+            value={universidades.find((u) => u.value === escuela.Escuela_UniversidadFK) || null}
+            onChange={handleSelectChange("Escuela_UniversidadFK")}
+            placeholder="Seleccione una universidad"
+            isClearable
+          />
         </div>
 
         <div className={Styles.name_group}>
-          <label htmlFor="Escuela_facultadFK">Facultad</label>
-          <select
-            id="Escuela_facultadFK"
-            value={escuela.Escuela_facultadFK}
-            onChange={handleChange}
-            required
-          >
-            <option value="">Seleccione una facultad</option>
-            {facultades.map((f) => (
-              <option key={f.FacultadID} value={f.FacultadID}>
-                {f.FacultadNombre}
-              </option>
-            ))}
-          </select>
+          <label>Facultad</label>
+          <Select
+            options={facultades}
+            value={facultades.find((f) => f.value === escuela.Escuela_facultadFK) || null}
+            onChange={handleSelectChange("Escuela_facultadFK")}
+            placeholder="Seleccione una facultad"
+            isClearable
+          />
         </div>
 
         <div className={Styles.name_group}>
@@ -200,8 +204,8 @@ function EditEscuela({ params }) {
         </div>
 
         <div className={Styles.btn_group}>
-          <button type="submit" className={Styles.btn}>
-            Guardar Cambios
+          <button type="submit" className={Styles.btn} disabled={submitting}>
+            {submitting ? "Guardando..." : "Guardar Cambios"}
           </button>
         </div>
       </form>

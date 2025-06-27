@@ -3,38 +3,46 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import FormLayout from "@components/layouts/FormLayout";
-import Styles from "@styles/form.module.css"; // Estilo estandarizado
+import Styles from "@styles/form.module.css";
 import Notification from "@components/Notification";
 import withAuth from "@utils/withAuth";
-import { use } from 'react';
+import Select from "react-select";
+
 function CategoriaEdit({ params }) {
   const router = useRouter();
-  const { id } = use(params) ;
+  const { id } = params;
   const API = process.env.NEXT_PUBLIC_API_KEY;
 
   const [categoria, setCategoria] = useState({
     categoriaCodigo: "",
     CategoriaNombre: "",
     CategoriaEstado: "",
-    CategoriaDocente_UniversidadFK: "",
+    Categoria_UniversidadFK: "",
     UsuarioRegistro: "admin",
   });
 
   const [universidades, setUniversidades] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
       try {
         const catRes = await fetch(`${API}api/categoriadocente/${id}/`);
-        if (!catRes.ok) throw new Error("Error al cargar categoría.");
-        const catData = await catRes.json();
-        setCategoria(catData);
-
         const univRes = await fetch(`${API}universidades`);
-        if (!univRes.ok) throw new Error("Error al cargar universidades.");
+
+        if (!catRes.ok || !univRes.ok) throw new Error("Error al cargar los datos.");
+
+        const catData = await catRes.json();
         const univData = await univRes.json();
-        setUniversidades(univData);
+
+        setCategoria(catData);
+        setUniversidades(
+          univData.map((u) => ({
+            label: u.UniversidadNombre,
+            value: u.UniversidadID,
+          }))
+        );
       } catch (error) {
         console.error("Error:", error);
         Notification.alertError("Error al cargar los datos.");
@@ -51,8 +59,16 @@ function CategoriaEdit({ params }) {
     setCategoria((prev) => ({ ...prev, [id]: value }));
   };
 
+  const handleSelectChange = (selectedOption) => {
+    setCategoria((prev) => ({
+      ...prev,
+      Categoria_UniversidadFK: selectedOption ? selectedOption.value : "",
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitting(true);
 
     try {
       const response = await fetch(`${API}api/categoriadocente/edit/${id}/`, {
@@ -72,6 +88,8 @@ function CategoriaEdit({ params }) {
     } catch (error) {
       console.error("Error updating categoria:", error);
       Notification.alertError("Fallo al editar.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -126,29 +144,21 @@ function CategoriaEdit({ params }) {
           </div>
 
           <div className={Styles.name_group}>
-            <label htmlFor="Categoria_UniversidadFK">Universidad</label>
-            <select
-              id="Categoria_UniversidadFK"
-              value={categoria.Categoria_UniversidadFK || ""}
-              onChange={handleChange}
-              required
-            >
-              <option value="" disabled>
-                -- Seleccione una Universidad --
-              </option>
-              {universidades.map((u) => (
-                <option key={u.UniversidadID} value={u.UniversidadID}>
-                  {u.UniversidadNombre}
-                </option>
-              ))}
-            </select>
+            <label>Universidad</label>
+            <Select
+              options={universidades}
+              value={
+                universidades.find((u) => u.value === categoria.Categoria_UniversidadFK) || null
+              }
+              onChange={handleSelectChange}
+              placeholder="Seleccione una universidad"
+              isClearable
+            />
           </div>
 
-          
-
           <div className={Styles.btn_group}>
-            <button type="submit" className={Styles.btn}>
-              Guardar Cambios
+            <button type="submit" className={Styles.btn} disabled={submitting}>
+              {submitting ? "Guardando..." : "Guardar Cambios"}
             </button>
           </div>
         </form>

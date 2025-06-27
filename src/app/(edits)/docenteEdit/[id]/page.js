@@ -6,11 +6,13 @@ import FormLayout from "@components/layouts/FormLayout";
 import withAuth from "@utils/withAuth";
 import Styles from "@styles/test.module.css";
 import Notification from "@components/Notification";
+import Select from "react-select";
 
 function DocenteEdit({ params }) {
   const router = useRouter();
-  const { id } = React.use(params);
+  const { id } = params;
   const API = process.env.NEXT_PUBLIC_API_KEY;
+
   const [docente, setDocente] = useState(null);
   const [universidades, setUniversidades] = useState([]);
   const [facultades, setFacultades] = useState([]);
@@ -18,65 +20,89 @@ function DocenteEdit({ params }) {
   const [tipos, setTipos] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const docenteResponse = await fetch(`${API}api/docente/${id}/`);
-        if (!docenteResponse.ok) throw new Error("Failed to fetch docente");
-        const docenteData = await docenteResponse.json();
-        setDocente(docenteData);
+        const docenteRes = await fetch(`${API}api/docente/${id}/`);
+        if (!docenteRes.ok) throw new Error("Fallo al obtener el docente");
+        const docenteData = await docenteRes.json();
 
-        const universidadesData = await (await fetch(`${API}universidades`)).json();
-        setUniversidades(universidadesData);
+        const [uData, fData, eData, tData, cData] = await Promise.all([
+          fetch(`${API}universidades`).then((r) => r.json()),
+          fetch(`${API}facultades`).then((r) => r.json()),
+          fetch(`${API}escuelas`).then((r) => r.json()),
+          fetch(`${API}tipodocentes`).then((r) => r.json()),
+          fetch(`${API}categoriadocentes`).then((r) => r.json()),
+        ]);
 
-        const facultadesData = await (await fetch(`${API}facultades`)).json();
-        setFacultades(facultadesData);
+        setDocente({
+          ...docenteData,
+          Docente_UniversidadFK:
+            typeof docenteData.Docente_UniversidadFK === "object"
+              ? docenteData.Docente_UniversidadFK.UniversidadID
+              : docenteData.Docente_UniversidadFK,
+        });
 
-        const escuelasData = await (await fetch(`${API}escuelas`)).json();
-        setEscuelas(escuelasData);
-
-        const tiposData = await (await fetch(`${API}tipodocentes`)).json();
-        setTipos(tiposData);
-
-        const categoriasData = await (await fetch(`${API}categoriadocentes`)).json();
-        setCategorias(categoriasData);
-        console.log("Data fetched successfully", categoriasData);
+        setUniversidades(
+          uData.map((u) => ({
+            label: u.UniversidadNombre,
+            value: u.UniversidadID,
+          }))
+        );
+        setFacultades(fData);
+        setEscuelas(eData);
+        setTipos(tData);
+        setCategorias(cData);
       } catch (error) {
         console.error("Error fetching data:", error);
+        Notification.alertError("Error al cargar los datos.");
       } finally {
         setLoading(false);
       }
     }
+
     fetchData();
-  }, [id, API]);
+  }, [id]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setDocente((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleUniversidadChange = (selectedOption) => {
+    setDocente((prev) => ({
+      ...prev,
+      Docente_UniversidadFK: selectedOption ? selectedOption.value : "",
+    }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!docente) return;
 
+    setSubmitting(true);
     try {
-      const response = await fetch(`${API}api/docente/edit/${id}/`, {
+      const res = await fetch(`${API}api/docente/edit/${id}/`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(docente),
       });
-      if (response.ok) {
+
+      if (res.ok) {
         Notification.alertSuccess("Docente Editado.");
         router.push("/docenteList");
       } else {
         Notification.alertError("Fallo al Editar.");
-        console.log(await response.json());
+        console.log(await res.json());
       }
-    } catch (error) {
-      console.error("Error updating docente:", error);
+    } catch (err) {
+      console.error("Error updating docente:", err);
       Notification.alertError("Fallo al Editar.");
+    } finally {
+      setSubmitting(false);
     }
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setDocente({ ...docente, [name]: value });
   };
 
   if (loading) {
@@ -289,41 +315,33 @@ function DocenteEdit({ params }) {
             />
           </div>
 
-          {/* FOREIGN KEYS */}
-          <div className={Styles.names}>
-            <div className={Styles.name_group}>
-              <label htmlFor="Docente_UniversidadFK">Universidad</label>
-              <select
-                id="Docente_UniversidadFK"
-                name="Docente_UniversidadFK"
-                value={docente?.Docente_UniversidadFK || ""}
-                onChange={handleChange}
-              >
-                <option value="">-- Seleccione una Universidad --</option>
-                {universidades.map((u) => (
-                  <option key={u.UniversidadID} value={u.UniversidadID}>
-                    {u.UniversidadNombre}
-                  </option>
-                ))}
-              </select>
-            </div>
+          <div className={Styles.name_group}>
+            <label htmlFor="Docente_UniversidadFK">Universidad</label>
+            <Select
+              id="Docente_UniversidadFK"
+              options={universidades}
+              value={universidades.find((u) => u.value === docente.Docente_UniversidadFK) || null}
+              onChange={handleUniversidadChange}
+              placeholder="Seleccione una universidad"
+              isClearable
+            />
+          </div>
 
-            <div className={Styles.name_group}>
-              <label htmlFor="Docente_TipoDocenteFK">Tipo Docente</label>
-              <select
-                id="Docente_TipoDocenteFK"
-                name="Docente_TipoDocenteFK"
-                value={docente?.Docente_TipoDocenteFK || ""}
-                onChange={handleChange}
-              >
-                <option value="">-- Seleccione un Tipo Docente --</option>
-                {tipos.map((tipo) => (
-                  <option key={tipo.TipoDocenteID} value={tipo.TipoDocenteID}>
-                    {tipo.TipoDocenteDescripcion}
-                  </option>
-                ))}
-              </select>
-            </div>
+          <div className={Styles.name_group}>
+            <label htmlFor="Docente_TipoDocenteFK">Tipo Docente</label>
+            <select
+              id="Docente_TipoDocenteFK"
+              name="Docente_TipoDocenteFK"
+              value={docente?.Docente_TipoDocenteFK || ""}
+              onChange={handleChange}
+            >
+              <option value="">-- Seleccione un Tipo Docente --</option>
+              {tipos.map((tipo) => (
+                <option key={tipo.TipoDocenteID} value={tipo.TipoDocenteID}>
+                  {tipo.TipoDocenteDescripcion}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className={Styles.name_group}>
@@ -343,7 +361,9 @@ function DocenteEdit({ params }) {
             </select>
           </div>
 
-          <button type="submit" className={Styles.btn}>Guardar Cambios</button>
+          <button type="submit" className={Styles.btn} disabled={submitting}>
+            {submitting ? "Guardando..." : "Guardar Cambios"}
+          </button>
         </form>
       </div>
     </FormLayout>
@@ -351,4 +371,3 @@ function DocenteEdit({ params }) {
 }
 
 export default withAuth(DocenteEdit);
-

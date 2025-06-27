@@ -2,12 +2,11 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import FormLayout from "@components/layouts/FormLayout";
-import withAuth from "@utils/withAuth";
+import Select from "react-select";
 import Notification from "@components/Notification";
-import Styles from "@styles/form.module.css"; // ✅ Usa el estilo estándar
+import withAuth from "@utils/withAuth";
+import Styles from "@styles/form.module.css";
 import { use } from 'react';
-
 function EditFacultad({ params }) {
   const router = useRouter();
   const { id } = use(params);
@@ -29,6 +28,7 @@ function EditFacultad({ params }) {
   const [universidades, setUniversidades] = useState([]);
   const [campusList, setCampusList] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
@@ -42,8 +42,18 @@ function EditFacultad({ params }) {
         const universidadesData = await univRes.json();
         const campusData = await campusRes.json();
 
-        setUniversidades(universidadesData);
-        setCampusList(campusData);
+        setUniversidades(
+          universidadesData.map((u) => ({
+            label: u.UniversidadNombre,
+            value: u.UniversidadID,
+          }))
+        );
+        setCampusList(
+          campusData.map((c) => ({
+            label: c.CampusNombre,
+            value: c.CampusID,
+          }))
+        );
       } catch (error) {
         Notification.alertError("Error al cargar datos.");
         console.error(error);
@@ -53,16 +63,23 @@ function EditFacultad({ params }) {
     }
 
     fetchData();
-  }, [id, API]);
+  }, [id]);
 
   const handleChange = (e) => {
     const { id, value } = e.target;
     setFacultad((prev) => ({ ...prev, [id]: value }));
   };
 
+  const handleSelectChange = (field) => (selectedOption) => {
+    setFacultad((prev) => ({
+      ...prev,
+      [field]: selectedOption ? selectedOption.value : "",
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    setSubmitting(true);
     try {
       const response = await fetch(`${API}api/facultad/edit/${id}/`, {
         method: "PATCH",
@@ -79,13 +96,15 @@ function EditFacultad({ params }) {
     } catch (err) {
       console.error("Update error:", err);
       Notification.alertError("Ocurrió un error inesperado.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
   if (loading) {
     return (
       <div className="spinner-container">
-        <div className="spinner"></div>
+        <div className="spinner" />
       </div>
     );
   }
@@ -168,37 +187,25 @@ function EditFacultad({ params }) {
         </div>
 
         <div className={Styles.name_group}>
-          <label htmlFor="Facultad_UniversidadFK">Universidad</label>
-          <select
-            id="Facultad_UniversidadFK"
-            value={facultad.Facultad_UniversidadFK}
-            onChange={handleChange}
-            required
-          >
-            <option value="">-- Seleccione una Universidad --</option>
-            {universidades.map((u) => (
-              <option key={u.UniversidadID} value={u.UniversidadID}>
-                {u.UniversidadNombre}
-              </option>
-            ))}
-          </select>
+          <label>Universidad</label>
+          <Select
+            options={universidades}
+            value={universidades.find((u) => u.value === facultad.Facultad_UniversidadFK) || null}
+            onChange={handleSelectChange("Facultad_UniversidadFK")}
+            placeholder="Seleccione una universidad"
+            isClearable
+          />
         </div>
 
         <div className={Styles.name_group}>
-          <label htmlFor="Facultad_CampusFK">Campus</label>
-          <select
-            id="Facultad_CampusFK"
-            value={facultad.Facultad_CampusFK}
-            onChange={handleChange}
-            required
-          >
-            <option value="">-- Seleccione un Campus --</option>
-            {campusList.map((c) => (
-              <option key={c.CampusID} value={c.CampusID}>
-                {c.CampusNombre}
-              </option>
-            ))}
-          </select>
+          <label>Campus</label>
+          <Select
+            options={campusList}
+            value={campusList.find((c) => c.value === facultad.Facultad_CampusFK) || null}
+            onChange={handleSelectChange("Facultad_CampusFK")}
+            placeholder="Seleccione un campus"
+            isClearable
+          />
         </div>
 
         <div className={Styles.name_group}>
@@ -216,8 +223,14 @@ function EditFacultad({ params }) {
         </div>
 
         <div className={Styles.btn_group}>
-          <button type="submit" className={Styles.btn}>
-            Guardar Cambios
+          <button type="submit" className={Styles.btn} disabled={submitting}>
+            {submitting ? (
+              <>
+                <span className="spinner-border spinner-border-sm" /> Guardando...
+              </>
+            ) : (
+              "Guardar Cambios"
+            )}
           </button>
         </div>
       </form>
@@ -226,4 +239,3 @@ function EditFacultad({ params }) {
 }
 
 export default withAuth(EditFacultad);
-

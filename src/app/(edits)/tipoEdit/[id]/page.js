@@ -2,12 +2,11 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Select from "react-select";
 import Notification from "@components/Notification";
-import FormLayout from "@components/layouts/FormLayout";
 import withAuth from "@utils/withAuth";
-import Styles from "@styles/form.module.css"; // ✅ Estilo unificado
+import Styles from "@styles/form.module.css";
 import { use } from 'react';
-
 function TipoEdit({ params }) {
   const router = useRouter();
   const { id } = use(params);
@@ -33,7 +32,12 @@ function TipoEdit({ params }) {
 
         const uniRes = await fetch(`${API}universidades`);
         const uniData = await uniRes.json();
-        setUniversidades(uniData);
+        setUniversidades(
+          (uniData.results || uniData).map((u) => ({
+            label: u.UniversidadNombre,
+            value: u.UniversidadID,
+          }))
+        );
       } catch (err) {
         console.error("Error:", err);
         Notification.alertError("Error al cargar los datos.");
@@ -48,6 +52,13 @@ function TipoEdit({ params }) {
   const handleChange = (e) => {
     const { id, value } = e.target;
     setTipo((prev) => ({ ...prev, [id]: value }));
+  };
+
+  const handleUniversidadChange = (selectedOption) => {
+    setTipo((prev) => ({
+      ...prev,
+      TipoDocente_UniversidadFK: selectedOption?.value || "",
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -73,6 +84,10 @@ function TipoEdit({ params }) {
       Notification.alertError("Fallo al editar.");
     }
   };
+
+  const selectedUniversidad = universidades.find(
+    (u) => u.value === tipo.TipoDocente_UniversidadFK
+  );
 
   if (loading) {
     return (
@@ -127,19 +142,14 @@ function TipoEdit({ params }) {
 
         <div className={Styles.name_group}>
           <label htmlFor="TipoDocente_UniversidadFK">Universidad</label>
-          <select
+          <Select
             id="TipoDocente_UniversidadFK"
-            value={tipo.TipoDocente_UniversidadFK}
-            onChange={handleChange}
-            required
-          >
-            <option value="">-- Seleccione una Universidad --</option>
-            {universidades.map((u) => (
-              <option key={u.UniversidadID} value={u.UniversidadID}>
-                {u.UniversidadNombre}
-              </option>
-            ))}
-          </select>
+            options={universidades}
+            value={selectedUniversidad || null}
+            onChange={handleUniversidadChange}
+            placeholder="Seleccione una universidad..."
+            isClearable
+          />
         </div>
 
         <div className={Styles.btn_group}>
