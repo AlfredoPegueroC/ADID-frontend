@@ -2,12 +2,17 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import Select from "react-select";
 import Styles from "@styles/test.module.css";
 import Notification from "../Notification";
 
 export default function Periodo({ title, onSuccess }) {
   const router = useRouter();
+  const API = process.env.NEXT_PUBLIC_API_KEY;
+
   const [universidades, setUniversidades] = useState([]);
+  const [loading, setLoading] = useState(false);
+
   const [formData, setFormData] = useState({
     PeriodoCodigo: "",
     PeriodoNombre: "",
@@ -16,33 +21,41 @@ export default function Periodo({ title, onSuccess }) {
     PeriodoFechaInicio: "",
     PeriodoFechaFin: "",
     PeriodoEstado: "",
-    Periodo_UniversidadFK: "", // Esto debe contener el ID de la universidad
+    Periodo_UniversidadFK: null,
   });
 
-  const API = process.env.NEXT_PUBLIC_API_KEY;
-  const [loading, setLoading] = useState(false);
-
   useEffect(() => {
-    cargarUniversidades();
-  }, []);
-
-  async function cargarUniversidades() {
-    try {
-      const response = await fetch(`${API}api/universidad`);
-      if (!response.ok) throw new Error("Failed to fetch universities");
-      const data = await response.json();
-      setUniversidades(data.results || data);
-    } catch (error) {
-      console.error("Error loading universities:", error);
-      alert("No se pudieron cargar las universidades");
+    async function cargarUniversidades() {
+      try {
+        const response = await fetch(`${API}universidades`);
+        const data = await response.json();
+        const lista = data.results || data;
+        const formatted = lista.map((u) => ({
+          value: u.UniversidadID,
+          label: u.UniversidadNombre,
+        }));
+        setUniversidades(formatted);
+      } catch (error) {
+        console.error("Error cargando universidades:", error);
+        Notification.alertError("No se pudieron cargar las universidades");
+      }
     }
-  }
-  console.log("asasv:v" ,universidades)
-  const handleInputChange = (e) => {
+
+    cargarUniversidades();
+  }, [API]);
+
+  const handleChange = (e) => {
     const { id, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
+    setFormData((prev) => ({
+      ...prev,
       [id]: value,
+    }));
+  };
+
+  const handleSelectChange = (selectedOption) => {
+    setFormData((prev) => ({
+      ...prev,
+      Periodo_UniversidadFK: selectedOption,
     }));
   };
 
@@ -51,7 +64,7 @@ export default function Periodo({ title, onSuccess }) {
     setLoading(true);
 
     if (!formData.Periodo_UniversidadFK) {
-      alert("Por favor, seleccione una universidad.");
+      Notification.alertError("Seleccione una universidad.");
       setLoading(false);
       return;
     }
@@ -62,10 +75,11 @@ export default function Periodo({ title, onSuccess }) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          Periodo_UniversidadFK: formData.Periodo_UniversidadFK.value,
+        }),
       });
-
-      console.log("formulario enviado: ", formData);
 
       if (response.ok) {
         Notification.alertSuccess("Periodo Académico creado exitosamente");
@@ -77,15 +91,16 @@ export default function Periodo({ title, onSuccess }) {
           PeriodoFechaInicio: "",
           PeriodoFechaFin: "",
           PeriodoEstado: "",
-          Periodo_UniversidadFK: "",
+          Periodo_UniversidadFK: null,
         });
-        onSuccess();
+        onSuccess?.();
       } else {
-        const errorData = await response.json();
+        const err = await response.json();
         Notification.alertError("Error al crear el periodo: ya existe.");
+        console.error(err);
       }
     } catch (error) {
-      console.error("Error creating periodo:", error);
+      console.error("Error:", error);
       Notification.alertError("Hubo un problema al crear el periodo");
     } finally {
       setLoading(false);
@@ -94,7 +109,7 @@ export default function Periodo({ title, onSuccess }) {
 
   return (
     <div>
-      <form id="periodoForm" onSubmit={handleSubmit} className={Styles.form}>
+      <form onSubmit={handleSubmit} className={Styles.form}>
         <h1 className={Styles.title}>{title}</h1>
 
         <div className={Styles.name_group}>
@@ -104,7 +119,7 @@ export default function Periodo({ title, onSuccess }) {
             id="PeriodoCodigo"
             placeholder="Ej: 2024A"
             value={formData.PeriodoCodigo}
-            onChange={handleInputChange}
+            onChange={handleChange}
             required
           />
         </div>
@@ -114,9 +129,9 @@ export default function Periodo({ title, onSuccess }) {
           <input
             type="text"
             id="PeriodoNombre"
-            placeholder="Nombre del periodo"
+            placeholder="Nombre completo del periodo"
             value={formData.PeriodoNombre}
-            onChange={handleInputChange}
+            onChange={handleChange}
             required
           />
         </div>
@@ -128,7 +143,7 @@ export default function Periodo({ title, onSuccess }) {
             id="PeriodoTipo"
             placeholder="Ej: Semestral, Trimestral"
             value={formData.PeriodoTipo}
-            onChange={handleInputChange}
+            onChange={handleChange}
             required
           />
         </div>
@@ -140,7 +155,7 @@ export default function Periodo({ title, onSuccess }) {
             id="PeriodoAnio"
             placeholder="Ej: 2025"
             value={formData.PeriodoAnio}
-            onChange={handleInputChange}
+            onChange={handleChange}
             required
           />
         </div>
@@ -151,7 +166,7 @@ export default function Periodo({ title, onSuccess }) {
             type="date"
             id="PeriodoFechaInicio"
             value={formData.PeriodoFechaInicio}
-            onChange={handleInputChange}
+            onChange={handleChange}
             required
           />
         </div>
@@ -162,7 +177,7 @@ export default function Periodo({ title, onSuccess }) {
             type="date"
             id="PeriodoFechaFin"
             value={formData.PeriodoFechaFin}
-            onChange={handleInputChange}
+            onChange={handleChange}
             required
           />
         </div>
@@ -172,7 +187,7 @@ export default function Periodo({ title, onSuccess }) {
           <select
             id="PeriodoEstado"
             value={formData.PeriodoEstado}
-            onChange={handleInputChange}
+            onChange={handleChange}
             required
           >
             <option value="">-- Seleccione Estado --</option>
@@ -182,32 +197,23 @@ export default function Periodo({ title, onSuccess }) {
         </div>
 
         <div className={Styles.name_group}>
-          <label htmlFor="Periodo_UniversidadFK">Universidad</label>
-          <select
-            id="Periodo_UniversidadFK"
+          <label>Universidad</label>
+          <Select
+            options={universidades}
             value={formData.Periodo_UniversidadFK}
-            onChange={handleInputChange}
-            required
-          >
-            <option value="" disabled>
-              -- Seleccione una Universidad --
-            </option>
-            {universidades.map((u) => (
-              <option
-                key={u.UniversidadID}
-                value={u.UniversidadID}
-              >
-                {u.UniversidadNombre}{" "}
-                {/* Mostrar el nombre, pero enviar el ID */}
-              </option>
-            ))}
-          </select>
+            onChange={handleSelectChange}
+            placeholder="Seleccione una universidad..."
+            isClearable
+          />
         </div>
 
-        <button type="submit" className={Styles.btn} disabled={loading}>
-          {loading ? "Enviando..." : "Enviar"}
-        </button>
+        <div className={Styles.btn_group}>
+          <button type="submit" className={Styles.btn} disabled={loading}>
+            {loading ? "Enviando..." : "Enviar"}
+          </button>
+        </div>
       </form>
     </div>
   );
 }
+

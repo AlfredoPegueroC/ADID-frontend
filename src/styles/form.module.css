@@ -50,7 +50,8 @@
 }
 .form input,
 .form textarea,
-.form select {
+.form select,
+.Selected {
   padding-block: 0.49rem;
   padding-inline: 1rem;
   border-radius: 5px;
@@ -65,7 +66,7 @@
   padding-block: 0.5rem;
   padding-inline: 1rem;
   /* appearance: none; */
-  overflow-y: auto;
+  /* overflow-y: auto; */
 }
 
 .form label {
@@ -95,14 +96,22 @@
 
 .form {
   max-width: 100%;
-  overflow: hidden;
+  /* overflow: hidden; */
 }
 .name_group {
   /* position: relative; */
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-
+  color: #000;
+  gap: 1rem;
+}
+.name_group select {
+  /* position: relative; */
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  color: #000;
   gap: 1rem;
 }
 .agreement {

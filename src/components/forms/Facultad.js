@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Select from "react-select";
 
 import Notification from "../Notification";
 import Styles from "@styles/form.module.css";
@@ -12,6 +13,8 @@ export default function Facultad({ title }) {
 
   const [universidades, setUniversidades] = useState([]);
   const [campus, setCampus] = useState([]);
+  const [selectedUniversidad, setSelectedUniversidad] = useState(null);
+  const [selectedCampus, setSelectedCampus] = useState(null);
 
   const [formData, setFormData] = useState({
     FacultadCodigo: "",
@@ -28,34 +31,63 @@ export default function Facultad({ title }) {
   useEffect(() => {
     const fetchUniversidades = async () => {
       try {
-        const res = await fetch(`${API}api/universidad`);
+        const res = await fetch(`${API}universidades`);
         const data = await res.json();
-        setUniversidades(data.results || data);
+        const formatted = (data.results || data).map((u) => ({
+          value: u.UniversidadID,
+          label: u.UniversidadNombre,
+        }));
+        setUniversidades(formatted);
       } catch (error) {
         console.error("Error cargando universidades:", error);
       }
     };
 
-    const fetchCampus = async () => {
-      try {
-        const res = await fetch(`${API}api/campus`);
-        const data = await res.json();
-        setCampus(data.results || data);
-        console.log(data.results)
-      } catch (error) {
-        console.error("Error cargando campus:", error);
-      }
-    };
-
     fetchUniversidades();
-    fetchCampus();
   }, [API]);
+
+  const fetchCampusByUniversidad = async (universidadId) => {
+    try {
+      const res = await fetch(`${API}campus?universidad_id=${universidadId}`);
+      const data = await res.json();
+      const formatted = (data.results || data).map((c) => ({
+        value: c.CampusID,
+        label: c.CampusNombre,
+      }));
+      setCampus(formatted);
+    } catch (error) {
+      console.error("Error cargando campus:", error);
+    }
+  };
 
   const handleChange = (e) => {
     const { id, value } = e.target;
     setFormData((prevData) => ({
       ...prevData,
       [id]: value,
+    }));
+  };
+
+  const handleUniversidadChange = (selectedOption) => {
+    setSelectedUniversidad(selectedOption);
+    setFormData((prev) => ({
+      ...prev,
+      Facultad_UniversidadFK: selectedOption ? selectedOption.value : "",
+      Facultad_CampusFK: "", // Limpia el campus anterior
+    }));
+    setSelectedCampus(null);
+    if (selectedOption) {
+      fetchCampusByUniversidad(selectedOption.value);
+    } else {
+      setCampus([]); // Limpia campus si no hay universidad
+    }
+  };
+
+  const handleCampusChange = (selectedOption) => {
+    setSelectedCampus(selectedOption);
+    setFormData((prev) => ({
+      ...prev,
+      Facultad_CampusFK: selectedOption ? selectedOption.value : "",
     }));
   };
 
@@ -174,45 +206,35 @@ export default function Facultad({ title }) {
         </div>
 
         <div className={Styles.name_group}>
-          <label htmlFor="Facultad_UniversidadFK">Universidad</label>
-          <select
-            id="Facultad_UniversidadFK"
-            value={formData.Facultad_UniversidadFK}
-            onChange={handleChange}
-            required
-          >
-            <option value="">-- Seleccione una universidad --</option>
-            {universidades.map((u) => (
-              <option key={u.UniversidadID} value={u.UniversidadID}>
-                {u.UniversidadNombre}
-              </option>
-            ))}
-          </select>
+          <label>Universidad</label>
+          <Select
+            options={universidades}
+            value={selectedUniversidad}
+            onChange={handleUniversidadChange}
+            placeholder="Seleccione una universidad..."
+            isClearable
+          />
         </div>
 
         <div className={Styles.name_group}>
-          <label htmlFor="Facultad_CampusFK">Campus</label>
-          <select
-            id="Facultad_CampusFK"
-            value={formData.Facultad_CampusFK}
-            onChange={handleChange}
-            required
-          >
-            <option value="">-- Seleccione un campus --</option>
-            {campus.map((c) => (
-              <option key={c.CampusID} value={c.CampusID}>
-                {c.CampusNombre}
-              </option>
-            ))}
-          </select>
+          <label>Campus</label>
+          <Select
+            options={campus}
+            value={selectedCampus}
+            onChange={handleCampusChange}
+            placeholder="Seleccione un campus..."
+            isClearable
+            isDisabled={!selectedUniversidad}
+          />
         </div>
 
         <div className={Styles.btn_group}>
-        <button type="submit" className={Styles.btn}>
-          Enviar
-        </button>
-      </div>
+          <button type="submit" className={Styles.btn}>
+            Enviar
+          </button>
+        </div>
       </form>
     </div>
   );
 }
+

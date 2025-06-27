@@ -16,7 +16,7 @@ import { deleteEntity } from "@utils/delete";
 import { fetchTipoDocentes } from "@api/tipoDocenteService";
 
 function TipoDocenteListClient({ initialData, totalPages: initialTotalPages }) {
-  const [tipos, setTipos] = useState(initialData);
+  const [tipos, setTipos] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(initialTotalPages);
   const [searchQuery, setSearchQuery] = useState("");

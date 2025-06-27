@@ -4,8 +4,9 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Notification from "../Notification";
 import Styles from "@styles/form.module.css";
+import Select from "react-select";
 
-export default function TipoDocenteForm({title}) {
+export default function TipoDocenteForm({ title }) {
   const router = useRouter();
   const API = process.env.NEXT_PUBLIC_API_KEY;
 
@@ -14,15 +15,20 @@ export default function TipoDocenteForm({title}) {
     TipoDocenteCodigo: "",
     TipoDocenteDescripcion: "",
     TipoDocenteEstado: "",
-    TipoDocente_UniversidadFK: "",
+    TipoDocente_UniversidadFK: null, // react-select object
   });
 
   useEffect(() => {
     const fetchUniversidades = async () => {
       try {
-        const res = await fetch(`${API}api/universidad`);
+        const res = await fetch(`${API}universidades`);
         const data = await res.json();
-        setUniversidades(data.results || data);
+        const lista = data.results || data;
+        const opciones = lista.map((u) => ({
+          value: u.UniversidadID,
+          label: u.UniversidadNombre,
+        }));
+        setUniversidades(opciones);
       } catch (error) {
         console.error("Error al cargar universidades:", error);
       }
@@ -33,34 +39,43 @@ export default function TipoDocenteForm({title}) {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
       [name]: value,
-    });
+    }));
+  };
+
+  const handleSelectChange = (selectedOption) => {
+    setFormData((prev) => ({
+      ...prev,
+      TipoDocente_UniversidadFK: selectedOption,
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const payload = {
+      ...formData,
+      TipoDocente_UniversidadFK: formData.TipoDocente_UniversidadFK?.value || null,
+    };
+
     try {
       const response = await fetch(`${API}api/tipodocente/create`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
       });
 
       if (response.ok) {
         await response.json();
         Notification.alertSuccess("Tipo de Docente creado correctamente");
         router.push("/tipodocenteList");
-
         setFormData({
           TipoDocenteCodigo: "",
           TipoDocenteDescripcion: "",
           TipoDocenteEstado: "",
-          TipoDocente_UniversidadFK: "",
+          TipoDocente_UniversidadFK: null,
         });
       } else {
         const error = await response.json();
@@ -120,28 +135,22 @@ export default function TipoDocenteForm({title}) {
 
         <div className={Styles.name_group}>
           <label htmlFor="TipoDocente_UniversidadFK">Universidad:</label>
-          <select
+          <Select
             id="TipoDocente_UniversidadFK"
             name="TipoDocente_UniversidadFK"
+            options={universidades}
             value={formData.TipoDocente_UniversidadFK}
-            onChange={handleChange}
-            required
-          >
-            <option value="">-- Seleccione una universidad --</option>
-            {universidades.map((u) => (
-              <option key={u.UniversidadID} value={u.UniversidadID}>
-                {u.UniversidadNombre}
-              </option>
-            ))}
-          </select>
+            onChange={handleSelectChange}
+            placeholder="Seleccione una universidad"
+            isClearable
+          />
         </div>
 
         <div className={Styles.btn_group}>
-        <button type="submit" className={Styles.btn}>
-          Enviar
-        </button>
+          <button type="submit" className={Styles.btn}>
+            Enviar
+          </button>
         </div>
-
       </form>
     </div>
   );

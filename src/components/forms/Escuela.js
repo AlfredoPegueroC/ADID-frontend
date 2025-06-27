@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import Select from "react-select";
 import Notification from "../Notification";
 import Styles from "@styles/form.module.css";
 
@@ -11,6 +12,9 @@ export default function EscuelaForm() {
 
   const [universidades, setUniversidades] = useState([]);
   const [facultades, setFacultades] = useState([]);
+
+  const [selectedUniversidad, setSelectedUniversidad] = useState(null);
+  const [selectedFacultad, setSelectedFacultad] = useState(null);
 
   const [formData, setFormData] = useState({
     EscuelaCodigo: "",
@@ -26,34 +30,63 @@ export default function EscuelaForm() {
   useEffect(() => {
     const fetchUniversidades = async () => {
       try {
-        const res = await fetch(`${API}api/universidad`);
+        const res = await fetch(`${API}universidades`);
         const data = await res.json();
-        setUniversidades(data.results || data);
+        const options = (data.results || data).map((u) => ({
+          value: u.UniversidadID,
+          label: u.UniversidadNombre,
+        }));
+        setUniversidades(options);
       } catch (error) {
         console.error("Error cargando universidades:", error);
       }
     };
 
-    const fetchFacultades = async () => {
-      try {
-        const res = await fetch(`${API}api/facultad`);
-        const data = await res.json();
-        setFacultades(data.results || data);
-      } catch (error) {
-        console.error("Error cargando facultades:", error);
-      }
-    };
-
     fetchUniversidades();
-    fetchFacultades();
   }, [API]);
 
-  const handleChange = (e) => {
+  const fetchFacultadesByUniversidad = async (universidadId) => {
+    try {
+      const res = await fetch(`${API}facultades?universidad_id=${universidadId}`);
+      const data = await res.json();
+      const options = (data.results || data).map((f) => ({
+        value: f.FacultadID,
+        label: f.FacultadNombre,
+      }));
+      setFacultades(options);
+    } catch (error) {
+      console.error("Error cargando facultades:", error);
+    }
+  };
+
+  const handleUniversidadChange = (selected) => {
+    setSelectedUniversidad(selected);
+    setSelectedFacultad(null);
+    setFacultades([]);
+    setFormData((prev) => ({
+      ...prev,
+      Escuela_UniversidadFK: selected ? selected.value : "",
+      Escuela_facultadFK: "",
+    }));
+    if (selected) {
+      fetchFacultadesByUniversidad(selected.value);
+    }
+  };
+
+  const handleFacultadChange = (selected) => {
+    setSelectedFacultad(selected);
+    setFormData((prev) => ({
+      ...prev,
+      Escuela_facultadFK: selected ? selected.value : "",
+    }));
+  };
+
+  const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
       [name]: value,
-    });
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -62,9 +95,7 @@ export default function EscuelaForm() {
     try {
       const response = await fetch(`${API}api/escuela/create`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
 
@@ -82,6 +113,9 @@ export default function EscuelaForm() {
           Escuela_UniversidadFK: "",
           Escuela_facultadFK: "",
         });
+        setSelectedUniversidad(null);
+        setSelectedFacultad(null);
+        setFacultades([]);
       } else {
         const error = await response.json();
         Notification.alertError("Error al crear la escuela.");
@@ -98,77 +132,71 @@ export default function EscuelaForm() {
         <h1 className={Styles.title}>Registrar Escuela</h1>
 
         <div className={Styles.name_group}>
-          <label htmlFor="EscuelaCodigo">Código:</label>
+          <label>Código:</label>
           <input
             type="text"
-            id="EscuelaCodigo"
             name="EscuelaCodigo"
             value={formData.EscuelaCodigo}
-            onChange={handleChange}
+            onChange={handleInputChange}
             placeholder="Ej. ESC001"
             required
           />
         </div>
 
         <div className={Styles.name_group}>
-          <label htmlFor="EscuelaNombre">Nombre:</label>
+          <label>Nombre:</label>
           <input
             type="text"
-            id="EscuelaNombre"
             name="EscuelaNombre"
             value={formData.EscuelaNombre}
-            onChange={handleChange}
+            onChange={handleInputChange}
             placeholder="Nombre de la escuela"
             required
           />
         </div>
 
         <div className={Styles.name_group}>
-          <label htmlFor="EscuelaDirectora">Directora:</label>
+          <label>Directora:</label>
           <input
             type="text"
-            id="EscuelaDirectora"
             name="EscuelaDirectora"
             value={formData.EscuelaDirectora}
-            onChange={handleChange}
+            onChange={handleInputChange}
             placeholder="Nombre de la directora"
             required
           />
         </div>
 
         <div className={Styles.name_group}>
-          <label htmlFor="EscuelaTelefono">Teléfono:</label>
+          <label>Teléfono:</label>
           <input
             type="text"
-            id="EscuelaTelefono"
             name="EscuelaTelefono"
             value={formData.EscuelaTelefono}
-            onChange={handleChange}
+            onChange={handleInputChange}
             placeholder="809-000-0000"
             required
           />
         </div>
 
         <div className={Styles.name_group}>
-          <label htmlFor="EscuelaCorreo">Correo:</label>
+          <label>Correo:</label>
           <input
             type="email"
-            id="EscuelaCorreo"
             name="EscuelaCorreo"
             value={formData.EscuelaCorreo}
-            onChange={handleChange}
+            onChange={handleInputChange}
             placeholder="escuela@universidad.edu.do"
             required
           />
         </div>
 
         <div className={Styles.name_group}>
-          <label htmlFor="EscuelaEstado">Estado:</label>
+          <label>Estado:</label>
           <select
-            id="EscuelaEstado"
             name="EscuelaEstado"
             value={formData.EscuelaEstado}
-            onChange={handleChange}
+            onChange={handleInputChange}
             required
           >
             <option value="">-- Seleccione el estado --</option>
@@ -178,39 +206,26 @@ export default function EscuelaForm() {
         </div>
 
         <div className={Styles.name_group}>
-          <label htmlFor="Escuela_UniversidadFK">Universidad:</label>
-          <select
-            id="Escuela_UniversidadFK"
-            name="Escuela_UniversidadFK"
-            value={formData.Escuela_UniversidadFK}
-            onChange={handleChange}
-            required
-          >
-            <option value="">-- Seleccione una universidad --</option>
-            {universidades.map((u) => (
-              <option key={u.UniversidadID} value={u.UniversidadID}>
-                {u.UniversidadNombre}
-              </option>
-            ))}
-          </select>
+          <label>Universidad:</label>
+          <Select
+            options={universidades}
+            value={selectedUniversidad}
+            onChange={handleUniversidadChange}
+            placeholder="Seleccione una universidad"
+            isClearable
+          />
         </div>
 
         <div className={Styles.name_group}>
-          <label htmlFor="Escuela_facultadFK">Facultad:</label>
-          <select
-            id="Escuela_facultadFK"
-            name="Escuela_facultadFK"
-            value={formData.Escuela_facultadFK}
-            onChange={handleChange}
-            required
-          >
-            <option value="">-- Seleccione una facultad --</option>
-            {facultades.map((f) => (
-              <option key={f.FacultadID} value={f.FacultadID}>
-                {f.FacultadNombre}
-              </option>
-            ))}
-          </select>
+          <label>Facultad:</label>
+          <Select
+            options={facultades}
+            value={selectedFacultad}
+            onChange={handleFacultadChange}
+            placeholder="Seleccione una facultad"
+            isClearable
+            isDisabled={!selectedUniversidad}
+          />
         </div>
 
         <div className={Styles.btn_group}>

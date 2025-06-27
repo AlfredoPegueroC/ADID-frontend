@@ -7,6 +7,7 @@ import Styles from "@styles/test.module.css";
 export default function ImportExcel({ title, importURL, onSuccess }) {
   const [file, setFile] = useState(null);
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
   const inputRef = useRef(null);
 
   const handleFileChange = (event) => {
@@ -24,6 +25,7 @@ export default function ImportExcel({ title, importURL, onSuccess }) {
 
     const formData = new FormData();
     formData.append("excel_file", file);
+    setLoading(true);
 
     try {
       const response = await fetch(importURL, {
@@ -32,35 +34,18 @@ export default function ImportExcel({ title, importURL, onSuccess }) {
       });
 
       const result = await response.json();
-      console.log("Response status escuela:", result);
 
       if (response.ok) {
-        // if (Array.isArray(result.duplicados) && result.duplicados.length > 0) {
-        //   Notification.alertLogin(
-        //     `Se omitieron ${result.duplicados.length} duplicados: ` + result.duplicados[0]
-        //   );
-        // }
-
         if (
           Array.isArray(result.nombres_duplicados) &&
           result.nombres_duplicados.length > 0
         ) {
           Notification.alertLogin(
-            `Nombres duplicado: ` + result.nombres_duplicados[0]
+            `Nombres duplicados: ` + result.nombres_duplicados[0]
           );
         } else {
           Notification.alertSuccess(result.message || "Se ha importado.");
         }
-
-        // if (
-        //   Array.isArray(result.directoras_duplicadas) &&
-        //   result.directoras_duplicadas.length > 0
-        // ) {
-        //   Notification.alertLogin(
-        //     `Director@s duplicad@s omitid@s:\n` +
-        //       result.directoras_duplicadas.slice(0, 5).join("\n")
-        //   );
-        // }
 
         if (Array.isArray(result.errores) && result.errores.length > 0) {
           Notification.alertError(
@@ -70,7 +55,6 @@ export default function ImportExcel({ title, importURL, onSuccess }) {
 
         if (onSuccess) onSuccess();
 
-        // Limpiar archivo y resetear input
         setFile(null);
         if (inputRef.current) {
           inputRef.current.value = null;
@@ -86,6 +70,8 @@ export default function ImportExcel({ title, importURL, onSuccess }) {
     } catch (error) {
       console.error("Import error:", error);
       Notification.alertError("Error al subir el documento excel.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -109,8 +95,14 @@ export default function ImportExcel({ title, importURL, onSuccess }) {
           />
         </div>
 
-        <button type="submit" className={Styles.btn}>
-          Importar
+        <button type="submit" className={Styles.btn} disabled={loading}>
+          {loading ? (
+            <>
+              <span className={Styles.spinner}></span> Importando...
+            </>
+          ) : (
+            "Importar"
+          )}
         </button>
       </form>
 

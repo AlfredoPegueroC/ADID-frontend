@@ -9,6 +9,7 @@ export default function ImportFileForm({ onSuccess }) {
   const [periods, setPeriods] = useState([]);
   const [selectedPeriod, setSelectedPeriod] = useState("");
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const API = process.env.NEXT_PUBLIC_API_KEY;
 
@@ -28,6 +29,7 @@ export default function ImportFileForm({ onSuccess }) {
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
+    setMessage("");
   };
 
   const handlePeriodChange = (e) => {
@@ -50,6 +52,7 @@ export default function ImportFileForm({ onSuccess }) {
     const formData = new FormData();
     formData.append("excel_file", file);
     formData.append("period", selectedPeriod);
+    setLoading(true);
 
     try {
       const res = await fetch(`${API}import/asignacion`, {
@@ -70,11 +73,15 @@ export default function ImportFileForm({ onSuccess }) {
         Notification.alertSuccess(result.message || "Importación exitosa.");
         if (onSuccess) onSuccess();
         document.querySelector("#import-form").reset();
+        setFile(null);
+        setSelectedPeriod("");
       } else {
         Notification.alertError(result.error || "Error durante la importación.");
       }
     } catch (error) {
       Notification.alertError("Error al subir el archivo Excel.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -92,6 +99,7 @@ export default function ImportFileForm({ onSuccess }) {
             className={styles.fileInput}
             onChange={handleFileChange}
             accept=".xls,.xlsx"
+            disabled={loading}
             required
           />
         </div>
@@ -105,6 +113,7 @@ export default function ImportFileForm({ onSuccess }) {
             value={selectedPeriod}
             onChange={handlePeriodChange}
             required
+            disabled={loading}
             className={styles.select}
           >
             <option value="" disabled>
@@ -119,8 +128,14 @@ export default function ImportFileForm({ onSuccess }) {
         </div>
 
         <div className={styles.buttonWrapper}>
-          <button type="submit" className={styles.submitButton}>
-            Enviar
+          <button type="submit" className={styles.submitButton} disabled={loading}>
+            {loading ? (
+              <>
+                <span className={styles.spinner}></span> Importando...
+              </>
+            ) : (
+              "Enviar"
+            )}
           </button>
         </div>
       </form>
@@ -129,3 +144,4 @@ export default function ImportFileForm({ onSuccess }) {
     </div>
   );
 }
+
