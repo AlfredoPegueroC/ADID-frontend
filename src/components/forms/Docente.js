@@ -68,7 +68,7 @@ export default function DocenteForm({ title }) {
         );
       } catch (error) {
         console.error("Error fetching data:", error);
-        Notification.alertError("Error al cargar los datos, por favor intenta de nuevo.");
+        Notification.alertError("Error al cargar los datos, por favor intenta de nuevo o el código existe en la base de datos.");
       } finally {
         setIsLoading(false);
       }

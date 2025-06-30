@@ -96,7 +96,7 @@ export default function Periodo({ title, onSuccess }) {
         onSuccess?.();
       } else {
         const err = await response.json();
-        Notification.alertError("Error al crear el periodo: ya existe.");
+        Notification.alertError("Error al crear el periodo: Ya existe o faltan datos.");
         console.error(err);
       }
     } catch (error) {

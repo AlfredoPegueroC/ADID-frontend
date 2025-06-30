@@ -229,7 +229,12 @@
   margin-top: 5rem;
   list-style: none;
 }
-
+.react-select__control {
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  min-height: 38px;
+  font-size: 14px;
+}
 .dropdownItem {
   padding: 8px 12px;
   cursor: pointer;

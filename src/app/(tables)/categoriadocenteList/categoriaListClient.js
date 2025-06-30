@@ -17,7 +17,7 @@ import { deleteEntity } from "@utils/delete";
 import { fetchCategorias } from "@api/categoriaService";
 
 function CategoriaListClient({ initialData, totalPages: initialTotalPages }) {
-  const [categorias, setCategorias] = useState(initialData);
+  const [categorias, setCategorias] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(initialTotalPages);
   const [searchQuery, setSearchQuery] = useState("");

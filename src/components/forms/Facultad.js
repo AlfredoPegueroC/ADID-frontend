@@ -106,7 +106,7 @@ export default function Facultad({ title }) {
         router.push("/facultadList");
       } else {
         const error = await response.json();
-        Notification.alertError("Error al crear la facultad.");
+        Notification.alertError("Error al crear la facultad. Ya existe o faltan datos.");
         console.log("Error:", error);
       }
     } catch (error) {

@@ -87,7 +87,7 @@ export default function CategoriaDocenteForm({ title }) {
         });
       } else {
         const error = await response.json();
-        Notification.alertError("Error al crear la categoría. Puede que ya exista.");
+        Notification.alertError("Error al crear la categoría. Puede que ya exista o faltan datos.");
         console.error("Error:", error);
       }
     } catch (error) {

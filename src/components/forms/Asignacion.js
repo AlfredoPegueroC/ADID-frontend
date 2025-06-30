@@ -72,7 +72,7 @@ export default function AsignacionForm({ title }) {
         setEscuelas(escuelasData.results);
         setPeriodos(periodosData.results);
       } catch (error) {
-        Notification.alertError("Error al cargar los datos.");
+        Notification.alertError("Error al cargar los datos. Ya existe o faltan datos.");
       } finally {
         setIsLoading(false);
       }

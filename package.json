@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@tanstack/react-form": "^1.12.4",
     "@tanstack/react-table": "^8.21.3",
     "bootstrap": "^5.3.3",
     "jspdf": "^3.0.1",

@@ -118,7 +118,7 @@ export default function EscuelaForm() {
         setFacultades([]);
       } else {
         const error = await response.json();
-        Notification.alertError("Error al crear la escuela.");
+        Notification.alertError("Error al crear la escuela. Ya existe o faltan datos");
         console.error("Error:", error);
       }
     } catch (error) {
