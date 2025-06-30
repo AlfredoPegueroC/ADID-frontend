@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import styles from "@styles/test.module.css";
+import { useState, useEffect, useRef } from "react";
 import Notification from "../Notification";
+import Styles from "@styles/test.module.css";
 
 export default function ImportFileForm({ onSuccess }) {
   const [file, setFile] = useState(null);
@@ -10,7 +10,7 @@ export default function ImportFileForm({ onSuccess }) {
   const [selectedPeriod, setSelectedPeriod] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
-
+  const inputRef = useRef(null);
   const API = process.env.NEXT_PUBLIC_API_KEY;
 
   useEffect(() => {
@@ -30,10 +30,6 @@ export default function ImportFileForm({ onSuccess }) {
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
     setMessage("");
-  };
-
-  const handlePeriodChange = (e) => {
-    setSelectedPeriod(e.target.value);
   };
 
   const handleSubmit = async (e) => {
@@ -72,9 +68,9 @@ export default function ImportFileForm({ onSuccess }) {
       if (res.ok) {
         Notification.alertSuccess(result.message || "Importación exitosa.");
         if (onSuccess) onSuccess();
-        document.querySelector("#import-form").reset();
         setFile(null);
         setSelectedPeriod("");
+        if (inputRef.current) inputRef.current.value = null;
       } else {
         Notification.alertError(result.error || "Error durante la importación.");
       }
@@ -87,16 +83,19 @@ export default function ImportFileForm({ onSuccess }) {
 
   return (
     <div>
-      <form id="import-form" onSubmit={handleSubmit} className={styles.form}>
-        <h1 className={styles.title}>Subir Archivo Excel</h1>
+      <h1 className={Styles.title}>Subir Archivo Excel</h1>
 
-        <div className={styles.inputGroup}>
-          <label htmlFor="excel_file" className={styles.label}>
-            Selecciona un archivo Excel:
+      <form id="import-form" onSubmit={handleSubmit} className={Styles.form}>
+        <div className={Styles.name_group}>
+          <label htmlFor="excel_file" className={Styles.label}>
+            Selecciona un archivo Excel
           </label>
           <input
+            ref={inputRef}
             type="file"
-            className={styles.fileInput}
+            className={Styles.archivo}
+            id="excel_file"
+            name="excel_file"
             onChange={handleFileChange}
             accept=".xls,.xlsx"
             disabled={loading}
@@ -104,17 +103,18 @@ export default function ImportFileForm({ onSuccess }) {
           />
         </div>
 
-        <div className={styles.inputGroup}>
-          <label htmlFor="periodoAcademicoCodigo" className={styles.label}>
-            Periodo Académico:
+        <div className={Styles.name_group}>
+          <label htmlFor="periodoAcademicoCodigo" className={Styles.label}>
+            Periodo Académico
           </label>
           <select
             id="periodoAcademicoCodigo"
+            name="period"
+            className={Styles.select}
             value={selectedPeriod}
-            onChange={handlePeriodChange}
-            required
+            onChange={(e) => setSelectedPeriod(e.target.value)}
             disabled={loading}
-            className={styles.select}
+            required
           >
             <option value="" disabled>
               -- Seleccione un Periodo --
@@ -127,21 +127,18 @@ export default function ImportFileForm({ onSuccess }) {
           </select>
         </div>
 
-        <div className={styles.buttonWrapper}>
-          <button type="submit" className={styles.submitButton} disabled={loading}>
-            {loading ? (
-              <>
-                <span className={styles.spinner}></span> Importando...
-              </>
-            ) : (
-              "Enviar"
-            )}
-          </button>
-        </div>
+        <button type="submit" className={Styles.btn} disabled={loading}>
+          {loading ? (
+            <>
+              <span className={Styles.spinner}></span> Importando...
+            </>
+          ) : (
+            "Importar"
+          )}
+        </button>
       </form>
 
-      {message && <p className={styles.alert}>{message}</p>}
+      {message && <div className="alert alert-info mt-3">{message}</div>}
     </div>
   );
 }
-

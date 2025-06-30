@@ -7,10 +7,10 @@ import withAuth from "@utils/withAuth";
 import Styles from "@styles/form.module.css"; // Mismo CSS que DocenteForm
 import Notification from "@components/Notification";
 import Select from "react-select";
-
+import { use } from "react";
 function DocenteEdit({ params }) {
   const router = useRouter();
-  const { id } = params;
+  const { id } = use(params);
   const API = process.env.NEXT_PUBLIC_API_KEY;
 
   const [docente, setDocente] = useState(null);
