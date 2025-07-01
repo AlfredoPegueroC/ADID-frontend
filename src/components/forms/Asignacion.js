@@ -51,7 +51,7 @@ export default function AsignacionForm({ title }) {
           fetch(`${API}api/universidad`),
           fetch(`${API}api/facultad`),
           fetch(`${API}api/escuela`),
-          fetch(`${API}api/periodoacademico`),
+          fetch(`${API}periodos`),
         ]);
 
         if (!docenteRes.ok || !campusRes.ok || !uniRes.ok || !facRes.ok || !escRes.ok || !perRes.ok) {
@@ -70,7 +70,8 @@ export default function AsignacionForm({ title }) {
         setUniversidades(universidadesData.results);
         setFacultades(facultadesData.results);
         setEscuelas(escuelasData.results);
-        setPeriodos(periodosData.results);
+        setPeriodos(periodosData);
+        console.log("Datos cargados correctamente", periodosData);
       } catch (error) {
         Notification.alertError("Error al cargar los datos. Ya existe o faltan datos.");
       } finally {

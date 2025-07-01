@@ -93,7 +93,7 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
       setAsignaciones(asignaciones);
       setTotalPages(totalPages);
       
-    
+      console.log("Asignaciones cargadas:", asignaciones.length, "página:", page, "periodo:", periodo);
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {

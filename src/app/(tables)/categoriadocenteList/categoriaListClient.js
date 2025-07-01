@@ -2,7 +2,6 @@
 
 import React, { useState, useCallback, useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { debounce } from "lodash";
 
 import Modal from "@components/Modal";
