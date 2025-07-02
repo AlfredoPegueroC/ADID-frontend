@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import Notification from "../Notification";
+import Select from "react-select";
 import Styles from "@styles/form.module.css";
 
 export default function AsignacionForm({ title }) {
@@ -46,17 +47,18 @@ export default function AsignacionForm({ title }) {
       setIsLoading(true);
       try {
         const [docenteRes, campusRes, uniRes, facRes, escRes, perRes] = await Promise.all([
-          fetch(`${API}api/docente`),
-          fetch(`${API}api/campus`),
-          fetch(`${API}api/universidad`),
-          fetch(`${API}api/facultad`),
-          fetch(`${API}api/escuela`),
+          fetch(`${API}docentes`),
+          fetch(`${API}campus`),
+          fetch(`${API}universidades`),
+          fetch(`${API}facultades`),
+          fetch(`${API}escuelas`),
           fetch(`${API}periodos`),
         ]);
 
         if (!docenteRes.ok || !campusRes.ok || !uniRes.ok || !facRes.ok || !escRes.ok || !perRes.ok) {
           throw new Error("Error en la carga de datos");
         }
+
         const [docentesData, campusData, universidadesData, facultadesData, escuelasData, periodosData] = await Promise.all([
           docenteRes.json(),
           campusRes.json(),
@@ -65,13 +67,31 @@ export default function AsignacionForm({ title }) {
           escRes.json(),
           perRes.json(),
         ]);
-        setDocentes(docentesData.results);
-        setCampus(campusData.results);
-        setUniversidades(universidadesData.results);
-        setFacultades(facultadesData.results);
-        setEscuelas(escuelasData.results);
-        setPeriodos(periodosData);
-        console.log("Datos cargados correctamente", periodosData);
+
+        setDocentes((docentesData.results || docentesData).map((d) => ({
+          value: d.DocenteID,
+          label: `${d.DocenteNombre} ${d.DocenteApellido}`,
+        })));
+        setCampus((campusData.results || campusData).map((c) => ({
+          value: c.CampusID,
+          label: c.CampusNombre,
+        })));
+        setUniversidades((universidadesData.results || universidadesData).map((u) => ({
+          value: u.UniversidadID,
+          label: u.UniversidadNombre,
+        })));
+        setFacultades((facultadesData.results || facultadesData).map((f) => ({
+          value: f.FacultadID,
+          label: f.FacultadNombre,
+        })));
+        setEscuelas((escuelasData.results || escuelasData).map((e) => ({
+          value: e.EscuelaId,
+          label: e.EscuelaNombre,
+        })));
+        setPeriodos((periodosData.results || periodosData).map((p) => ({
+          value: p.PeriodoID,
+          label: p.PeriodoNombre,
+        })));
       } catch (error) {
         Notification.alertError("Error al cargar los datos. Ya existe o faltan datos.");
       } finally {
@@ -84,10 +104,11 @@ export default function AsignacionForm({ title }) {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSelectChange = (selected, { name }) => {
+    setFormData((prev) => ({ ...prev, [name]: selected ? selected.value : "" }));
   };
 
   const handleSubmit = async (e) => {
@@ -98,10 +119,33 @@ export default function AsignacionForm({ title }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
-      console.log("Response:", formData);
+
       if (response.ok) {
         Notification.alertSuccess("Asignación creada con éxito");
-        // router.push("/asignacionDocenteList"); cambiar a la lista de asignaciones
+
+        setFormData({
+          nrc: "",
+          clave: "",
+          nombre: "",
+          codigo: "",
+          seccion: "",
+          modalidad: "",
+          cupo: "",
+          inscripto: "",
+          horario: "",
+          dias: "",
+          aula: "",
+          creditos: "",
+          tipo: "",
+          accion: "",
+          usuario_registro: "",
+          docenteFk: "",
+          campusFk: "",
+          universidadFk: "",
+          facultadFk: "",
+          escuelaFk: "",
+          periodoFk: "",
+        });
       } else {
         Notification.alertError("Error al registrar la asignación");
       }
@@ -117,307 +161,96 @@ export default function AsignacionForm({ title }) {
       <form onSubmit={handleSubmit} className={Styles.form}>
         <h1 className={Styles.title}>{title}</h1>
 
-        <div className={Styles.name_group}>
-          <label htmlFor="nrc">NRC:</label>
-          <input
-            type="text"
-            id="nrc"
-            name="nrc"
-            value={formData.nrc}
-            onChange={handleChange}
-            required
-            placeholder="Ej: 12345"
-          />
-        </div>
+        {/* Inputs normales */}
+        {[
+          "nrc", "clave", "nombre", "codigo", "seccion", "modalidad",
+          "cupo", "inscripto", "horario", "dias", "aula",
+          "creditos", "tipo", "accion", "usuario_registro"
+        ].map((field) => (
+          <div className={Styles.name_group} key={field}>
+            <label htmlFor={field}>{field.charAt(0).toUpperCase() + field.slice(1)}:</label>
+            <input
+              type={["cupo", "inscripto", "creditos"].includes(field) ? "number" : "text"}
+              id={field}
+              name={field}
+              value={formData[field]}
+              onChange={handleChange}
+              placeholder={`Ingrese ${field}`}
+            />
+          </div>
+        ))}
 
+        {/* Selects con react-select */}
         <div className={Styles.name_group}>
-          <label htmlFor="clave">Clave:</label>
-          <input
-            type="text"
-            id="clave"
-            name="clave"
-            value={formData.clave}
-            onChange={handleChange}
-            required
-            placeholder="Ej: ASG-101"
-          />
-        </div>
-
-        <div className={Styles.name_group}>
-          <label htmlFor="nombre">Nombre:</label>
-          <input
-            type="text"
-            id="nombre"
-            name="nombre"
-            value={formData.nombre}
-            onChange={handleChange}
-            placeholder="Nombre de la asignatura"
-          />
-        </div>
-
-        <div className={Styles.name_group}>
-          <label htmlFor="codigo">Código:</label>
-          <input
-            type="text"
-            id="codigo"
-            name="codigo"
-            value={formData.codigo}
-            onChange={handleChange}
-            placeholder="Código interno"
-          />
-        </div>
-
-        <div className={Styles.name_group}>
-          <label htmlFor="seccion">Sección:</label>
-          <input
-            type="text"
-            id="seccion"
-            name="seccion"
-            value={formData.seccion}
-            onChange={handleChange}
-            placeholder="Ej: A"
-          />
-        </div>
-
-        <div className={Styles.name_group}>
-          <label htmlFor="modalidad">Modalidad:</label>
-          <input
-            type="text"
-            id="modalidad"
-            name="modalidad"
-            value={formData.modalidad}
-            onChange={handleChange}
-            placeholder="Presencial / Virtual"
-          />
-        </div>
-
-        <div className={Styles.name_group}>
-          <label htmlFor="cupo">Cupo:</label>
-          <input
-            type="number"
-            id="cupo"
-            name="cupo"
-            value={formData.cupo}
-            onChange={handleChange}
-            placeholder="Número máximo de estudiantes"
-          />
-        </div>
-
-        <div className={Styles.name_group}>
-          <label htmlFor="inscripto">Inscripto:</label>
-          <input
-            type="number"
-            id="inscripto"
-            name="inscripto"
-            value={formData.inscripto}
-            onChange={handleChange}
-            placeholder="Estudiantes inscritos"
-          />
-        </div>
-
-        <div className={Styles.name_group}>
-          <label htmlFor="horario">Horario:</label>
-          <input
-            type="text"
-            id="horario"
-            name="horario"
-            value={formData.horario}
-            onChange={handleChange}
-            placeholder="Ej: 08:00 - 10:00 AM"
-          />
-        </div>
-
-        <div className={Styles.name_group}>
-          <label htmlFor="dias">Días:</label>
-          <input
-            type="text"
-            id="dias"
-            name="dias"
-            value={formData.dias}
-            onChange={handleChange}
-            placeholder="Ej: Lunes, Miércoles, Viernes"
-          />
-        </div>
-
-        <div className={Styles.name_group}>
-          <label htmlFor="aula">Aula:</label>
-          <input
-            type="text"
-            id="aula"
-            name="aula"
-            value={formData.aula}
-            onChange={handleChange}
-            placeholder="Número o nombre del aula"
-          />
-        </div>
-
-        <div className={Styles.name_group}>
-          <label htmlFor="creditos">Créditos:</label>
-          <input
-            type="number"
-            step="1"
-            id="creditos"
-            name="creditos"
-            value={formData.creditos}
-            onChange={handleChange}
-            placeholder="Cantidad de créditos"
-          />
-        </div>
-
-        <div className={Styles.name_group}>
-          <label htmlFor="tipo">Tipo:</label>
-          <input
-            type="text"
-            id="tipo"
-            name="tipo"
-            value={formData.tipo}
-            onChange={handleChange}
-            placeholder="Teórica / Práctica"
-          />
-        </div>
-
-        <div className={Styles.name_group}>
-          <label htmlFor="accion">Acción:</label>
-          <input
-            type="text"
-            id="accion"
-            name="accion"
-            value={formData.accion}
-            onChange={handleChange}
-            placeholder="Ej: Crear / Actualizar"
-          />
-        </div>
-
-        <div className={Styles.name_group}>
-          <label htmlFor="usuario_registro">Usuario Registro:</label>
-          <input
-            type="text"
-            id="usuario_registro"
-            name="usuario_registro"
-            value={formData.usuario_registro}
-            onChange={handleChange}
-            placeholder="Nombre usuario"
-          />
-        </div>
-
-        <div className={Styles.name_group}>
-          <label htmlFor="docenteFk">Docente:</label>
-          <select
-            id="docenteFk"
+          <label>Docente:</label>
+          <Select
             name="docenteFk"
-            value={formData.docenteFk}
-            onChange={handleChange}
-            required
-          >
-            <option value="" disabled>
-              -- Seleccione un Docente --
-            </option>
-            {docentes.map((d) => (
-              <option key={d.DocenteID} value={d.DocenteID}>
-                {d.DocenteNombre} {d.DocenteApellido}
-              </option>
-            ))}
-          </select>
+            options={docentes}
+            value={docentes.find((d) => d.value === formData.docenteFk) || null}
+            onChange={handleSelectChange}
+            placeholder="Seleccione un docente"
+            isClearable
+          />
         </div>
 
         <div className={Styles.name_group}>
-          <label htmlFor="campusFk">Campus:</label>
-          <select
-            id="campusFk"
+          <label>Campus:</label>
+          <Select
             name="campusFk"
-            value={formData.campusFk}
-            onChange={handleChange}
-            required
-          >
-            <option value="" disabled>
-              -- Seleccione un Campus --
-            </option>
-            {campus.map((c) => (
-              <option key={c.CampusID} value={c.CampusID}>
-                {c.CampusNombre}
-              </option>
-            ))}
-          </select>
+            options={campus}
+            value={campus.find((c) => c.value === formData.campusFk) || null}
+            onChange={handleSelectChange}
+            placeholder="Seleccione un campus"
+            isClearable
+          />
         </div>
 
         <div className={Styles.name_group}>
-          <label htmlFor="universidadFk">Universidad:</label>
-          <select
-            id="universidadFk"
+          <label>Universidad:</label>
+          <Select
             name="universidadFk"
-            value={formData.universidadFk}
-            onChange={handleChange}
-            required
-          >
-            <option value="" disabled>
-              -- Seleccione una Universidad --
-            </option>
-            {universidades.map((u) => (
-              <option key={u.UniversidadID} value={u.UniversidadID}>
-                {u.UniversidadNombre}
-              </option>
-            ))}
-          </select>
+            options={universidades}
+            value={universidades.find((u) => u.value === formData.universidadFk) || null}
+            onChange={handleSelectChange}
+            placeholder="Seleccione una universidad"
+            isClearable
+          />
         </div>
 
         <div className={Styles.name_group}>
-          <label htmlFor="facultadFk">Facultad:</label>
-          <select
-            id="facultadFk"
+          <label>Facultad:</label>
+          <Select
             name="facultadFk"
-            value={formData.facultadFk}
-            onChange={handleChange}
-            required
-          >
-            <option value="" disabled>
-              -- Seleccione una Facultad --
-            </option>
-            {facultades.map((f) => (
-              <option key={f.FacultadID} value={f.FacultadID}>
-                {f.FacultadNombre}
-              </option>
-            ))}
-          </select>
+            options={facultades}
+            value={facultades.find((f) => f.value === formData.facultadFk) || null}
+            onChange={handleSelectChange}
+            placeholder="Seleccione una facultad"
+            isClearable
+          />
         </div>
 
         <div className={Styles.name_group}>
-          <label htmlFor="escuelaFk">Escuela:</label>
-          <select
-            id="escuelaFk"
+          <label>Escuela:</label>
+          <Select
             name="escuelaFk"
-            value={formData.escuelaFk}
-            onChange={handleChange}
-            required
-          >
-            <option value="" disabled>
-              -- Seleccione una Escuela --
-            </option>
-            {escuelas.map((e) => (
-              <option key={e.EscuelaId} value={e.EscuelaId}>
-                {e.EscuelaNombre}
-              </option>
-            ))}
-          </select>
+            options={escuelas}
+            value={escuelas.find((e) => e.value === formData.escuelaFk) || null}
+            onChange={handleSelectChange}
+            placeholder="Seleccione una escuela"
+            isClearable
+          />
         </div>
 
         <div className={Styles.name_group}>
-          <label htmlFor="periodoFk">Periodo Académico:</label>
-          <select
-            id="periodoFk"
+          <label>Periodo Académico:</label>
+          <Select
             name="periodoFk"
-            value={formData.periodoFk}
-            onChange={handleChange}
-            required
-          >
-            <option value="" disabled>
-              -- Seleccione un Periodo --
-            </option>
-            {periodos.map((p) => (
-              <option key={p.PeriodoID} value={p.PeriodoID}>
-                {p.PeriodoNombre}
-              </option>
-            ))}
-          </select>
+            options={periodos}
+            value={periodos.find((p) => p.value === formData.periodoFk) || null}
+            onChange={handleSelectChange}
+            placeholder="Seleccione un periodo"
+            isClearable
+          />
         </div>
 
         <div className={Styles.btn_group}>
