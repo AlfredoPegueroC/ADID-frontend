@@ -7,6 +7,8 @@ import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { ToastContainer, Bounce } from "react-toastify";
 import { AuthProvider } from "@contexts/AuthContext";
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap-icons/font/bootstrap-icons.css';
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -25,6 +27,7 @@ export default function RootLayout({ children }) {
   const backgroundClass = isLoginPage ? "login-bg" : "";
   useEffect(() => {
     import("bootstrap/dist/js/bootstrap.bundle");
+    
   }, []);
   return (
     <html lang="en">

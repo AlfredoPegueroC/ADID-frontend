@@ -1,10 +1,112 @@
+// ✅ DashboardPage.jsx (Bootstrap-style with dynamic API key)
 "use client";
+import { useEffect, useState } from "react";
+import { Bar, Pie } from "react-chartjs-2";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  ArcElement,
+  Tooltip,
+  Legend,
+} from "chart.js";
+import DashboardCard from "@components/DashboardCard";
 
-export default function AdminPage() {
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  ArcElement,
+  Tooltip,
+  Legend
+);
+const options = {
+  maintainAspectRatio: false,
+  // otras opciones que necesites
+};
+export default function DashboardPage() {
+  const [data, setData] = useState(null);
+  const API = process.env.NEXT_PUBLIC_API_KEY;
+
+  useEffect(() => {
+    fetch(`${API}/api/dashboard`)
+      .then((res) => res.json())
+      .then(setData)
+      .catch((err) => console.error("Error al cargar dashboard:", err));
+  }, [API]);
+
+  if (!data)
+    return (
+      <div className="container mt-4">Cargando datos del dashboard...</div>
+    );
+
   return (
-    <div className="text-black">
-      <h1>Admin Page</h1>
-      <p>Welcome to the admin page!</p>
+    <div className="container py-4">
+      <div className="row g-3 mb-4">
+        <DashboardCard
+          icon="bi-check-circle-fill"
+          title="Asignaciones cargadas"
+          value={data.totalAsignaciones}
+          link="/"
+        />
+        <DashboardCard
+          icon="bi-person-fill"
+          title="Docentes asignados"
+          value={data.totalDocentes}
+          link="/docenteList"
+        />
+        <DashboardCard
+          icon="bi-calendar-event"
+          title="Período actual"
+          value={data.periodoActual}
+          link="/periodoList"
+        />
+        <DashboardCard
+          icon="bi-building"
+          title="Total Facultades"
+          value={data.totalFacultades}
+          link="/facultadList"
+        />
+        <DashboardCard
+          icon="bi-building"
+          title="Total Campus"
+          value={data.totalCampus}
+          link="/campusList"
+        />
+        <DashboardCard
+          icon="bi-building"
+          title="Total Tipos de Docente"
+          value={data.totalTiposDocente}
+          link="/tipoDocenteList"
+        />
+        <DashboardCard
+          icon="bi-building"
+          title="Total Categorías"
+          value={data.totalCategorias}
+          link="/categoriaList"
+        />
+      </div>
+      <div className="row g-4 mb-4">
+        <div className="col-md-6">
+          <div className="card">
+            <div className="card-body">
+              <h5 className="card-title">Asignaciones por Facultad</h5>
+              <Bar data={data.asignacionesPorFacultad} />
+            </div>
+          </div>
+        </div>
+        <div className="col-md-4">
+          <div className="card">
+            <div className="card-body">
+              <h5 className="card-title">Docentes por Categoría</h5>
+              <div style={{ height: 300, width: 380}}>
+                <Pie data={data.docentesPorCategoria} options={options} />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
