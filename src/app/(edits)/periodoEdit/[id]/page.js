@@ -113,6 +113,7 @@ function EditPeriodo({ params }) {
             value={periodo.PeriodoCodigo}
             onChange={handleChange}
             required
+            disabled
             placeholder="Ej: PER2024A"
           />
         </div>

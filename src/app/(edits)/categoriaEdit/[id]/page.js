@@ -114,6 +114,7 @@ function CategoriaEdit({ params }) {
               id="categoriaCodigo"
               value={categoria.categoriaCodigo || ""}
               onChange={handleChange}
+              disabled
               required
             />
           </div>

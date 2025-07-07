@@ -115,6 +115,7 @@ function EditEscuela({ params }) {
             value={escuela.EscuelaCodigo}
             onChange={handleChange}
             required
+            disabled
             placeholder="Ej: ESC123"
           />
         </div>

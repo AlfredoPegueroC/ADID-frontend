@@ -110,6 +110,7 @@ function TipoEdit({ params }) {
             value={tipo.TipoDocenteCodigo}
             onChange={handleChange}
             required
+            disabled
             placeholder="Ej: T001"
           />
         </div>

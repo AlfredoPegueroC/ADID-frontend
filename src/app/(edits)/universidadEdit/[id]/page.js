@@ -100,6 +100,7 @@ function EditUniversidad({ params }) {
             id="UniversidadCodigo"
             value={formData.UniversidadCodigo}
             onChange={handleChange}
+            disabled
             required
           />
         </div>

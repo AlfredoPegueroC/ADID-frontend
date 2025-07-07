@@ -123,6 +123,7 @@ function EditCampus({ params }) {
             value={campus.CampusCodigo}
             onChange={handleChange}
             required
+            disabled
             placeholder="Ej: C001"
           />
         </div>

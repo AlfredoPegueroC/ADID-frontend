@@ -127,6 +127,7 @@ function DocenteEdit({ params }) {
               name="DocenteCodigo"
               value={docente.DocenteCodigo}
               onChange={handleChange}
+              disabled
               required
             />
           </div>

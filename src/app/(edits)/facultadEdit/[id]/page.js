@@ -122,6 +122,7 @@ function EditFacultad({ params }) {
             value={facultad.FacultadCodigo}
             onChange={handleChange}
             required
+            disabled
             placeholder="Ej: F001"
           />
         </div>
