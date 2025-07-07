@@ -6,8 +6,8 @@ export default function DashboardCard({ title, value, icon, warning = false, lin
       <Link href={link} className="text-decoration-none">
         <div className={`card h-100 text-dark ${warning ? "border-warning" : "border-light"}`}> 
           <div className="card-body d-flex align-items-center gap-3">
-            <div className={`bg-${warning ? "warning" : "primary"} bg-opacity-10 rounded-circle p-3`}>
-              <i className={`bi ${icon} fs-3 text-${warning ? "warning" : "primary"}`}></i>
+            <div className={`bg-${warning ? "warning" : "primary"} bg-opacity-10 rounded-circle px-3 py-2 d-flex align-items-center justify-content-center`}>
+              <i className={`bi ${icon} fs-4 text-${warning ? "warning" : "primary"}`}></i>
             </div>
             <div>
               <h4 className="mb-0 fw-bold">{value}</h4>
