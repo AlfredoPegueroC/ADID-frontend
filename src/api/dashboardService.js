@@ -1,7 +1,7 @@
 // services/dashboardService.js
 export async function fetchDashboardData() {
   const API = process.env.NEXT_PUBLIC_API_KEY;
-  const url = `${API}/api/dashboard`;
+  const url = `${API}api/dashboard`;
 
   try {
     console.log("📡 Llamando a:", url);
