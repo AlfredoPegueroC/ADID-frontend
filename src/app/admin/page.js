@@ -1,4 +1,3 @@
-// ✅ DashboardPage.jsx (Bootstrap-style with dynamic API key)
 "use client";
 import { useEffect, useState } from "react";
 import { Bar, Pie } from "react-chartjs-2";
@@ -12,6 +11,7 @@ import {
   Legend,
 } from "chart.js";
 import DashboardCard from "@components/DashboardCard";
+import { fetchDashboardData } from "@api/dashboardService"; // importa el servicio
 
 ChartJS.register(
   CategoryScale,
@@ -21,20 +21,23 @@ ChartJS.register(
   Tooltip,
   Legend
 );
-const options = {
-  maintainAspectRatio: false,
-  // otras opciones que necesites
-};
+
+const options = { maintainAspectRatio: false };
+
 export default function DashboardPage() {
   const [data, setData] = useState(null);
-  const API = process.env.NEXT_PUBLIC_API_KEY;
 
   useEffect(() => {
-    fetch(`${API}/api/dashboard`)
-      .then((res) => res.json())
-      .then(setData)
-      .catch((err) => console.error("Error al cargar dashboard:", err));
-  }, [API]);
+    const getData = async () => {
+      try {
+        const result = await fetchDashboardData();
+        setData(result);
+      } catch (error) {
+        console.error("Error al obtener datos:", error);
+      }
+    };
+    getData();
+  }, []);
 
   if (!data)
     return (
@@ -87,6 +90,7 @@ export default function DashboardPage() {
           link="/categoriaList"
         />
       </div>
+
       <div className="row g-4 mb-4">
         <div className="col-md-6">
           <div className="card">
@@ -100,7 +104,7 @@ export default function DashboardPage() {
           <div className="card">
             <div className="card-body">
               <h5 className="card-title">Docentes por Categoría</h5>
-              <div style={{ height: 300, width: 380}}>
+              <div style={{ height: 300, width: 380 }}>
                 <Pie data={data.docentesPorCategoria} options={options} />
               </div>
             </div>
