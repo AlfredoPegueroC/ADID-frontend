@@ -20,6 +20,7 @@ import { deleteEntity } from "@utils/delete";
 import { fetchAsignacionData } from "@api/asignacionService";
 // import { fetchPeriodos } from "@api/periodoService";
 import { debounce } from "lodash";
+import { exportAsignacionesToPDF } from "@utils/ExportPDF/exportAsignacionesToPDF";
 
 function AccionCell({ row, api }) {
   const [value, setValue] = useState(row.original.accion || "");
@@ -168,9 +169,9 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
     setCurrentPage(1);
   };
   const opciones = periodos.map((p) => ({
-  value: p,
-  label: p,
-}));
+    value: p,
+    label: p,
+  }));
   const handlePeriodoChange = (e) => {
     setSelectedPeriodo(e.target.value);
     setCurrentPage(1);
@@ -301,7 +302,20 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
         >
           Exportar
         </Link>
-
+        <button
+          className="btn btn-danger"
+          onClick={() =>
+            exportAsignacionesToPDF(
+              table.getAllLeafColumns(),
+              table.getRowModel().rows,
+              selectedPeriodo,
+              currentPage,
+              pageSize
+            )
+          }
+        >
+          Exportar PDF
+        </button>
         {loadingPeriodos ? (
           <span className="text-muted">Cargando periodos...</span>
         ) : (
