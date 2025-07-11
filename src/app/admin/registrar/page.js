@@ -31,7 +31,9 @@ export default function RegisterPage() {
         `${process.env.NEXT_PUBLIC_API_KEY}api/registro`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+           },
           body: JSON.stringify(formData),
         }
       );

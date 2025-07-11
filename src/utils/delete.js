@@ -7,6 +7,9 @@ export const deleteEntity = async (endpoint, pk, setEntities, idKey = "id") => {
     try {
       const response = await fetch(`${endpoint}/${pk}/`, {
         method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
       });
 
       if (response.ok) {

@@ -31,11 +31,16 @@ export default function LogListClient() {
 
   const methodStyle = (method) => {
     switch (method) {
-      case "GET": return "text-blue-600 font-semibold";
-      case "POST": return "text-green-600 font-semibold";
-      case "PATCH": return "text-yellow-600 font-semibold";
-      case "DELETE": return "text-red-600 font-semibold";
-      default: return "text-gray-700";
+      case "GET":
+        return "text-blue-600 font-semibold";
+      case "POST":
+        return "text-green-600 font-semibold";
+      case "PATCH":
+        return "text-yellow-600 font-semibold";
+      case "DELETE":
+        return "text-red-600 font-semibold";
+      default:
+        return "text-gray-700";
     }
   };
 
@@ -53,41 +58,44 @@ export default function LogListClient() {
     return map[code] || `Código: ${code}`;
   };
 
-  const columns = useMemo(() => [
-    {
-      accessorKey: "user",
-      header: "Usuario",
-      cell: ({ row }) => {
-        const user = row.original.user;
-        return <span>{user?.username || "Anónimo"}</span>;
+  const columns = useMemo(
+    () => [
+      {
+        accessorKey: "user",
+        header: "Usuario",
+        cell: ({ row }) => {
+          const user = row.original.user;
+          return <span>{user || "Anónimo"}</span>;
+        },
       },
-    },
-    {
-      accessorKey: "method",
-      header: "Método",
-      cell: ({ row }) => (
-        <span className={methodStyle(row.original.method)}>
-          {row.original.method}
-        </span>
-      ),
-    },
-    { accessorKey: "path", header: "Ruta" },
-    {
-      accessorKey: "status_code",
-      header: "Estado",
-      cell: ({ getValue }) => {
-        const code = getValue();
-        const label = statusLabel(code);
-        const color = code >= 400 ? "text-red-600" : "text-green-600";
-        return <span className={color}>{label}</span>;
+      {
+        accessorKey: "method",
+        header: "Método",
+        cell: ({ row }) => (
+          <span className={methodStyle(row.original.method)}>
+            {row.original.method}
+          </span>
+        ),
       },
-    },
-    {
-      accessorKey: "timestamp",
-      header: "Fecha",
-      cell: ({ getValue }) => new Date(getValue()).toLocaleString(),
-    },
-  ], []);
+      { accessorKey: "path", header: "Ruta" },
+      {
+        accessorKey: "status_code",
+        header: "Estado",
+        cell: ({ getValue }) => {
+          const code = getValue();
+          const label = statusLabel(code);
+          const color = code >= 400 ? "text-red-600" : "text-green-600";
+          return <span className={color}>{label}</span>;
+        },
+      },
+      {
+        accessorKey: "timestamp",
+        header: "Fecha",
+        cell: ({ getValue }) => new Date(getValue()).toLocaleString(),
+      },
+    ],
+    []
+  );
 
   const table = useReactTable({
     data: logs,
@@ -147,8 +155,14 @@ export default function LogListClient() {
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
-                    <th key={header.id} className="p-2 border-b text-left text-sm font-medium text-gray-700">
-                      {flexRender(header.column.columnDef.header, header.getContext())}
+                    <th
+                      key={header.id}
+                      className="p-2 border-b text-left text-sm font-medium text-gray-700"
+                    >
+                      {flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
                     </th>
                   ))}
                 </tr>
@@ -159,7 +173,10 @@ export default function LogListClient() {
                 <tr key={row.id} className="hover:bg-gray-50">
                   {row.getVisibleCells().map((cell) => (
                     <td key={cell.id} className="p-2 border-b text-sm">
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
                     </td>
                   ))}
                 </tr>
@@ -170,7 +187,11 @@ export default function LogListClient() {
       </div>
 
       {totalPages > 1 && (
-        <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
+        />
       )}
     </div>
   );

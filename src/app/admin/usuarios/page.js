@@ -23,7 +23,11 @@ export default function UsuarioPage() {
   useEffect(() => {
     const fetchUsuarios = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_KEY}api/usuarios`);
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_KEY}api/usuarios`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+        });
         const usuarios = await res.json();
 
         const formateados = usuarios.map(user => ({
@@ -63,7 +67,9 @@ export default function UsuarioPage() {
             try {
               const res = await fetch(`${process.env.NEXT_PUBLIC_API_KEY}api/usuarios/${row.original.id}/`, {
                 method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json',
+                  Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+                 },
                 body: JSON.stringify({ is_active: nuevoEstado }),
               });
 
