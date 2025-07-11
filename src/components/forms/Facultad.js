@@ -93,10 +93,15 @@ export default function Facultad({ title }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const accessToken = localStorage.getItem("accessToken");
+
     try {
       const response = await fetch(`${API}api/facultad/create`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
         body: JSON.stringify(formData),
       });
 

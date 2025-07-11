@@ -58,6 +58,7 @@ export default function CategoriaDocenteForm({ title }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const accessToken = localStorage.getItem("accessToken");
 
     // Al enviar, enviamos solo el id de la universidad seleccionada
     const payload = {
@@ -70,6 +71,7 @@ export default function CategoriaDocenteForm({ title }) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify(payload),
       });

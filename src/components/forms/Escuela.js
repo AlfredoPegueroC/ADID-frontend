@@ -91,16 +91,20 @@ export default function EscuelaForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const accessToken = localStorage.getItem("accessToken");
 
     try {
       const response = await fetch(`${API}api/escuela/create`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
         body: JSON.stringify(formData),
-      });
+        });
 
-      if (response.ok) {
-        await response.json();
+        if (response.ok) {
+          await response.json();
         Notification.alertSuccess("Escuela creada exitosamente");
         router.push("/escuelaList");
         setFormData({

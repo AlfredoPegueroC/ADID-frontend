@@ -22,6 +22,7 @@ function UniversidadListClient({ initialData }) {
   const [totalPages, setTotalPages] = useState(initialData.totalPages || 1);
   const [searchQuery, setSearchQuery] = useState("");
   const [pageSize, setPageSize] = useState(10);
+ 
 
   const API = process.env.NEXT_PUBLIC_API_KEY;
 
@@ -35,13 +36,17 @@ function UniversidadListClient({ initialData }) {
     setPage(1);
   }, [searchQuery]);
 
+  
   const fetchData = useCallback(async () => {
     setLoading(true);
+    // AQUI PASO EL TOKEN DE ACCESO AUTORIZADO
+    const token = localStorage.getItem("accessToken");
     try {
       const { results, totalPages } = await fetchUniversidades(
         page,
         searchQuery,
-        pageSize
+        pageSize,
+        token
       );
       setUniversidades(results);
       setTotalPages(totalPages);

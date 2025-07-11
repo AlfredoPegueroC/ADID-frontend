@@ -62,6 +62,7 @@ export default function Periodo({ title, onSuccess }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    const accessToken = localStorage.getItem("accessToken");
 
     if (!formData.Periodo_UniversidadFK) {
       Notification.alertError("Seleccione una universidad.");
@@ -74,6 +75,7 @@ export default function Periodo({ title, onSuccess }) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify({
           ...formData,

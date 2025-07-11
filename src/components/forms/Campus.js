@@ -61,12 +61,14 @@ export default function CampusForm({ title }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    const accessToken = localStorage.getItem("accessToken");
+    console.log("🔑 Token de acceso:", accessToken);
     try {
       const response = await fetch(`${API}api/campus/create`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify(formData),
       });

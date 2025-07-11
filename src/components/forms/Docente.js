@@ -68,7 +68,9 @@ export default function DocenteForm({ title }) {
         );
       } catch (error) {
         console.error("Error fetching data:", error);
-        Notification.alertError("Error al cargar los datos, por favor intenta de nuevo o el código existe en la base de datos.");
+        Notification.alertError(
+          "Error al cargar los datos, por favor intenta de nuevo o el código existe en la base de datos."
+        );
       } finally {
         setIsLoading(false);
       }
@@ -88,10 +90,15 @@ export default function DocenteForm({ title }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const accessToken = localStorage.getItem("accessToken");
+
     try {
       const response = await fetch(`${API}api/docente/create`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
         body: JSON.stringify(formData),
       });
 
@@ -139,22 +146,48 @@ export default function DocenteForm({ title }) {
 
         <div className={Styles.name_group}>
           <label htmlFor="DocenteCodigo">Código:</label>
-          <input type="text" name="DocenteCodigo" placeholder="Ej. DOC001" value={formData.DocenteCodigo} onChange={handleChange} required />
+          <input
+            type="text"
+            name="DocenteCodigo"
+            placeholder="Ej. DOC001"
+            value={formData.DocenteCodigo}
+            onChange={handleChange}
+            required
+          />
         </div>
 
         <div className={Styles.name_group}>
           <label htmlFor="DocenteNombre">Nombre:</label>
-          <input type="text" name="DocenteNombre" placeholder="Nombre del docente" value={formData.DocenteNombre} onChange={handleChange} required />
+          <input
+            type="text"
+            name="DocenteNombre"
+            placeholder="Nombre del docente"
+            value={formData.DocenteNombre}
+            onChange={handleChange}
+            required
+          />
         </div>
 
         <div className={Styles.name_group}>
           <label htmlFor="DocenteApellido">Apellido:</label>
-          <input type="text" name="DocenteApellido" placeholder="Apellido del docente" value={formData.DocenteApellido} onChange={handleChange} required />
+          <input
+            type="text"
+            name="DocenteApellido"
+            placeholder="Apellido del docente"
+            value={formData.DocenteApellido}
+            onChange={handleChange}
+            required
+          />
         </div>
 
         <div className={Styles.name_group}>
           <label>Sexo:</label>
-          <select name="DocenteSexo" value={formData.DocenteSexo} onChange={handleChange} required>
+          <select
+            name="DocenteSexo"
+            value={formData.DocenteSexo}
+            onChange={handleChange}
+            required
+          >
             <option value="">-- Seleccione el sexo --</option>
             <option value="M">Masculino</option>
             <option value="F">Femenino</option>
@@ -163,7 +196,12 @@ export default function DocenteForm({ title }) {
 
         <div className={Styles.name_group}>
           <label>Estado Civil:</label>
-          <select name="DocenteEstadoCivil" value={formData.DocenteEstadoCivil} onChange={handleChange} required>
+          <select
+            name="DocenteEstadoCivil"
+            value={formData.DocenteEstadoCivil}
+            onChange={handleChange}
+            required
+          >
             <option value="">-- Seleccione estado civil --</option>
             <option value="Soltero">Soltero</option>
             <option value="Casado">Casado</option>
@@ -174,7 +212,12 @@ export default function DocenteForm({ title }) {
 
         <div className={Styles.name_group}>
           <label>Tipo Identificación:</label>
-          <select name="DocenteTipoIdentificacion" value={formData.DocenteTipoIdentificacion} onChange={handleChange} required>
+          <select
+            name="DocenteTipoIdentificacion"
+            value={formData.DocenteTipoIdentificacion}
+            onChange={handleChange}
+            required
+          >
             <option value="">-- Seleccione tipo de identificación --</option>
             <option value="Cédula">Cédula</option>
             <option value="Pasaporte">Pasaporte</option>
@@ -183,47 +226,104 @@ export default function DocenteForm({ title }) {
 
         <div className={Styles.name_group}>
           <label>Número Identificación:</label>
-          <input type="text" name="DocenteNumeroIdentificacion" placeholder="Ej. 00123456789" value={formData.DocenteNumeroIdentificacion} onChange={handleChange} required />
+          <input
+            type="text"
+            name="DocenteNumeroIdentificacion"
+            placeholder="Ej. 00123456789"
+            value={formData.DocenteNumeroIdentificacion}
+            onChange={handleChange}
+            required
+          />
         </div>
 
         <div className={Styles.name_group}>
           <label>Fecha Nacimiento:</label>
-          <input type="date" name="DocenteFechaNacimiento" value={formData.DocenteFechaNacimiento} onChange={handleChange} />
+          <input
+            type="date"
+            name="DocenteFechaNacimiento"
+            value={formData.DocenteFechaNacimiento}
+            onChange={handleChange}
+          />
         </div>
 
         <div className={Styles.name_group}>
           <label>Lugar Nacimiento:</label>
-          <input type="text" name="DocenteLugarNacimiento" placeholder="Ej. Santo Domingo" value={formData.DocenteLugarNacimiento} onChange={handleChange} required />
+          <input
+            type="text"
+            name="DocenteLugarNacimiento"
+            placeholder="Ej. Santo Domingo"
+            value={formData.DocenteLugarNacimiento}
+            onChange={handleChange}
+            required
+          />
         </div>
 
         <div className={Styles.name_group}>
           <label>Fecha Ingreso:</label>
-          <input type="date" name="DocenteFechaIngreso" value={formData.DocenteFechaIngreso} onChange={handleChange} />
+          <input
+            type="date"
+            name="DocenteFechaIngreso"
+            value={formData.DocenteFechaIngreso}
+            onChange={handleChange}
+          />
         </div>
 
         <div className={Styles.name_group}>
           <label>Nacionalidad:</label>
-          <input type="text" name="DocenteNacionalidad" placeholder="Ej. Dominicana" value={formData.DocenteNacionalidad} onChange={handleChange} required />
+          <input
+            type="text"
+            name="DocenteNacionalidad"
+            placeholder="Ej. Dominicana"
+            value={formData.DocenteNacionalidad}
+            onChange={handleChange}
+            required
+          />
         </div>
 
         <div className={Styles.name_group}>
           <label>Teléfono:</label>
-          <input type="text" name="DocenteTelefono" placeholder="Ej. 8090000000" value={formData.DocenteTelefono} onChange={handleChange} required />
+          <input
+            type="text"
+            name="DocenteTelefono"
+            placeholder="Ej. 8090000000"
+            value={formData.DocenteTelefono}
+            onChange={handleChange}
+            required
+          />
         </div>
 
         <div className={Styles.name_group}>
           <label>Correo Electrónico:</label>
-          <input type="email" name="DocenteCorreoElectronico" placeholder="Ej. docente@email.com" value={formData.DocenteCorreoElectronico} onChange={handleChange} required />
+          <input
+            type="email"
+            name="DocenteCorreoElectronico"
+            placeholder="Ej. docente@email.com"
+            value={formData.DocenteCorreoElectronico}
+            onChange={handleChange}
+            required
+          />
         </div>
 
         <div className={Styles.name_group}>
           <label>Dirección:</label>
-          <input type="text" name="DocenteDireccion" placeholder="Dirección del docente" value={formData.DocenteDireccion} onChange={handleChange} required />
+          <input
+            type="text"
+            name="DocenteDireccion"
+            placeholder="Dirección del docente"
+            value={formData.DocenteDireccion}
+            onChange={handleChange}
+            required
+          />
         </div>
 
         <div className={Styles.name_group}>
           <label>Estado:</label>
-          <select name="DocenteEstado" value={formData.DocenteEstado} onChange={handleChange} required>
+          <select
+            name="DocenteEstado"
+            value={formData.DocenteEstado}
+            onChange={handleChange}
+            required
+          >
             <option value="">-- Seleccione el estado --</option>
             <option value="Activo">Activo</option>
             <option value="Inactivo">Inactivo</option>
@@ -232,7 +332,13 @@ export default function DocenteForm({ title }) {
 
         <div className={Styles.name_group}>
           <label>Observaciones:</label>
-          <textarea name="DocenteObservaciones" rows="3" placeholder="Observaciones adicionales" value={formData.DocenteObservaciones} onChange={handleChange} />
+          <textarea
+            name="DocenteObservaciones"
+            rows="3"
+            placeholder="Observaciones adicionales"
+            value={formData.DocenteObservaciones}
+            onChange={handleChange}
+          />
         </div>
 
         <div className={Styles.name_group}>
@@ -241,7 +347,9 @@ export default function DocenteForm({ title }) {
             name="Docente_UniversidadFK"
             options={universidades}
             placeholder="Seleccione una universidad"
-            value={universidades.find((u) => u.value === formData.Docente_UniversidadFK)}
+            value={universidades.find(
+              (u) => u.value === formData.Docente_UniversidadFK
+            )}
             onChange={handleSelectChange}
           />
         </div>
@@ -252,7 +360,9 @@ export default function DocenteForm({ title }) {
             name="Docente_TipoDocenteFK"
             options={tiposDocente}
             placeholder="Seleccione tipo de docente"
-            value={tiposDocente.find((t) => t.value === formData.Docente_TipoDocenteFK)}
+            value={tiposDocente.find(
+              (t) => t.value === formData.Docente_TipoDocenteFK
+            )}
             onChange={handleSelectChange}
           />
         </div>
@@ -263,13 +373,17 @@ export default function DocenteForm({ title }) {
             name="Docente_CategoriaDocenteFK"
             options={categoriasDocente}
             placeholder="Seleccione categoría docente"
-            value={categoriasDocente.find((c) => c.value === formData.Docente_CategoriaDocenteFK)}
+            value={categoriasDocente.find(
+              (c) => c.value === formData.Docente_CategoriaDocenteFK
+            )}
             onChange={handleSelectChange}
           />
         </div>
 
         <div className={Styles.btn_group}>
-          <button type="submit" className={Styles.btn}>Enviar</button>
+          <button type="submit" className={Styles.btn}>
+            Enviar
+          </button>
         </div>
       </form>
     </div>

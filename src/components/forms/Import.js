@@ -17,6 +17,7 @@ export default function ImportExcel({ title, importURL, onSuccess }) {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    const accessToken = localStorage.getItem("accessToken");
 
     if (!file) {
       setMessage("Por favor, seleccionar un archivo");
@@ -31,6 +32,9 @@ export default function ImportExcel({ title, importURL, onSuccess }) {
       const response = await fetch(importURL, {
         method: "POST",
         body: formData,
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
       });
 
       const result = await response.json();

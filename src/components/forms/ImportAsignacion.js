@@ -34,6 +34,7 @@ export default function ImportFileForm({ onSuccess }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const accessToken = localStorage.getItem("accessToken");
 
     if (!file) {
       setMessage("Por favor, selecciona un archivo.");
@@ -54,6 +55,9 @@ export default function ImportFileForm({ onSuccess }) {
       const res = await fetch(`${API}import/asignacion`, {
         method: "POST",
         body: formData,
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
       });
 
       const result = await res.json();

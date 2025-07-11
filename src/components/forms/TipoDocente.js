@@ -57,13 +57,18 @@ export default function TipoDocenteForm({ title }) {
 
     const payload = {
       ...formData,
-      TipoDocente_UniversidadFK: formData.TipoDocente_UniversidadFK?.value || null,
+      TipoDocente_UniversidadFK:
+        formData.TipoDocente_UniversidadFK?.value || null,
     };
+    const accessToken = localStorage.getItem("accessToken");
 
     try {
       const response = await fetch(`${API}api/tipodocente/create`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
         body: JSON.stringify(payload),
       });
 
@@ -79,7 +84,9 @@ export default function TipoDocenteForm({ title }) {
         });
       } else {
         const error = await response.json();
-        Notification.alertError("Error al crear el tipo de docente. Ya existe o faltan datos.");
+        Notification.alertError(
+          "Error al crear el tipo de docente. Ya existe o faltan datos."
+        );
         console.error("Error:", error);
       }
     } catch (error) {

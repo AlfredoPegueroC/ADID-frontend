@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 
 import Notification from "../Notification";
 import Styles from "@styles/form.module.css";
-import { toast, Bounce } from "react-toastify";
 
 export default function Universidad({ title }) {
   const router = useRouter();
@@ -32,27 +31,36 @@ export default function Universidad({ title }) {
 
   const handleUniversidad = async (e) => {
     e.preventDefault();
-
+    const accessToken = localStorage.getItem("accessToken");
+    console.log("🔑 Token de acceso:", accessToken);
+    
     try {
       const response = await fetch(`${API}api/universidad/create`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify(formData),
       });
 
       if (response.ok) {
         const result = await response.json();
-        Notification.alertSuccess(`Universidad Creada: ${result.UniversidadNombre}`);
+        Notification.alertSuccess(
+          `Universidad Creada: ${result.UniversidadNombre}`
+        );
         router.push("/universidadList");
       } else {
         const error = await response.json();
-        Notification.alertError("Error al crear la universidad. Ya existe en la DB.");
+        Notification.alertError(
+          "Error al crear la universidad. Ya existe en la DB."
+        );
         console.log("Error", error);
       }
     } catch (error) {
-      Notification.alertError("Hubo un error al conectar con la API: " + error.message);
+      Notification.alertError(
+        "Hubo un error al conectar con la API: " + error.message
+      );
     }
   };
 
