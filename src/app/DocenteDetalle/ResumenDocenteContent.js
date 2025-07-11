@@ -15,7 +15,11 @@ export default function ResumenDocenteContent({ docenteID, periodoParam }) {
   useEffect(() => {
     const fetchPeriodos = async () => {
       try {
-        const res = await fetch(`${API}api/periodoacademico`);
+        const res = await fetch(`${API}api/periodoacademico`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+        });
         const data = await res.json();
         const nombres = data.results.map(p => p.PeriodoNombre);
         const ordenados = nombres.sort((a, b) => b.localeCompare(a));
@@ -35,7 +39,11 @@ export default function ResumenDocenteContent({ docenteID, periodoParam }) {
       if (!docenteID || !selectedPeriodo) return;
       setLoading(true);
       try {
-        const res = await fetch(`${API}api/resumen/docente/?docente=${docenteID}&periodo=${selectedPeriodo}`);
+        const res = await fetch(`${API}api/resumen/docente/?docente=${docenteID}&periodo=${selectedPeriodo}`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+        });
         if (!res.ok) {
           setDatos(null);
           return;

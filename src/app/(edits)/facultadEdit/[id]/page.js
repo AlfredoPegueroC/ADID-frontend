@@ -6,7 +6,7 @@ import Select from "react-select";
 import Notification from "@components/Notification";
 import withAuth from "@utils/withAuth";
 import Styles from "@styles/form.module.css";
-import { use } from 'react';
+import { use } from "react";
 function EditFacultad({ params }) {
   const router = useRouter();
   const { id } = use(params);
@@ -29,16 +29,30 @@ function EditFacultad({ params }) {
   const [campusList, setCampusList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  
 
   useEffect(() => {
     async function fetchData() {
+      const accessToken = localStorage.getItem("accessToken");
       try {
-        const facultadRes = await fetch(`${API}api/facultad/${id}/`);
+        const facultadRes = await fetch(`${API}api/facultad/${id}/`, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
         const facultadData = await facultadRes.json();
         setFacultad(facultadData);
 
-        const univRes = await fetch(`${API}universidades`);
-        const campusRes = await fetch(`${API}campus`);
+        const univRes = await fetch(`${API}universidades`, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
+        const campusRes = await fetch(`${API}campus`, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
         const universidadesData = await univRes.json();
         const campusData = await campusRes.json();
 
@@ -83,7 +97,10 @@ function EditFacultad({ params }) {
     try {
       const response = await fetch(`${API}api/facultad/edit/${id}/`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
         body: JSON.stringify(facultad),
       });
 
@@ -191,7 +208,11 @@ function EditFacultad({ params }) {
           <label>Universidad</label>
           <Select
             options={universidades}
-            value={universidades.find((u) => u.value === facultad.Facultad_UniversidadFK) || null}
+            value={
+              universidades.find(
+                (u) => u.value === facultad.Facultad_UniversidadFK
+              ) || null
+            }
             onChange={handleSelectChange("Facultad_UniversidadFK")}
             placeholder="Seleccione una universidad"
             isClearable
@@ -202,7 +223,10 @@ function EditFacultad({ params }) {
           <label>Campus</label>
           <Select
             options={campusList}
-            value={campusList.find((c) => c.value === facultad.Facultad_CampusFK) || null}
+            value={
+              campusList.find((c) => c.value === facultad.Facultad_CampusFK) ||
+              null
+            }
             onChange={handleSelectChange("Facultad_CampusFK")}
             placeholder="Seleccione un campus"
             isClearable
@@ -227,7 +251,8 @@ function EditFacultad({ params }) {
           <button type="submit" className={Styles.btn} disabled={submitting}>
             {submitting ? (
               <>
-                <span className="spinner-border spinner-border-sm" /> Guardando...
+                <span className="spinner-border spinner-border-sm" />{" "}
+                Guardando...
               </>
             ) : (
               "Guardar Cambios"

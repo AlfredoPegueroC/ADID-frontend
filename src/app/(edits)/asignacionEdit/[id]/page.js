@@ -28,6 +28,7 @@ function AsignacionEdit({ params }) {
   useEffect(() => {
     async function fetchData() {
       setIsLoading(true);
+      const accessToken = localStorage.getItem("accessToken");
       try {
         const [
           asignacionRes,
@@ -38,13 +39,41 @@ function AsignacionEdit({ params }) {
           escRes,
           perRes,
         ] = await Promise.all([
-          fetch(`${API}api/asignacion/${id}/`),
-          fetch(`${API}docentes`),
-          fetch(`${API}campus`),
-          fetch(`${API}universidades`),
-          fetch(`${API}facultades`),
-          fetch(`${API}escuelas`),
-          fetch(`${API}periodos`),
+          fetch(`${API}api/asignacion/${id}/`, {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }),
+          fetch(`${API}docentes`, {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }),
+          fetch(`${API}campus`, {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }),
+          fetch(`${API}universidades`, {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }),
+          fetch(`${API}facultades`, {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }),
+          fetch(`${API}escuelas`, {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }),
+          fetch(`${API}periodos`, {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }),
         ]);
 
         if (
@@ -79,32 +108,46 @@ function AsignacionEdit({ params }) {
 
         setAsignacion(asignacionData);
 
-        setDocentes((docentesData.results || docentesData).map((d) => ({
-          value: d.DocenteID,
-          label: `${d.DocenteNombre} ${d.DocenteApellido}`,
-        })));
-        setCampus((campusData.results || campusData).map((c) => ({
-          value: c.CampusID,
-          label: c.CampusNombre,
-        })));
-        setUniversidades((universidadesData.results || universidadesData).map((u) => ({
-          value: u.UniversidadID,
-          label: u.UniversidadNombre,
-        })));
-        setFacultades((facultadesData.results || facultadesData).map((f) => ({
-          value: f.FacultadID,
-          label: f.FacultadNombre,
-        })));
-        setEscuelas((escuelasData.results || escuelasData).map((e) => ({
-          value: e.EscuelaId,
-          label: e.EscuelaNombre,
-        })));
-        setPeriodos((periodosData.results || periodosData).map((p) => ({
-          value: p.PeriodoID,
-          label: p.PeriodoNombre,
-        })));
+        setDocentes(
+          (docentesData.results || docentesData).map((d) => ({
+            value: d.DocenteID,
+            label: `${d.DocenteNombre} ${d.DocenteApellido}`,
+          }))
+        );
+        setCampus(
+          (campusData.results || campusData).map((c) => ({
+            value: c.CampusID,
+            label: c.CampusNombre,
+          }))
+        );
+        setUniversidades(
+          (universidadesData.results || universidadesData).map((u) => ({
+            value: u.UniversidadID,
+            label: u.UniversidadNombre,
+          }))
+        );
+        setFacultades(
+          (facultadesData.results || facultadesData).map((f) => ({
+            value: f.FacultadID,
+            label: f.FacultadNombre,
+          }))
+        );
+        setEscuelas(
+          (escuelasData.results || escuelasData).map((e) => ({
+            value: e.EscuelaId,
+            label: e.EscuelaNombre,
+          }))
+        );
+        setPeriodos(
+          (periodosData.results || periodosData).map((p) => ({
+            value: p.PeriodoID,
+            label: p.PeriodoNombre,
+          }))
+        );
       } catch (error) {
-        Notification.alertError("Error al cargar los datos. Ya existe o faltan datos.");
+        Notification.alertError(
+          "Error al cargar los datos. Ya existe o faltan datos."
+        );
         console.error(error);
       } finally {
         setIsLoading(false);
@@ -131,7 +174,10 @@ function AsignacionEdit({ params }) {
     try {
       const response = await fetch(`${API}api/asignacion/edit/${id}/`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
         body: JSON.stringify(asignacion),
       });
 
@@ -179,17 +225,27 @@ function AsignacionEdit({ params }) {
           {/* Inputs normales */}
           {inputFields.map((field) => (
             <div className={Styles.name_group} key={field}>
-              <label htmlFor={field}>{field.charAt(0).toUpperCase() + field.slice(1)}:</label>
+              <label htmlFor={field}>
+                {field.charAt(0).toUpperCase() + field.slice(1)}:
+              </label>
 
               {/* Acción debe ser select */}
               {field === "accion" ? (
-                <select name="accion" value={asignacion.accion || "nuevo"} onChange={handleChange}>
+                <select
+                  name="accion"
+                  value={asignacion.accion || "nuevo"}
+                  onChange={handleChange}
+                >
                   <option value="nuevo">Nuevo</option>
                   <option value="modificado">Modificado</option>
                 </select>
               ) : (
                 <input
-                  type={["cupo", "inscripto", "creditos"].includes(field) ? "number" : "text"}
+                  type={
+                    ["cupo", "inscripto", "creditos"].includes(field)
+                      ? "number"
+                      : "text"
+                  }
                   id={field}
                   name={field}
                   value={asignacion[field] || ""}
@@ -207,7 +263,9 @@ function AsignacionEdit({ params }) {
             <Select
               name="docenteFk"
               options={docentes}
-              value={docentes.find((d) => d.value === asignacion.docenteFk) || null}
+              value={
+                docentes.find((d) => d.value === asignacion.docenteFk) || null
+              }
               onChange={handleSelectChange}
               placeholder="Seleccione un docente"
               isClearable
@@ -220,7 +278,9 @@ function AsignacionEdit({ params }) {
             <Select
               name="campusFk"
               options={campus}
-              value={campus.find((c) => c.value === asignacion.campusFk) || null}
+              value={
+                campus.find((c) => c.value === asignacion.campusFk) || null
+              }
               onChange={handleSelectChange}
               placeholder="Seleccione un campus"
               isClearable
@@ -233,7 +293,11 @@ function AsignacionEdit({ params }) {
             <Select
               name="universidadFk"
               options={universidades}
-              value={universidades.find((u) => u.value === asignacion.universidadFk) || null}
+              value={
+                universidades.find(
+                  (u) => u.value === asignacion.universidadFk
+                ) || null
+              }
               onChange={handleSelectChange}
               placeholder="Seleccione una universidad"
               isClearable
@@ -246,7 +310,10 @@ function AsignacionEdit({ params }) {
             <Select
               name="facultadFk"
               options={facultades}
-              value={facultades.find((f) => f.value === asignacion.facultadFk) || null}
+              value={
+                facultades.find((f) => f.value === asignacion.facultadFk) ||
+                null
+              }
               onChange={handleSelectChange}
               placeholder="Seleccione una facultad"
               isClearable
@@ -259,7 +326,9 @@ function AsignacionEdit({ params }) {
             <Select
               name="escuelaFk"
               options={escuelas}
-              value={escuelas.find((e) => e.value === asignacion.escuelaFk) || null}
+              value={
+                escuelas.find((e) => e.value === asignacion.escuelaFk) || null
+              }
               onChange={handleSelectChange}
               placeholder="Seleccione una escuela"
               isClearable
@@ -272,7 +341,9 @@ function AsignacionEdit({ params }) {
             <Select
               name="periodoFk"
               options={periodos}
-              value={periodos.find((p) => p.value === asignacion.periodoFk) || null}
+              value={
+                periodos.find((p) => p.value === asignacion.periodoFk) || null
+              }
               onChange={handleSelectChange}
               placeholder="Seleccione un periodo"
               isClearable

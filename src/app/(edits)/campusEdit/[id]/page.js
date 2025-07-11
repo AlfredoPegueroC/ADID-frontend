@@ -31,9 +31,20 @@ function EditCampus({ params }) {
 
   useEffect(() => {
     async function fetchData() {
+      const accessToken = localStorage.getItem("accessToken");
       try {
-        const campusRes = await fetch(`${API}api/campus/${id}/`);
-        const univRes = await fetch(`${API}universidades`);
+        const campusRes = await fetch(`${API}api/campus/${id}/`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
+        const univRes = await fetch(`${API}universidades`, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
 
         if (!campusRes.ok || !univRes.ok) throw new Error("Error al cargar datos");
 
@@ -84,7 +95,7 @@ function EditCampus({ params }) {
     try {
       const response = await fetch(`${API}api/campus/edit/${id}/`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${localStorage.getItem("accessToken")}` },
         body: JSON.stringify(campus),
       });
 

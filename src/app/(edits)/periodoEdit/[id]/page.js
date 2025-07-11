@@ -6,7 +6,7 @@ import Select from "react-select";
 import Notification from "@components/Notification";
 import withAuth from "@utils/withAuth";
 import Styles from "@styles/form.module.css";
-import { use } from 'react';
+import { use } from "react";
 function EditPeriodo({ params }) {
   const router = useRouter();
   const { id } = use(params);
@@ -25,17 +25,28 @@ function EditPeriodo({ params }) {
 
   const [universidades, setUniversidades] = useState([]);
   const [loading, setLoading] = useState(true);
+ 
 
   useEffect(() => {
+    const accessToken = localStorage.getItem("accessToken");
     async function fetchData() {
       try {
-        const response = await fetch(`${API}api/periodoacademico/${id}/`);
+        const response = await fetch(`${API}api/periodoacademico/${id}/`, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
         if (!response.ok) throw new Error("Error al cargar el período.");
         const data = await response.json();
         setPeriodo(data);
 
-        const universidadesResponse = await fetch(`${API}api/universidad`);
-        if (!universidadesResponse.ok) throw new Error("Error al cargar universidades.");
+        const universidadesResponse = await fetch(`${API}api/universidad`, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
+        if (!universidadesResponse.ok)
+          throw new Error("Error al cargar universidades.");
         const universidadesData = await universidadesResponse.json();
 
         setUniversidades(
@@ -72,7 +83,10 @@ function EditPeriodo({ params }) {
     try {
       const response = await fetch(`${API}api/periodoacademico/edit/${id}/`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
         body: JSON.stringify(periodo),
       });
 

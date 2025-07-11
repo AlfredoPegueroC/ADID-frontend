@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import Notification from "@components/Notification";
 import Styles from "@styles/form.module.css"; // Usa el mismo estilo del formulario de creación
 import withAuth from "@utils/withAuth";
-import { use } from 'react';
+import { use } from "react";
 
 function EditUniversidad({ params }) {
   const router = useRouter();
@@ -26,11 +26,15 @@ function EditUniversidad({ params }) {
   });
 
   const [loading, setLoading] = useState(true);
-
+ 
   useEffect(() => {
     const fetchUniversidad = async () => {
       try {
-        const res = await fetch(`${API}api/universidad/${id}/`);
+        const res = await fetch(`${API}api/universidad/${id}/`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+        });
         if (!res.ok) throw new Error("No se pudo cargar la universidad.");
         const data = await res.json();
         setFormData(data);
@@ -60,6 +64,7 @@ function EditUniversidad({ params }) {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },
         body: JSON.stringify(formData),
       });

@@ -22,15 +22,32 @@ function DocenteEdit({ params }) {
 
   useEffect(() => {
     async function fetchData() {
+      const accessToken = localStorage.getItem("accessToken");
       try {
-        const docenteRes = await fetch(`${API}api/docente/${id}/`);
+        const docenteRes = await fetch(`${API}api/docente/${id}/`, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
         if (!docenteRes.ok) throw new Error("Error al obtener docente");
         const docenteData = await docenteRes.json();
 
         const [uData, tData, cData] = await Promise.all([
-          fetch(`${API}universidades`).then((r) => r.json()),
-          fetch(`${API}tipodocentes`).then((r) => r.json()),
-          fetch(`${API}categoriadocentes`).then((r) => r.json()),
+          fetch(`${API}universidades`, {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }).then((r) => r.json()),
+          fetch(`${API}tipodocentes`, {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }).then((r) => r.json()),
+          fetch(`${API}categoriadocentes`, {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }).then((r) => r.json()),
         ]);
 
         setDocente({
@@ -92,7 +109,7 @@ function DocenteEdit({ params }) {
     try {
       const res = await fetch(`${API}api/docente/edit/${id}/`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${localStorage.getItem("accessToken")}` },
         body: JSON.stringify(docente),
       });
 

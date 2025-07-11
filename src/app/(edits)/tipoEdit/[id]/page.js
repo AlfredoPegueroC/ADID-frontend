@@ -23,14 +23,24 @@ function TipoEdit({ params }) {
   const [universidades, setUniversidades] = useState([]);
   const [loading, setLoading] = useState(true);
 
+
   useEffect(() => {
     async function fetchData() {
+      const accessToken = localStorage.getItem("accessToken");
       try {
-        const tipoRes = await fetch(`${API}api/tipodocente/${id}/`);
+        const tipoRes = await fetch(`${API}api/tipodocente/${id}/`, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
         const tipoData = await tipoRes.json();
         setTipo(tipoData);
 
-        const uniRes = await fetch(`${API}universidades`);
+        const uniRes = await fetch(`${API}universidades`, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
         const uniData = await uniRes.json();
         setUniversidades(
           (uniData.results || uniData).map((u) => ({
@@ -69,6 +79,7 @@ function TipoEdit({ params }) {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },
         body: JSON.stringify(tipo),
       });

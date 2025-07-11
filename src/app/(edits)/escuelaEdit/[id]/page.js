@@ -28,12 +28,26 @@ function EditEscuela({ params }) {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
+
   useEffect(() => {
     async function fetchData() {
+      const accessToken = localStorage.getItem("accessToken");
       try {
-        const escuelaResponse = await fetch(`${API}api/escuela/${id}/`);
-        const facultadesResponse = await fetch(`${API}facultades`);
-        const universidadesResponse = await fetch(`${API}universidades`);
+        const escuelaResponse = await fetch(`${API}api/escuela/${id}/`, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
+        const facultadesResponse = await fetch(`${API}facultades`, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
+        const universidadesResponse = await fetch(`${API}universidades`, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
 
         if (!escuelaResponse.ok || !facultadesResponse.ok || !universidadesResponse.ok)
           throw new Error("Error fetching data");
@@ -80,7 +94,10 @@ function EditEscuela({ params }) {
     try {
       const response = await fetch(`${API}api/escuela/edit/${id}/`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
         body: JSON.stringify(escuela),
       });
 

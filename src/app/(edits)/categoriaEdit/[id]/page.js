@@ -27,9 +27,18 @@ function CategoriaEdit({ params }) {
 
   useEffect(() => {
     async function fetchData() {
+      const accessToken = localStorage.getItem("accessToken");
       try {
-        const catRes = await fetch(`${API}api/categoriadocente/${id}/`);
-        const univRes = await fetch(`${API}universidades`);
+        const catRes = await fetch(`${API}api/categoriadocente/${id}/`, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
+        const univRes = await fetch(`${API}universidades`, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
 
         if (!catRes.ok || !univRes.ok) throw new Error("Error al cargar los datos.");
 
@@ -75,6 +84,7 @@ function CategoriaEdit({ params }) {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },
         body: JSON.stringify(categoria),
       });
