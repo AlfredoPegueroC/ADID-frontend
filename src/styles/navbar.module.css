@@ -1,6 +1,11 @@
 .navbar {
   background-color: hsla(215, 83%, 45%, 0.9);
-
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+ 
 }
 
 .navbarContainer {
@@ -8,6 +13,9 @@
   justify-content: space-between;
   align-items: center;
   margin: 3rem;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
 }
 .container{
   margin: 0 2rem;

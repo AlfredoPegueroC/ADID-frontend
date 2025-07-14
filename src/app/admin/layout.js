@@ -10,7 +10,7 @@ export default function AdminLayout({ children }) {
   const toggleSidebar = () => setIsOpen(!isOpen);
 
   return (
-    <div className="d-flex">
+    <div>
       <Sidebar isOpen={isOpen} toggleSidebar={toggleSidebar} />
       <div className={`${Styles.content} ${!isOpen ? Styles.shifted : ''}`}>
         {children}

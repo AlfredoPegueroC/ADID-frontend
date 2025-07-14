@@ -11,6 +11,7 @@
   transition: width 0.3s ease-in-out;
   overflow-x: hidden;
   z-index: 1000;
+  position: fixed;
 }
 
 .sidebar.collapsed {

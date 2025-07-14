@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import { fetchLogs } from "@api/logService";
 import Pagination from "@components/Pagination";
 import Search from "@components/search";
+import Tables from "@components/Tables";
 import { useAuth } from "@contexts/AuthContext";
 
 export default function LogListClient() {
@@ -18,6 +19,7 @@ export default function LogListClient() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [search, setSearch] = useState("");
+  const [pageSize, setPageSize] = useState(10);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
@@ -26,8 +28,6 @@ export default function LogListClient() {
   useEffect(() => {
     console.log("👤 Usuario conectado:", user?.username || "No autenticado");
   }, [user]);
-
-  const pageSize = 10;
 
   const methodStyle = (method) => {
     switch (method) {
@@ -77,7 +77,18 @@ export default function LogListClient() {
           </span>
         ),
       },
-      { accessorKey: "path", header: "Ruta" },
+      {
+        accessorKey: "path",
+        header: "Ruta",
+        cell: ({ getValue }) => {
+          const path = getValue();
+          return (
+            <span title={path}>
+              {path.length > 60 ? path.slice(0, 57) + "..." : path}
+            </span>
+          );
+        },
+      },
       {
         accessorKey: "status_code",
         header: "Estado",
@@ -116,13 +127,12 @@ export default function LogListClient() {
     const token = localStorage.getItem("accessToken");
 
     if (!token) {
-      console.warn("No access token found. Redirecting to login...");
       router.push("/login");
       return;
     }
 
     setLoading(true);
-    fetchLogs(page, search, token)
+    fetchLogs(page, search, pageSize, token)
       .then(({ results, totalPages }) => {
         setLogs(results);
         setTotalPages(totalPages);
@@ -134,42 +144,81 @@ export default function LogListClient() {
         }
       })
       .finally(() => setLoading(false));
-  }, [page, search]);
+  }, [page, search, pageSize]);
 
   return (
-    <div className="p-4">
+    <div>
       <h2 className="text-xl font-bold mb-4">📋 Registro de Actividad API</h2>
 
-      <Search
-        value={search}
-        onChange={setSearch}
-        placeholder="Buscar por usuario, ruta o método..."
-      />
+      <div>
+        <div className="d-flex justify-between items-center gap-2 mx-auto mb-4">
+          <Search
+            SearchSubmit={(e) => e.preventDefault()}
+            SearchChange={(e) => setSearch(e.target.value)}
+            searchQuery={search}
+          />
 
-      <div className="overflow-x-auto mt-4 border rounded-lg shadow-sm">
-        {loading ? (
-          <div className="text-center p-8 text-gray-500">Cargando logs...</div>
-        ) : (
-          <table className="min-w-full bg-white">
-            <thead className="bg-gray-100">
-              {table.getHeaderGroups().map((headerGroup) => (
-                <tr key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => (
-                    <th
-                      key={header.id}
-                      className="p-2 border-b text-left text-sm font-medium text-gray-700"
-                    >
-                      {flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
-                    </th>
-                  ))}
-                </tr>
-              ))}
-            </thead>
-            <tbody>
-              {table.getRowModel().rows.map((row) => (
+          <div className="d-flex align-items-center gap-2" style={{ marginLeft: "auto" }}>
+            <label className="fw-bold text-black">
+              Resultados por página:
+            </label>
+            <select
+              className="form-select w-auto"
+              style={{ height: "38px" }}
+              value={pageSize}
+              onChange={(e) => {
+                setPageSize(Number(e.target.value));
+                setPage(1);
+              }}
+            >
+              <option value={10}>10</option>
+              <option value={25}>25</option>
+              <option value={50}>50</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <Tables>
+          <thead className="bg-gray-100">
+            {table.getHeaderGroups().map((headerGroup) => (
+              <tr key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <th
+                    key={header.id}
+                    className="p-2 border-b text-left text-sm font-medium text-gray-700"
+                  >
+                    {flexRender(
+                      header.column.columnDef.header,
+                      header.getContext()
+                    )}
+                  </th>
+                ))}
+              </tr>
+            ))}
+          </thead>
+          <tbody>
+            {loading ? (
+              <tr>
+                <td
+                  colSpan={columns.length}
+                  className="text-center p-4 text-gray-500"
+                >
+                  Cargando...
+                </td>
+              </tr>
+            ) : logs.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={columns.length}
+                  className="text-center p-4 text-gray-500"
+                >
+                  No se encontraron registros.
+                </td>
+              </tr>
+            ) : (
+              table.getRowModel().rows.map((row) => (
                 <tr key={row.id} className="hover:bg-gray-50">
                   {row.getVisibleCells().map((cell) => (
                     <td key={cell.id} className="p-2 border-b text-sm">
@@ -180,10 +229,10 @@ export default function LogListClient() {
                     </td>
                   ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+              ))
+            )}
+          </tbody>
+        </Tables>
       </div>
 
       {totalPages > 1 && (

@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import {
   useReactTable,
@@ -7,41 +7,46 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   flexRender,
-} from '@tanstack/react-table';
+} from "@tanstack/react-table";
 
-import { useMemo, useState, useEffect } from 'react';
-import Tables from '@components/Tables';
-import Notification from '@components/Notification';
+import { useMemo, useState, useEffect } from "react";
+import Tables from "@components/Tables";
+import Pagination from "@components/Pagination";
+import Notification from "@components/Notification";
 
 export default function UsuarioPage() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sorting, setSorting] = useState([]);
   const [columnFilters, setColumnFilters] = useState([]);
-  const [globalFilter, setGlobalFilter] = useState('');
+  const [globalFilter, setGlobalFilter] = useState("");
+  const [pageSize, setPageSize] = useState(10);
 
   useEffect(() => {
     const fetchUsuarios = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_KEY}api/usuarios`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
-        });
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_KEY}api/usuarios`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            },
+          }
+        );
         const usuarios = await res.json();
 
-        const formateados = usuarios.map(user => ({
+        const formateados = usuarios.results.map((user) => ({
           id: user.id,
           username: user.username,
           name: `${user.first_name} ${user.last_name}`,
           email: user.email,
-          role: user.groups.includes('admin') ? 'Admin' : 'User',
+          role: user.groups.includes("admin") ? "Admin" : "User",
           is_active: user.is_active,
         }));
 
         setData(formateados);
       } catch (err) {
-        console.error('Error cargando usuarios:', err);
+        console.error("Error cargando usuarios:", err);
       } finally {
         setLoading(false);
       }
@@ -51,43 +56,51 @@ export default function UsuarioPage() {
 
   const columns = useMemo(
     () => [
-      { accessorKey: 'username', header: () => 'Usuario' },
-      { accessorKey: 'name', header: () => 'Nombre' },
-      { accessorKey: 'email', header: () => 'Email' },
-      { accessorKey: 'role', header: () => 'Rol' },
+      { accessorKey: "username", header: () => "Usuario" },
+      { accessorKey: "name", header: () => "Nombre" },
+      { accessorKey: "email", header: () => "Email" },
+      { accessorKey: "role", header: () => "Rol" },
       {
-        accessorKey: 'is_active',
-        header: () => 'Estado',
+        accessorKey: "is_active",
+        header: () => "Estado",
         cell: ({ row }) => {
           const { username, is_active } = row.original;
 
           const handleEstadoChange = async (e) => {
-            const nuevoEstado = e.target.value === 'true';
+            const nuevoEstado = e.target.value === "true";
 
             try {
-              const res = await fetch(`${process.env.NEXT_PUBLIC_API_KEY}api/usuarios/${row.original.id}/`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json',
-                  Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
-                 },
-                body: JSON.stringify({ is_active: nuevoEstado }),
-              });
+              const res = await fetch(
+                `${process.env.NEXT_PUBLIC_API_KEY}api/usuarios/${row.original.id}/`,
+                {
+                  method: "PATCH",
+                  headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem(
+                      "accessToken"
+                    )}`,
+                  },
+                  body: JSON.stringify({ is_active: nuevoEstado }),
+                }
+              );
 
               if (res.ok) {
                 Notification.alertLogin(`Estado actualizado para ${username}`);
-                setData(prev =>
-                  prev.map(user =>
+                setData((prev) =>
+                  prev.map((user) =>
                     user.id === row.original.id
                       ? { ...user, is_active: nuevoEstado }
                       : user
                   )
                 );
               } else {
-                Notification.alertError(`Error al actualizar estado de ${username}`);
+                Notification.alertError(
+                  `Error al actualizar estado de ${username}`
+                );
               }
             } catch (error) {
               console.error(error);
-              Notification.alertError('Error de red al cambiar estado');
+              Notification.alertError("Error de red al cambiar estado");
             }
           };
 
@@ -101,8 +114,8 @@ export default function UsuarioPage() {
               <option value="false">Inactivo</option>
             </select>
           );
-        }
-      }
+        },
+      },
     ],
     [data]
   );
@@ -121,42 +134,72 @@ export default function UsuarioPage() {
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    manualPagination: false,
+    initialState: {
+      pagination: {
+        pageSize,
+      },
+    },
   });
 
-  if (loading) return <div className="text-center mt-5">Cargando usuarios...</div>;
+  useEffect(() => {
+    table.setPageSize(pageSize);
+  }, [pageSize]);
+
+  if (loading)
+    return <div className="text-center mt-5">Cargando usuarios...</div>;
 
   return (
     <div>
       <h2 className="mb-4">Usuarios Registrados</h2>
 
-      {/* Filtro global */}
-      <div className="mb-3">
+      {/* Filtro global y selector página */}
+      <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
         <input
           type="text"
           placeholder="Buscar en todos los campos..."
           className="form-control"
-          value={globalFilter ?? ''}
-          onChange={e => setGlobalFilter(e.target.value)}
+          style={{ maxWidth: "300px" }}
+          value={globalFilter ?? ""}
+          onChange={(e) => setGlobalFilter(e.target.value)}
         />
+
+        <div className="d-flex align-items-center gap-2">
+          <label className="fw-bold mb-0 text-black">
+            Resultados por página:
+          </label>
+          <select
+            className="form-select w-auto"
+            value={pageSize}
+            onChange={(e) => setPageSize(Number(e.target.value))}
+          >
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+          </select>
+        </div>
       </div>
 
       {/* Tabla */}
       <div className="table-responsive">
         <Tables>
           <thead className="table-light">
-            {table.getHeaderGroups().map(headerGroup => (
+            {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>
-                {headerGroup.headers.map(header => (
+                {headerGroup.headers.map((header) => (
                   <th
                     key={header.id}
                     onClick={header.column.getToggleSortingHandler()}
-                    style={{ cursor: 'pointer' }}
+                    style={{ cursor: "pointer" }}
                   >
-                    {flexRender(header.column.columnDef.header, header.getContext())}
-                    {header.column.getIsSorted() === 'asc'
-                      ? ' 🔼'
-                      : header.column.getIsSorted() === 'desc'
-                      ? ' 🔽'
+                    {flexRender(
+                      header.column.columnDef.header,
+                      header.getContext()
+                    )}
+                    {header.column.getIsSorted() === "asc"
+                      ? " 🔼"
+                      : header.column.getIsSorted() === "desc"
+                      ? " 🔽"
                       : null}
                   </th>
                 ))}
@@ -165,9 +208,9 @@ export default function UsuarioPage() {
           </thead>
 
           <tbody>
-            {table.getRowModel().rows.map(row => (
+            {table.getRowModel().rows.map((row) => (
               <tr key={row.id}>
-                {row.getVisibleCells().map(cell => (
+                {row.getVisibleCells().map((cell) => (
                   <td key={cell.id}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>
@@ -179,29 +222,13 @@ export default function UsuarioPage() {
       </div>
 
       {/* Paginación */}
-      <div className="d-flex justify-content-between align-items-center mt-3">
-        <div>
-          Página {table.getState().pagination.pageIndex + 1} de{' '}
-          {table.getPageCount()}
-        </div>
-
-        <div className="btn-group">
-          <button
-            className="btn btn-sm btn-outline-primary"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            Anterior
-          </button>
-          <button
-            className="btn btn-sm btn-outline-primary"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            Siguiente
-          </button>
-        </div>
-      </div>
+      {table.getPageCount() > 1 && (
+        <Pagination
+          page={table.getState().pagination.pageIndex + 1}
+          totalPages={table.getPageCount()}
+          onPageChange={(newPage) => table.setPageIndex(newPage - 1)}
+        />
+      )}
     </div>
   );
 }

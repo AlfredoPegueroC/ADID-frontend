@@ -50,7 +50,9 @@ export default function RootLayout({ children }) {
               theme="colored"
               transition={Bounce}
             />
-            {children}
+            <div style={{ marginTop: "6rem" }}>
+              {children}
+            </div>
           </div>
         </AuthProvider>
       </body>
