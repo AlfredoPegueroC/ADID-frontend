@@ -36,7 +36,10 @@ function AccionCell({ row, api }) {
         `${api}api/asignacion/edit/${row.original.AsignacionID}/`,
         {
           method: "PATCH",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
           body: JSON.stringify({ accion: newValue }),
         }
       );
@@ -101,15 +104,6 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
       );
       setAsignaciones(asignaciones);
       setTotalPages(totalPages);
-
-      console.log(
-        "Asignaciones cargadas:",
-        asignaciones.length,
-        "página:",
-        page,
-        "periodo:",
-        periodo
-      );
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
@@ -182,7 +176,10 @@ function PrincipalListClient({ initialData, totalPages: initialTotalPages }) {
     try {
       const res = await fetch(`${API}api/asignacion/copiar`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
         body: JSON.stringify({
           from_period: selectedPeriodo,
           to_period: periodoDestino,
