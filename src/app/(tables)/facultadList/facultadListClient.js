@@ -1,73 +1,75 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { debounce } from "lodash";
-
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Pagination from "@components/Pagination";
 import Tables from "@components/Tables";
 import Search from "@components/search";
 import ImportExcel from "@components/forms/Import";
 import Modal from "@components/Modal";
-import { exportFacultadesToPDF } from "@utils/ExportPDF/exportFacultadPDF";
-import { fetchFacultades } from "@api/facultadService";
 import withAuth from "@utils/withAuth";
-import { deleteEntity } from "@utils/delete";
+import { debounce } from "lodash";
 
-function FacultadListClient({ initialData, totalPages: initialTotalPages }) {
-  const [facultades, setFacultades] = useState(initialData);
+import { fetchFacultades } from "@api/facultadService";
+import { deleteEntity } from "@utils/delete";
+import { exportFacultadesToPDF } from "@utils/ExportPDF/exportFacultadPDF";
+
+function FacultadListClient() {
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(initialTotalPages);
   const [searchQuery, setSearchQuery] = useState("");
   const [pageSize, setPageSize] = useState(10);
-  const [loading, setLoading] = useState(false);
 
   const API = process.env.NEXT_PUBLIC_API_KEY;
-  const Api_import_URL = `${API}import/facultad`;
+  const token = typeof window !== "undefined" ? localStorage.getItem("accessToken") : "";
+  const queryClient = useQueryClient();
 
-  // ✅ Cambio 1: refactor para que fetchData dependa del estado y no reciba parámetros externos
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    try {
-      const response = await fetchFacultades(page, searchQuery, pageSize);
-      setFacultades(response.results);
-      setTotalPages(response.totalPages);
-    } catch (error) {
-      console.error("Error fetching facultades:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [page, searchQuery, pageSize]);
-
-  // ✅ Cambio 2: uso de debounce para actualizar el query, no para hacer el fetch
+  // debounce solo actualiza searchQuery, no resetea página aquí
   const debouncedSearch = useRef(
     debounce((value) => {
-      setSearchQuery(value); // solo actualiza el query
+      setSearchQuery(value);
     }, 300)
   ).current;
 
-  // ✅ Cambio 3: cada vez que cambia el query, se va a la página 1
+  // Cuando cambia searchQuery, resetear página a 1
   useEffect(() => {
     setPage(1);
   }, [searchQuery]);
 
-  // ✅ Cambio 4: fetchData centralizado en useEffect
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+  const { data, isLoading } = useQuery({
+    queryKey: ["facultades", { page, searchQuery, pageSize }],
+    queryFn: () => fetchFacultades(page, searchQuery, pageSize, token),
+    keepPreviousData: true,
+  });
 
-  const deleteFacultad = (pk) => {
-    deleteEntity(`${API}api/facultad/delete`, pk, setFacultades, "FacultadID");
+  const mutationDelete = useMutation({
+    mutationFn: (pk) => deleteEntity(`${API}api/facultad/delete`, pk),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["facultades"]);
+    },
+  });
+
+  const handleDeleteFacultad = (pk) => {
+    mutationDelete.mutate(pk);
   };
 
+  // Aquí solo llama debounce para actualizar searchQuery
   const handleSearchChange = (e) => {
-    debouncedSearch(e.target.value); // ✅ solo actualiza el searchQuery
+    debouncedSearch(e.target.value);
   };
 
+  // Solo previene el submit, no toca página
   const handleSearchSubmit = (e) => {
     e.preventDefault();
+  };
+
+  const handlePageSizeChange = (e) => {
+    setPageSize(Number(e.target.value));
     setPage(1);
   };
+
+  const facultades = data?.results || [];
+  const totalPages = data?.totalPages || 1;
 
   return (
     <div className="mt-5">
@@ -82,6 +84,7 @@ function FacultadListClient({ initialData, totalPages: initialTotalPages }) {
           <Link className="btn btn-success" href={`${API}export/facultad`}>
             Exportar Excel
           </Link>
+
           <button
             className={`btn btn-danger ${facultades.length === 0 ? "disabled" : ""}`}
             onClick={() => exportFacultadesToPDF(facultades, page, pageSize)}
@@ -89,14 +92,10 @@ function FacultadListClient({ initialData, totalPages: initialTotalPages }) {
             Exportar PDF
           </button>
 
-          <button
-            type="button"
-            className="btn btn-warning"
-            data-bs-toggle="modal"
-            data-bs-target="#Modal"
-          >
+          <button type="button" className="btn btn-warning" data-bs-toggle="modal" data-bs-target="#Modal">
             Importar Excel
           </button>
+
           <Search
             SearchSubmit={handleSearchSubmit}
             SearchChange={handleSearchChange}
@@ -105,17 +104,12 @@ function FacultadListClient({ initialData, totalPages: initialTotalPages }) {
         </div>
 
         <div className="d-flex align-items-center gap-2">
-          <label className="fw-bold mb-0 text-black">
-            Resultados por página:
-          </label>
+          <label className="fw-bold mb-0 text-black">Resultados por página:</label>
           <select
             className="form-select w-auto"
             style={{ height: "38px" }}
             value={pageSize}
-            onChange={(e) => {
-              setPageSize(Number(e.target.value));
-              setPage(1);
-            }}
+            onChange={handlePageSizeChange}
           >
             <option value={10}>10</option>
             <option value={25}>25</option>
@@ -125,7 +119,10 @@ function FacultadListClient({ initialData, totalPages: initialTotalPages }) {
       </div>
 
       <Modal title="Importar Facultad">
-        <ImportExcel importURL={Api_import_URL} onSuccess={() => fetchData()} />
+        <ImportExcel
+          importURL={`${API}import/facultad`}
+          onSuccess={() => queryClient.invalidateQueries(["facultades"])}
+        />
       </Modal>
 
       <Tables>
@@ -143,21 +140,23 @@ function FacultadListClient({ initialData, totalPages: initialTotalPages }) {
             <th>Acción</th>
           </tr>
         </thead>
-        <tbody>
-          {loading ? (
+        {isLoading ? (
+          <tbody>
             <tr>
-              <td colSpan="10" className="text-center">
+              <td colSpan={10} className="text-center">
                 Cargando...
               </td>
             </tr>
-          ) : facultades.length === 0 ? (
+          </tbody>
+        ) : facultades.length === 0 ? (
+          <tbody>
             <tr>
-              <td colSpan="10" className="text-center">
-                No se han encontrado facultades.
-              </td>
+              <td colSpan={10} className="text-center">No se han encontrado facultades.</td>
             </tr>
-          ) : (
-            facultades.map((facultad) => (
+          </tbody>
+        ) : (
+          <tbody>
+            {facultades.map((facultad) => (
               <tr key={facultad.FacultadID}>
                 <td>{facultad.FacultadCodigo}</td>
                 <td>{facultad.FacultadNombre}</td>
@@ -169,31 +168,24 @@ function FacultadListClient({ initialData, totalPages: initialTotalPages }) {
                 <td>{facultad.universidadNombre || "—"}</td>
                 <td>{facultad.campusNombre || "—"}</td>
                 <td>
-                  <Link
-                    className="btn btn-primary btn-sm"
-                    href={`/facultadEdit/${facultad.FacultadID}`}
-                  >
+                  <Link className="btn btn-primary btn-sm" href={`/facultadEdit/${facultad.FacultadID}`}>
                     Editar
                   </Link>
                   <button
                     className="btn btn-danger btn-sm mx-2"
-                    onClick={() => deleteFacultad(facultad.FacultadID)}
+                    onClick={() => handleDeleteFacultad(facultad.FacultadID)}
                   >
                     borrar
                   </button>
                 </td>
               </tr>
-            ))
-          )}
-        </tbody>
+            ))}
+          </tbody>
+        )}
       </Tables>
 
       {totalPages > 1 && (
-        <Pagination
-          page={page}
-          totalPages={totalPages}
-          onPageChange={setPage}
-        />
+        <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
       )}
     </div>
   );

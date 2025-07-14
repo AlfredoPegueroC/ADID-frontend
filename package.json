@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@tanstack/react-form": "^1.12.4",
+    "@tanstack/react-query": "^5.83.0",
     "@tanstack/react-table": "^8.21.3",
     "bootstrap": "^5.3.7",
     "bootstrap-icons": "^1.13.1",

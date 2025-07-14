@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import Link from "next/link";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { debounce } from "lodash";
 
 import Modal from "@components/Modal";
@@ -15,66 +16,58 @@ import withAuth from "@utils/withAuth";
 import { deleteEntity } from "@utils/delete";
 import { fetchTipoDocentes } from "@api/tipoDocenteService";
 
-function TipoDocenteListClient({ initialData, totalPages: initialTotalPages }) {
-  const [tipos, setTipos] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(initialTotalPages);
+function TipoDocenteListClient() {
+  const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [pageSize, setPageSize] = useState(10);
-  const [loading, setLoading] = useState(false);
 
   const API = process.env.NEXT_PUBLIC_API_KEY;
-  const importURL = `${API}import/tipoDocente`;
+  const queryClient = useQueryClient();
 
-  // Función para cargar datos
-  const fetchTipoDocentesData = async (page, query, size) => {
-    setLoading(true);
-    try {
-      const { results, totalPages } = await fetchTipoDocentes(
-        page,
-        query,
-        size
-      );
-      setTipos(results);
-      setTotalPages(totalPages);
-    } catch (error) {
-      console.error("Error al obtener tipos de docente:", error);
-    } finally {
-      setLoading(false);
-    }
+  // Debounce para evitar llamadas múltiples al escribir
+  const debouncedSearch = useRef(
+    debounce((value) => {
+      setSearchQuery(value);
+      // setPage(1);
+    }, 400)
+  ).current;
+
+  // React Query: cargar tipos
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["tiposDocente", { page, searchQuery, pageSize }],
+    queryFn: () => fetchTipoDocentes(page, searchQuery, pageSize),
+    keepPreviousData: true,
+  });
+
+  // Mutación para borrar
+  const mutationDelete = useMutation({
+    mutationFn: (pk) => deleteEntity(`${API}api/tipodocente/delete`, pk),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tiposDocente"] });
+    },
+  });
+
+  const handleDeleteTipo = (pk) => {
+    mutationDelete.mutate(pk);
   };
 
-  // debounce para evitar llamadas rápidas
-  const debouncedFetchTipos = useCallback(
-    debounce((page, query, size) => {
-      fetchTipoDocentesData(page, query, size);
-    }, 400),
-    []
-  );
-
-  // Carga datos al inicio y cuando cambian búsqueda, página o tamaño de página
-  useEffect(() => {
-    debouncedFetchTipos(currentPage, searchQuery, pageSize);
-    return () => debouncedFetchTipos.cancel();
-  }, [searchQuery, currentPage, pageSize, debouncedFetchTipos]);
-
-  // Reset página cuando cambia búsqueda o tamaño de página
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery, pageSize]);
-
+  // Handlers
   const handleSearchChange = (e) => {
-    setSearchQuery(e.target.value);
+    debouncedSearch(e.target.value);
   };
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
+    // setPage(1);
   };
 
-  // Borrar tipo docente
-  const deleteTipoDocente = (pk) => {
-    deleteEntity(`${API}api/tipodocente/delete`, pk, setTipos, "TipoDocenteID");
+  const handlePageSizeChange = (e) => {
+    setPageSize(Number(e.target.value));
+    setPage(1);
   };
+
+  const tipos = data?.results || [];
+  const totalPages = data?.totalPages || 1;
 
   return (
     <div className="mt-5">
@@ -91,7 +84,7 @@ function TipoDocenteListClient({ initialData, totalPages: initialTotalPages }) {
           </Link>
           <button
             className={`btn btn-danger ${tipos.length === 0 ? "disabled" : ""}`}
-            onClick={() => exportTipoDocenteToPDF(tipos, currentPage, pageSize)}
+            onClick={() => exportTipoDocenteToPDF(tipos, page, pageSize)}
           >
             Exportar PDF
           </button>
@@ -113,14 +106,12 @@ function TipoDocenteListClient({ initialData, totalPages: initialTotalPages }) {
         </div>
 
         <div className="d-flex align-items-center gap-2">
-          <label className="fw-bold mb-0 text-black">
-            Resultados por página:
-          </label>
+          <label className="fw-bold mb-0 text-black">Resultados por página:</label>
           <select
             className="form-select w-auto"
             style={{ height: "38px" }}
             value={pageSize}
-            onChange={(e) => setPageSize(Number(e.target.value))}
+            onChange={handlePageSizeChange}
           >
             <option value={10}>10</option>
             <option value={25}>25</option>
@@ -131,10 +122,8 @@ function TipoDocenteListClient({ initialData, totalPages: initialTotalPages }) {
 
       <Modal title="Importar Tipo de Docente">
         <ImportExcel
-          importURL={importURL}
-          onSuccess={() =>
-            fetchTipoDocentesData(searchQuery, currentPage, pageSize)
-          }
+          importURL={`${API}import/tipoDocente`}
+          onSuccess={() => queryClient.invalidateQueries({ queryKey: ["tiposDocente"] })}
         />
       </Modal>
 
@@ -148,21 +137,21 @@ function TipoDocenteListClient({ initialData, totalPages: initialTotalPages }) {
             <th>Acción</th>
           </tr>
         </thead>
-        <tbody>
-          {loading ? (
+        {isLoading ? (
+          <tbody>
             <tr>
-              <td colSpan="6" className="text-center">
-                Cargando...
-              </td>
+              <td colSpan={6} className="text-center">Cargando...</td>
             </tr>
-          ) : tipos.length === 0 ? (
+          </tbody>
+        ) : tipos.length === 0 ? (
+          <tbody>
             <tr>
-              <td colSpan="6" className="text-center">
-                No se encontraron tipos de docente.
-              </td>
+              <td colSpan={6} className="text-center">No se encontraron tipos de docente.</td>
             </tr>
-          ) : (
-            tipos.map((tipo, index) => (
+          </tbody>
+        ) : (
+          <tbody>
+            {tipos.map((tipo) => (
               <tr key={tipo.TipoDocenteID}>
                 <td>{tipo.TipoDocenteCodigo}</td>
                 <td>{tipo.TipoDocenteDescripcion}</td>
@@ -177,23 +166,19 @@ function TipoDocenteListClient({ initialData, totalPages: initialTotalPages }) {
                   </Link>
                   <button
                     className="btn btn-danger btn-sm mx-2"
-                    onClick={() => deleteTipoDocente(tipo.TipoDocenteID)}
+                    onClick={() => handleDeleteTipo(tipo.TipoDocenteID)}
                   >
                     borrar
                   </button>
                 </td>
               </tr>
-            ))
-          )}
-        </tbody>
+            ))}
+          </tbody>
+        )}
       </Tables>
 
       {totalPages > 1 && (
-        <Pagination
-          page={currentPage}
-          totalPages={totalPages}
-          onPageChange={setCurrentPage}
-        />
+        <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
       )}
     </div>
   );

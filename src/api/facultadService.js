@@ -14,7 +14,7 @@ export async function fetchFacultades(page = 1, searchQuery = "", pageSize = 10)
     if (!response.ok) throw new Error("Failed to fetch facultades");
 
     const data = await response.json();
-    console.log(`${API}api/facultad?${params.toString()}`);
+    
     return {
       results: data.results || [],
       totalPages: Math.ceil(data.count / pageSize),

@@ -7,6 +7,5 @@ export default async function FacultadPage({ searchParams }) {
   const page = params?.page ? parseInt(params.page) : 1;
 
   const { results, totalPages } = await fetchFacultades(searchQuery, page);
-  console.log(results)
   return <FacultadListClient initialData={results} totalPages={totalPages} />;
 }

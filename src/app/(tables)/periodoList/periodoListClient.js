@@ -1,90 +1,87 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useRef } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { debounce } from "lodash";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 import Pagination from "@components/Pagination";
 import Tables from "@components/Tables";
-import Search from "@components/search";
 import Modal from "@components/Modal";
+import Search from "@components/search";
 import Periodo from "@components/forms/Periodo";
 
 import withAuth from "@utils/withAuth";
-import { deleteEntity } from "@utils/delete";
 import { fetchPeriodos } from "@api/periodoService";
+import { deleteEntity } from "@utils/delete";
 
 function PeriodoListClient({ initialData, totalPages: initialTotalPages }) {
-  const [periodos, setPeriodos] = useState(initialData);
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(initialTotalPages || 1);
   const [searchQuery, setSearchQuery] = useState("");
   const [pageSize, setPageSize] = useState(10);
-  const [loading, setLoading] = useState(false);
 
   const API = process.env.NEXT_PUBLIC_API_KEY;
+  const queryClient = useQueryClient();
 
-  const deletePeriodo = (pk) => {
-    deleteEntity(
-      `${API}api/periodoacademico/delete`,
-      pk,
-      setPeriodos,
-      "PeriodoID"
-    );
-  };
+  // Debounce para búsqueda
+  const debouncedSearch = useRef(
+    debounce((value) => {
+      setSearchQuery(value);
+      // setPage(1);
+    }, 300)
+  ).current;
 
-  const fetchData = async (pageNum, query, size) => {
-    setLoading(true);
-    try {
-      const { results, totalPages } = await fetchPeriodos(pageNum, query, size);
-      setPeriodos(results);
-      setTotalPages(totalPages);
-    } catch (error) {
-      console.error("Error al obtener periodos:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Consulta para obtener periodos
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["periodos", { page, searchQuery, pageSize }],
+    queryFn: () => fetchPeriodos(page, searchQuery, pageSize),
+    keepPreviousData: true,
+    initialData: () => ({
+      results: initialData || [],
+      totalPages: initialTotalPages || 1,
+    }),
+  });
 
-  const debouncedFetchData = useCallback(
-    debounce((pageNum, query, size) => {
-      fetchData(pageNum, query, size);
-    }, 400),
-    []
-  );
+  // Mutación para borrar periodo
+  const mutationDelete = useMutation({
+    mutationFn: (pk) => deleteEntity(`${API}api/periodoacademico/delete`, pk),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["periodos"] });
+    },
+  });
 
-  // useEffect para buscar y paginar con debounce
-  useEffect(() => {
-    debouncedFetchData(page, searchQuery, pageSize);
-    return () => debouncedFetchData.cancel();
-  }, [page, searchQuery, pageSize, debouncedFetchData]);
-
-  const handleSearchSubmit = (e) => {
-    e.preventDefault();
-    setPage(1);
-    fetchData(1, searchQuery, pageSize);
+  const handleDeletePeriodo = (pk) => {
+    mutationDelete.mutate(pk);
   };
 
   const handleSearchChange = (e) => {
-    setSearchQuery(e.target.value);
+    debouncedSearch(e.target.value);
+  };
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    // setPage(1);
   };
 
   const handlePageChange = (newPage) => {
     setPage(newPage);
-    // No hace falta fetchData aquí porque useEffect con debounce lo hace
   };
 
   const handlePageSizeChange = (e) => {
-    const newSize = Number(e.target.value);
-    setPageSize(newSize);
+    setPageSize(Number(e.target.value));
     setPage(1);
-    // No hace falta llamar fetchData explícitamente por useEffect
   };
+
+  const periodos = data?.results || [];
+  const totalPages = data?.totalPages || 1;
 
   return (
     <div className="mt-5">
       <h1 className="text-dark">Lista Periodo Académico</h1>
+
+      {isError && (
+        <div className="alert alert-danger">Error al cargar los periodos.</div>
+      )}
 
       <div className="d-flex justify-content-between align-items-center mb-3 mt-3">
         <div className="d-flex gap-2">
@@ -131,9 +128,7 @@ function PeriodoListClient({ initialData, totalPages: initialTotalPages }) {
       <Modal title="Nuevo Periodo Académico">
         <Periodo
           title="Registrar Periodo"
-          onSuccess={async () => {
-            await fetchData(page, searchQuery, pageSize);
-          }}
+          onSuccess={() => queryClient.invalidateQueries({ queryKey: ["periodos"] })}
         />
       </Modal>
 
@@ -152,21 +147,25 @@ function PeriodoListClient({ initialData, totalPages: initialTotalPages }) {
             <th>Acción</th>
           </tr>
         </thead>
-        <tbody>
-          {loading ? (
+        {isLoading ? (
+          <tbody>
             <tr>
-              <td colSpan="10" className="text-center">
+              <td colSpan={10} className="text-center">
                 Cargando...
               </td>
             </tr>
-          ) : periodos.length === 0 ? (
+          </tbody>
+        ) : periodos.length === 0 ? (
+          <tbody>
             <tr>
-              <td colSpan="10" className="text-center">
+              <td colSpan={10} className="text-center">
                 No se encontraron periodos académicos.
               </td>
             </tr>
-          ) : (
-            periodos.map((periodo, index) => (
+          </tbody>
+        ) : (
+          <tbody>
+            {periodos.map((periodo, index) => (
               <tr key={periodo.PeriodoID}>
                 <td>{index + 1 + (page - 1) * pageSize}</td>
                 <td>{periodo.PeriodoCodigo}</td>
@@ -186,15 +185,16 @@ function PeriodoListClient({ initialData, totalPages: initialTotalPages }) {
                   </Link>
                   <button
                     className="btn btn-danger btn-sm mx-2"
-                    onClick={() => deletePeriodo(periodo.PeriodoID)}
+                    onClick={() => handleDeletePeriodo(periodo.PeriodoID)}
+                    disabled={mutationDelete.isLoading}
                   >
                     borrar
                   </button>
                 </td>
               </tr>
-            ))
-          )}
-        </tbody>
+            ))}
+          </tbody>
+        )}
       </Tables>
 
       {totalPages > 1 && (

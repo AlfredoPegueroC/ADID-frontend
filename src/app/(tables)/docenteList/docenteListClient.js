@@ -1,74 +1,63 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useRef } from "react";
 import Link from "next/link";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { debounce } from "lodash";
+
 import Pagination from "@components/Pagination";
 import Tables from "@components/Tables";
 import Modal from "@components/Modal";
 import ImportExcel from "@components/forms/Import";
 import Search from "@components/search";
 import withAuth from "@utils/withAuth";
-import { deleteEntity } from "@utils/delete";
 import { fetchDocentes } from "@api/docenteService";
-import { debounce } from "lodash";
 import { exportDocentesToPDF } from "@utils/ExportPDF/exportDocentePDF";
+import { deleteEntity } from "@utils/delete";
 
 function DocenteListClient() {
-  const [docentes, setDocentes] = useState([]);
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [pageSize, setPageSize] = useState(10);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
 
   const API = process.env.NEXT_PUBLIC_API_KEY;
-  const Api_import_URL = `${API}import/docente`;
+  const queryClient = useQueryClient();
 
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const { results, totalPages } = await fetchDocentes(
-        page,
-        searchQuery,
-        pageSize
-      );
-      setDocentes(results);
-      setTotalPages(totalPages);
-    } catch (error) {
-      setError("Error al cargar los docentes.");
-      console.error("Error al cargar docentes:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [page, searchQuery, pageSize]);
-
+  // Debounce para búsqueda
   const debouncedSearch = useRef(
     debounce((value) => {
       setSearchQuery(value);
+      // setPage(1);
     }, 300)
   ).current;
 
-  useEffect(() => {
-    setPage(1);
-  }, [searchQuery]);
+  // Consulta react-query para traer docentes
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["docentes", { page, searchQuery, pageSize }],
+    queryFn: () => fetchDocentes(page, searchQuery, pageSize),
+    keepPreviousData: true,
+  });
 
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+  // Mutación para borrar docente
+  const mutationDelete = useMutation({
+    mutationFn: (pk) => deleteEntity(`${API}api/docente/delete`, pk),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["docentes"] });
+    },
+  });
 
-  const deleteDocente = (pk) => {
-    deleteEntity(`${API}api/docente/delete`, pk, setDocentes, "DocenteID");
+  const handleDeleteDocente = (pk) => {
+    mutationDelete.mutate(pk);
   };
 
+  // Handlers
   const handleSearchChange = (e) => {
     debouncedSearch(e.target.value);
   };
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    setPage(1);
+    // setPage(1);
   };
 
   const handlePageSizeChange = (e) => {
@@ -76,10 +65,16 @@ function DocenteListClient() {
     setPage(1);
   };
 
+  const docentes = data?.results || [];
+  const totalPages = data?.totalPages || 1;
+
   return (
     <div className="mt-5">
       <h1 className="text-dark">Lista de Docentes</h1>
-      {error && <div className="alert alert-danger">{error}</div>}
+
+      {isError && (
+        <div className="alert alert-danger">Error al cargar los docentes.</div>
+      )}
 
       <div className="d-flex justify-content-between align-items-center mb-3 mt-3">
         <div className="d-flex gap-2">
@@ -105,6 +100,7 @@ function DocenteListClient() {
           >
             Importar Excel
           </button>
+
           <Search
             SearchSubmit={handleSearchSubmit}
             SearchChange={handleSearchChange}
@@ -113,9 +109,7 @@ function DocenteListClient() {
         </div>
 
         <div className="d-flex align-items-center gap-2">
-          <label className="fw-bold mb-0 text-black">
-            Resultados por página:
-          </label>
+          <label className="fw-bold mb-0 text-black">Resultados por página:</label>
           <select
             className="form-select w-auto"
             style={{ height: "38px" }}
@@ -130,7 +124,10 @@ function DocenteListClient() {
       </div>
 
       <Modal title="Importar Docente">
-        <ImportExcel importURL={Api_import_URL} onSuccess={() => fetchData()} />
+        <ImportExcel
+          importURL={`${API}import/docente`}
+          onSuccess={() => queryClient.invalidateQueries({ queryKey: ["docentes"] })}
+        />
       </Modal>
 
       <Tables>
@@ -153,17 +150,25 @@ function DocenteListClient() {
             <th>Acción</th>
           </tr>
         </thead>
-        <tbody>
-          {loading ? (
+        {isLoading ? (
+          <tbody>
             <tr>
-              <td colSpan="15" className="text-center">Cargando...</td>
+              <td colSpan={15} className="text-center">
+                Cargando...
+              </td>
             </tr>
-          ) : docentes.length === 0 ? (
+          </tbody>
+        ) : docentes.length === 0 ? (
+          <tbody>
             <tr>
-              <td colSpan="15" className="text-center">No se encontraron docentes.</td>
+              <td colSpan={15} className="text-center">
+                No se encontraron docentes.
+              </td>
             </tr>
-          ) : (
-            docentes.map((d) => (
+          </tbody>
+        ) : (
+          <tbody>
+            {docentes.map((d) => (
               <tr key={d.DocenteID}>
                 <td>{d.DocenteCodigo}</td>
                 <td>{d.DocenteNombre}</td>
@@ -188,23 +193,20 @@ function DocenteListClient() {
                   </Link>
                   <button
                     className="btn btn-danger btn-sm mx-2"
-                    onClick={() => deleteDocente(d.DocenteID)}
+                    onClick={() => handleDeleteDocente(d.DocenteID)}
+                    disabled={mutationDelete.isLoading}
                   >
                     Borrar
                   </button>
                 </td>
               </tr>
-            ))
-          )}
-        </tbody>
+            ))}
+          </tbody>
+        )}
       </Tables>
 
       {totalPages > 1 && (
-        <Pagination
-          page={page}
-          totalPages={totalPages}
-          onPageChange={setPage}
-        />
+        <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
       )}
     </div>
   );

@@ -6,8 +6,6 @@ export async function fetchUniversidades(page = 1, searchQuery = "", pageSize = 
   params.append("page", page);
   params.append("page_size", pageSize);
 
-
-
   if (searchQuery) params.append("search", searchQuery);
 
   try {

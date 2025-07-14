@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useRef } from "react";
 import Link from "next/link";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Pagination from "@components/Pagination";
 import Tables from "@components/Tables";
 import ImportExcel from "@components/forms/Import";
@@ -10,57 +11,40 @@ import Search from "@components/search";
 import withAuth from "@utils/withAuth";
 import { deleteEntity } from "@utils/delete";
 import { debounce } from "lodash";
+
 import { fetchEscuelas } from "@api/escuelaService";
 import { exportEscuelasToPDF } from "@utils/ExportPDF/exportEscuelaPDF";
 
 function EscuelaListClient() {
-  const [escuelas, setEscuelas] = useState([]);
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [pageSize, setPageSize] = useState(10);
-  const [loading, setLoading] = useState(false);
 
   const API = process.env.NEXT_PUBLIC_API_KEY;
-  const Api_import_URL = `${API}import/escuela`;
+  const queryClient = useQueryClient();
 
-  // ✅ fetchData depende del estado, no de parámetros externos
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    try {
-      const { results, totalPages } = await fetchEscuelas(
-        page,
-        searchQuery,
-        pageSize
-      );
-      setEscuelas(results);
-      setTotalPages(totalPages);
-    } catch (error) {
-      console.error("Error al cargar escuelas:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [page, searchQuery, pageSize]);
-
-  // ✅ actualiza solo el query con debounce
   const debouncedSearch = useRef(
     debounce((value) => {
       setSearchQuery(value);
+      // setPage(1);
     }, 300)
   ).current;
 
-  // ✅ reset de página cuando cambia el query
-  useEffect(() => {
-    setPage(1);
-  }, [searchQuery]);
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["escuelas", { page, searchQuery, pageSize }],
+    queryFn: () => fetchEscuelas(page, searchQuery, pageSize),
+    keepPreviousData: true,
+  });
 
-  // ✅ ejecuta fetch centralizado
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+  const mutationDelete = useMutation({
+    mutationFn: (pk) => deleteEntity(`${API}api/escuela/delete`, pk),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["escuelas"] });
+    },
+  });
 
-  const deleteEscuela = (pk) => {
-    deleteEntity(`${API}api/escuela/delete`, pk, setEscuelas, "EscuelaId");
+  const handleDeleteEscuela = (pk) => {
+    mutationDelete.mutate(pk);
   };
 
   const handleSearchChange = (e) => {
@@ -69,13 +53,16 @@ function EscuelaListClient() {
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    setPage(1);
+    // setPage(1);
   };
 
   const handlePageSizeChange = (e) => {
     setPageSize(Number(e.target.value));
     setPage(1);
   };
+
+  const escuelas = data?.results || [];
+  const totalPages = data?.totalPages || 1;
 
   return (
     <div className="mt-5">
@@ -90,6 +77,7 @@ function EscuelaListClient() {
           <Link className="btn btn-success" href={`${API}export/escuela`}>
             Exportar Excel
           </Link>
+
           <button
             className={`btn btn-danger ${escuelas.length === 0 ? "disabled" : ""}`}
             onClick={() => exportEscuelasToPDF(escuelas, page, pageSize)}
@@ -105,6 +93,7 @@ function EscuelaListClient() {
           >
             Importar Excel
           </button>
+
           <Search
             SearchSubmit={handleSearchSubmit}
             SearchChange={handleSearchChange}
@@ -130,7 +119,10 @@ function EscuelaListClient() {
       </div>
 
       <Modal title="Importar Escuela">
-        <ImportExcel importURL={Api_import_URL} onSuccess={() => fetchData()} />
+        <ImportExcel
+          importURL={`${API}import/escuela`}
+          onSuccess={() => queryClient.invalidateQueries({ queryKey: ["escuelas"] })}
+        />
       </Modal>
 
       <Tables>
@@ -147,21 +139,25 @@ function EscuelaListClient() {
             <th>Acción</th>
           </tr>
         </thead>
-        <tbody>
-          {loading ? (
+        {isLoading ? (
+          <tbody>
             <tr>
-              <td colSpan="10" className="text-center">
+              <td colSpan={10} className="text-center">
                 Cargando...
               </td>
             </tr>
-          ) : escuelas.length === 0 ? (
+          </tbody>
+        ) : escuelas.length === 0 ? (
+          <tbody>
             <tr>
-              <td colSpan="10" className="text-center">
+              <td colSpan={10} className="text-center">
                 No se han encontrado escuelas.
               </td>
             </tr>
-          ) : (
-            escuelas.map((escuela, index) => (
+          </tbody>
+        ) : (
+          <tbody>
+            {escuelas.map((escuela) => (
               <tr key={escuela.EscuelaId}>
                 <td>{escuela.EscuelaCodigo}</td>
                 <td>{escuela.EscuelaNombre}</td>
@@ -180,23 +176,19 @@ function EscuelaListClient() {
                   </Link>
                   <button
                     className="btn btn-danger btn-sm mx-2"
-                    onClick={() => deleteEscuela(escuela.EscuelaId)}
+                    onClick={() => handleDeleteEscuela(escuela.EscuelaId)}
                   >
                     borrar
                   </button>
                 </td>
               </tr>
-            ))
-          )}
-        </tbody>
+            ))}
+          </tbody>
+        )}
       </Tables>
 
       {totalPages > 1 && (
-        <Pagination
-          page={page}
-          totalPages={totalPages}
-          onPageChange={setPage}
-        />
+        <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
       )}
     </div>
   );
