@@ -13,7 +13,7 @@ export async function fetchUniversidades(page = 1, searchQuery = "", pageSize = 
       cache: "no-store",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`, // Incluye el token de acceso
+        // Authorization: `Bearer ${accessToken}`, // Incluye el token de acceso
       },
     });
 
