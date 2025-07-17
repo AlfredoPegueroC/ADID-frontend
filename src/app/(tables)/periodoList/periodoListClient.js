@@ -9,6 +9,7 @@ import Pagination from "@components/Pagination";
 import Tables from "@components/Tables";
 import Modal from "@components/Modal";
 import Search from "@components/search";
+import Spinner from "@components/Spinner";
 import Periodo from "@components/forms/Periodo";
 
 import withAuth from "@utils/withAuth";
@@ -151,7 +152,7 @@ function PeriodoListClient({ initialData, totalPages: initialTotalPages }) {
           <tbody>
             <tr>
               <td colSpan={10} className="text-center">
-                Cargando...
+               <Spinner />
               </td>
             </tr>
           </tbody>

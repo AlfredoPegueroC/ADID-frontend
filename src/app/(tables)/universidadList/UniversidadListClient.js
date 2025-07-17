@@ -9,6 +9,7 @@ import Pagination from "@components/Pagination";
 import Tables from "@components/Tables";
 import Search from "@components/search";
 import Modal from "@components/Modal";
+import Spinner from "@components/Spinner";
 import ImportExcel from "@components/forms/Import";
 import { exportUniversidadesToPDF } from "@utils/ExportPDF/exportUniversidadesToPDF";
 
@@ -126,7 +127,7 @@ function UniversidadListClient() {
         </thead>
         <tbody>
           {isLoading ? (
-            <tr><td colSpan="10" className="text-center">Cargando...</td></tr>
+            <tr><td colSpan="10" className="text-center"><Spinner /></td></tr>
           ) : universidades.length === 0 ? (
             <tr><td colSpan="10" className="text-center">No se encontraron universidades.</td></tr>
           ) : (

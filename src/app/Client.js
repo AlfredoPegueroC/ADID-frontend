@@ -15,6 +15,8 @@ import Search from "@components/search";
 import Modal from "@components/Modal";
 import ImportPage from "@components/forms/ImportAsignacion";
 import Notification from "@components/Notification";
+import Spinner from "@components/Spinner";
+
 import withAuth from "@utils/withAuth";
 import Select from "react-select";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -360,59 +362,53 @@ function PrincipalListClient() {
         </div>
       </div>
 
-      {isLoading ? (
-        <div className="d-flex justify-content-center my-5">
-          <div
-            className="spinner-border text-primary"
-            role="status"
-            style={{ width: "3rem", height: "3rem" }}
-          >
-            <span className="visually-hidden">Cargando...</span>
-          </div>
-        </div>
-      ) : (
-        <Tables>
-          <thead>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <th key={header.id}>
-                    {flexRender(
-                      header.column.columnDef.header,
-                      header.getContext()
-                    )}
-                  </th>
+      <Tables>
+        <thead>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <tr key={headerGroup.id}>
+              {headerGroup.headers.map((header) => (
+                <th key={header.id}>
+                  {flexRender(
+                    header.column.columnDef.header,
+                    header.getContext()
+                  )}
+                </th>
+              ))}
+            </tr>
+          ))}
+        </thead>
+        <tbody>
+          {isLoading ? (
+            <tr>
+              <td
+                colSpan={table.getAllLeafColumns().length}
+                className="text-center py-5"
+              >
+                <Spinner />
+              </td>
+            </tr>
+          ) : table.getRowModel().rows.length === 0 ? (
+            <tr>
+              <td
+                colSpan={table.getAllLeafColumns().length}
+                className="text-center py-4"
+              >
+                No se encontraron resultados.
+              </td>
+            </tr>
+          ) : (
+            table.getRowModel().rows.map((row) => (
+              <tr key={row.id}>
+                {row.getVisibleCells().map((cell) => (
+                  <td key={cell.id}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
                 ))}
               </tr>
-            ))}
-          </thead>
-          <tbody>
-            {table.getRowModel().rows.length === 0 ? (
-              <tr>
-                <td
-                  colSpan={table.getAllLeafColumns().length}
-                  className="text-center py-4"
-                >
-                  No se encontraron resultados.
-                </td>
-              </tr>
-            ) : (
-              table.getRowModel().rows.map((row) => (
-                <tr key={row.id}>
-                  {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </td>
-                  ))}
-                </tr>
-              ))
-            )}
-          </tbody>
-        </Tables>
-      )}
+            ))
+          )}
+        </tbody>
+      </Tables>
 
       {totalPages > 1 && (
         <Pagination

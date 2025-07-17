@@ -8,6 +8,7 @@ import Tables from "@components/Tables";
 import Search from "@components/search";
 import ImportExcel from "@components/forms/Import";
 import Modal from "@components/Modal";
+import Spinner from "@components/Spinner";
 import withAuth from "@utils/withAuth";
 import { debounce } from "lodash";
 
@@ -144,7 +145,7 @@ function FacultadListClient() {
           <tbody>
             <tr>
               <td colSpan={10} className="text-center">
-                Cargando...
+                <Spinner />
               </td>
             </tr>
           </tbody>

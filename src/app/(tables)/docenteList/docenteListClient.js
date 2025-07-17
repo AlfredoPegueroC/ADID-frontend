@@ -10,6 +10,7 @@ import Tables from "@components/Tables";
 import Modal from "@components/Modal";
 import ImportExcel from "@components/forms/Import";
 import Search from "@components/search";
+import Spinner from "@components/Spinner";
 import withAuth from "@utils/withAuth";
 import { fetchDocentes } from "@api/docenteService";
 import { exportDocentesToPDF } from "@utils/ExportPDF/exportDocentePDF";
@@ -154,7 +155,7 @@ function DocenteListClient() {
           <tbody>
             <tr>
               <td colSpan={15} className="text-center">
-                Cargando...
+                <Spinner />
               </td>
             </tr>
           </tbody>

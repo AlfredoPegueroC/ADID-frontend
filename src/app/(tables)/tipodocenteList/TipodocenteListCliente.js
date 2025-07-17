@@ -10,7 +10,7 @@ import ImportExcel from "@components/forms/Import";
 import Search from "@components/search";
 import Tables from "@components/Tables";
 import Pagination from "@components/Pagination";
-
+import Spinner from "@components/Spinner";
 import { exportTipoDocenteToPDF } from "@utils/ExportPDF/exportTipoPDF";
 import withAuth from "@utils/withAuth";
 import { deleteEntity } from "@utils/delete";
@@ -140,7 +140,7 @@ function TipoDocenteListClient() {
         {isLoading ? (
           <tbody>
             <tr>
-              <td colSpan={6} className="text-center">Cargando...</td>
+              <td colSpan={6} className="text-center"><Spinner /></td>
             </tr>
           </tbody>
         ) : tipos.length === 0 ? (

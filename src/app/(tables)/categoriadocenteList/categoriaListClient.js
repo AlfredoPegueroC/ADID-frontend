@@ -10,7 +10,7 @@ import ImportExcel from "@components/forms/Import";
 import Search from "@components/search";
 import Tables from "@components/Tables";
 import Pagination from "@components/Pagination";
-
+import Spinner from "@components/Spinner";
 import { exportCategoriasToPDF } from "@utils/ExportPDF/exportCategoriaPDF";
 import withAuth from "@utils/withAuth";
 import { deleteEntity } from "@utils/delete";
@@ -144,7 +144,7 @@ function CategoriaListClient() {
           <tbody>
             <tr>
               <td colSpan={6} className="text-center">
-                Cargando...
+                <Spinner />
               </td>
             </tr>
           </tbody>

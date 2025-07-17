@@ -8,6 +8,7 @@ import Tables from "@components/Tables";
 import Modal from "@components/Modal";
 import ImportExcel from "@components/forms/Import";
 import Search from "@components/search";
+import Spinner from "@components/Spinner";
 import withAuth from "@utils/withAuth";
 import { deleteEntity } from "@utils/delete";
 import { debounce } from "lodash";
@@ -138,7 +139,7 @@ function CampusListClient() {
           <tbody>
             <tr>
               <td colSpan="11" className="text-center">
-                Cargando...
+                <Spinner />
               </td>
             </tr>
           </tbody>

@@ -8,6 +8,7 @@ import Tables from "@components/Tables";
 import ImportExcel from "@components/forms/Import";
 import Modal from "@components/Modal";
 import Search from "@components/search";
+import Spinner from "@components/Spinner";
 import withAuth from "@utils/withAuth";
 import { deleteEntity } from "@utils/delete";
 import { debounce } from "lodash";
@@ -143,7 +144,7 @@ function EscuelaListClient() {
           <tbody>
             <tr>
               <td colSpan={10} className="text-center">
-                Cargando...
+                <Spinner />
               </td>
             </tr>
           </tbody>
