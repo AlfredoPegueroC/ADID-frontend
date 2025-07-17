@@ -6,10 +6,28 @@ import { useAuth } from "@contexts/AuthContext";
 import Style from "@styles/navbar.module.css";
 import Notification from "./Notification";
 
+import { useQueryClient } from "@tanstack/react-query";
+import { fetchUniversidades } from "@api/universidadService";
+import { fetchFacultades } from "@api/facultadService";
+import { fetchCampus } from "@api/campusService";
+import { fetchEscuelas } from "@api/escuelaService";
+import { fetchDocentes } from "@api/docenteService";
+
 export default function Navbar() {
   const router = useRouter();
   const API = process.env.NEXT_PUBLIC_API_KEY;
   const { user, refreshToken, logout } = useAuth();
+
+  const queryClient = useQueryClient();
+  const token = typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
+
+  const handlePrefetch = (key, fetchFn) => {
+    queryClient.prefetchQuery({
+      queryKey: [key],
+      queryFn: fetchFn,
+      staleTime: 1000 * 60 * 5, // 5 minutos
+    });
+  };
 
   const handleLogout = async () => {
     if (!refreshToken) {
@@ -86,7 +104,12 @@ export default function Navbar() {
             </li>
 
             <li className="nav-item dropdown">
-              <Link className="nav-link dropdown-toggle text-white fw-bold" href="#" role="button" data-bs-toggle="dropdown">
+              <Link
+                className="nav-link dropdown-toggle text-white fw-bold"
+                href="#"
+                role="button"
+                data-bs-toggle="dropdown"
+              >
                 Mantenimientos
               </Link>
               <ul className="dropdown-menu">
@@ -101,17 +124,82 @@ export default function Navbar() {
             </li>
 
             <li className="nav-item dropdown">
-              <Link className="nav-link dropdown-toggle text-white fw-bold" href="#" role="button" data-bs-toggle="dropdown">
+              <Link
+                className="nav-link dropdown-toggle text-white fw-bold"
+                href="#"
+                role="button"
+                data-bs-toggle="dropdown"
+              >
                 Listados
               </Link>
               <ul className="dropdown-menu">
-                <li><Link className="dropdown-item" href="/universidadList">Universidad</Link></li>
-                <li><Link className="dropdown-item" href="/campusList">Campus</Link></li>
-                <li><Link className="dropdown-item" href="/facultadList">Facultad</Link></li>
-                <li><Link className="dropdown-item" href="/escuelaList">Escuela</Link></li>
+                <li>
+                  <Link
+                    className="dropdown-item"
+                    href="/universidadList"
+                    onMouseEnter={() =>
+                      handlePrefetch("universidades", () =>
+                        fetchUniversidades(1, "", 10, token)
+                      )
+                    }
+                  >
+                    Universidad
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    className="dropdown-item"
+                    href="/campusList"
+                    onMouseEnter={() =>
+                      handlePrefetch("campus", () =>
+                        fetchCampus(1, "", 10, token)
+                      )
+                    }
+                  >
+                    Campus
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    className="dropdown-item"
+                    href="/facultadList"
+                    onMouseEnter={() =>
+                      handlePrefetch("facultades", () =>
+                        fetchFacultades(1, "", 10, token)
+                      )
+                    }
+                  >
+                    Facultad
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    className="dropdown-item"
+                    href="/escuelaList"
+                    onMouseEnter={() =>
+                      handlePrefetch("escuelas", () =>
+                        fetchEscuelas(1, "", 10, token)
+                      )
+                    }
+                  >
+                    Escuela
+                  </Link>
+                </li>
                 <li><Link className="dropdown-item" href="/categoriadocenteList">Categoria docente</Link></li>
                 <li><Link className="dropdown-item" href="/tipodocenteList">Tipo docente</Link></li>
-                <li><Link className="dropdown-item" href="/docenteList">Docente</Link></li>
+                <li>
+                  <Link
+                    className="dropdown-item"
+                    href="/docenteList"
+                    onMouseEnter={() =>
+                      handlePrefetch("docentes", () =>
+                        fetchDocentes(1, "", 10, token)
+                      )
+                    }
+                  >
+                    Docente
+                  </Link>
+                </li>
                 <li><Link className="dropdown-item" href="/periodoList">Periodo Academico</Link></li>
               </ul>
             </li>
