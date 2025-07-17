@@ -10,7 +10,7 @@ import Select from "react-select";
 
 function CategoriaEdit({ params }) {
   const router = useRouter();
-  const { id } = params;
+  const { id } = React.use(params);
   const API = process.env.NEXT_PUBLIC_API_KEY;
 
   const [categoria, setCategoria] = useState({

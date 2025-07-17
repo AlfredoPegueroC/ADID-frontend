@@ -159,7 +159,7 @@ function TipoDocenteListClient() {
                 <td>{tipo.universidadNombre || "—"}</td>
                 <td>
                   <Link
-                    href={`/tipoEdit/${tipo.TipoDocenteID}`}
+                    href={`/tipoEdit/${tipo.TipoDocenteCodigo}`}
                     className="btn btn-primary btn-sm"
                   >
                     editar

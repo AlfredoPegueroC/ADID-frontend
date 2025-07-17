@@ -35,15 +35,15 @@ export default function Navbar() {
         const errorData = await response.json();
         if (errorData.error === "Invalid or expired token") {
           logout();
-          alert("Sesión expirada. Redirigiendo al login.");
+          Notification.alertLogin("Sesión expirada. Redirigiendo al login.");
           router.push("/login");
         } else {
-          alert(`Error al cerrar sesión: ${errorData.error}`);
+          Notification.alertLogin(`Error al cerrar sesión: ${errorData.error}`);
         }
       }
     } catch (error) {
       console.error("Logout error:", error);
-      alert("Error al cerrar sesión.");
+      Notification.alertError("Error al cerrar sesión.");
     }
   };
 

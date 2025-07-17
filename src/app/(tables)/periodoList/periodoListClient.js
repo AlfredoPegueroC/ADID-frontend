@@ -179,7 +179,7 @@ function PeriodoListClient({ initialData, totalPages: initialTotalPages }) {
                 <td>
                   <Link
                     className="btn btn-primary btn-sm"
-                    href={`/periodoEdit/${periodo.PeriodoID}`}
+                    href={`/periodoEdit/${periodo.PeriodoCodigo}`}
                   >
                     editar
                   </Link>

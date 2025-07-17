@@ -168,7 +168,7 @@ function FacultadListClient() {
                 <td>{facultad.universidadNombre || "—"}</td>
                 <td>{facultad.campusNombre || "—"}</td>
                 <td>
-                  <Link className="btn btn-primary btn-sm" href={`/facultadEdit/${facultad.FacultadID}`}>
+                  <Link className="btn btn-primary btn-sm" href={`/facultadEdit/${facultad.FacultadCodigo}`}>
                     Editar
                   </Link>
                   <button

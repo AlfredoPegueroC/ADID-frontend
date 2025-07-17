@@ -187,7 +187,7 @@ function DocenteListClient() {
                 <td>
                   <Link
                     className="btn btn-primary btn-sm"
-                    href={`/docenteEdit/${d.DocenteID}`}
+                    href={`/docenteEdit/${d.DocenteCodigo}`}
                   >
                     Editar
                   </Link>

@@ -20,7 +20,6 @@ export async function fetchUniversidades(page = 1, searchQuery = "", pageSize = 
     if (!response.ok) throw new Error("Failed to fetch universidades");
 
     const data = await response.json();
-    console.log("Universidades data:", data);
 
     return {
       results: data.results || [],

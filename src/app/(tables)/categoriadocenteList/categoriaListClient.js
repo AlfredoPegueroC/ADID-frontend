@@ -166,7 +166,7 @@ function CategoriaListClient() {
                 <td>{categoria.universidadNombre || "—"}</td>
                 <td>
                   <Link
-                    href={`/categoriaEdit/${categoria.CategoriaID}`}
+                    href={`/categoriaEdit/${categoria.categoriaCodigo}`}
                     className="btn btn-primary btn-sm"
                   >
                     editar

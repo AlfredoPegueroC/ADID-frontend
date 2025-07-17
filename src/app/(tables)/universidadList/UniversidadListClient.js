@@ -145,7 +145,7 @@ function UniversidadListClient() {
                 <td>{universidad.UniversidadRector}</td>
                 <td>{universidad.UniversidadEstado}</td>
                 <td>
-                  <Link href={`/universidadEdit/${universidad.UniversidadID}`} className="btn btn-primary btn-sm">
+                  <Link href={`/universidadEdit/${universidad.UniversidadCodigo}`} className="btn btn-primary btn-sm">
                     editar
                   </Link>
                   <button className="btn btn-danger btn-sm mx-2" onClick={() => handleDelete(universidad.UniversidadID)}>

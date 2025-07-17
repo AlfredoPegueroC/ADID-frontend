@@ -170,7 +170,7 @@ function EscuelaListClient() {
                 <td>
                   <Link
                     className="btn btn-primary btn-sm"
-                    href={`/escuelaEdit/${escuela.EscuelaId}`}
+                    href={`/escuelaEdit/${escuela.EscuelaCodigo}`}
                   >
                     Editar
                   </Link>
