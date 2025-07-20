@@ -7,6 +7,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [accessToken, setAccessToken] = useState(null);
   const [refreshToken, setRefreshToken] = useState(null);
+  const [loading, setLoading] = useState(true); 
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -18,6 +19,8 @@ export const AuthProvider = ({ children }) => {
       setAccessToken(storedAccess);
       setRefreshToken(storedRefresh);
     }
+
+    setLoading(false);
   }, []);
 
   const login = ({ user, access, refresh }) => {
@@ -37,7 +40,9 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, accessToken, refreshToken, login, logout }}>
+    <AuthContext.Provider
+      value={{ user, accessToken, refreshToken, login, logout, loading }}
+    >
       {children}
     </AuthContext.Provider>
   );

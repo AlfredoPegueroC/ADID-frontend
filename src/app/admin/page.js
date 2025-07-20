@@ -11,7 +11,8 @@ import {
   Legend,
 } from "chart.js";
 import DashboardCard from "@components/DashboardCard";
-import { fetchDashboardData } from "@api/dashboardService"; // importa el servicio
+import { fetchDashboardData } from "@api/dashboardService";
+import Spinner from "@components/Spinner";
 
 ChartJS.register(
   CategoryScale,
@@ -39,10 +40,7 @@ export default function DashboardPage() {
     getData();
   }, []);
 
-  if (!data)
-    return (
-      <div className="container mt-4">Cargando datos del dashboard...</div>
-    );
+  if (!data) return <Spinner />;
 
   return (
     <div className="container py-4">

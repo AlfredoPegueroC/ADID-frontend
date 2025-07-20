@@ -13,7 +13,7 @@ import Pagination from "@components/Pagination";
 import Search from "@components/search";
 import Tables from "@components/Tables";
 import { useAuth } from "@contexts/AuthContext";
-
+import Spinner from "@components/Spinner";
 export default function LogListClient() {
   const [logs, setLogs] = useState([]);
   const [page, setPage] = useState(1);
@@ -205,7 +205,7 @@ export default function LogListClient() {
                   colSpan={columns.length}
                   className="text-center p-4 text-gray-500"
                 >
-                  Cargando...
+                  <Spinner />
                 </td>
               </tr>
             ) : logs.length === 0 ? (

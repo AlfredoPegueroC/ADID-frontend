@@ -9,32 +9,59 @@ export default function RegisterPage() {
     first_name: "",
     last_name: "",
     password: "",
+    confirmPassword: "",
     is_staff: false,
+    groups: [],
   });
 
   const [message, setMessage] = useState("");
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
+    const { name, value, type } = e.target;
+
+    if (name === "role") {
+      const isAdmin = value === "admin";
+      setFormData((prev) => ({
+        ...prev,
+        is_staff: isAdmin,
+        groups: [isAdmin ? "admin" : "usuario"], // Admin = grupo "admin", Usuario = grupo "usuario"
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: type === "checkbox" ? e.target.checked : value,
+      }));
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (formData.password !== formData.confirmPassword) {
+      setMessage("❌ Las contraseñas no coinciden");
+      return;
+    }
+
     setMessage("Registrando...");
 
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_KEY}api/registro`,
+        `${process.env.NEXT_PUBLIC_API_KEY}api/usuarios/`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json",
+          headers: {
+            "Content-Type": "application/json",
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-           },
-          body: JSON.stringify(formData),
+          },
+          body: JSON.stringify({
+            username: formData.username,
+            email: formData.email,
+            first_name: formData.first_name,
+            last_name: formData.last_name,
+            password: formData.password,
+            is_staff: formData.is_staff,
+            groups: formData.groups,
+          }),
         }
       );
 
@@ -48,7 +75,9 @@ export default function RegisterPage() {
           first_name: "",
           last_name: "",
           password: "",
+          confirmPassword: "",
           is_staff: false,
+          groups: [],
         });
       } else {
         setMessage(`❌ Error: ${JSON.stringify(data)}`);
@@ -112,11 +141,28 @@ export default function RegisterPage() {
             required
           />
         </div>
-        <div className="form-check mb-3">
-         <input className="form-check-input" type="checkbox" name="is_staff" checked={formData.is_staff} onChange={handleChange} />
-          <label className="form-check-label" htmlFor="is_staff">
-            ¿Registrar como administrador?
-          </label>
+        <div className="mb-3">
+          <label className="form-label">Confirmar Contraseña</label>
+          <input
+            className="form-control"
+            type="password"
+            name="confirmPassword"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <div className="mb-3">
+          <label className="form-label">Rol</label>
+          <select
+            className="form-select"
+            name="role"
+            value={formData.is_staff ? "admin" : "usuario"}
+            onChange={handleChange}
+          >
+            <option value="usuario">Usuario</option>
+            <option value="admin">Administrador</option>
+          </select>
         </div>
         <button className="btn btn-primary w-100" type="submit">
           Registrar

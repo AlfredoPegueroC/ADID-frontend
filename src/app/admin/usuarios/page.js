@@ -3,56 +3,88 @@
 import {
   useReactTable,
   getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
   getSortedRowModel,
   flexRender,
 } from "@tanstack/react-table";
 
-import { useMemo, useState, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
+import Link from "next/link";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { debounce } from "lodash";
+
 import Tables from "@components/Tables";
 import Pagination from "@components/Pagination";
 import Notification from "@components/Notification";
+import Spinner from "@components/Spinner";
 
 export default function UsuarioPage() {
-  const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [sorting, setSorting] = useState([]);
-  const [columnFilters, setColumnFilters] = useState([]);
-  const [globalFilter, setGlobalFilter] = useState("");
+  const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sorting, setSorting] = useState([]);
 
-  useEffect(() => {
-    const fetchUsuarios = async () => {
-      try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_KEY}api/usuarios`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-            },
-          }
-        );
-        const usuarios = await res.json();
+  const queryClient = useQueryClient();
+  const API = process.env.NEXT_PUBLIC_API_KEY;
+  const token = typeof window !== "undefined" ? localStorage.getItem("accessToken") : "";
 
-        const formateados = usuarios.results.map((user) => ({
-          id: user.id,
-          username: user.username,
-          name: `${user.first_name} ${user.last_name}`,
-          email: user.email,
-          role: user.groups.includes("admin") ? "Admin" : "User",
-          is_active: user.is_active,
-        }));
+  const debouncedSearch = useRef(
+    debounce((value) => {
+      setSearchQuery(value);
+      setPage(1);
+    }, 500)
+  ).current;
 
-        setData(formateados);
-      } catch (err) {
-        console.error("Error cargando usuarios:", err);
-      } finally {
-        setLoading(false);
+  const {
+    data,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["usuarios", { page, pageSize, searchQuery }],
+    queryFn: async () => {
+      const res = await fetch(`${API}api/usuarios?page=${page}&page_size=${pageSize}&search=${searchQuery}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await res.json();
+      const formateados = data.results.map((user) => ({
+        id: user.id,
+        username: user.username,
+        name: `${user.first_name} ${user.last_name}`,
+        email: user.email,
+        role: user.groups.includes("admin") ? "Admin" : "User",
+        is_active: user.is_active,
+      }));
+      return {
+        results: formateados,
+        totalPages: data.totalPages || Math.ceil(data.count / pageSize),
+      };
+    },
+    keepPreviousData: true,
+  });
+
+  const handleEstadoChange = async (id, username, nuevoEstado) => {
+    try {
+      const res = await fetch(`${API}api/usuarios/${id}/`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ is_active: nuevoEstado }),
+      });
+
+      if (res.ok) {
+        Notification.alertLogin(`Estado actualizado para ${username}`);
+        queryClient.invalidateQueries(["usuarios"]);
+      } else {
+        Notification.alertError(`Error al actualizar estado de ${username}`);
       }
-    };
-    fetchUsuarios();
-  }, []);
+    } catch (error) {
+      console.error(error);
+      Notification.alertError("Error de red al cambiar estado");
+    }
+  };
 
   const columns = useMemo(
     () => [
@@ -64,49 +96,14 @@ export default function UsuarioPage() {
         accessorKey: "is_active",
         header: () => "Estado",
         cell: ({ row }) => {
-          const { username, is_active } = row.original;
-
-          const handleEstadoChange = async (e) => {
-            const nuevoEstado = e.target.value === "true";
-
-            try {
-              const res = await fetch(
-                `${process.env.NEXT_PUBLIC_API_KEY}api/usuarios/${row.original.id}/`,
-                {
-                  method: "PATCH",
-                  headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-                  },
-                  body: JSON.stringify({ is_active: nuevoEstado }),
-                }
-              );
-
-              if (res.ok) {
-                Notification.alertLogin(`Estado actualizado para ${username}`);
-                setData((prev) =>
-                  prev.map((user) =>
-                    user.id === row.original.id
-                      ? { ...user, is_active: nuevoEstado }
-                      : user
-                  )
-                );
-              } else {
-                Notification.alertError(
-                  `Error al actualizar estado de ${username}`
-                );
-              }
-            } catch (error) {
-              console.error(error);
-              Notification.alertError("Error de red al cambiar estado");
-            }
-          };
-
+          const user = row.original;
           return (
             <select
               className="form-select form-select-sm"
-              value={is_active.toString()}
-              onChange={handleEstadoChange}
+              value={user.is_active.toString()}
+              onChange={(e) =>
+                handleEstadoChange(user.id, user.username, e.target.value === "true")
+              }
             >
               <option value="true">Activo</option>
               <option value="false">Inactivo</option>
@@ -115,61 +112,46 @@ export default function UsuarioPage() {
         },
       },
     ],
-    [data]
+    []
   );
 
   const table = useReactTable({
-    data,
+    data: data?.results || [],
     columns,
-    state: {
-      sorting,
-      columnFilters,
-      globalFilter,
-    },
+    state: { sorting },
     onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    manualPagination: false,
-    initialState: {
-      pagination: {
-        pageSize,
-      },
-    },
+    manualPagination: true,
   });
-
-  useEffect(() => {
-    table.setPageSize(pageSize);
-  }, [pageSize]);
-
-  if (loading)
-    return <div className="text-center mt-5">Cargando usuarios...</div>;
 
   return (
     <div>
       <h2 className="mb-4">Usuarios Registrados</h2>
 
-      {/* Filtro global y selector página */}
       <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-        <input
-          type="text"
-          placeholder="Buscar en todos los campos..."
-          className="form-control"
-          style={{ maxWidth: "300px" }}
-          value={globalFilter ?? ""}
-          onChange={(e) => setGlobalFilter(e.target.value)}
-        />
+        <div className="d-flex gap-2">
+          <Link className="btn btn-primary" href="/admin/registrar" style={{ width: "200px" }}>
+            Nuevo Usuario
+          </Link>
+          <input
+            type="text"
+            placeholder="Buscar en todos los campos..."
+            className="form-control"
+            style={{ maxWidth: "300px" }}
+            onChange={(e) => debouncedSearch(e.target.value)}
+          />
+        </div>
 
         <div className="d-flex align-items-center gap-2">
-          <label className="fw-bold mb-0 text-black">
-            Resultados por página:
-          </label>
+          <label className="fw-bold mb-0 text-black">Resultados por página:</label>
           <select
             className="form-select w-auto"
             value={pageSize}
-            onChange={(e) => setPageSize(Number(e.target.value))}
+            onChange={(e) => {
+              setPageSize(Number(e.target.value));
+              setPage(1);
+            }}
           >
             <option value={10}>10</option>
             <option value={25}>25</option>
@@ -178,7 +160,6 @@ export default function UsuarioPage() {
         </div>
       </div>
 
-      {/* Tabla */}
       <div className="table-responsive">
         <Tables>
           <thead className="table-light">
@@ -190,10 +171,7 @@ export default function UsuarioPage() {
                     onClick={header.column.getToggleSortingHandler()}
                     style={{ cursor: "pointer" }}
                   >
-                    {flexRender(
-                      header.column.columnDef.header,
-                      header.getContext()
-                    )}
+                    {flexRender(header.column.columnDef.header, header.getContext())}
                     {header.column.getIsSorted() === "asc"
                       ? " 🔼"
                       : header.column.getIsSorted() === "desc"
@@ -204,28 +182,34 @@ export default function UsuarioPage() {
               </tr>
             ))}
           </thead>
-
           <tbody>
-            {table.getRowModel().rows.map((row) => (
-              <tr key={row.id}>
-                {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </td>
-                ))}
+            {isLoading ? (
+              <tr>
+                <td colSpan="5" className="text-center">
+                  <Spinner />
+                </td>
               </tr>
-            ))}
+            ) : table.getRowModel().rows.length === 0 ? (
+              <tr>
+                <td colSpan="5" className="text-center">No se encontraron usuarios.</td>
+              </tr>
+            ) : (
+              table.getRowModel().rows.map((row) => (
+                <tr key={row.id}>
+                  {row.getVisibleCells().map((cell) => (
+                    <td key={cell.id}>
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </td>
+                  ))}
+                </tr>
+              ))
+            )}
           </tbody>
         </Tables>
       </div>
 
-      {/* Paginación */}
-      {table.getPageCount() > 1 && (
-        <Pagination
-          page={table.getState().pagination.pageIndex + 1}
-          totalPages={table.getPageCount()}
-          onPageChange={(newPage) => table.setPageIndex(newPage - 1)}
-        />
+      {data?.totalPages > 1 && (
+        <Pagination page={page} totalPages={data.totalPages} onPageChange={setPage} />
       )}
     </div>
   );

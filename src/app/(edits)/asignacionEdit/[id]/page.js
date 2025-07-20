@@ -10,7 +10,7 @@ import Select from "react-select";
 
 function AsignacionEdit({ params }) {
   const router = useRouter();
-  const { id } = params;
+  const { id } = React.use(params);
   const searchParams = useSearchParams();
   const period = searchParams.get("period");
 
