@@ -272,7 +272,7 @@ function PrincipalListClient() {
           className="btn btn-secondary"
           href={`${API}export/asignacionDocenteExport?period=${selectedPeriodo}`}
         >
-          Exportar
+          Exportar Excel
         </Link>
         <button
           className="btn btn-danger"

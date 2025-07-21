@@ -1,8 +1,14 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useReactTable,
+  getCoreRowModel,
+  getSortedRowModel,
+  flexRender,
+} from "@tanstack/react-table";
 import { debounce } from "lodash";
 
 import Modal from "@components/Modal";
@@ -11,82 +17,131 @@ import Search from "@components/search";
 import Tables from "@components/Tables";
 import Pagination from "@components/Pagination";
 import Spinner from "@components/Spinner";
-import { exportCategoriasToPDF } from "@utils/ExportPDF/exportCategoriaPDF";
 import withAuth from "@utils/withAuth";
 import { deleteEntity } from "@utils/delete";
+import { exportCategoriasToPDF } from "@utils/ExportPDF/exportCategoriaPDF";
 import { fetchCategorias } from "@api/categoriaService";
 
 function CategoriaListClient() {
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [pageSize, setPageSize] = useState(10);
+  const [sorting, setSorting] = useState([]);
 
   const API = process.env.NEXT_PUBLIC_API_KEY;
   const queryClient = useQueryClient();
 
-  // Debounce para evitar demasiadas llamadas al escribir
   const debouncedSearch = useRef(
     debounce((value) => {
       setSearchQuery(value);
       // setPage(1);
     }, 400)
-  ).current;
+  );
 
-  // Hook useQuery para cargar categorías
-  const { data, isLoading, isError } = useQuery({
+  useEffect(() => {
+    return () => {
+      debouncedSearch.current.cancel();
+    };
+  }, []);
+
+  const { data, isLoading } = useQuery({
     queryKey: ["categorias", { page, searchQuery, pageSize }],
     queryFn: () => fetchCategorias(page, searchQuery, pageSize),
     keepPreviousData: true,
   });
 
-  // Mutación para borrar categoría
   const mutationDelete = useMutation({
     mutationFn: (pk) => deleteEntity(`${API}api/categoriadocente/delete`, pk),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["categorias"] });
+      queryClient.invalidateQueries(["categorias"]);
     },
   });
 
-  // Función para llamar al borrado
   const handleDeleteCategoria = (pk) => {
-    mutationDelete.mutate(pk);
+    if (confirm("¿Está seguro de eliminar esta categoría?")) {
+      mutationDelete.mutate(pk);
+    }
   };
 
-  // Manejadores
   const handleSearchChange = (e) => {
-    debouncedSearch(e.target.value);
+    debouncedSearch.current(e.target.value);
   };
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    // setPage(1);
   };
 
   const handlePageSizeChange = (e) => {
     setPageSize(Number(e.target.value));
-    setPage(1);
+    // setPage(1);
   };
 
   const categorias = data?.results || [];
   const totalPages = data?.totalPages || 1;
 
+  const columns = useMemo(
+    () => [
+      { header: "Código", accessorKey: "categoriaCodigo" },
+      { header: "Nombre", accessorKey: "CategoriaNombre" },
+      { header: "Estado", accessorKey: "CategoriaEstado" },
+      { header: "Universidad", accessorKey: "universidadNombre" },
+      {
+        header: "Acción",
+        id: "actions",
+        cell: ({ row }) => (
+          <div className="d-flex gap-2">
+            <Link
+              href={`/categoriaEdit/${row.original.categoriaCodigo}`}
+              className="btn btn-primary btn-sm"
+            >
+              Editar
+            </Link>
+            <button
+              className="btn btn-danger btn-sm"
+              onClick={() => handleDeleteCategoria(row.original.CategoriaID)}
+              disabled={mutationDelete.isLoading}
+            >
+              Borrar
+            </button>
+          </div>
+        ),
+      },
+    ],
+    [mutationDelete.isLoading]
+  );
+
+  const table = useReactTable({
+    data: categorias,
+    columns,
+    state: { sorting },
+    onSortingChange: setSorting,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+  });
+
   return (
     <div className="mt-5">
       <h1 className="text-dark">Lista Categorías de Docente</h1>
 
-      <div className="d-flex justify-content-between align-items-center mb-3 mt-3">
-        <div className="d-flex gap-2">
+      <div className="d-flex justify-content-between align-items-center mb-3 mt-3 flex-wrap">
+        <div className="d-flex gap-2 flex-wrap align-items-center">
           <Link className="btn btn-primary" href="/categoriadocente">
             Nueva Categoría
           </Link>
 
-          <Link className="btn btn-success" href={`${API}export/categoriaDocente`}>
+          <Link
+            className={`btn btn-success ${categorias.length === 0 ? "disabled" : ""}`}
+            href={`${API}export/categoriaDocente`}
+            tabIndex={categorias.length === 0 ? -1 : 0}
+            aria-disabled={categorias.length === 0}
+          >
             Exportar
           </Link>
 
           <button
             className={`btn btn-danger ${categorias.length === 0 ? "disabled" : ""}`}
             onClick={() => exportCategoriasToPDF(categorias, page, pageSize)}
+            disabled={categorias.length === 0}
           >
             Exportar PDF
           </button>
@@ -107,7 +162,7 @@ function CategoriaListClient() {
           />
         </div>
 
-        <div className="d-flex align-items-center gap-2">
+        <div className="d-flex align-items-center gap-2 mt-2 mt-md-0">
           <label className="fw-bold mb-0 text-black">Resultados por página:</label>
           <select
             className="form-select w-auto"
@@ -125,63 +180,56 @@ function CategoriaListClient() {
       <Modal title="Importar Categoría">
         <ImportExcel
           importURL={`${API}import/categoriaDocente`}
-          onSuccess={() => queryClient.invalidateQueries({ queryKey: ["categorias"] })}
+          onSuccess={() => queryClient.invalidateQueries(["categorias"])}
         />
       </Modal>
 
       <Tables>
         <thead>
-          <tr>
-            <th>Código</th>
-            <th>Nombre</th>
-            <th>Estado</th>
-            <th>Universidad</th>
-            <th>Acción</th>
-          </tr>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <tr key={headerGroup.id}>
+              {headerGroup.headers.map((header) => (
+                <th
+                  key={header.id}
+                  onClick={header.column.getToggleSortingHandler()}
+                  style={{ cursor: header.column.getCanSort() ? "pointer" : "default" }}
+                >
+                  {flexRender(header.column.columnDef.header, header.getContext())}
+                  {{
+                    asc: " 🔼",
+                    desc: " 🔽",
+                  }[header.column.getIsSorted()] ?? null}
+                </th>
+              ))}
+            </tr>
+          ))}
         </thead>
 
-        {isLoading ? (
-          <tbody>
+        <tbody>
+          {isLoading ? (
             <tr>
-              <td colSpan={6} className="text-center">
+              <td colSpan={columns.length} className="text-center">
                 <Spinner />
               </td>
             </tr>
-          </tbody>
-        ) : categorias.length === 0 ? (
-          <tbody>
+          ) : categorias.length === 0 ? (
             <tr>
-              <td colSpan={6} className="text-center">
+              <td colSpan={columns.length} className="text-center">
                 No se encontraron categorías.
               </td>
             </tr>
-          </tbody>
-        ) : (
-          <tbody>
-            {categorias.map((categoria) => (
-              <tr key={categoria.CategoriaID}>
-                <td>{categoria.categoriaCodigo}</td>
-                <td>{categoria.CategoriaNombre}</td>
-                <td>{categoria.CategoriaEstado}</td>
-                <td>{categoria.universidadNombre || "—"}</td>
-                <td>
-                  <Link
-                    href={`/categoriaEdit/${categoria.categoriaCodigo}`}
-                    className="btn btn-primary btn-sm"
-                  >
-                    editar
-                  </Link>
-                  <button
-                    className="btn btn-danger btn-sm mx-2"
-                    onClick={() => handleDeleteCategoria(categoria.CategoriaID)}
-                  >
-                    borrar
-                  </button>
-                </td>
+          ) : (
+            table.getRowModel().rows.map((row) => (
+              <tr key={row.id}>
+                {row.getVisibleCells().map((cell) => (
+                  <td key={cell.id}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
+                ))}
               </tr>
-            ))}
-          </tbody>
-        )}
+            ))
+          )}
+        </tbody>
       </Tables>
 
       {totalPages > 1 && (

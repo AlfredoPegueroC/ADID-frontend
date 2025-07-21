@@ -1,9 +1,15 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useMemo } from "react";
 import Link from "next/link";
 import { debounce } from "lodash";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useReactTable,
+  getCoreRowModel,
+  getSortedRowModel,
+  flexRender,
+} from "@tanstack/react-table";
 
 import Pagination from "@components/Pagination";
 import Tables from "@components/Tables";
@@ -20,19 +26,17 @@ function PeriodoListClient({ initialData, totalPages: initialTotalPages }) {
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [pageSize, setPageSize] = useState(10);
+  const [sorting, setSorting] = useState([]);
 
   const API = process.env.NEXT_PUBLIC_API_KEY;
   const queryClient = useQueryClient();
 
-  // Debounce para búsqueda
   const debouncedSearch = useRef(
     debounce((value) => {
       setSearchQuery(value);
-      // setPage(1);
     }, 300)
   ).current;
 
-  // Consulta para obtener periodos
   const { data, isLoading, isError } = useQuery({
     queryKey: ["periodos", { page, searchQuery, pageSize }],
     queryFn: () => fetchPeriodos(page, searchQuery, pageSize),
@@ -43,7 +47,6 @@ function PeriodoListClient({ initialData, totalPages: initialTotalPages }) {
     }),
   });
 
-  // Mutación para borrar periodo
   const mutationDelete = useMutation({
     mutationFn: (pk) => deleteEntity(`${API}api/periodoacademico/delete`, pk),
     onSuccess: () => {
@@ -61,7 +64,6 @@ function PeriodoListClient({ initialData, totalPages: initialTotalPages }) {
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    // setPage(1);
   };
 
   const handlePageChange = (newPage) => {
@@ -75,6 +77,59 @@ function PeriodoListClient({ initialData, totalPages: initialTotalPages }) {
 
   const periodos = data?.results || [];
   const totalPages = data?.totalPages || 1;
+
+  const columns = useMemo(
+    () => [
+      {
+        header: "#",
+        id: "index",
+        cell: ({ row }) => row.index + 1 + (page - 1) * pageSize,
+      },
+      { header: "Código", accessorKey: "PeriodoCodigo" },
+      { header: "Nombre", accessorKey: "PeriodoNombre" },
+      { header: "Tipo", accessorKey: "PeriodoTipo" },
+      { header: "Año", accessorKey: "PeriodoAnio" },
+      { header: "Inicio", accessorKey: "PeriodoFechaInicio" },
+      { header: "Fin", accessorKey: "PeriodoFechaFin" },
+      { header: "Estado", accessorKey: "PeriodoEstado" },
+      {
+        header: "Universidad",
+        accessorKey: "universidadNombre",
+        cell: ({ row }) => row.original.universidadNombre || "—",
+      },
+      {
+        header: "Acción",
+        id: "actions",
+        cell: ({ row }) => (
+          <>
+            <Link
+              className="btn btn-primary btn-sm"
+              href={`/periodoEdit/${row.original.PeriodoCodigo}`}
+            >
+              editar
+            </Link>
+            <button
+              className="btn btn-danger btn-sm mx-2"
+              onClick={() => handleDeletePeriodo(row.original.PeriodoID)}
+              disabled={mutationDelete.isLoading}
+            >
+              borrar
+            </button>
+          </>
+        ),
+      },
+    ],
+    [page, pageSize, mutationDelete.isLoading]
+  );
+
+  const table = useReactTable({
+    data: periodos,
+    columns,
+    state: { sorting },
+    onSortingChange: setSorting,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+  });
 
   return (
     <div className="mt-5">
@@ -110,9 +165,7 @@ function PeriodoListClient({ initialData, totalPages: initialTotalPages }) {
         </div>
 
         <div className="d-flex align-items-center gap-2">
-          <label className="fw-bold mb-0 text-black">
-            Resultados por página:
-          </label>
+          <label className="fw-bold mb-0 text-black">Resultados por página:</label>
           <select
             className="form-select w-auto"
             style={{ height: "38px" }}
@@ -135,67 +188,48 @@ function PeriodoListClient({ initialData, totalPages: initialTotalPages }) {
 
       <Tables>
         <thead>
-          <tr>
-            <th>#</th>
-            <th>Código</th>
-            <th>Nombre</th>
-            <th>Tipo</th>
-            <th>Año</th>
-            <th>Inicio</th>
-            <th>Fin</th>
-            <th>Estado</th>
-            <th>Universidad</th>
-            <th>Acción</th>
-          </tr>
-        </thead>
-        {isLoading ? (
-          <tbody>
-            <tr>
-              <td colSpan={10} className="text-center">
-               <Spinner />
-              </td>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <tr key={headerGroup.id}>
+              {headerGroup.headers.map((header) => (
+                <th
+                  key={header.id}
+                  onClick={header.column.getToggleSortingHandler()}
+                  style={{ cursor: header.column.getCanSort() ? "pointer" : "default" }}
+                >
+                  {flexRender(header.column.columnDef.header, header.getContext())}
+                  {{
+                    asc: " 🔼",
+                    desc: " 🔽",
+                  }[header.column.getIsSorted()] ?? null}
+                </th>
+              ))}
             </tr>
-          </tbody>
-        ) : periodos.length === 0 ? (
-          <tbody>
+          ))}
+        </thead>
+
+        <tbody>
+          {isLoading ? (
+            <tr>
+              <td colSpan={10} className="text-center"><Spinner /></td>
+            </tr>
+          ) : periodos.length === 0 ? (
             <tr>
               <td colSpan={10} className="text-center">
                 No se encontraron periodos académicos.
               </td>
             </tr>
-          </tbody>
-        ) : (
-          <tbody>
-            {periodos.map((periodo, index) => (
-              <tr key={periodo.PeriodoID}>
-                <td>{index + 1 + (page - 1) * pageSize}</td>
-                <td>{periodo.PeriodoCodigo}</td>
-                <td>{periodo.PeriodoNombre}</td>
-                <td>{periodo.PeriodoTipo}</td>
-                <td>{periodo.PeriodoAnio}</td>
-                <td>{periodo.PeriodoFechaInicio}</td>
-                <td>{periodo.PeriodoFechaFin}</td>
-                <td>{periodo.PeriodoEstado}</td>
-                <td>{periodo.universidadNombre || "—"}</td>
-                <td>
-                  <Link
-                    className="btn btn-primary btn-sm"
-                    href={`/periodoEdit/${periodo.PeriodoCodigo}`}
-                  >
-                    editar
-                  </Link>
-                  <button
-                    className="btn btn-danger btn-sm mx-2"
-                    onClick={() => handleDeletePeriodo(periodo.PeriodoID)}
-                    disabled={mutationDelete.isLoading}
-                  >
-                    borrar
-                  </button>
-                </td>
+          ) : (
+            table.getRowModel().rows.map((row) => (
+              <tr key={row.id}>
+                {row.getVisibleCells().map((cell) => (
+                  <td key={cell.id}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
+                ))}
               </tr>
-            ))}
-          </tbody>
-        )}
+            ))
+          )}
+        </tbody>
       </Tables>
 
       {totalPages > 1 && (

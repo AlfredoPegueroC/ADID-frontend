@@ -1,8 +1,14 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useMemo } from "react";
 import Link from "next/link";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useReactTable,
+  getCoreRowModel,
+  getSortedRowModel,
+  flexRender,
+} from "@tanstack/react-table";
 import { debounce } from "lodash";
 
 import Modal from "@components/Modal";
@@ -20,26 +26,23 @@ function TipoDocenteListClient() {
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [pageSize, setPageSize] = useState(10);
+  const [sorting, setSorting] = useState([]);
 
   const API = process.env.NEXT_PUBLIC_API_KEY;
   const queryClient = useQueryClient();
 
-  // Debounce para evitar llamadas múltiples al escribir
   const debouncedSearch = useRef(
     debounce((value) => {
       setSearchQuery(value);
-      // setPage(1);
     }, 400)
   ).current;
 
-  // React Query: cargar tipos
   const { data, isLoading, isError } = useQuery({
     queryKey: ["tiposDocente", { page, searchQuery, pageSize }],
     queryFn: () => fetchTipoDocentes(page, searchQuery, pageSize),
     keepPreviousData: true,
   });
 
-  // Mutación para borrar
   const mutationDelete = useMutation({
     mutationFn: (pk) => deleteEntity(`${API}api/tipodocente/delete`, pk),
     onSuccess: () => {
@@ -51,14 +54,12 @@ function TipoDocenteListClient() {
     mutationDelete.mutate(pk);
   };
 
-  // Handlers
   const handleSearchChange = (e) => {
     debouncedSearch(e.target.value);
   };
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    // setPage(1);
   };
 
   const handlePageSizeChange = (e) => {
@@ -69,12 +70,51 @@ function TipoDocenteListClient() {
   const tipos = data?.results || [];
   const totalPages = data?.totalPages || 1;
 
+  const columns = useMemo(
+    () => [
+      { header: "Código", accessorKey: "TipoDocenteCodigo" },
+      { header: "Descripción", accessorKey: "TipoDocenteDescripcion" },
+      { header: "Estado", accessorKey: "TipoDocenteEstado" },
+      { header: "Universidad", accessorKey: "universidadNombre" },
+      {
+        header: "Acción",
+        id: "actions",
+        cell: ({ row }) => (
+          <div className="d-flex">
+            <Link
+              href={`/tipoEdit/${row.original.TipoDocenteCodigo}`}
+              className="btn btn-primary btn-sm"
+            >
+              editar
+            </Link>
+            <button
+              className="btn btn-danger btn-sm mx-2"
+              onClick={() => handleDeleteTipo(row.original.TipoDocenteID)}
+            >
+              borrar
+            </button>
+          </div>
+        ),
+      },
+    ],
+    []
+  );
+
+  const table = useReactTable({
+    data: tipos,
+    columns,
+    state: { sorting },
+    onSortingChange: setSorting,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+  });
+
   return (
     <div className="mt-5">
       <h1 className="text-dark">Lista Tipos de Docente</h1>
 
       <div className="d-flex justify-content-between align-items-center mb-3 mt-3">
-        <div className="d-flex gap-2">
+        <div className="d-flex gap-2 flex-wrap">
           <Link className="btn btn-primary" href="/tipodocente">
             Nuevo Tipo
           </Link>
@@ -129,52 +169,45 @@ function TipoDocenteListClient() {
 
       <Tables>
         <thead>
-          <tr>
-            <th>Código</th>
-            <th>Descripción</th>
-            <th>Estado</th>
-            <th>Universidad</th>
-            <th>Acción</th>
-          </tr>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <tr key={headerGroup.id}>
+              {headerGroup.headers.map((header) => (
+                <th
+                  key={header.id}
+                  onClick={header.column.getToggleSortingHandler()}
+                  style={{ cursor: header.column.getCanSort() ? "pointer" : "default" }}
+                >
+                  {flexRender(header.column.columnDef.header, header.getContext())}
+                  {{
+                    asc: " 🔼",
+                    desc: " 🔽",
+                  }[header.column.getIsSorted()] ?? null}
+                </th>
+              ))}
+            </tr>
+          ))}
         </thead>
-        {isLoading ? (
-          <tbody>
+        <tbody>
+          {isLoading ? (
             <tr>
               <td colSpan={6} className="text-center"><Spinner /></td>
             </tr>
-          </tbody>
-        ) : tipos.length === 0 ? (
-          <tbody>
+          ) : tipos.length === 0 ? (
             <tr>
               <td colSpan={6} className="text-center">No se encontraron tipos de docente.</td>
             </tr>
-          </tbody>
-        ) : (
-          <tbody>
-            {tipos.map((tipo) => (
-              <tr key={tipo.TipoDocenteID}>
-                <td>{tipo.TipoDocenteCodigo}</td>
-                <td>{tipo.TipoDocenteDescripcion}</td>
-                <td>{tipo.TipoDocenteEstado}</td>
-                <td>{tipo.universidadNombre || "—"}</td>
-                <td>
-                  <Link
-                    href={`/tipoEdit/${tipo.TipoDocenteCodigo}`}
-                    className="btn btn-primary btn-sm"
-                  >
-                    editar
-                  </Link>
-                  <button
-                    className="btn btn-danger btn-sm mx-2"
-                    onClick={() => handleDeleteTipo(tipo.TipoDocenteID)}
-                  >
-                    borrar
-                  </button>
-                </td>
+          ) : (
+            table.getRowModel().rows.map((row) => (
+              <tr key={row.id}>
+                {row.getVisibleCells().map((cell) => (
+                  <td key={cell.id}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
+                ))}
               </tr>
-            ))}
-          </tbody>
-        )}
+            ))
+          )}
+        </tbody>
       </Tables>
 
       {totalPages > 1 && (
