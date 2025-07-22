@@ -13,10 +13,9 @@ export const deleteEntity = async (endpoint, pk, setEntities, idKey = "id") => {
       });
 
       if (response.ok) {
-        setEntities((prevEntities) => prevEntities.filter((entity) => entity[idKey] !== pk)
-        
-      );
-        Notification.alertLogin("Elemento eliminado con éxito.");
+      //   setEntities((prevEntities) => prevEntities.filter((entity) => entity[idKey] !== pk)
+      // );
+        Notification.alertSuccess("Elemento eliminado con éxito.");
       } else {
         Notification.alertError("Error al eliminar el elemento.")
       }
