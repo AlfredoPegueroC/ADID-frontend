@@ -27,7 +27,7 @@ function DocenteListClient() {
   const [searchQuery, setSearchQuery] = useState("");
   const [pageSize, setPageSize] = useState(10);
   const [sorting, setSorting] = useState([]);
-
+  const { user } = useAuth();
   const API = process.env.NEXT_PUBLIC_API_KEY;
   const queryClient = useQueryClient();
 
