@@ -393,7 +393,8 @@ function PrincipalListClient() {
                 colSpan={table.getAllLeafColumns().length}
                 className="text-center py-4"
               >
-                No se encontraron resultados.
+                {/* No se encontraron resultados. */}
+                <Spinner />
               </td>
             </tr>
           ) : (

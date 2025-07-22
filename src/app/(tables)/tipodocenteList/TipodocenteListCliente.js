@@ -10,6 +10,7 @@ import {
   flexRender,
 } from "@tanstack/react-table";
 import { debounce } from "lodash";
+import { useAuth } from "@contexts/AuthContext";
 
 import Modal from "@components/Modal";
 import ImportExcel from "@components/forms/Import";
@@ -30,7 +31,7 @@ function TipoDocenteListClient() {
 
   const API = process.env.NEXT_PUBLIC_API_KEY;
   const queryClient = useQueryClient();
-
+  const {user} = useAuth();
   const debouncedSearch = useRef(
     debounce((value) => {
       setSearchQuery(value);
@@ -87,12 +88,16 @@ function TipoDocenteListClient() {
             >
               editar
             </Link>
-            <button
-              className="btn btn-danger btn-sm mx-2"
-              onClick={() => handleDeleteTipo(row.original.TipoDocenteID)}
-            >
-              borrar
-            </button>
+
+
+            {user?.groups[0] === "admin" && (
+              <button
+                className="btn btn-danger btn-sm mx-2"
+                onClick={() => handleDeleteTipo(row.original.TipoDocenteID)}
+              >
+                borrar
+              </button>
+            )}
           </div>
         ),
       },

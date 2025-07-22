@@ -3,8 +3,14 @@
 import React, { useState, useRef, useMemo } from "react";
 import Link from "next/link";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useReactTable, getCoreRowModel, getSortedRowModel, flexRender } from "@tanstack/react-table";
+import {
+  useReactTable,
+  getCoreRowModel,
+  getSortedRowModel,
+  flexRender,
+} from "@tanstack/react-table";
 import { debounce } from "lodash";
+import { useAuth } from "@contexts/AuthContext";
 
 import Pagination from "@components/Pagination";
 import Search from "@components/search";
@@ -24,9 +30,11 @@ function UniversidadListClient() {
   const [pageSize, setPageSize] = useState(10);
   const [sorting, setSorting] = useState([]);
 
+  const { user } = useAuth();
   const queryClient = useQueryClient();
   const API = process.env.NEXT_PUBLIC_API_KEY;
-  const token = typeof window !== "undefined" ? localStorage.getItem("accessToken") : "";
+  const token =
+    typeof window !== "undefined" ? localStorage.getItem("accessToken") : "";
 
   const debouncedSearch = useRef(
     debounce((value) => {
@@ -34,11 +42,7 @@ function UniversidadListClient() {
     }, 500)
   ).current;
 
-  const {
-    data,
-    isLoading,
-    isError,
-  } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ["universidades", { page, searchQuery, pageSize }],
     queryFn: () => fetchUniversidades(page, searchQuery, pageSize, token),
     keepPreviousData: true,
@@ -91,12 +95,16 @@ function UniversidadListClient() {
             >
               editar
             </Link>
-            <button
-              className="btn btn-danger btn-sm mx-2"
-              onClick={() => handleDelete(row.original.UniversidadID)}
-            >
-              borrar
-            </button>
+            {user?.groups[0] === "admin" && (
+              <>
+                <button
+                  className="btn btn-danger btn-sm mx-2"
+                  onClick={() => handleDelete(row.original.UniversidadID)}
+                >
+                  borrar
+                </button>
+              </>
+            )}
           </div>
         ),
       },
@@ -126,8 +134,12 @@ function UniversidadListClient() {
             Exportar Excel
           </Link>
           <button
-            className={`btn btn-danger ${universidades.length === 0 ? "disabled" : ""}`}
-            onClick={() => exportUniversidadesToPDF(universidades, page, pageSize)}
+            className={`btn btn-danger ${
+              universidades.length === 0 ? "disabled" : ""
+            }`}
+            onClick={() =>
+              exportUniversidadesToPDF(universidades, page, pageSize)
+            }
           >
             Exportar PDF
           </button>
@@ -148,7 +160,9 @@ function UniversidadListClient() {
         </div>
 
         <div className="d-flex align-items-center gap-2">
-          <label className="fw-bold mb-0 text-black">Resultados por página:</label>
+          <label className="fw-bold mb-0 text-black">
+            Resultados por página:
+          </label>
           <select
             className="form-select w-auto"
             style={{ height: "38px" }}
@@ -180,9 +194,14 @@ function UniversidadListClient() {
                 <th
                   key={header.id}
                   onClick={header.column.getToggleSortingHandler()}
-                  style={{ cursor: header.column.getCanSort() ? "pointer" : "default" }}
+                  style={{
+                    cursor: header.column.getCanSort() ? "pointer" : "default",
+                  }}
                 >
-                  {flexRender(header.column.columnDef.header, header.getContext())}
+                  {flexRender(
+                    header.column.columnDef.header,
+                    header.getContext()
+                  )}
                   {{
                     asc: " 🔼",
                     desc: " 🔽",
@@ -220,7 +239,11 @@ function UniversidadListClient() {
       </Tables>
 
       {totalPages > 1 && (
-        <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
+        />
       )}
     </div>
   );

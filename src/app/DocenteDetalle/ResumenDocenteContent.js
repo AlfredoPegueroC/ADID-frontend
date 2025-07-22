@@ -1,5 +1,6 @@
 'use client';
 
+import Spinner from '@components/Spinner';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -71,7 +72,7 @@ export default function ResumenDocenteContent({ docenteID, periodoParam }) {
       <h2>Resumen del Docente</h2>
 
       {loading ? (
-        <p>Cargando resumen...</p>
+       <Spinner />
       ) : !datos || !datos.asignaturas || datos.asignaturas.length === 0 ? (
         <div className="alert alert-info">
           No hay asignaturas registradas para este docente en el período <strong>{selectedPeriodo}</strong>.

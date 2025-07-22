@@ -10,7 +10,7 @@ import {
   getSortedRowModel,
   flexRender,
 } from "@tanstack/react-table";
-
+import { useAuth } from "@contexts/AuthContext";
 import Pagination from "@components/Pagination";
 import Tables from "@components/Tables";
 import Modal from "@components/Modal";
@@ -28,6 +28,7 @@ function PeriodoListClient({ initialData, totalPages: initialTotalPages }) {
   const [pageSize, setPageSize] = useState(10);
   const [sorting, setSorting] = useState([]);
 
+  const { user } = useAuth();
   const API = process.env.NEXT_PUBLIC_API_KEY;
   const queryClient = useQueryClient();
 
@@ -108,13 +109,15 @@ function PeriodoListClient({ initialData, totalPages: initialTotalPages }) {
             >
               editar
             </Link>
-            <button
-              className="btn btn-danger btn-sm mx-2"
-              onClick={() => handleDeletePeriodo(row.original.PeriodoID)}
-              disabled={mutationDelete.isLoading}
-            >
-              borrar
-            </button>
+            {user?.groups[0] === "admin" && (
+              <button
+                className="btn btn-danger btn-sm mx-2"
+                onClick={() => handleDeletePeriodo(row.original.PeriodoID)}
+                disabled={mutationDelete.isLoading}
+              >
+                borrar
+              </button>
+            )}
           </>
         ),
       },

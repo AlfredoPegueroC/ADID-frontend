@@ -10,7 +10,7 @@ import {
   flexRender,
 } from "@tanstack/react-table";
 import { debounce } from "lodash";
-
+import { useAuth } from "@contexts/AuthContext";
 import Pagination from "@components/Pagination";
 import Tables from "@components/Tables";
 import ImportExcel from "@components/forms/Import";
@@ -29,7 +29,7 @@ function EscuelaListClient() {
   const [searchQuery, setSearchQuery] = useState("");
   const [pageSize, setPageSize] = useState(10);
   const [sorting, setSorting] = useState([]);
-
+  const { user } = useAuth();
   const API = process.env.NEXT_PUBLIC_API_KEY;
   const token = typeof window !== "undefined" ? localStorage.getItem("accessToken") : "";
   const queryClient = useQueryClient();
@@ -105,13 +105,15 @@ function EscuelaListClient() {
             >
               Editar
             </Link>
-            <button
-              className="btn btn-danger btn-sm mx-2"
-              onClick={() => handleDeleteEscuela(row.original.EscuelaId)}
-              disabled={mutationDelete.isLoading}
-            >
-              borrar
-            </button>
+            {user?.groups[0] === "admin" && (
+              <button
+                className="btn btn-danger btn-sm mx-2"
+                onClick={() => handleDeleteEscuela(row.original.EscuelaId)}
+                disabled={mutationDelete.isLoading}
+              >
+                Borrar
+              </button>
+            )}
           </div>
         ),
       },

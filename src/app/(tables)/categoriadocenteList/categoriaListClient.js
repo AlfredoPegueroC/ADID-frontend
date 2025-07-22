@@ -10,7 +10,7 @@ import {
   flexRender,
 } from "@tanstack/react-table";
 import { debounce } from "lodash";
-
+import { useAuth } from "@contexts/AuthContext";
 import Modal from "@components/Modal";
 import ImportExcel from "@components/forms/Import";
 import Search from "@components/search";
@@ -27,7 +27,7 @@ function CategoriaListClient() {
   const [searchQuery, setSearchQuery] = useState("");
   const [pageSize, setPageSize] = useState(10);
   const [sorting, setSorting] = useState([]);
-
+  const { user } = useAuth();
   const API = process.env.NEXT_PUBLIC_API_KEY;
   const queryClient = useQueryClient();
 
@@ -96,18 +96,20 @@ function CategoriaListClient() {
             >
               Editar
             </Link>
-            <button
-              className="btn btn-danger btn-sm"
-              onClick={() => handleDeleteCategoria(row.original.CategoriaID)}
-              disabled={mutationDelete.isLoading}
-            >
+            {user?.groups[0] === "admin" && (
+              <button
+                className="btn btn-danger btn-sm"
+                onClick={() => handleDeleteCategoria(row.original.CategoriaID)}
+                disabled={mutationDelete.isLoading}
+                  >
               Borrar
             </button>
-          </div>
-        ),
-      },
-    ],
-    [mutationDelete.isLoading]
+          )}
+        </div>
+      ),
+    },
+  ],
+  [mutationDelete.isLoading]
   );
 
   const table = useReactTable({
