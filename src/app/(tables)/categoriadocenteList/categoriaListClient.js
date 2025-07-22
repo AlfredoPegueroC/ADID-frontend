@@ -130,12 +130,12 @@ function CategoriaListClient() {
           </Link>
 
           <Link
-            className={`btn btn-success ${categorias.length === 0 ? "disabled" : ""}`}
+            className={`btn btn-success`}
             href={`${API}export/categoriaDocente`}
             tabIndex={categorias.length === 0 ? -1 : 0}
             aria-disabled={categorias.length === 0}
           >
-            Exportar
+            Exportar Excel
           </Link>
 
           <button

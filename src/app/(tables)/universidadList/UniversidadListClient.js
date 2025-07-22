@@ -11,7 +11,6 @@ import Search from "@components/search";
 import Modal from "@components/Modal";
 import Spinner from "@components/Spinner";
 import ImportExcel from "@components/forms/Import";
-import Notification from "@components/Notification";
 import { exportUniversidadesToPDF } from "@utils/ExportPDF/exportUniversidadesToPDF";
 
 import withAuth from "@utils/withAuth";

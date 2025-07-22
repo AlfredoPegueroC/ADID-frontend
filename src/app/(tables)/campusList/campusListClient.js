@@ -140,7 +140,7 @@ function CampusListClient() {
           </Link>
 
           <Link
-            className={`btn btn-success ${campusList.length === 0 ? "disabled" : ""}`}
+            className={`btn btn-success`}
             href={`${API}export/campus`}
             tabIndex={campusList.length === 0 ? -1 : 0}
             aria-disabled={campusList.length === 0}

@@ -138,7 +138,7 @@ function FacultadListClient() {
           </Link>
 
           <Link
-            className={`btn btn-success ${facultades.length === 0 ? "disabled" : ""}`}
+            className={`btn btn-success`}
             href={`${API}export/facultad`}
             tabIndex={facultades.length === 0 ? -1 : 0}
             aria-disabled={facultades.length === 0}

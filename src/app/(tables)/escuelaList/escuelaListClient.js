@@ -139,7 +139,7 @@ function EscuelaListClient() {
           </Link>
 
           <Link
-            className={`btn btn-success ${escuelas.length === 0 ? "disabled" : ""}`}
+            className={`btn btn-success`}
             href={`${API}export/escuela`}
             tabIndex={escuelas.length === 0 ? -1 : 0}
             aria-disabled={escuelas.length === 0}

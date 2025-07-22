@@ -144,7 +144,7 @@ function DocenteListClient() {
           </Link>
 
           <Link
-            className={`btn btn-success ${docentes.length === 0 ? "disabled" : ""}`}
+            className={`btn btn-success`}
             href={`${API}export/docente`}
             tabIndex={docentes.length === 0 ? -1 : 0}
             aria-disabled={docentes.length === 0}
