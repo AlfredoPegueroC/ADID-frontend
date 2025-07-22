@@ -79,13 +79,13 @@ export default function DashboardPage() {
           icon="bi-building"
           title="Total Tipos de Docente"
           value={data.totalTiposDocente}
-          link="/tipoDocenteList"
+          link="/tipodocenteList"
         />
         <DashboardCard
           icon="bi-building"
           title="Total Categorías"
           value={data.totalCategorias}
-          link="/categoriaList"
+          link="/categoriadocenteList"
         />
       </div>
 
