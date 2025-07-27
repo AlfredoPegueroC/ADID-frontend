@@ -109,12 +109,13 @@ function PrincipalListClient() {
         }
       } catch (error) {
         console.error("Error al cargar periodos:", error);
+        setPeriodos([]);
       } finally {
         setLoadingPeriodos(false);
       }
     };
     cargarPeriodos();
-  }, []);
+  }, [API, selectedPeriodo]);
 
   const { data, isLoading } = useQuery({
     queryKey: [
@@ -130,7 +131,6 @@ function PrincipalListClient() {
     keepPreviousData: true,
   });
 
-  // Extraemos totalPages desde data, con fallback a 1
   const totalPages = data?.totalPages || 1;
 
   const deleteAsignacion = useCallback(
@@ -255,6 +255,8 @@ function PrincipalListClient() {
           className="btn btn-warning text-dark"
           data-bs-toggle="modal"
           data-bs-target="#Modal"
+          disabled={!selectedPeriodo}
+          title={!selectedPeriodo ? "Selecciona un periodo primero" : ""}
         >
           Nueva Asignación
         </button>
@@ -262,15 +264,28 @@ function PrincipalListClient() {
           className="btn btn-info text-white"
           data-bs-toggle="modal"
           data-bs-target="#modalcopiar"
+          disabled={!selectedPeriodo}
+          title={!selectedPeriodo ? "Selecciona un periodo primero" : ""}
         >
           Editar Asignación
         </button>
-        <Link className="btn btn-success" href="/asignacion">
+        <Link
+          className={`btn btn-success ${!selectedPeriodo ? "disabled" : ""}`}
+          href={selectedPeriodo ? "/asignacion" : "#"}
+          tabIndex={!selectedPeriodo ? -1 : 0}
+          aria-disabled={!selectedPeriodo}
+        >
           Crear Sección
         </Link>
         <Link
-          className="btn btn-secondary"
-          href={`${API}export/asignacionDocenteExport?period=${selectedPeriodo}`}
+          className={`btn btn-secondary ${!selectedPeriodo ? "disabled" : ""}`}
+          href={
+            selectedPeriodo
+              ? `${API}export/asignacionDocenteExport?period=${selectedPeriodo}`
+              : "#"
+          }
+          tabIndex={!selectedPeriodo ? -1 : 0}
+          aria-disabled={!selectedPeriodo}
         >
           Exportar Excel
         </Link>
@@ -285,12 +300,16 @@ function PrincipalListClient() {
               pageSize
             )
           }
+          disabled={!selectedPeriodo}
+          title={!selectedPeriodo ? "Selecciona un periodo primero" : ""}
         >
           Exportar PDF
         </button>
 
         {loadingPeriodos ? (
           <span className="text-muted">Cargando periodos...</span>
+        ) : periodos.length === 0 ? (
+          <span className="text-danger">No hay periodos disponibles</span>
         ) : (
           <Select
             className="w-60 text-black"
@@ -333,6 +352,7 @@ function PrincipalListClient() {
             ))}
           </div>
         </div>
+
         <Search
           SearchSubmit={(e) => {
             e.preventDefault();
@@ -389,6 +409,15 @@ function PrincipalListClient() {
                 <Spinner />
               </td>
             </tr>
+          ) : !selectedPeriodo ? (
+            <tr>
+              <td
+                colSpan={table.getAllLeafColumns().length}
+                className="text-center py-4 text-danger"
+              >
+                Selecciona un periodo para mostrar las asignaciones.
+              </td>
+            </tr>
           ) : table.getRowModel().rows.length === 0 ? (
             <tr>
               <td
@@ -396,7 +425,6 @@ function PrincipalListClient() {
                 className="text-center py-4"
               >
                 No se encontraron resultados.
-                {/* <Spinner /> */}
               </td>
             </tr>
           ) : (
@@ -454,7 +482,7 @@ function PrincipalListClient() {
             <button
               className="btn btn-warning"
               onClick={handleCopiarPeriodo}
-              disabled={!periodoDestino || copiando}
+              disabled={!periodoDestino || !selectedPeriodo || copiando}
             >
               {copiando ? "Editando..." : "Editar asignaciones"}
             </button>
