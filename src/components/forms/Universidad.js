@@ -32,7 +32,7 @@ export default function Universidad({ title }) {
   const handleUniversidad = async (e) => {
     e.preventDefault();
     const accessToken = localStorage.getItem("accessToken");
-    console.log("🔑 Token de acceso:", accessToken);
+
     
     try {
       const response = await fetch(`${API}api/universidad/create`, {
