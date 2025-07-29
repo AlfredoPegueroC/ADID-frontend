@@ -5,14 +5,14 @@ import { useEffect, useState } from "react";
 import Select from "react-select";
 import Notification from "../Notification";
 import Styles from "@styles/form.module.css";
+import { fetchUniversidades } from "@api/universidadService";
+import { fetchFacultades } from "@api/facultadService";
 
 export default function EscuelaForm() {
   const router = useRouter();
-  const API = process.env.NEXT_PUBLIC_API_KEY;
 
   const [universidades, setUniversidades] = useState([]);
   const [facultades, setFacultades] = useState([]);
-
   const [selectedUniversidad, setSelectedUniversidad] = useState(null);
   const [selectedFacultad, setSelectedFacultad] = useState(null);
 
@@ -28,34 +28,36 @@ export default function EscuelaForm() {
   });
 
   useEffect(() => {
-    const fetchUniversidades = async () => {
+    const cargarUniversidades = async () => {
       try {
-        const res = await fetch(`${API}universidades`);
-        const data = await res.json();
-        const options = (data.results || data).map((u) => ({
+        const token = localStorage.getItem("accessToken") || "";
+        const { results } = await fetchUniversidades(1, "", 100, token);
+        const opciones = results.map((u) => ({
           value: u.UniversidadID,
           label: u.UniversidadNombre,
         }));
-        setUniversidades(options);
+        setUniversidades(opciones);
       } catch (error) {
         console.error("Error cargando universidades:", error);
+        Notification.alertError("No se pudieron cargar las universidades");
       }
     };
 
-    fetchUniversidades();
-  }, [API]);
+    cargarUniversidades();
+  }, []);
 
-  const fetchFacultadesByUniversidad = async (universidadId) => {
+  const cargarFacultades = async (universidadId) => {
     try {
-      const res = await fetch(`${API}facultades?universidad_id=${universidadId}`);
-      const data = await res.json();
-      const options = (data.results || data).map((f) => ({
+      const token = localStorage.getItem("accessToken") || "";
+      const { results } = await fetchFacultades(1, "", 100, token, universidadId);
+      const opciones = results.map((f) => ({
         value: f.FacultadID,
         label: f.FacultadNombre,
       }));
-      setFacultades(options);
+      setFacultades(opciones);
     } catch (error) {
       console.error("Error cargando facultades:", error);
+      Notification.alertError("No se pudieron cargar las facultades");
     }
   };
 
@@ -68,9 +70,7 @@ export default function EscuelaForm() {
       Escuela_UniversidadFK: selected ? selected.value : "",
       Escuela_facultadFK: "",
     }));
-    if (selected) {
-      fetchFacultadesByUniversidad(selected.value);
-    }
+    if (selected) cargarFacultades(selected.value);
   };
 
   const handleFacultadChange = (selected) => {
@@ -94,17 +94,17 @@ export default function EscuelaForm() {
     const accessToken = localStorage.getItem("accessToken");
 
     try {
-      const response = await fetch(`${API}api/escuela/create`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_KEY}api/escuela/create`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify(formData),
-        });
+      });
 
-        if (response.ok) {
-          await response.json();
+      if (response.ok) {
+        await response.json();
         Notification.alertSuccess("Escuela creada exitosamente");
         router.push("/escuelaList");
         setFormData({

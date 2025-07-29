@@ -5,9 +5,14 @@ import { useState, useEffect } from "react";
 import Select from "react-select";
 import Notification from "../Notification";
 import Styles from "@styles/form.module.css";
+import { fetchUniversidades } from "@api/universidadService"; // Usa tu service para universidades
 
 export default function CampusForm({ title }) {
   const router = useRouter();
+
+  const [universidades, setUniversidades] = useState([]);
+  const [loadingUniversidades, setLoadingUniversidades] = useState(false);
+
   const [formData, setFormData] = useState({
     CampusCodigo: "",
     CampusNombre: "",
@@ -18,59 +23,68 @@ export default function CampusForm({ title }) {
     CampusTelefono: "",
     CampusCorreoContacto: "",
     CampusEstado: "",
-    Campus_UniversidadFK: "",
+    Campus_UniversidadFK: null, // guardamos el objeto seleccionado
   });
 
-  const API = process.env.NEXT_PUBLIC_API_KEY;
-  const [universidades, setUniversidades] = useState([]);
-  const [universidadSeleccionada, setUniversidadSeleccionada] = useState(null);
-
+  // Carga inicial universidades (puedes cambiar o dejar vacio para búsqueda dinámica)
   useEffect(() => {
-    const fetchUniversidades = async () => {
-      try {
-        const response = await fetch(`${API}universidades`);
-        const data = await response.json();
-        const formatted = data.map((u) => ({
-          value: u.UniversidadID,
-          label: u.UniversidadNombre || u.nombre,
-        }));
-        setUniversidades(formatted);
-      } catch (error) {
-        console.error("Error al cargar universidades:", error);
-      }
-    };
-
-    fetchUniversidades();
+    cargarUniversidades("");
   }, []);
+
+  const cargarUniversidades = async (search = "") => {
+    setLoadingUniversidades(true);
+    try {
+      const token = localStorage.getItem("accessToken") || "";
+      const { results } = await fetchUniversidades(1, search, 10, token);
+      const opciones = results.map((u) => ({
+        value: u.UniversidadID,
+        label: u.UniversidadNombre,
+      }));
+      setUniversidades(opciones);
+    } catch (error) {
+      console.error("Error al cargar universidades:", error);
+      Notification.alertError("No se pudieron cargar las universidades");
+    } finally {
+      setLoadingUniversidades(false);
+    }
+  };
+
+  const handleInputChange = (inputValue) => {
+    cargarUniversidades(inputValue);
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
       [name]: value,
-    });
+    }));
   };
 
   const handleUniversidadChange = (selectedOption) => {
-    setUniversidadSeleccionada(selectedOption);
-    setFormData({
-      ...formData,
-      Campus_UniversidadFK: selectedOption ? selectedOption.value : "",
-    });
+    setFormData((prev) => ({
+      ...prev,
+      Campus_UniversidadFK: selectedOption,
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const accessToken = localStorage.getItem("accessToken");
-    console.log("🔑 Token de acceso:", accessToken);
+    const token = localStorage.getItem("accessToken");
+
+    const payload = {
+      ...formData,
+      Campus_UniversidadFK: formData.Campus_UniversidadFK?.value || null,
+    };
+
     try {
-      const response = await fetch(`${API}api/campus/create`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_KEY}api/campus/create`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       if (response.ok) {
@@ -88,9 +102,8 @@ export default function CampusForm({ title }) {
           CampusTelefono: "",
           CampusCorreoContacto: "",
           CampusEstado: "",
-          Campus_UniversidadFK: "",
+          Campus_UniversidadFK: null,
         });
-        setUniversidadSeleccionada(null);
       } else {
         const error = await response.json();
         Notification.alertError("Error al crear el campus. Ya existe o está incompleto.");
@@ -213,21 +226,25 @@ export default function CampusForm({ title }) {
             onChange={handleChange}
             required
           >
-            <option value="" disabled>-- Seleccione el estado --</option>
+            <option value="" disabled>
+              -- Seleccione el estado --
+            </option>
             <option value="Activo">Activo</option>
             <option value="Inactivo">Inactivo</option>
           </select>
         </div>
 
         <div className={Styles.name_group}>
-          <label >Universidad:</label>
+          <label>Universidad:</label>
           <Select
             options={universidades}
-            value={universidadSeleccionada}
-            
+            value={formData.Campus_UniversidadFK}
             onChange={handleUniversidadChange}
+            onInputChange={handleInputChange}
             placeholder="Seleccione universidad..."
             isClearable
+            isLoading={loadingUniversidades}
+            noOptionsMessage={() => "No se encontraron universidades"}
           />
         </div>
 

@@ -6,15 +6,14 @@ import Select from "react-select";
 
 import Notification from "../Notification";
 import Styles from "@styles/form.module.css";
+import { fetchUniversidades } from "@api/universidadService";
+import { fetchCampus } from "@api/campusService";
 
-export default function Facultad({ title }) {
+export default function FacultadForm({ title }) {
   const router = useRouter();
-  const API = process.env.NEXT_PUBLIC_API_KEY;
-
   const [universidades, setUniversidades] = useState([]);
   const [campus, setCampus] = useState([]);
-  const [selectedUniversidad, setSelectedUniversidad] = useState(null);
-  const [selectedCampus, setSelectedCampus] = useState(null);
+  const [loadingCampus, setLoadingCampus] = useState(false);
 
   const [formData, setFormData] = useState({
     FacultadCodigo: "",
@@ -24,94 +23,137 @@ export default function Facultad({ title }) {
     FacultadTelefono: "",
     FacultadEmail: "",
     FacultadEstado: "",
-    Facultad_UniversidadFK: "",
-    Facultad_CampusFK: "",
+    Facultad_UniversidadFK: null,
+    Facultad_CampusFK: null,
   });
 
-  useEffect(() => {
-    const fetchUniversidades = async () => {
-      try {
-        const res = await fetch(`${API}universidades`);
-        const data = await res.json();
-        const formatted = (data.results || data).map((u) => ({
-          value: u.UniversidadID,
-          label: u.UniversidadNombre,
-        }));
-        setUniversidades(formatted);
-      } catch (error) {
-        console.error("Error cargando universidades:", error);
-      }
-    };
-
-    fetchUniversidades();
-  }, [API]);
-
-  const fetchCampusByUniversidad = async (universidadId) => {
+  // Cargar universidades con búsqueda y paginación
+  const cargarUniversidades = async (search = "", page = 1) => {
     try {
-      const res = await fetch(`${API}campus?universidad_id=${universidadId}`);
-      const data = await res.json();
-      const formatted = (data.results || data).map((c) => ({
-        value: c.CampusID,
-        label: c.CampusNombre,
+      const token = localStorage.getItem("accessToken") || "";
+      const { results } = await fetchUniversidades(page, search, 10, token);
+      const opciones = results.map((u) => ({
+        value: u.UniversidadID,
+        label: u.UniversidadNombre,
       }));
-      setCampus(formatted);
+      setUniversidades(opciones);
     } catch (error) {
-      console.error("Error cargando campus:", error);
+      console.error("Error al cargar universidades:", error);
+      Notification.alertError("No se pudieron cargar las universidades");
     }
   };
 
+  // Cargar campus filtrado por universidad, búsqueda y paginación
+  const cargarCampus = async (universidadId, search = "", page = 1) => {
+    if (!universidadId) {
+      setCampus([]);
+      return;
+    }
+    setLoadingCampus(true);
+    try {
+      const token = localStorage.getItem("accessToken") || "";
+      // Asumo que fetchCampus acepta universidadId, search, page y pageSize
+      const { results } = await fetchCampus(page, search, 10, token, universidadId);
+      const opciones = results.map((c) => ({
+        value: c.CampusID,
+        label: c.CampusNombre,
+      }));
+      setCampus(opciones);
+    } catch (error) {
+      console.error("Error al cargar campus:", error);
+      Notification.alertError("No se pudieron cargar los campus");
+    } finally {
+      setLoadingCampus(false);
+    }
+  };
+
+  // Carga inicial universidades sin filtro
+  useEffect(() => {
+    cargarUniversidades("", 1);
+  }, []);
+
   const handleChange = (e) => {
     const { id, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
+    setFormData((prev) => ({
+      ...prev,
       [id]: value,
     }));
   };
 
   const handleUniversidadChange = (selectedOption) => {
-    setSelectedUniversidad(selectedOption);
     setFormData((prev) => ({
       ...prev,
-      Facultad_UniversidadFK: selectedOption ? selectedOption.value : "",
-      Facultad_CampusFK: "", // Limpia el campus anterior
+      Facultad_UniversidadFK: selectedOption,
+      Facultad_CampusFK: null,
     }));
-    setSelectedCampus(null);
+    setCampus([]);
     if (selectedOption) {
-      fetchCampusByUniversidad(selectedOption.value);
-    } else {
-      setCampus([]); // Limpia campus si no hay universidad
+      cargarCampus(selectedOption.value, "", 1);
+    }
+  };
+
+  // Búsqueda dinámica campus, solo si universidad seleccionada
+  const handleCampusInputChange = (inputValue) => {
+    if (formData.Facultad_UniversidadFK) {
+      cargarCampus(formData.Facultad_UniversidadFK.value, inputValue, 1);
     }
   };
 
   const handleCampusChange = (selectedOption) => {
-    setSelectedCampus(selectedOption);
     setFormData((prev) => ({
       ...prev,
-      Facultad_CampusFK: selectedOption ? selectedOption.value : "",
+      Facultad_CampusFK: selectedOption,
     }));
+  };
+
+  const handleUniversidadInputChange = (inputValue) => {
+    cargarUniversidades(inputValue, 1);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const accessToken = localStorage.getItem("accessToken");
+    const token = localStorage.getItem("accessToken");
+
+    const payload = {
+      ...formData,
+      Facultad_UniversidadFK: formData.Facultad_UniversidadFK?.value || null,
+      Facultad_CampusFK: formData.Facultad_CampusFK?.value || null,
+    };
 
     try {
-      const response = await fetch(`${API}api/facultad/create`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify(formData),
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_KEY}api/facultad/create`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(payload),
+        }
+      );
 
       if (response.ok) {
         const result = await response.json();
         Notification.alertSuccess(`Facultad creada: ${result.FacultadNombre}`);
         router.push("/facultadList");
+        setFormData({
+          FacultadCodigo: "",
+          FacultadNombre: "",
+          FacultadDecano: "",
+          FacultadDireccion: "",
+          FacultadTelefono: "",
+          FacultadEmail: "",
+          FacultadEstado: "",
+          Facultad_UniversidadFK: null,
+          Facultad_CampusFK: null,
+        });
+        setCampus([]);
       } else {
         const error = await response.json();
-        Notification.alertError("Error al crear la facultad. Ya existe o faltan datos.");
+        Notification.alertError(
+          "Error al crear la facultad. Ya existe o faltan datos."
+        );
         console.log("Error:", error);
       }
     } catch (error) {
@@ -214,8 +256,9 @@ export default function Facultad({ title }) {
           <label>Universidad</label>
           <Select
             options={universidades}
-            value={selectedUniversidad}
+            value={formData.Facultad_UniversidadFK}
             onChange={handleUniversidadChange}
+            onInputChange={handleUniversidadInputChange}
             placeholder="Seleccione una universidad..."
             isClearable
           />
@@ -225,11 +268,18 @@ export default function Facultad({ title }) {
           <label>Campus</label>
           <Select
             options={campus}
-            value={selectedCampus}
+            value={formData.Facultad_CampusFK}
             onChange={handleCampusChange}
+            onInputChange={handleCampusInputChange}
             placeholder="Seleccione un campus..."
             isClearable
-            isDisabled={!selectedUniversidad}
+            isDisabled={!formData.Facultad_UniversidadFK}
+            isLoading={loadingCampus}
+            noOptionsMessage={() =>
+              formData.Facultad_UniversidadFK
+                ? "No hay campus disponibles"
+                : "Seleccione primero una universidad"
+            }
           />
         </div>
 
@@ -242,4 +292,3 @@ export default function Facultad({ title }) {
     </div>
   );
 }
-
