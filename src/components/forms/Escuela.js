@@ -15,6 +15,8 @@ export default function EscuelaForm() {
   const [facultades, setFacultades] = useState([]);
   const [selectedUniversidad, setSelectedUniversidad] = useState(null);
   const [selectedFacultad, setSelectedFacultad] = useState(null);
+  const [loadingUniversidades, setLoadingUniversidades] = useState(false);
+  const [loadingFacultades, setLoadingFacultades] = useState(false);
 
   const [formData, setFormData] = useState({
     EscuelaCodigo: "",
@@ -28,28 +30,32 @@ export default function EscuelaForm() {
   });
 
   useEffect(() => {
-    const cargarUniversidades = async () => {
-      try {
-        const token = localStorage.getItem("accessToken") || "";
-        const { results } = await fetchUniversidades(1, "", 100, token);
-        const opciones = results.map((u) => ({
-          value: u.UniversidadID,
-          label: u.UniversidadNombre,
-        }));
-        setUniversidades(opciones);
-      } catch (error) {
-        console.error("Error cargando universidades:", error);
-        Notification.alertError("No se pudieron cargar las universidades");
-      }
-    };
-
     cargarUniversidades();
   }, []);
 
-  const cargarFacultades = async (universidadId) => {
+  const cargarUniversidades = async (search = "") => {
+    setLoadingUniversidades(true);
     try {
       const token = localStorage.getItem("accessToken") || "";
-      const { results } = await fetchFacultades(1, "", 100, token, universidadId);
+      const { results } = await fetchUniversidades(1, search, 10, token);
+      const opciones = results.map((u) => ({
+        value: u.UniversidadID,
+        label: u.UniversidadNombre,
+      }));
+      setUniversidades(opciones);
+    } catch (error) {
+      console.error("Error cargando universidades:", error);
+      Notification.alertError("No se pudieron cargar las universidades");
+    } finally {
+      setLoadingUniversidades(false);
+    }
+  };
+
+  const cargarFacultades = async (universidadId, search = "") => {
+    setLoadingFacultades(true);
+    try {
+      const token = localStorage.getItem("accessToken") || "";
+      const { results } = await fetchFacultades(1, search, 10, token, universidadId);
       const opciones = results.map((f) => ({
         value: f.FacultadID,
         label: f.FacultadNombre,
@@ -58,6 +64,8 @@ export default function EscuelaForm() {
     } catch (error) {
       console.error("Error cargando facultades:", error);
       Notification.alertError("No se pudieron cargar las facultades");
+    } finally {
+      setLoadingFacultades(false);
     }
   };
 
@@ -73,12 +81,22 @@ export default function EscuelaForm() {
     if (selected) cargarFacultades(selected.value);
   };
 
+  const handleUniversidadSearch = (inputValue) => {
+    cargarUniversidades(inputValue);
+  };
+
   const handleFacultadChange = (selected) => {
     setSelectedFacultad(selected);
     setFormData((prev) => ({
       ...prev,
       Escuela_facultadFK: selected ? selected.value : "",
     }));
+  };
+
+  const handleFacultadSearch = (inputValue) => {
+    if (selectedUniversidad) {
+      cargarFacultades(selectedUniversidad.value, inputValue);
+    }
   };
 
   const handleInputChange = (e) => {
@@ -215,8 +233,11 @@ export default function EscuelaForm() {
             options={universidades}
             value={selectedUniversidad}
             onChange={handleUniversidadChange}
+            onInputChange={handleUniversidadSearch}
             placeholder="Seleccione una universidad"
             isClearable
+            isLoading={loadingUniversidades}
+            noOptionsMessage={() => "No se encontraron universidades"}
           />
         </div>
 
@@ -226,9 +247,16 @@ export default function EscuelaForm() {
             options={facultades}
             value={selectedFacultad}
             onChange={handleFacultadChange}
+            onInputChange={handleFacultadSearch}
             placeholder="Seleccione una facultad"
             isClearable
             isDisabled={!selectedUniversidad}
+            isLoading={loadingFacultades}
+            noOptionsMessage={() =>
+              selectedUniversidad
+                ? "No se encontraron facultades"
+                : "Seleccione una universidad primero"
+            }
           />
         </div>
 

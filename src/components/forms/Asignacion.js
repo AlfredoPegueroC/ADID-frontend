@@ -2,22 +2,38 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import Notification from "../Notification";
 import Select from "react-select";
+import Notification from "../Notification";
 import Styles from "@styles/form.module.css";
+
+// Servicios importados
+import { fetchDocentes } from "@api/docenteService";
+import { fetchCampus } from "@api/campusService";
+import { fetchUniversidades } from "@api/universidadService";
+import { fetchFacultades } from "@api/facultadService";
+import { fetchEscuelas } from "@api/escuelaService";
+import { fetchPeriodos } from "@api/periodoService";
 
 export default function AsignacionForm({ title }) {
   const router = useRouter();
-  const API = process.env.NEXT_PUBLIC_API_KEY;
 
+  // Estados de opciones
   const [docentes, setDocentes] = useState([]);
   const [campus, setCampus] = useState([]);
   const [universidades, setUniversidades] = useState([]);
   const [facultades, setFacultades] = useState([]);
   const [escuelas, setEscuelas] = useState([]);
   const [periodos, setPeriodos] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
 
+  // Estados loading
+  const [loadingDocentes, setLoadingDocentes] = useState(false);
+  const [loadingCampus, setLoadingCampus] = useState(false);
+  const [loadingUniversidades, setLoadingUniversidades] = useState(false);
+  const [loadingFacultades, setLoadingFacultades] = useState(false);
+  const [loadingEscuelas, setLoadingEscuelas] = useState(false);
+  const [loadingPeriodos, setLoadingPeriodos] = useState(false);
+
+  // Estado del formulario
   const [formData, setFormData] = useState({
     nrc: "",
     clave: "",
@@ -34,143 +50,181 @@ export default function AsignacionForm({ title }) {
     tipo: "",
     accion: "",
     usuario_registro: "",
-    docenteFk: "",
-    campusFk: "",
-    universidadFk: "",
-    facultadFk: "",
-    escuelaFk: "",
-    periodoFk: "",
+    docenteFk: null,
+    campusFk: null,
+    universidadFk: null,
+    facultadFk: null,
+    escuelaFk: null,
+    periodoFk: null,
   });
 
+  // Carga inicial
   useEffect(() => {
-    async function fetchData() {
-      setIsLoading(true);
-      try {
-        const [docenteRes, campusRes, uniRes, facRes, escRes, perRes] = await Promise.all([
-          fetch(`${API}docentes`),
-          fetch(`${API}campus`),
-          fetch(`${API}universidades`),
-          fetch(`${API}facultades`),
-          fetch(`${API}escuelas`),
-          fetch(`${API}periodos`),
-        ]);
-
-        if (!docenteRes.ok || !campusRes.ok || !uniRes.ok || !facRes.ok || !escRes.ok || !perRes.ok) {
-          throw new Error("Error en la carga de datos");
-        }
-
-        const [docentesData, campusData, universidadesData, facultadesData, escuelasData, periodosData] = await Promise.all([
-          docenteRes.json(),
-          campusRes.json(),
-          uniRes.json(),
-          facRes.json(),
-          escRes.json(),
-          perRes.json(),
-        ]);
-
-        setDocentes((docentesData.results || docentesData).map((d) => ({
-          value: d.DocenteID,
-          label: `${d.DocenteNombre} ${d.DocenteApellido}`,
-        })));
-        setCampus((campusData.results || campusData).map((c) => ({
-          value: c.CampusID,
-          label: c.CampusNombre,
-        })));
-        setUniversidades((universidadesData.results || universidadesData).map((u) => ({
-          value: u.UniversidadID,
-          label: u.UniversidadNombre,
-        })));
-        setFacultades((facultadesData.results || facultadesData).map((f) => ({
-          value: f.FacultadID,
-          label: f.FacultadNombre,
-        })));
-        setEscuelas((escuelasData.results || escuelasData).map((e) => ({
-          value: e.EscuelaId,
-          label: e.EscuelaNombre,
-        })));
-        setPeriodos((periodosData.results || periodosData).map((p) => ({
-          value: p.PeriodoID,
-          label: p.PeriodoNombre,
-        })));
-      } catch (error) {
-        Notification.alertError("Error al cargar los datos. Ya existe o faltan datos.");
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    fetchData();
+    cargarDocentes();
+    cargarCampus();
+    cargarUniversidades();
+    cargarFacultades();
+    cargarEscuelas();
+    cargarPeriodos();
   }, []);
 
+  const cargarDocentes = async (search = "") => {
+    setLoadingDocentes(true);
+    try {
+      const token = localStorage.getItem("accessToken") || "";
+      const { results } = await fetchDocentes(1, search, 10, token);
+      setDocentes(results.map((d) => ({
+        value: d.DocenteID,
+        label: `${d.DocenteNombre} ${d.DocenteApellido}`,
+      })));
+    } catch (error) {
+      Notification.alertError("Error al cargar docentes");
+    } finally {
+      setLoadingDocentes(false);
+    }
+  };
+
+  const cargarCampus = async (search = "") => {
+    setLoadingCampus(true);
+    try {
+      const token = localStorage.getItem("accessToken") || "";
+      const { results } = await fetchCampus(1, search, 10, token);
+      setCampus(results.map((c) => ({
+        value: c.CampusID,
+        label: c.CampusNombre,
+      })));
+    } catch (error) {
+      Notification.alertError("Error al cargar campus");
+    } finally {
+      setLoadingCampus(false);
+    }
+  };
+
+  const cargarUniversidades = async (search = "") => {
+    setLoadingUniversidades(true);
+    try {
+      const token = localStorage.getItem("accessToken") || "";
+      const { results } = await fetchUniversidades(1, search, 10, token);
+      setUniversidades(results.map((u) => ({
+        value: u.UniversidadID,
+        label: u.UniversidadNombre,
+      })));
+    } catch (error) {
+      Notification.alertError("Error al cargar universidades");
+    } finally {
+      setLoadingUniversidades(false);
+    }
+  };
+
+  const cargarFacultades = async (search = "") => {
+    setLoadingFacultades(true);
+    try {
+      const token = localStorage.getItem("accessToken") || "";
+      const { results } = await fetchFacultades(1, search, 10, token);
+      setFacultades(results.map((f) => ({
+        value: f.FacultadID,
+        label: f.FacultadNombre,
+      })));
+    } catch (error) {
+      Notification.alertError("Error al cargar facultades");
+    } finally {
+      setLoadingFacultades(false);
+    }
+  };
+
+  const cargarEscuelas = async (search = "") => {
+    setLoadingEscuelas(true);
+    try {
+      const token = localStorage.getItem("accessToken") || "";
+      const { results } = await fetchEscuelas(1, search, 10, token);
+      setEscuelas(results.map((e) => ({
+        value: e.EscuelaId,
+        label: e.EscuelaNombre,
+      })));
+    } catch (error) {
+      Notification.alertError("Error al cargar escuelas");
+    } finally {
+      setLoadingEscuelas(false);
+    }
+  };
+
+  const cargarPeriodos = async (search = "") => {
+    setLoadingPeriodos(true);
+    try {
+      const token = localStorage.getItem("accessToken") || "";
+      const { results } = await fetchPeriodos(1, search, 10, token);
+      setPeriodos(results.map((p) => ({
+        value: p.PeriodoID,
+        label: p.PeriodoNombre,
+      })));
+    } catch (error) {
+      Notification.alertError("Error al cargar periodos académicos");
+    } finally {
+      setLoadingPeriodos(false);
+    }
+  };
+
+  // Handlers
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSelectChange = (selected, { name }) => {
-    setFormData((prev) => ({ ...prev, [name]: selected ? selected.value : "" }));
+  const handleSelectChange = (selectedOption, actionMeta) => {
+    const { name } = actionMeta;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: selectedOption || null,
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const accessToken = localStorage.getItem("accessToken");
+    const token = localStorage.getItem("accessToken") || "";
+
+    const payload = {
+      ...formData,
+      docenteFk: formData.docenteFk?.value || null,
+      campusFk: formData.campusFk?.value || null,
+      universidadFk: formData.universidadFk?.value || null,
+      facultadFk: formData.facultadFk?.value || null,
+      escuelaFk: formData.escuelaFk?.value || null,
+      periodoFk: formData.periodoFk?.value || null,
+    };
 
     try {
-      const response = await fetch(`${API}api/asignacion/create`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_KEY}api/asignacion/create`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${accessToken}` },
-        body: JSON.stringify(formData),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
       });
 
-      if (response.ok) {
-        Notification.alertSuccess("Asignación creada con éxito");
-
-        setFormData({
-          nrc: "",
-          clave: "",
-          nombre: "",
-          codigo: "",
-          seccion: "",
-          modalidad: "",
-          cupo: "",
-          inscripto: "",
-          horario: "",
-          dias: "",
-          aula: "",
-          creditos: "",
-          tipo: "",
-          accion: "",
-          usuario_registro: "",
-          docenteFk: "",
-          campusFk: "",
-          universidadFk: "",
-          facultadFk: "",
-          escuelaFk: "",
-          periodoFk: "",
-        });
+      if (res.ok) {
+        Notification.alertSuccess("Asignación registrada con éxito");
+        router.push("/");
       } else {
-        Notification.alertError("Error al registrar la asignación");
+        Notification.alertError("Error al registrar asignación");
       }
-    } catch (error) {
-      Notification.alertError("Error en la conexión con la API");
+    } catch (err) {
+      Notification.alertError("Error de conexión: " + err.message);
     }
   };
-
-  if (isLoading) return <div>Cargando datos...</div>;
 
   return (
     <div className={Styles.container}>
       <form onSubmit={handleSubmit} className={Styles.form}>
         <h1 className={Styles.title}>{title}</h1>
 
-        {/* Inputs normales */}
         {[
           "nrc", "clave", "nombre", "codigo", "seccion", "modalidad",
           "cupo", "inscripto", "horario", "dias", "aula",
-          "creditos", "tipo", "accion", "usuario_registro"
+          "creditos", "tipo"
         ].map((field) => (
           <div className={Styles.name_group} key={field}>
-            <label htmlFor={field}>{field.charAt(0).toUpperCase() + field.slice(1)}:</label>
+            <label htmlFor={field}>{field.toUpperCase()}:</label>
             <input
               type={["cupo", "inscripto", "creditos"].includes(field) ? "number" : "text"}
               id={field}
@@ -178,19 +232,26 @@ export default function AsignacionForm({ title }) {
               value={formData[field]}
               onChange={handleChange}
               placeholder={`Ingrese ${field}`}
+              required
             />
           </div>
         ))}
 
-        {/* Selects con react-select */}
+        {/* Selects */}
         <div className={Styles.name_group}>
           <label>Docente:</label>
           <Select
             name="docenteFk"
             options={docentes}
-            value={docentes.find((d) => d.value === formData.docenteFk) || null}
+            value={formData.docenteFk}
             onChange={handleSelectChange}
-            placeholder="Seleccione un docente"
+            onInputChange={(inputValue) => {
+              if (typeof inputValue === "string") {
+                cargarDocentes(inputValue.replace(/\s/g, ""));
+              }
+            }}
+            isLoading={loadingDocentes}
+            placeholder="Seleccione docente"
             isClearable
           />
         </div>
@@ -200,9 +261,15 @@ export default function AsignacionForm({ title }) {
           <Select
             name="campusFk"
             options={campus}
-            value={campus.find((c) => c.value === formData.campusFk) || null}
+            value={formData.campusFk}
             onChange={handleSelectChange}
-            placeholder="Seleccione un campus"
+            onInputChange={(inputValue) => {
+              if (typeof inputValue === "string") {
+                cargarCampus(inputValue.replace(/\s/g, ""));
+              }
+            }}
+            isLoading={loadingCampus}
+            placeholder="Seleccione campus"
             isClearable
           />
         </div>
@@ -212,9 +279,15 @@ export default function AsignacionForm({ title }) {
           <Select
             name="universidadFk"
             options={universidades}
-            value={universidades.find((u) => u.value === formData.universidadFk) || null}
+            value={formData.universidadFk}
             onChange={handleSelectChange}
-            placeholder="Seleccione una universidad"
+            onInputChange={(inputValue) => {
+              if (typeof inputValue === "string") {
+                cargarUniversidades(inputValue.replace(/\s/g, ""));
+              }
+            }}
+            isLoading={loadingUniversidades}
+            placeholder="Seleccione universidad"
             isClearable
           />
         </div>
@@ -224,9 +297,15 @@ export default function AsignacionForm({ title }) {
           <Select
             name="facultadFk"
             options={facultades}
-            value={facultades.find((f) => f.value === formData.facultadFk) || null}
+            value={formData.facultadFk}
             onChange={handleSelectChange}
-            placeholder="Seleccione una facultad"
+            onInputChange={(inputValue) => {
+              if (typeof inputValue === "string") {
+                cargarFacultades(inputValue.replace(/\s/g, ""));
+              }
+            }}
+            isLoading={loadingFacultades}
+            placeholder="Seleccione facultad"
             isClearable
           />
         </div>
@@ -236,9 +315,15 @@ export default function AsignacionForm({ title }) {
           <Select
             name="escuelaFk"
             options={escuelas}
-            value={escuelas.find((e) => e.value === formData.escuelaFk) || null}
+            value={formData.escuelaFk}
             onChange={handleSelectChange}
-            placeholder="Seleccione una escuela"
+            onInputChange={(inputValue) => {
+              if (typeof inputValue === "string") {
+                cargarEscuelas(inputValue.replace(/\s/g, ""));
+              }
+            }}
+            isLoading={loadingEscuelas}
+            placeholder="Seleccione escuela"
             isClearable
           />
         </div>
@@ -248,9 +333,15 @@ export default function AsignacionForm({ title }) {
           <Select
             name="periodoFk"
             options={periodos}
-            value={periodos.find((p) => p.value === formData.periodoFk) || null}
+            value={formData.periodoFk}
             onChange={handleSelectChange}
-            placeholder="Seleccione un periodo"
+            onInputChange={(inputValue) => {
+              if (typeof inputValue === "string") {
+                cargarPeriodos(inputValue.replace(/\s/g, ""));
+              }
+            }}
+            isLoading={loadingPeriodos}
+            placeholder="Seleccione periodo"
             isClearable
           />
         </div>
