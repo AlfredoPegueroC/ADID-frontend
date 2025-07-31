@@ -94,7 +94,7 @@ export default function LoginPage() {
             <button type="submit" className={Styles.login_btn}>
               Iniciar Sesión
             </button>
-            {error && <p className={Styles.error}>{error}</p>}
+            {error && <p className={Styles.error}>Su Usuario o Contraseña están incorrectos</p>}
           </form>
         </div>
       </div>
