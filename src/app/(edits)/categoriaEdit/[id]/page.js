@@ -1,16 +1,18 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import FormLayout from "@components/layouts/FormLayout";
+import withAuth from "@utils/withAuth";
 import Styles from "@styles/form.module.css";
 import Notification from "@components/Notification";
-import withAuth from "@utils/withAuth";
-import Select from "react-select";
+import AsyncSelect from "react-select/async";
+
+import { fetchUniversidades } from "@api/universidadService";
 
 function CategoriaEdit({ params }) {
   const router = useRouter();
-  const { id } = React.use(params);
+  const { id } = params;
   const API = process.env.NEXT_PUBLIC_API_KEY;
 
   const [categoria, setCategoria] = useState({
@@ -21,47 +23,71 @@ function CategoriaEdit({ params }) {
     UsuarioRegistro: "admin",
   });
 
-  const [universidades, setUniversidades] = useState([]);
+  const [selectedUniversidad, setSelectedUniversidad] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    async function fetchData() {
-      const accessToken = localStorage.getItem("accessToken");
+    async function fetchCategoria() {
+      setLoading(true);
+      const token = localStorage.getItem("accessToken") || "";
       try {
-        const catRes = await fetch(`${API}api/categoriadocente/${id}/`, {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
+        const res = await fetch(`${API}api/categoriadocente/${id}/`, {
+          headers: { Authorization: `Bearer ${token}` },
         });
-        const univRes = await fetch(`${API}universidades`, {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        });
+        if (!res.ok) throw new Error("Error al cargar categoría");
+        const data = await res.json();
 
-        if (!catRes.ok || !univRes.ok) throw new Error("Error al cargar los datos.");
+        // Obtener código universidad (puede venir como objeto o string)
+        const universidadCodigo =
+          typeof data.universidadCodigo === "object"
+            ? data.universidadCodigo
+            : data.universidadCodigo;
 
-        const catData = await catRes.json();
-        const univData = await univRes.json();
+        setCategoria({ ...data, universidadCodigo });
 
-        setCategoria(catData);
-        setUniversidades(
-          univData.map((u) => ({
-            label: u.UniversidadNombre,
-            value: u.UniversidadID,
-          }))
-        );
+        if (universidadCodigo) {
+          // Obtener nombre universidad con fetch para mostrar label en select
+          const resUni = await fetch(`${API}api/universidad/${universidadCodigo}/`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (!resUni.ok) throw new Error("Universidad no encontrada");
+          const dataUni = await resUni.json();
+
+          setSelectedUniversidad({
+            value: dataUni.UniversidadID,
+            label: dataUni.UniversidadNombre || "Sin nombre",
+          });
+        } else {
+          setSelectedUniversidad(null);
+        }
       } catch (error) {
-        console.error("Error:", error);
-        Notification.alertError("Error al cargar los datos.");
+        console.error(error);
+        Notification.alertError("Error al cargar datos de categoría.");
       } finally {
         setLoading(false);
       }
     }
+    fetchCategoria();
+  }, [id, API]);
 
-    fetchData();
-  }, [id]);
+  const loadUniversidades = useCallback(
+    async (inputValue) => {
+      const token = localStorage.getItem("accessToken") || "";
+      try {
+        const { results } = await fetchUniversidades(1, inputValue, 10, token);
+        return results.map((u) => ({
+          value: u.UniversidadID,
+          label: u.UniversidadNombre,
+        }));
+      } catch (error) {
+        console.error("Error al cargar universidades:", error);
+        Notification.alertError("No se pudieron cargar las universidades");
+        return [];
+      }
+    },
+    []
+  );
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -73,31 +99,33 @@ function CategoriaEdit({ params }) {
       ...prev,
       Categoria_UniversidadFK: selectedOption ? selectedOption.value : "",
     }));
+    setSelectedUniversidad(selectedOption);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
+    const token = localStorage.getItem("accessToken") || "";
 
     try {
-      const response = await fetch(`${API}api/categoriadocente/edit/${id}/`, {
+      const res = await fetch(`${API}api/categoriadocente/edit/${id}/`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(categoria),
       });
 
-      if (response.ok) {
-        Notification.alertSuccess("Categoría Docente editada.");
+      if (res.ok) {
+        Notification.alertSuccess("Categoría Docente actualizada.");
         router.push("/categoriadocenteList");
       } else {
-        Notification.alertError("Fallo al editar.");
+        Notification.alertError("Error al actualizar la categoría.");
       }
     } catch (error) {
-      console.error("Error updating categoria:", error);
-      Notification.alertError("Fallo al editar.");
+      console.error(error);
+      Notification.alertError("Error inesperado.");
     } finally {
       setSubmitting(false);
     }
@@ -114,7 +142,7 @@ function CategoriaEdit({ params }) {
   return (
     <FormLayout>
       <div className={Styles.container}>
-        <form className={Styles.form} onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className={Styles.form}>
           <h1 className={Styles.title}>Editar Categoría Docente</h1>
 
           <div className={Styles.name_group}>
@@ -126,6 +154,7 @@ function CategoriaEdit({ params }) {
               onChange={handleChange}
               disabled
               required
+              placeholder="Código categoría"
             />
           </div>
 
@@ -137,6 +166,7 @@ function CategoriaEdit({ params }) {
               value={categoria.CategoriaNombre || ""}
               onChange={handleChange}
               required
+              placeholder="Nombre de la categoría"
             />
           </div>
 
@@ -148,7 +178,7 @@ function CategoriaEdit({ params }) {
               onChange={handleChange}
               required
             >
-              <option value="">Seleccione Estado</option>
+              <option value="">-- Seleccione Estado --</option>
               <option value="Activo">Activo</option>
               <option value="Inactivo">Inactivo</option>
             </select>
@@ -156,14 +186,18 @@ function CategoriaEdit({ params }) {
 
           <div className={Styles.name_group}>
             <label>Universidad</label>
-            <Select
-              options={universidades}
-              value={
-                universidades.find((u) => u.value === categoria.Categoria_UniversidadFK) || null
-              }
+            <AsyncSelect
+              cacheOptions
+              defaultOptions
+              loadOptions={loadUniversidades}
+              value={selectedUniversidad}
               onChange={handleSelectChange}
               placeholder="Seleccione una universidad"
               isClearable
+              noOptionsMessage={() => "Escribe para buscar universidades"}
+              menuPlacement="auto"
+              inputId="Categoria_UniversidadFK"
+              name="Categoria_UniversidadFK"
             />
           </div>
 

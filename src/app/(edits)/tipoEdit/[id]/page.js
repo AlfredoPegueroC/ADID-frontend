@@ -1,16 +1,16 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import Select from "react-select";
+import AsyncSelect from "react-select/async";
 import Notification from "@components/Notification";
 import withAuth from "@utils/withAuth";
 import Styles from "@styles/form.module.css";
-import { use } from 'react';
+import { fetchUniversidades } from "@api/universidadService";
+
 function TipoEdit({ params }) {
   const router = useRouter();
-  const { id } = use(params);
-
+  const { id } = params;
   const API = process.env.NEXT_PUBLIC_API_KEY;
 
   const [tipo, setTipo] = useState({
@@ -20,44 +20,70 @@ function TipoEdit({ params }) {
     TipoDocente_UniversidadFK: "",
   });
 
-  const [universidades, setUniversidades] = useState([]);
+  const [selectedUniversidad, setSelectedUniversidad] = useState(null);
   const [loading, setLoading] = useState(true);
-
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    async function fetchData() {
-      const accessToken = localStorage.getItem("accessToken");
+    async function fetchTipo() {
+      setLoading(true);
+      const token = localStorage.getItem("accessToken") || "";
       try {
-        const tipoRes = await fetch(`${API}api/tipodocente/${id}/`, {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
+        const res = await fetch(`${API}api/tipodocente/${id}/`, {
+          headers: { Authorization: `Bearer ${token}` },
         });
-        const tipoData = await tipoRes.json();
-        setTipo(tipoData);
+        if (!res.ok) throw new Error("Error al cargar tipo docente");
+        const data = await res.json();
 
-        const uniRes = await fetch(`${API}universidades`, {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        });
-        const uniData = await uniRes.json();
-        setUniversidades(
-          (uniData.results || uniData).map((u) => ({
-            label: u.UniversidadNombre,
-            value: u.UniversidadID,
-          }))
-        );
-      } catch (err) {
-        console.error("Error:", err);
-        Notification.alertError("Error al cargar los datos.");
+        const universidadCodigo =
+          typeof data.universidadCodigo === "object"
+            ? data.universidadCodigo
+            : data.universidadCodigo;
+        setTipo({ ...data, universidadCodigo });
+
+        // Si tenemos solo el id de la universidad, hacemos fetch para obtener el nombre
+        if (universidadCodigo) {
+          // Obtener nombre universidad con fetch para mostrar label en select
+          const resUni = await fetch(
+            `${API}api/universidad/${universidadCodigo}/`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+          if (!resUni.ok) throw new Error("Universidad no encontrada");
+          const dataUni = await resUni.json();
+
+          setSelectedUniversidad({
+            value: dataUni.UniversidadID,
+            label: dataUni.UniversidadNombre || "Sin nombre",
+          });
+        } else {
+          setSelectedUniversidad(null);
+        }
+      } catch (error) {
+        console.error(error);
+        Notification.alertError("Error al cargar datos del tipo docente.");
       } finally {
         setLoading(false);
       }
     }
-
-    fetchData();
+    fetchTipo();
   }, [id, API]);
+
+  const loadUniversidades = useCallback(async (inputValue) => {
+    const token = localStorage.getItem("accessToken") || "";
+    try {
+      const { results } = await fetchUniversidades(1, inputValue, 10, token);
+      return results.map((u) => ({
+        value: u.UniversidadID,
+        label: u.UniversidadNombre,
+      }));
+    } catch (error) {
+      console.error("Error al cargar universidades:", error);
+      Notification.alertError("No se pudieron cargar las universidades");
+      return [];
+    }
+  }, []);
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -67,38 +93,39 @@ function TipoEdit({ params }) {
   const handleUniversidadChange = (selectedOption) => {
     setTipo((prev) => ({
       ...prev,
-      TipoDocente_UniversidadFK: selectedOption?.value || "",
+      TipoDocente_UniversidadFK: selectedOption ? selectedOption.value : "",
     }));
+    setSelectedUniversidad(selectedOption);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitting(true);
+    const token = localStorage.getItem("accessToken") || "";
 
     try {
       const res = await fetch(`${API}api/tipodocente/edit/${id}/`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(tipo),
       });
 
       if (res.ok) {
-        Notification.alertSuccess("Tipo Docente actualizado.");
+        Notification.alertSuccess("Tipo Docente actualizado correctamente.");
         router.push("/tipodocenteList");
       } else {
-        Notification.alertError("Error al actualizar.");
+        Notification.alertError("Error al actualizar el tipo docente.");
       }
-    } catch (err) {
-      console.error("Error:", err);
-      Notification.alertError("Fallo al editar.");
+    } catch (error) {
+      console.error(error);
+      Notification.alertError("Error inesperado.");
+    } finally {
+      setSubmitting(false);
     }
   };
-
-  const selectedUniversidad = universidades.find(
-    (u) => u.value === tipo.TipoDocente_UniversidadFK
-  );
 
   if (loading) {
     return (
@@ -153,20 +180,25 @@ function TipoEdit({ params }) {
         </div>
 
         <div className={Styles.name_group}>
-          <label htmlFor="TipoDocente_UniversidadFK">Universidad</label>
-          <Select
-            id="TipoDocente_UniversidadFK"
-            options={universidades}
-            value={selectedUniversidad || null}
+          <label>Universidad</label>
+          <AsyncSelect
+            cacheOptions
+            defaultOptions
+            loadOptions={loadUniversidades}
+            value={selectedUniversidad}
             onChange={handleUniversidadChange}
-            placeholder="Seleccione una universidad..."
+            placeholder="Seleccione una universidad"
             isClearable
+            noOptionsMessage={() => "Escribe para buscar universidades"}
+            menuPlacement="auto"
+            inputId="TipoDocente_UniversidadFK"
+            name="TipoDocente_UniversidadFK"
           />
         </div>
 
         <div className={Styles.btn_group}>
-          <button type="submit" className={Styles.btn}>
-            Guardar Cambios
+          <button type="submit" className={Styles.btn} disabled={submitting}>
+            {submitting ? "Guardando..." : "Guardar Cambios"}
           </button>
         </div>
       </form>

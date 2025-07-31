@@ -2,10 +2,10 @@
 
 import React, { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import AsyncSelect from "react-select/async";
 import withAuth from "@utils/withAuth";
 import Notification from "@components/Notification";
 import Styles from "@styles/form.module.css";
-import Select from "react-select";
 import { fetchUniversidades } from "@api/universidadService";
 
 function EditCampus({ params }) {
@@ -26,128 +26,120 @@ function EditCampus({ params }) {
     CampusEstado: "",
   });
 
-  const [universidades, setUniversidades] = useState([]);
+  const [selectedUniversidad, setSelectedUniversidad] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
-  // Estados para búsqueda y carga universidades
-  const [universidadSearch, setUniversidadSearch] = useState("");
-  const [loadingUniversidades, setLoadingUniversidades] = useState(false);
-
-  // Carga campus al montar
+  // 1. Cargar campus y universidad para mostrar en el select
   useEffect(() => {
     async function fetchCampus() {
       setLoading(true);
-      const accessToken = localStorage.getItem("accessToken") || "";
+      const token = localStorage.getItem("accessToken") || "";
       try {
-        const res = await fetch(`${API}api/campus/${id}/`, {
-          headers: { Authorization: `Bearer ${accessToken}` },
+        // Fetch campus
+        const resCampus = await fetch(`${API}api/campus/${id}/`, {
+          headers: { Authorization: `Bearer ${token}` },
         });
-        if (!res.ok) throw new Error("Error al cargar campus");
-        const data = await res.json();
+        if (!resCampus.ok) throw new Error("Error cargando campus");
+        const dataCampus = await resCampus.json();
 
-        setCampus({
-          ...data,
-          Campus_UniversidadFK:
-            typeof data.Campus_UniversidadFK === "object"
-              ? data.Campus_UniversidadFK.UniversidadID
-              : data.Campus_UniversidadFK,
-        });
+        const universidadCodigo =
+          typeof dataCampus.universidadCodigo === "object"
+            ? dataCampus.universidadCodigo // aquí
+            : dataCampus.universidadCodigo;
+        
+        setCampus({ ...dataCampus, universidadCodigo: universidadCodigo });
+        if (universidadCodigo) {
+          const resUni = await fetch(
+            `${API}api/universidad/${universidadCodigo}/`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+          if (!resUni.ok) throw new Error("Universidad no encontrada");
+          const dataUni = await resUni.json();
+
+          setSelectedUniversidad({
+            value: dataUni.UniversidadID,
+            label: dataUni.UniversidadNombre || "Sin nombre",
+          });
+        }
       } catch (error) {
         console.error(error);
-        Notification.alertError("Error al cargar datos del campus.");
+        Notification.alertError("Error cargando datos");
       } finally {
         setLoading(false);
       }
     }
     fetchCampus();
-  }, [id, API]);
+  }, [API, id]);
 
-  // Función para cargar universidades con búsqueda
-  const cargarUniversidades = useCallback(
-    async (search = "") => {
-      setLoadingUniversidades(true);
-      try {
-        const token = localStorage.getItem("accessToken") || "";
-        const { results } = await fetchUniversidades(1, search, 10, token);
-        const opciones = results.map((u) => ({
-          value: u.UniversidadID,
-          label: u.UniversidadNombre,
-        }));
-        setUniversidades(opciones);
-      } catch (error) {
-        console.error("Error al cargar universidades:", error);
-        Notification.alertError("No se pudieron cargar las universidades");
-      } finally {
-        setLoadingUniversidades(false);
-      }
-    },
-    []
-  );
+  // 2. Función para cargar universidades en búsqueda dinámica
+  const cargarUniversidades = useCallback(async (inputValue) => {
+    try {
+      const token = localStorage.getItem("accessToken") || "";
+      const { results } = await fetchUniversidades(1, inputValue, 10, token);
+      return results.map((u) => ({
+        value: u.UniversidadID,
+        label: u.UniversidadNombre,
+      }));
+    } catch (error) {
+      console.error(error);
+      Notification.alertError("Error cargando universidades");
+      return [];
+    }
+  }, []);
 
-  // Carga inicial de universidades sin filtro
-  useEffect(() => {
-    cargarUniversidades();
-  }, [cargarUniversidades]);
-
-  // Maneja el cambio en búsqueda
-  const handleSearchChange = (e) => {
-    const value = e.target.value;
-    setUniversidadSearch(value);
-    cargarUniversidades(value);
-  };
-
-  // Maneja cambios en inputs normales
+  // 3. Manejadores de cambios
   const handleChange = (e) => {
     const { id, value } = e.target;
     setCampus((prev) => ({ ...prev, [id]: value }));
   };
 
-  // Maneja cambio en select universidad
-  const handleUniversidadChange = (selectedOption) => {
+  const handleUniversidadChange = (option) => {
+    setSelectedUniversidad(option);
     setCampus((prev) => ({
       ...prev,
-      Campus_UniversidadFK: selectedOption ? selectedOption.value : "",
+      Campus_UniversidadFK: option ? option.value : "",
     }));
   };
 
-  // Enviar formulario
+  // 4. Submit
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
-    const accessToken = localStorage.getItem("accessToken") || "";
+    const token = localStorage.getItem("accessToken") || "";
 
     try {
       const res = await fetch(`${API}api/campus/edit/${id}/`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(campus),
       });
 
       if (res.ok) {
-        Notification.alertSuccess("Campus actualizado correctamente.");
+        Notification.alertSuccess("Campus actualizado");
         router.push("/campusList");
       } else {
-        Notification.alertError("Error al actualizar el campus.");
+        Notification.alertError("Error actualizando campus");
       }
     } catch (error) {
       console.error(error);
-      Notification.alertError("Ocurrió un error inesperado.");
+      Notification.alertError("Error inesperado");
     } finally {
       setSubmitting(false);
     }
   };
 
-  if (loading) {
+  if (loading)
     return (
       <div className="spinner-container">
         <div className="spinner"></div>
       </div>
     );
-  }
 
   return (
     <div className={Styles.container}>
@@ -157,12 +149,12 @@ function EditCampus({ params }) {
         <div className={Styles.name_group}>
           <label htmlFor="CampusCodigo">Código</label>
           <input
-            type="text"
             id="CampusCodigo"
+            type="text"
             value={campus.CampusCodigo}
             onChange={handleChange}
-            required
             disabled
+            required
             placeholder="Ej: C001"
           />
         </div>
@@ -170,8 +162,8 @@ function EditCampus({ params }) {
         <div className={Styles.name_group}>
           <label htmlFor="CampusNombre">Nombre</label>
           <input
-            type="text"
             id="CampusNombre"
+            type="text"
             value={campus.CampusNombre}
             onChange={handleChange}
             required
@@ -182,8 +174,8 @@ function EditCampus({ params }) {
         <div className={Styles.name_group}>
           <label htmlFor="CampusDireccion">Dirección</label>
           <input
-            type="text"
             id="CampusDireccion"
+            type="text"
             value={campus.CampusDireccion}
             onChange={handleChange}
             required
@@ -194,8 +186,8 @@ function EditCampus({ params }) {
         <div className={Styles.name_group}>
           <label htmlFor="CampusCiudad">Ciudad</label>
           <input
-            type="text"
             id="CampusCiudad"
+            type="text"
             value={campus.CampusCiudad}
             onChange={handleChange}
             required
@@ -206,8 +198,8 @@ function EditCampus({ params }) {
         <div className={Styles.name_group}>
           <label htmlFor="CampusProvincia">Provincia</label>
           <input
-            type="text"
             id="CampusProvincia"
+            type="text"
             value={campus.CampusProvincia}
             onChange={handleChange}
             required
@@ -218,8 +210,8 @@ function EditCampus({ params }) {
         <div className={Styles.name_group}>
           <label htmlFor="CampusPais">País</label>
           <input
-            type="text"
             id="CampusPais"
+            type="text"
             value={campus.CampusPais}
             onChange={handleChange}
             required
@@ -230,8 +222,8 @@ function EditCampus({ params }) {
         <div className={Styles.name_group}>
           <label htmlFor="CampusTelefono">Teléfono</label>
           <input
-            type="text"
             id="CampusTelefono"
+            type="text"
             value={campus.CampusTelefono}
             onChange={handleChange}
             required
@@ -242,8 +234,8 @@ function EditCampus({ params }) {
         <div className={Styles.name_group}>
           <label htmlFor="CampusCorreoContacto">Correo de Contacto</label>
           <input
-            type="email"
             id="CampusCorreoContacto"
+            type="email"
             value={campus.CampusCorreoContacto}
             onChange={handleChange}
             required
@@ -251,27 +243,17 @@ function EditCampus({ params }) {
           />
         </div>
 
-
         <div className={Styles.name_group}>
           <label>Universidad</label>
-          <Select
-            options={universidades}
-            value={universidades.find(
-              (u) => u.value === campus.Campus_UniversidadFK
-            ) || null}
+          <AsyncSelect
+            cacheOptions
+            defaultOptions
+            loadOptions={cargarUniversidades}
+            value={selectedUniversidad}
             onChange={handleUniversidadChange}
-            placeholder={
-              loadingUniversidades
-                ? "Cargando universidades..."
-                : "Seleccione una universidad"
-            }
+            placeholder="Seleccione una universidad"
             isClearable
-            isLoading={loadingUniversidades}
-            noOptionsMessage={() =>
-              universidadSearch
-                ? "No se encontraron universidades"
-                : "Escribe para buscar"
-            }
+            noOptionsMessage={() => "No se encontraron universidades"}
             menuPlacement="auto"
           />
         </div>

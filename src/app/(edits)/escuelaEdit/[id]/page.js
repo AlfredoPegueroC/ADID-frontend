@@ -1,15 +1,18 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import withAuth from "@utils/withAuth";
+import AsyncSelect from "react-select/async";
 import Notification from "@components/Notification";
+import withAuth from "@utils/withAuth";
 import Styles from "@styles/form.module.css";
-import Select from "react-select";
-import { use } from 'react';
+
+import { fetchUniversidades } from "@api/universidadService";
+import { fetchFacultades } from "@api/facultadService";
+
 function EditEscuela({ params }) {
   const router = useRouter();
-  const { id } = use(params);
+  const { id } = params;
   const API = process.env.NEXT_PUBLIC_API_KEY;
 
   const [escuela, setEscuela] = useState({
@@ -23,48 +26,62 @@ function EditEscuela({ params }) {
     EscuelaEstado: "",
   });
 
-  const [facultades, setFacultades] = useState([]);
-  const [universidades, setUniversidades] = useState([]);
+  const [selectedUniversidad, setSelectedUniversidad] = useState(null);
+  const [selectedFacultad, setSelectedFacultad] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
-
   useEffect(() => {
     async function fetchData() {
-      const accessToken = localStorage.getItem("accessToken");
+      const token = localStorage.getItem("accessToken") || "";
       try {
-        const escuelaResponse = await fetch(`${API}api/escuela/${id}/`, {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
+        const res = await fetch(`${API}api/escuela/${id}/`, {
+          headers: { Authorization: `Bearer ${token}` },
         });
-        const facultadesResponse = await fetch(`${API}facultades`, {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        });
-        const universidadesResponse = await fetch(`${API}universidades`, {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        });
+        if (!res.ok) throw new Error("Error al cargar datos");
+        const data = await res.json();
 
-        if (!escuelaResponse.ok || !facultadesResponse.ok || !universidadesResponse.ok)
-          throw new Error("Error fetching data");
+        const universidadCodigo =
+          typeof data.universidadCodigo === "object"
+            ? data.universidadCodigo
+            : data.universidadCodigo;
 
-        const escuelaData = await escuelaResponse.json();
-        const facultadesData = await facultadesResponse.json();
-        const universidadesData = await universidadesResponse.json();
+        const facultadCodigo =
+          typeof data.facultadCodigo === "object"
+            ? data.facultadCodigo
+            : data.facultadCodigo;
+        setEscuela({ ...data, universidadCodigo, facultadCodigo });
 
-        setEscuela(escuelaData);
+        // Universidad actual
+        if (universidadCodigo) {
+          const resUni = await fetch(
+            `${API}api/universidad/${universidadCodigo}/`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+          if (resUni.ok) {
+            const uniData = await resUni.json();
+            setSelectedUniversidad({
+              value: uniData.UniversidadID,
+              label: uniData.UniversidadNombre,
+            });
+          }
+        }
 
-        setFacultades(
-          facultadesData.map((f) => ({ label: f.FacultadNombre, value: f.FacultadID }))
-        );
-
-        setUniversidades(
-          universidadesData.map((u) => ({ label: u.UniversidadNombre, value: u.UniversidadID }))
-        );
+        // Facultad actual
+        if (facultadCodigo) {
+          const resFac = await fetch(`${API}api/facultad/${facultadCodigo}/`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (resFac.ok) {
+            const facData = await resFac.json();
+            setSelectedFacultad({
+              value: facData.FacultadID,
+              label: facData.FacultadNombre,
+            });
+          }
+        }
       } catch (error) {
         console.error("Error:", error);
         Notification.alertError("Error al cargar los datos.");
@@ -74,18 +91,57 @@ function EditEscuela({ params }) {
     }
 
     fetchData();
-  }, [id]);
+  }, [API, id]);
+
+  const loadUniversidades = useCallback(async (inputValue) => {
+    const token = localStorage.getItem("accessToken") || "";
+    try {
+      const { results } = await fetchUniversidades(1, inputValue, 10, token);
+      return results.map((u) => ({
+        value: u.UniversidadID,
+        label: u.UniversidadNombre,
+      }));
+    } catch (error) {
+      console.error("Error al cargar universidades:", error);
+      Notification.alertError("No se pudieron cargar las universidades");
+      return [];
+    }
+  }, []);
+
+  const loadFacultades = useCallback(async (inputValue) => {
+    const token = localStorage.getItem("accessToken") || "";
+    try {
+      const { results } = await fetchFacultades(1, inputValue, 10, token);
+      return results.map((f) => ({
+        value: f.FacultadID,
+        label: f.FacultadNombre,
+      }));
+    } catch (error) {
+      console.error("Error al cargar facultades:", error);
+      Notification.alertError("No se pudieron cargar las facultades");
+      return [];
+    }
+  }, []);
 
   const handleChange = (e) => {
     const { id, value } = e.target;
     setEscuela((prev) => ({ ...prev, [id]: value }));
   };
 
-  const handleSelectChange = (field) => (selectedOption) => {
+  const handleUniversidadChange = (selectedOption) => {
     setEscuela((prev) => ({
       ...prev,
-      [field]: selectedOption ? selectedOption.value : "",
+      Escuela_UniversidadFK: selectedOption ? selectedOption.value : "",
     }));
+    setSelectedUniversidad(selectedOption);
+  };
+
+  const handleFacultadChange = (selectedOption) => {
+    setEscuela((prev) => ({
+      ...prev,
+      Escuela_facultadFK: selectedOption ? selectedOption.value : "",
+    }));
+    setSelectedFacultad(selectedOption);
   };
 
   const handleSubmit = async (e) => {
@@ -116,7 +172,11 @@ function EditEscuela({ params }) {
   };
 
   if (loading) {
-    return <div className="spinner-container"><div className="spinner"></div></div>;
+    return (
+      <div className="spinner-container">
+        <div className="spinner" />
+      </div>
+    );
   }
 
   return (
@@ -129,7 +189,7 @@ function EditEscuela({ params }) {
           <input
             type="text"
             id="EscuelaCodigo"
-            value={escuela.EscuelaCodigo}
+            value={escuela.EscuelaCodigo || ""}
             onChange={handleChange}
             required
             disabled
@@ -142,7 +202,7 @@ function EditEscuela({ params }) {
           <input
             type="text"
             id="EscuelaNombre"
-            value={escuela.EscuelaNombre}
+            value={escuela.EscuelaNombre || ""}
             onChange={handleChange}
             required
             placeholder="Nombre de la escuela"
@@ -154,7 +214,7 @@ function EditEscuela({ params }) {
           <input
             type="text"
             id="EscuelaDirectora"
-            value={escuela.EscuelaDirectora}
+            value={escuela.EscuelaDirectora || ""}
             onChange={handleChange}
             required
             placeholder="Nombre completo de la directora"
@@ -166,7 +226,7 @@ function EditEscuela({ params }) {
           <input
             type="text"
             id="EscuelaTelefono"
-            value={escuela.EscuelaTelefono}
+            value={escuela.EscuelaTelefono || ""}
             onChange={handleChange}
             required
             placeholder="Ej: +1 809 123 4567"
@@ -178,7 +238,7 @@ function EditEscuela({ params }) {
           <input
             type="email"
             id="EscuelaCorreo"
-            value={escuela.EscuelaCorreo}
+            value={escuela.EscuelaCorreo || ""}
             onChange={handleChange}
             required
             placeholder="correo@escuela.edu"
@@ -187,23 +247,31 @@ function EditEscuela({ params }) {
 
         <div className={Styles.name_group}>
           <label>Universidad</label>
-          <Select
-            options={universidades}
-            value={universidades.find((u) => u.value === escuela.Escuela_UniversidadFK) || null}
-            onChange={handleSelectChange("Escuela_UniversidadFK")}
+          <AsyncSelect
+            cacheOptions
+            defaultOptions
+            loadOptions={loadUniversidades}
+            value={selectedUniversidad}
+            onChange={handleUniversidadChange}
             placeholder="Seleccione una universidad"
             isClearable
+            noOptionsMessage={() => "Escribe para buscar universidades"}
+            inputId="Escuela_UniversidadFK"
           />
         </div>
 
         <div className={Styles.name_group}>
           <label>Facultad</label>
-          <Select
-            options={facultades}
-            value={facultades.find((f) => f.value === escuela.Escuela_facultadFK) || null}
-            onChange={handleSelectChange("Escuela_facultadFK")}
+          <AsyncSelect
+            cacheOptions
+            defaultOptions
+            loadOptions={loadFacultades}
+            value={selectedFacultad}
+            onChange={handleFacultadChange}
             placeholder="Seleccione una facultad"
             isClearable
+            noOptionsMessage={() => "Escribe para buscar facultades"}
+            inputId="Escuela_facultadFK"
           />
         </div>
 
@@ -211,7 +279,7 @@ function EditEscuela({ params }) {
           <label htmlFor="EscuelaEstado">Estado</label>
           <select
             id="EscuelaEstado"
-            value={escuela.EscuelaEstado}
+            value={escuela.EscuelaEstado || ""}
             onChange={handleChange}
             required
           >

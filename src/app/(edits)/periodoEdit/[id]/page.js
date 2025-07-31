@@ -6,10 +6,10 @@ import Select from "react-select";
 import Notification from "@components/Notification";
 import withAuth from "@utils/withAuth";
 import Styles from "@styles/form.module.css";
-import { use } from "react";
+
 function EditPeriodo({ params }) {
   const router = useRouter();
-  const { id } = use(params);
+  const { id } = params; // ✅ corregido: no se usa use()
   const API = process.env.NEXT_PUBLIC_API_KEY;
 
   const [periodo, setPeriodo] = useState({
@@ -25,38 +25,41 @@ function EditPeriodo({ params }) {
 
   const [universidades, setUniversidades] = useState([]);
   const [loading, setLoading] = useState(true);
- 
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    const accessToken = localStorage.getItem("accessToken");
     async function fetchData() {
+      const token = localStorage.getItem("accessToken");
+
       try {
-        const response = await fetch(`${API}api/periodoacademico/${id}/`, {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        });
-        if (!response.ok) throw new Error("Error al cargar el período.");
-        const data = await response.json();
-        setPeriodo(data);
+        const [periodoRes, universidadesRes] = await Promise.all([
+          fetch(`${API}api/periodoacademico/${id}/`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          fetch(`${API}api/universidad`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+        ]);
 
-        const universidadesResponse = await fetch(`${API}api/universidad`, {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        });
-        if (!universidadesResponse.ok)
-          throw new Error("Error al cargar universidades.");
-        const universidadesData = await universidadesResponse.json();
+        if (!periodoRes.ok || !universidadesRes.ok) {
+          throw new Error("Error al cargar los datos.");
+        }
 
-        setUniversidades(
-          (universidadesData.results || universidadesData).map((u) => ({
-            label: u.UniversidadNombre,
-            value: u.UniversidadID,
-          }))
-        );
+        const periodoData = await periodoRes.json();
+        const universidadesData = await universidadesRes.json();
+
+        const options = (universidadesData.results || universidadesData).map((u) => ({
+          value: u.UniversidadID,
+          label: u.UniversidadNombre,
+        }));
+
+        setPeriodo({
+          ...periodoData,
+          Periodo_UniversidadFK: periodoData.Periodo_UniversidadFK,
+        });
+        setUniversidades(options);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Error:", error);
         Notification.alertError("Error al cargar los datos.");
       } finally {
         setLoading(false);
@@ -71,7 +74,7 @@ function EditPeriodo({ params }) {
     setPeriodo((prev) => ({ ...prev, [id]: value }));
   };
 
-  const handleUniversidadChange = (selectedOption) => {
+  const handleSelectChange = (selectedOption) => {
     setPeriodo((prev) => ({
       ...prev,
       Periodo_UniversidadFK: selectedOption ? selectedOption.value : "",
@@ -80,6 +83,8 @@ function EditPeriodo({ params }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitting(true);
+
     try {
       const response = await fetch(`${API}api/periodoacademico/edit/${id}/`, {
         method: "PATCH",
@@ -91,20 +96,18 @@ function EditPeriodo({ params }) {
       });
 
       if (response.ok) {
-        Notification.alertSuccess("Periodo Académico Editado.");
+        Notification.alertSuccess("Periodo Académico editado exitosamente.");
         router.push("/periodoList");
       } else {
         Notification.alertError("Fallo al editar el período.");
       }
     } catch (error) {
-      console.error("Error updating periodo:", error);
+      console.error("Error al editar el período:", error);
       Notification.alertError("Fallo al editar el período.");
+    } finally {
+      setSubmitting(false);
     }
   };
-
-  const selectedUniversidad = universidades.find(
-    (u) => u.value === periodo.Periodo_UniversidadFK
-  );
 
   if (loading) {
     return (
@@ -195,8 +198,10 @@ function EditPeriodo({ params }) {
           <Select
             id="Periodo_UniversidadFK"
             options={universidades}
-            value={selectedUniversidad || null}
-            onChange={handleUniversidadChange}
+            value={universidades.find(
+              (u) => u.value === periodo.Periodo_UniversidadFK
+            )}
+            onChange={handleSelectChange}
             placeholder="Seleccione una universidad..."
             isClearable
           />
@@ -217,8 +222,8 @@ function EditPeriodo({ params }) {
         </div>
 
         <div className={Styles.btn_group}>
-          <button type="submit" className={Styles.btn}>
-            Guardar Cambios
+          <button type="submit" className={Styles.btn} disabled={submitting}>
+            {submitting ? "Guardando..." : "Guardar Cambios"}
           </button>
         </div>
       </form>

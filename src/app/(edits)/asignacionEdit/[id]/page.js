@@ -1,203 +1,267 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import FormLayout from "@components/layouts/FormLayout";
 import withAuth from "@utils/withAuth";
-import Styles from "@styles/form.module.css"; // Usé el mismo CSS que el primero
+import Styles from "@styles/form.module.css";
 import Notification from "@components/Notification";
-import Select from "react-select";
+import AsyncSelect from "react-select/async";
+
+import { fetchDocentes } from "@api/docenteService";
+import { fetchCampus } from "@api/campusService";
+import { fetchUniversidades } from "@api/universidadService";
+import { fetchFacultades } from "@api/facultadService";
+import { fetchEscuelas } from "@api/escuelaService";
+import { fetchPeriodos } from "@api/periodoService";
 
 function AsignacionEdit({ params }) {
   const router = useRouter();
-  const { id } = React.use(params);
+  const { id } = params;
   const searchParams = useSearchParams();
-  const period = searchParams.get("period");
-
   const API = process.env.NEXT_PUBLIC_API_KEY;
 
   const [asignacion, setAsignacion] = useState(null);
-  const [docentes, setDocentes] = useState([]);
-  const [campus, setCampus] = useState([]);
-  const [universidades, setUniversidades] = useState([]);
-  const [facultades, setFacultades] = useState([]);
-  const [escuelas, setEscuelas] = useState([]);
-  const [periodos, setPeriodos] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    async function fetchData() {
-      setIsLoading(true);
-      const accessToken = localStorage.getItem("accessToken");
+  // Estados para los valores seleccionados completos (objetos) de los selects
+  const [selectedDocente, setSelectedDocente] = useState(null);
+  const [selectedCampus, setSelectedCampus] = useState(null);
+  const [selectedUniversidad, setSelectedUniversidad] = useState(null);
+  const [selectedFacultad, setSelectedFacultad] = useState(null);
+  const [selectedEscuela, setSelectedEscuela] = useState(null);
+  const [selectedPeriodo, setSelectedPeriodo] = useState(null);
+
+  // Funciones para cargar opciones async para cada select
+  const loadDocentes = useCallback(
+    async (inputValue) => {
       try {
-        const [
-          asignacionRes,
-          docenteRes,
-          campusRes,
-          uniRes,
-          facRes,
-          escRes,
-          perRes,
-        ] = await Promise.all([
-          fetch(`${API}api/asignacion/${id}/`, {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-          }),
-          fetch(`${API}docentes`, {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-          }),
-          fetch(`${API}campus`, {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-          }),
-          fetch(`${API}universidades`, {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-          }),
-          fetch(`${API}facultades`, {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-          }),
-          fetch(`${API}escuelas`, {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-          }),
-          fetch(`${API}periodos`, {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-          }),
-        ]);
+        const token = localStorage.getItem("accessToken") || "";
+        const { results } = await fetchDocentes(1, inputValue, 10, token);
+        return results.map((d) => ({
+          value: d.DocenteID,
+          label: d.DocenteNombre,
+        }));
+      } catch (error) {
+        console.error("Error al cargar docentes:", error);
+        Notification.alertError("No se pudieron cargar los docentes");
+        return [];
+      }
+    },
+    []
+  );
 
-        if (
-          !asignacionRes.ok ||
-          !docenteRes.ok ||
-          !campusRes.ok ||
-          !uniRes.ok ||
-          !facRes.ok ||
-          !escRes.ok ||
-          !perRes.ok
-        ) {
-          throw new Error("Error en la carga de datos");
-        }
+  const loadCampus = useCallback(
+    async (inputValue) => {
+      try {
+        const token = localStorage.getItem("accessToken") || "";
+        const { results } = await fetchCampus(1, inputValue, 10, token);
+        return results.map((c) => ({
+          value: c.CampusID,
+          label: c.CampusNombre,
+        }));
+      } catch (error) {
+        console.error("Error al cargar campus:", error);
+        Notification.alertError("No se pudo cargar el campus");
+        return [];
+      }
+    },
+    []
+  );
 
-        const [
-          asignacionData,
-          docentesData,
-          campusData,
-          universidadesData,
-          facultadesData,
-          escuelasData,
-          periodosData,
-        ] = await Promise.all([
-          asignacionRes.json(),
-          docenteRes.json(),
-          campusRes.json(),
-          uniRes.json(),
-          facRes.json(),
-          escRes.json(),
-          perRes.json(),
-        ]);
+  const loadUniversidades = useCallback(
+    async (inputValue) => {
+      try {
+        const token = localStorage.getItem("accessToken") || "";
+        const { results } = await fetchUniversidades(1, inputValue, 10, token);
+        return results.map((u) => ({
+          value: u.UniversidadID,
+          label: u.UniversidadNombre,
+        }));
+      } catch (error) {
+        console.error("Error al cargar universidades:", error);
+        Notification.alertError("No se pudieron cargar las universidades");
+        return [];
+      }
+    },
+    []
+  );
 
-        setAsignacion(asignacionData);
+  const loadFacultades = useCallback(
+    async (inputValue) => {
+      try {
+        const token = localStorage.getItem("accessToken") || "";
+        const { results } = await fetchFacultades(1, inputValue, 10, token);
+        return results.map((f) => ({
+          value: f.FacultadID,
+          label: f.FacultadNombre,
+        }));
+      } catch (error) {
+        console.error("Error al cargar facultades:", error);
+        Notification.alertError("No se pudieron cargar las facultades");
+        return [];
+      }
+    },
+    []
+  );
 
-        setDocentes(
-          (docentesData.results || docentesData).map((d) => ({
-            value: d.DocenteID,
-            label: `${d.DocenteNombre} ${d.DocenteApellido}`,
-          }))
+  const loadEscuelas = useCallback(
+    async (inputValue) => {
+      try {
+        const token = localStorage.getItem("accessToken") || "";
+        const { results } = await fetchEscuelas(1, inputValue, 10, token);
+        return results.map((e) => ({
+          value: e.EscuelaId,
+          label: e.EscuelaNombre,
+        }));
+      } catch (error) {
+        console.error("Error al cargar escuelas:", error);
+        Notification.alertError("No se pudieron cargar las escuelas");
+        return [];
+      }
+    },
+    []
+  );
+
+  const loadPeriodos = useCallback(
+    async (inputValue) => {
+      try {
+        const token = localStorage.getItem("accessToken") || "";
+        const { results } = await fetchPeriodos(1, inputValue, 10, token);
+        return results.map((p) => ({
+          value: p.PeriodoID,
+          label: p.PeriodoNombre,
+        }));
+      } catch (error) {
+        console.error("Error al cargar periodos:", error);
+        Notification.alertError("No se pudieron cargar los periodos");
+        return [];
+      }
+    },
+    []
+  );
+
+  // Cargar la asignación y los valores seleccionados completos al montar
+  useEffect(() => {
+    async function fetchAsignacion() {
+      const token = localStorage.getItem("accessToken") || "";
+      try {
+        const res = await fetch(`${API}api/asignacion/${id}/`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) throw new Error("Error al cargar la asignación");
+        const data = await res.json();
+        setAsignacion(data);
+
+        // Para cada FK, crear el objeto {value, label} para mostrar en AsyncSelect
+        // Idealmente, la API debería devolver el nombre junto al ID, si no, se debería hacer una consulta extra para obtener el nombre.
+        setSelectedDocente(
+          data.docenteFk
+            ? { value: data.docenteFk, label: data.docenteNombre || "" }
+            : null
         );
-        setCampus(
-          (campusData.results || campusData).map((c) => ({
-            value: c.CampusID,
-            label: c.CampusNombre,
-          }))
+        setSelectedCampus(
+          data.campusFk
+            ? { value: data.campusFk, label: data.campusNombre || "" }
+            : null
         );
-        setUniversidades(
-          (universidadesData.results || universidadesData).map((u) => ({
-            value: u.UniversidadID,
-            label: u.UniversidadNombre,
-          }))
+        setSelectedUniversidad(
+          data.universidadFk
+            ? { value: data.universidadFk, label: data.universidadNombre || "" }
+            : null
         );
-        setFacultades(
-          (facultadesData.results || facultadesData).map((f) => ({
-            value: f.FacultadID,
-            label: f.FacultadNombre,
-          }))
+        setSelectedFacultad(
+          data.facultadFk
+            ? { value: data.facultadFk, label: data.facultadNombre || "" }
+            : null
         );
-        setEscuelas(
-          (escuelasData.results || escuelasData).map((e) => ({
-            value: e.EscuelaId,
-            label: e.EscuelaNombre,
-          }))
+        setSelectedEscuela(
+          data.escuelaFk
+            ? { value: data.escuelaFk, label: data.escuelaNombre || "" }
+            : null
         );
-        setPeriodos(
-          (periodosData.results || periodosData).map((p) => ({
-            value: p.PeriodoID,
-            label: p.PeriodoNombre,
-          }))
+        setSelectedPeriodo(
+          data.periodoFk
+            ? { value: data.periodoFk, label: data.periodoNombre || "" }
+            : null
         );
       } catch (error) {
-        Notification.alertError(
-          "Error al cargar los datos. Ya existe o faltan datos."
-        );
-        console.error(error);
+        Notification.alertError("No se pudo cargar la asignación");
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
     }
-
-    fetchData();
+    fetchAsignacion();
   }, [id, API]);
 
+  // Cambios en inputs normales
   const handleChange = (e) => {
     const { name, value } = e.target;
     setAsignacion((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Cambios en selects async react-select
   const handleSelectChange = (selected, { name }) => {
     setAsignacion((prev) => ({
       ...prev,
       [name]: selected ? selected.value : "",
     }));
-  };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await fetch(`${API}api/asignacion/edit/${id}/`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-        },
-        body: JSON.stringify(asignacion),
-      });
-
-      if (response.ok) {
-        Notification.alertSuccess("Asignación actualizada con éxito");
-
-        router.push(`/`);
-      } else {
-        Notification.alertError("Error al actualizar la asignación");
-      }
-    } catch (error) {
-      Notification.alertError("Error en la conexión con la API");
-      console.error(error);
+    // Actualizar el estado seleccionado para que el select muestre la opción
+    switch (name) {
+      case "docenteFk":
+        setSelectedDocente(selected);
+        break;
+      case "campusFk":
+        setSelectedCampus(selected);
+        break;
+      case "universidadFk":
+        setSelectedUniversidad(selected);
+        break;
+      case "facultadFk":
+        setSelectedFacultad(selected);
+        break;
+      case "escuelaFk":
+        setSelectedEscuela(selected);
+        break;
+      case "periodoFk":
+        setSelectedPeriodo(selected);
+        break;
+      default:
+        break;
     }
   };
 
-  if (isLoading) return <div>Cargando datos...</div>;
-  if (!asignacion) return <div>No se encontró la asignación</div>;
+  // Submit formulario
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+    const token = localStorage.getItem("accessToken");
+    try {
+      const res = await fetch(`${API}api/asignacion/edit/${id}/`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(asignacion),
+      });
+      if (res.ok) {
+        Notification.alertSuccess("Asignación actualizada");
+        router.push("/");
+      } else {
+        Notification.alertError("Error al actualizar");
+      }
+    } catch (err) {
+      Notification.alertError("Error inesperado");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
-  // Lista de inputs normales para mapear
+  if (loading || !asignacion) return <div>Cargando...</div>;
+
   const inputFields = [
     "nrc",
     "clave",
@@ -213,7 +277,6 @@ function AsignacionEdit({ params }) {
     "creditos",
     "tipo",
     "accion",
-    "usuario_registro",
   ];
 
   return (
@@ -222,17 +285,15 @@ function AsignacionEdit({ params }) {
         <form onSubmit={handleSubmit} className={Styles.form}>
           <h1 className={Styles.title}>Editar Asignación</h1>
 
-          {/* Inputs normales */}
           {inputFields.map((field) => (
             <div className={Styles.name_group} key={field}>
               <label htmlFor={field}>
-                {field.charAt(0).toUpperCase() + field.slice(1)}:
+                {field.charAt(0).toUpperCase() + field.slice(1)}
               </label>
-
-              {/* Acción debe ser select */}
               {field === "accion" ? (
                 <select
                   name="accion"
+                  id="accion"
                   value={asignacion.accion || "nuevo"}
                   onChange={handleChange}
                 >
@@ -246,114 +307,45 @@ function AsignacionEdit({ params }) {
                       ? "number"
                       : "text"
                   }
-                  id={field}
                   name={field}
+                  id={field}
                   value={asignacion[field] || ""}
                   onChange={handleChange}
-                  placeholder={`Ingrese ${field}`}
-                  disabled={field === "nrc"} // Bloqueamos NRC igual que antes
+                  disabled={field === "nrc"}
                 />
               )}
             </div>
           ))}
 
-          {/* Selects con react-select */}
-          <div className={Styles.name_group}>
-            <label>Docente:</label>
-            <Select
-              name="docenteFk"
-              options={docentes}
-              value={
-                docentes.find((d) => d.value === asignacion.docenteFk) || null
-              }
-              onChange={handleSelectChange}
-              placeholder="Seleccione un docente"
-              isClearable
-              required
-            />
-          </div>
-
-          <div className={Styles.name_group}>
-            <label>Campus:</label>
-            <Select
-              name="campusFk"
-              options={campus}
-              value={
-                campus.find((c) => c.value === asignacion.campusFk) || null
-              }
-              onChange={handleSelectChange}
-              placeholder="Seleccione un campus"
-              isClearable
-              required
-            />
-          </div>
-
-          <div className={Styles.name_group}>
-            <label>Universidad:</label>
-            <Select
-              name="universidadFk"
-              options={universidades}
-              value={
-                universidades.find(
-                  (u) => u.value === asignacion.universidadFk
-                ) || null
-              }
-              onChange={handleSelectChange}
-              placeholder="Seleccione una universidad"
-              isClearable
-              required
-            />
-          </div>
-
-          <div className={Styles.name_group}>
-            <label>Facultad:</label>
-            <Select
-              name="facultadFk"
-              options={facultades}
-              value={
-                facultades.find((f) => f.value === asignacion.facultadFk) ||
-                null
-              }
-              onChange={handleSelectChange}
-              placeholder="Seleccione una facultad"
-              isClearable
-              required
-            />
-          </div>
-
-          <div className={Styles.name_group}>
-            <label>Escuela:</label>
-            <Select
-              name="escuelaFk"
-              options={escuelas}
-              value={
-                escuelas.find((e) => e.value === asignacion.escuelaFk) || null
-              }
-              onChange={handleSelectChange}
-              placeholder="Seleccione una escuela"
-              isClearable
-              required
-            />
-          </div>
-
-          <div className={Styles.name_group}>
-            <label>Periodo Académico:</label>
-            <Select
-              name="periodoFk"
-              options={periodos}
-              value={
-                periodos.find((p) => p.value === asignacion.periodoFk) || null
-              }
-              onChange={handleSelectChange}
-              placeholder="Seleccione un periodo"
-              isClearable
-              required
-            />
-          </div>
+          {[
+            { label: "Docente", name: "docenteFk", value: selectedDocente, loadOptions: loadDocentes },
+            { label: "Campus", name: "campusFk", value: selectedCampus, loadOptions: loadCampus },
+            { label: "Universidad", name: "universidadFk", value: selectedUniversidad, loadOptions: loadUniversidades },
+            { label: "Facultad", name: "facultadFk", value: selectedFacultad, loadOptions: loadFacultades },
+            { label: "Escuela", name: "escuelaFk", value: selectedEscuela, loadOptions: loadEscuelas },
+            { label: "Periodo Académico", name: "periodoFk", value: selectedPeriodo, loadOptions: loadPeriodos },
+          ].map(({ label, name, value, loadOptions }) => (
+            <div className={Styles.name_group} key={name}>
+              <label htmlFor={name}>{label}</label>
+              <AsyncSelect
+                cacheOptions
+                defaultOptions
+                loadOptions={loadOptions}
+                value={value}
+                onChange={handleSelectChange}
+                placeholder={`Seleccione ${label.toLowerCase()}`}
+                isClearable
+                name={name}
+                inputId={name}
+                noOptionsMessage={() => "No se encontraron opciones"}
+                menuPlacement="auto"
+              />
+            </div>
+          ))}
 
           <div className={Styles.btn_group}>
-            <button type="submit" className={Styles.btn}>
-              Guardar
+            <button type="submit" className={Styles.btn} disabled={submitting}>
+              {submitting ? "Guardando..." : "Guardar cambios"}
             </button>
           </div>
         </form>
