@@ -64,8 +64,9 @@ function AccionCell({ row, api }) {
       onChange={handleChange}
       disabled={isUpdating}
     >
-      <option value="Nueva">Nueva</option>
-      <option value="Editada">Editada</option>
+      <option value="Pendiente Asignacion">Pendiente Asignacion</option>
+      <option value="Asignar">Asignar</option>
+      <option value="Eliminar">Eliminar</option>
     </select>
   );
 }
@@ -209,7 +210,7 @@ function PrincipalListClient() {
       { accessorKey: "creditos", header: "CR" },
       {
         accessorKey: "accion",
-        header: "Modificación",
+        header: "Status",
         cell: ({ row }) => <AccionCell row={row} api={API} />,
       },
       {
@@ -260,6 +261,16 @@ function PrincipalListClient() {
         >
           Nueva Asignación
         </button>
+
+        <Link
+          className={`btn btn-success ${!selectedPeriodo ? "disabled" : ""}`}
+          href={selectedPeriodo ? "/asignacion" : "#"}
+          tabIndex={!selectedPeriodo ? -1 : 0}
+          aria-disabled={!selectedPeriodo}
+        >
+          Crear Sección
+        </Link>
+
         <button
           className="btn btn-info text-white"
           data-bs-toggle="modal"
@@ -269,14 +280,7 @@ function PrincipalListClient() {
         >
           Editar Asignación
         </button>
-        <Link
-          className={`btn btn-success ${!selectedPeriodo ? "disabled" : ""}`}
-          href={selectedPeriodo ? "/asignacion" : "#"}
-          tabIndex={!selectedPeriodo ? -1 : 0}
-          aria-disabled={!selectedPeriodo}
-        >
-          Crear Sección
-        </Link>
+
         <Link
           className={`btn btn-secondary ${!selectedPeriodo ? "disabled" : ""}`}
           href={
