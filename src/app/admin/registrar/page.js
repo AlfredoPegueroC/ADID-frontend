@@ -157,9 +157,16 @@ export default function RegisterPage() {
           <select
             className="form-select"
             name="role"
-            value={formData.is_staff ? "admin" : "usuario"}
+            value={
+              formData.is_staff
+                ? "admin"
+                : formData.role === "usuario"
+                ? "usuario"
+                : "" // consultador por defecto
+            }
             onChange={handleChange}
           >
+            <option value="">Solo lectura</option>
             <option value="usuario">Usuario</option>
             <option value="admin">Administrador</option>
           </select>

@@ -17,6 +17,7 @@ import ImportPage from "@components/forms/ImportAsignacion";
 import Notification from "@components/Notification";
 import Spinner from "@components/Spinner";
 
+import { useAuth } from "@contexts/AuthContext";
 import withAuth from "@utils/withAuth";
 import Select from "react-select";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -92,6 +93,7 @@ function PrincipalListClient() {
   const API = process.env.NEXT_PUBLIC_API_KEY;
   const Api_import_URL = `${API}import/asignacion`;
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   useEffect(() => {
     const cargarPeriodos = async () => {
@@ -211,19 +213,23 @@ function PrincipalListClient() {
       {
         accessorKey: "accion",
         header: "Status",
-        cell: ({ row }) => <AccionCell row={row} api={API} />,
+        cell: ({ row }) =>
+          (user?.groups[0] === "admin" || user?.groups[0] === "usuario") && (
+            <AccionCell row={row} api={API} />
+          ),
       },
       {
         id: "acciones",
         header: "Acción",
-        cell: ({ row }) => (
-          <Link
-            className="btn btn-primary btn-sm"
-            href={`/asignacionEdit/${row.original.AsignacionID}?period=${selectedPeriodo}`}
-          >
-            Editar
-          </Link>
-        ),
+        cell: ({ row }) =>
+          (user?.groups[0] === "admin" || user?.groups[0] === "usuario") && (
+            <Link
+              className="btn btn-primary btn-sm"
+              href={`/asignacionEdit/${row.original.AsignacionID}?period=${selectedPeriodo}`}
+            >
+              Editar
+            </Link>
+          ),
       },
     ],
     [selectedPeriodo, API]
@@ -252,34 +258,40 @@ function PrincipalListClient() {
   return (
     <div className="mt-4">
       <div className="d-flex flex-wrap gap-2 align-items-center mb-3">
-        <button
-          className="btn btn-warning text-dark"
-          data-bs-toggle="modal"
-          data-bs-target="#Modal"
-          disabled={!selectedPeriodo}
-          title={!selectedPeriodo ? "Selecciona un periodo primero" : ""}
-        >
-          Nueva Asignación
-        </button>
+        {(user?.groups[0] === "admin" || user?.groups[0] === "usuario") && (
+          <>
+            <button
+              className="btn btn-warning text-dark"
+              data-bs-toggle="modal"
+              data-bs-target="#Modal"
+              disabled={!selectedPeriodo}
+              title={!selectedPeriodo ? "Selecciona un periodo primero" : ""}
+            >
+              Nueva Asignación
+            </button>
 
-        <Link
-          className={`btn btn-success ${!selectedPeriodo ? "disabled" : ""}`}
-          href={selectedPeriodo ? "/asignacion" : "#"}
-          tabIndex={!selectedPeriodo ? -1 : 0}
-          aria-disabled={!selectedPeriodo}
-        >
-          Crear Sección
-        </Link>
+            <Link
+              className={`btn btn-success ${
+                !selectedPeriodo ? "disabled" : ""
+              }`}
+              href={selectedPeriodo ? "/asignacion" : "#"}
+              tabIndex={!selectedPeriodo ? -1 : 0}
+              aria-disabled={!selectedPeriodo}
+            >
+              Crear Sección
+            </Link>
 
-        <button
-          className="btn btn-info text-white"
-          data-bs-toggle="modal"
-          data-bs-target="#modalcopiar"
-          disabled={!selectedPeriodo}
-          title={!selectedPeriodo ? "Selecciona un periodo primero" : ""}
-        >
-          Editar Asignación
-        </button>
+            <button
+              className="btn btn-info text-white"
+              data-bs-toggle="modal"
+              data-bs-target="#modalcopiar"
+              disabled={!selectedPeriodo}
+              title={!selectedPeriodo ? "Selecciona un periodo primero" : ""}
+            >
+              Editar Asignación
+            </button>
+          </>
+        )}
 
         <Link
           className={`btn btn-secondary ${!selectedPeriodo ? "disabled" : ""}`}

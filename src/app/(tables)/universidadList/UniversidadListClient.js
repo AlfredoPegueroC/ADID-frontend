@@ -89,12 +89,14 @@ function UniversidadListClient() {
         id: "actions",
         cell: ({ row }) => (
           <div className="d-flex">
-            <Link
-              href={`/universidadEdit/${row.original.UniversidadCodigo}`}
-              className="btn btn-primary btn-sm"
-            >
-              editar
-            </Link>
+            {(user?.groups[0] === "admin" || user?.groups[0] === "usuario") && (
+              <Link
+                href={`/universidadEdit/${row.original.UniversidadCodigo}`}
+                className="btn btn-primary btn-sm"
+              >
+                editar
+              </Link>
+            )}
             {user?.groups[0] === "admin" && (
               <>
                 <button
@@ -127,9 +129,12 @@ function UniversidadListClient() {
 
       <div className="d-flex justify-content-between align-items-center mb-3 mt-3">
         <div className="d-flex gap-2 flex-wrap">
-          <Link className="btn btn-primary" href="/universidad">
-            Nueva Universidad
-          </Link>
+          {(user?.groups[0] === "admin" || user?.groups[0] === "usuario") && (
+            <Link className="btn btn-primary" href="/universidad">
+              Nueva Universidad
+            </Link>
+          )}
+
           <Link className="btn btn-success" href={`${API}export/universidad`}>
             Exportar Excel
           </Link>
@@ -143,14 +148,17 @@ function UniversidadListClient() {
           >
             Exportar PDF
           </button>
-          <button
-            type="button"
-            className="btn btn-warning"
-            data-bs-toggle="modal"
-            data-bs-target="#Modal"
-          >
-            Importar Excel
-          </button>
+
+          {(user?.groups[0] === "admin" || user?.groups[0] === "usuario") && (
+            <button
+              type="button"
+              className="btn btn-warning"
+              data-bs-toggle="modal"
+              data-bs-target="#Modal"
+            >
+              Importar Excel
+            </button>
+          )}
 
           <Search
             SearchSubmit={(e) => e.preventDefault()}

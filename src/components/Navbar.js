@@ -19,7 +19,8 @@ export default function Navbar() {
   const { user, refreshToken, logout } = useAuth();
 
   const queryClient = useQueryClient();
-  const token = typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
+  const token =
+    typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
 
   const handlePrefetch = (key, fetchFn) => {
     queryClient.prefetchQuery({
@@ -103,26 +104,55 @@ export default function Navbar() {
               </Link>
             </li>
 
-            <li className="nav-item dropdown">
-              <Link
-                className="nav-link dropdown-toggle text-white fw-bold"
-                href="#"
-                role="button"
-                data-bs-toggle="dropdown"
-              >
-                Mantenimientos
-              </Link>
-              <ul className="dropdown-menu">
-                <li><Link className="dropdown-item" href="/universidad">Universidad</Link></li>
-                <li><Link className="dropdown-item" href="/campus">Campus</Link></li>
-                <li><Link className="dropdown-item" href="/facultad">Facultad</Link></li>
-                <li><Link className="dropdown-item" href="/escuela">Escuela</Link></li>
-                <li><Link className="dropdown-item" href="/categoriadocente">Categoria docente</Link></li>
-                <li><Link className="dropdown-item" href="/tipodocente">Tipo docente</Link></li>
-                <li><Link className="dropdown-item" href="/docente">Docente</Link></li>
-              </ul>
-            </li>
-
+            {(user?.groups[0] === "admin" || user?.groups[0] === "usuario") && (
+              <li className="nav-item dropdown">
+                <Link
+                  className="nav-link dropdown-toggle text-white fw-bold"
+                  href="#"
+                  role="button"
+                  data-bs-toggle="dropdown"
+                >
+                  Mantenimientos
+                </Link>
+                <ul className="dropdown-menu">
+                  <li>
+                    <Link className="dropdown-item" href="/universidad">
+                      Universidad
+                    </Link>
+                  </li>
+                  <li>
+                    <Link className="dropdown-item" href="/campus">
+                      Campus
+                    </Link>
+                  </li>
+                  <li>
+                    <Link className="dropdown-item" href="/facultad">
+                      Facultad
+                    </Link>
+                  </li>
+                  <li>
+                    <Link className="dropdown-item" href="/escuela">
+                      Escuela
+                    </Link>
+                  </li>
+                  <li>
+                    <Link className="dropdown-item" href="/categoriadocente">
+                      Categoria docente
+                    </Link>
+                  </li>
+                  <li>
+                    <Link className="dropdown-item" href="/tipodocente">
+                      Tipo docente
+                    </Link>
+                  </li>
+                  <li>
+                    <Link className="dropdown-item" href="/docente">
+                      Docente
+                    </Link>
+                  </li>
+                </ul>
+              </li>
+            )}
             <li className="nav-item dropdown">
               <Link
                 className="nav-link dropdown-toggle text-white fw-bold"
@@ -185,8 +215,16 @@ export default function Navbar() {
                     Escuela
                   </Link>
                 </li>
-                <li><Link className="dropdown-item" href="/categoriadocenteList">Categoria docente</Link></li>
-                <li><Link className="dropdown-item" href="/tipodocenteList">Tipo docente</Link></li>
+                <li>
+                  <Link className="dropdown-item" href="/categoriadocenteList">
+                    Categoria docente
+                  </Link>
+                </li>
+                <li>
+                  <Link className="dropdown-item" href="/tipodocenteList">
+                    Tipo docente
+                  </Link>
+                </li>
                 <li>
                   <Link
                     className="dropdown-item"
@@ -200,7 +238,11 @@ export default function Navbar() {
                     Docente
                   </Link>
                 </li>
-                <li><Link className="dropdown-item" href="/periodoList">Periodo Academico</Link></li>
+                <li>
+                  <Link className="dropdown-item" href="/periodoList">
+                    Periodo Academico
+                  </Link>
+                </li>
               </ul>
             </li>
 
@@ -214,11 +256,17 @@ export default function Navbar() {
                   aria-expanded="false"
                 >
                   <span className="fw-semibold">{userName}</span>
-                  <span className="ms-2 text-muted" style={{ fontSize: "1rem" }}>
+                  <span
+                    className="ms-2 text-muted"
+                    style={{ fontSize: "1rem" }}
+                  >
                     ({userUsername})
                   </span>
                 </div>
-                <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                <ul
+                  className="dropdown-menu dropdown-menu-end"
+                  aria-labelledby="userDropdown"
+                >
                   {user.groups?.includes("admin") && (
                     <li>
                       <Link className="dropdown-item" href="/admin">
@@ -227,7 +275,10 @@ export default function Navbar() {
                     </li>
                   )}
                   <li>
-                    <button className="dropdown-item text-danger" onClick={handleLogout}>
+                    <button
+                      className="dropdown-item text-danger"
+                      onClick={handleLogout}
+                    >
                       Cerrar sesión
                     </button>
                   </li>

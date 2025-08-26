@@ -100,12 +100,14 @@ function DocenteListClient() {
         id: "actions",
         cell: ({ row }) => (
           <div className="d-flex gap-2">
-            <Link
-              href={`/docenteEdit/${row.original.DocenteCodigo}`}
-              className="btn btn-primary btn-sm"
-            >
-              Editar
-            </Link>
+            {(user?.groups[0] === "admin" || user?.groups[0] === "usuario") && (
+              <Link
+                href={`/docenteEdit/${row.original.DocenteCodigo}`}
+                className="btn btn-primary btn-sm"
+              >
+                Editar
+              </Link>
+            )}
             {user?.groups[0] === "admin" && (
               <button
                 className="btn btn-danger btn-sm"
@@ -141,9 +143,11 @@ function DocenteListClient() {
 
       <div className="d-flex justify-content-between align-items-center mb-3 mt-3 flex-wrap">
         <div className="d-flex gap-2 flex-wrap align-items-center">
-          <Link className="btn btn-primary" href="/docente">
-            Agregar Docente
-          </Link>
+          {(user?.groups[0] === "admin" || user?.groups[0] === "usuario") && (
+            <Link className="btn btn-primary" href="/docente">
+              Agregar Docente
+            </Link>
+          )}
 
           <Link
             className={`btn btn-success`}
@@ -155,21 +159,25 @@ function DocenteListClient() {
           </Link>
 
           <button
-            className={`btn btn-danger ${docentes.length === 0 ? "disabled" : ""}`}
+            className={`btn btn-danger ${
+              docentes.length === 0 ? "disabled" : ""
+            }`}
             onClick={() => exportDocentesToPDF(docentes, page, pageSize)}
             disabled={docentes.length === 0}
           >
             Exportar PDF
           </button>
 
-          <button
-            type="button"
-            className="btn btn-warning"
-            data-bs-toggle="modal"
-            data-bs-target="#Modal"
-          >
-            Importar Excel
-          </button>
+          {(user?.groups[0] === "admin" || user?.groups[0] === "usuario") && (
+            <button
+              type="button"
+              className="btn btn-warning"
+              data-bs-toggle="modal"
+              data-bs-target="#Modal"
+            >
+              Importar Excel
+            </button>
+          )}
 
           <Search
             SearchSubmit={handleSearchSubmit}
@@ -179,7 +187,9 @@ function DocenteListClient() {
         </div>
 
         <div className="d-flex align-items-center gap-2 mt-2 mt-md-0">
-          <label className="fw-bold mb-0 text-black">Resultados por página:</label>
+          <label className="fw-bold mb-0 text-black">
+            Resultados por página:
+          </label>
           <select
             className="form-select w-auto"
             style={{ height: "38px" }}
@@ -210,9 +220,14 @@ function DocenteListClient() {
                 <th
                   key={header.id}
                   onClick={header.column.getToggleSortingHandler()}
-                  style={{ cursor: header.column.getCanSort() ? "pointer" : "default" }}
+                  style={{
+                    cursor: header.column.getCanSort() ? "pointer" : "default",
+                  }}
                 >
-                  {flexRender(header.column.columnDef.header, header.getContext())}
+                  {flexRender(
+                    header.column.columnDef.header,
+                    header.getContext()
+                  )}
                   {{
                     asc: " 🔼",
                     desc: " 🔽",
@@ -251,7 +266,11 @@ function DocenteListClient() {
       </Tables>
 
       {totalPages > 1 && (
-        <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
+        />
       )}
     </div>
   );

@@ -31,7 +31,8 @@ function EscuelaListClient() {
   const [sorting, setSorting] = useState([]);
   const { user } = useAuth();
   const API = process.env.NEXT_PUBLIC_API_KEY;
-  const token = typeof window !== "undefined" ? localStorage.getItem("accessToken") : "";
+  const token =
+    typeof window !== "undefined" ? localStorage.getItem("accessToken") : "";
   const queryClient = useQueryClient();
 
   const debouncedSearch = useRef(
@@ -99,12 +100,14 @@ function EscuelaListClient() {
         id: "actions",
         cell: ({ row }) => (
           <div className="d-flex">
-            <Link
-              href={`/escuelaEdit/${row.original.EscuelaCodigo}`}
-              className="btn btn-primary btn-sm"
-            >
-              Editar
-            </Link>
+            {(user?.groups[0] === "admin" || user?.groups[0] === "usuario") && (
+              <Link
+                href={`/escuelaEdit/${row.original.EscuelaCodigo}`}
+                className="btn btn-primary btn-sm"
+              >
+                Editar
+              </Link>
+            )}
             {user?.groups[0] === "admin" && (
               <button
                 className="btn btn-danger btn-sm mx-2"
@@ -136,10 +139,11 @@ function EscuelaListClient() {
 
       <div className="d-flex justify-content-between align-items-center mb-3 mt-3 flex-wrap">
         <div className="d-flex gap-2 flex-wrap align-items-center">
-          <Link className="btn btn-primary" href="/escuela">
-            Nueva Escuela
-          </Link>
-
+          {(user?.groups[0] === "admin" || user?.groups[0] === "usuario") && (
+            <Link className="btn btn-primary" href="/escuela">
+              Nueva Escuela
+            </Link>
+          )}
           <Link
             className={`btn btn-success`}
             href={`${API}export/escuela`}
@@ -150,21 +154,25 @@ function EscuelaListClient() {
           </Link>
 
           <button
-            className={`btn btn-danger ${escuelas.length === 0 ? "disabled" : ""}`}
+            className={`btn btn-danger ${
+              escuelas.length === 0 ? "disabled" : ""
+            }`}
             onClick={() => exportEscuelasToPDF(escuelas, page, pageSize)}
             disabled={escuelas.length === 0}
           >
             Exportar PDF
           </button>
 
-          <button
-            type="button"
-            className="btn btn-warning"
-            data-bs-toggle="modal"
-            data-bs-target="#Modal"
-          >
-            Importar Excel
-          </button>
+          {(user?.groups[0] === "admin" || user?.groups[0] === "usuario") && (
+            <button
+              type="button"
+              className="btn btn-warning"
+              data-bs-toggle="modal"
+              data-bs-target="#Modal"
+            >
+              Importar Excel
+            </button>
+          )}
 
           <Search
             SearchSubmit={handleSearchSubmit}
@@ -174,7 +182,9 @@ function EscuelaListClient() {
         </div>
 
         <div className="d-flex align-items-center gap-2 mt-2 mt-md-0">
-          <label className="fw-bold mb-0 text-black">Resultados por página:</label>
+          <label className="fw-bold mb-0 text-black">
+            Resultados por página:
+          </label>
           <select
             className="form-select w-auto"
             style={{ height: "38px" }}
@@ -205,9 +215,14 @@ function EscuelaListClient() {
                 <th
                   key={header.id}
                   onClick={header.column.getToggleSortingHandler()}
-                  style={{ cursor: header.column.getCanSort() ? "pointer" : "default" }}
+                  style={{
+                    cursor: header.column.getCanSort() ? "pointer" : "default",
+                  }}
                 >
-                  {flexRender(header.column.columnDef.header, header.getContext())}
+                  {flexRender(
+                    header.column.columnDef.header,
+                    header.getContext()
+                  )}
                   {{
                     asc: " 🔼",
                     desc: " 🔽",
@@ -246,7 +261,11 @@ function EscuelaListClient() {
       </Tables>
 
       {totalPages > 1 && (
-        <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
+        />
       )}
     </div>
   );

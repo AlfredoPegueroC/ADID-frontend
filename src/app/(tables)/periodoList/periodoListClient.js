@@ -103,12 +103,15 @@ function PeriodoListClient({ initialData, totalPages: initialTotalPages }) {
         id: "actions",
         cell: ({ row }) => (
           <>
-            <Link
-              className="btn btn-primary btn-sm"
-              href={`/periodoEdit/${row.original.PeriodoCodigo}`}
-            >
-              editar
-            </Link>
+            {(user?.groups[0] === "admin" || user?.groups[0] === "usuario") && (
+              <Link
+                className="btn btn-primary btn-sm"
+                href={`/periodoEdit/${row.original.PeriodoCodigo}`}
+              >
+                editar
+              </Link>
+            )}
+
             {user?.groups[0] === "admin" && (
               <button
                 className="btn btn-danger btn-sm mx-2"
@@ -144,14 +147,16 @@ function PeriodoListClient({ initialData, totalPages: initialTotalPages }) {
 
       <div className="d-flex justify-content-between align-items-center mb-3 mt-3">
         <div className="d-flex gap-2">
-          <button
-            type="button"
-            className="btn btn-primary"
-            data-bs-toggle="modal"
-            data-bs-target="#Modal"
-          >
-            Nuevo Periodo Académico
-          </button>
+          {(user?.groups[0] === "admin" || user?.groups[0] === "usuario") && (
+            <button
+              type="button"
+              className="btn btn-primary"
+              data-bs-toggle="modal"
+              data-bs-target="#Modal"
+            >
+              Nuevo Periodo Académico
+            </button>
+          )}
 
           <Link
             className="btn btn-success"
@@ -168,7 +173,9 @@ function PeriodoListClient({ initialData, totalPages: initialTotalPages }) {
         </div>
 
         <div className="d-flex align-items-center gap-2">
-          <label className="fw-bold mb-0 text-black">Resultados por página:</label>
+          <label className="fw-bold mb-0 text-black">
+            Resultados por página:
+          </label>
           <select
             className="form-select w-auto"
             style={{ height: "38px" }}
@@ -187,7 +194,9 @@ function PeriodoListClient({ initialData, totalPages: initialTotalPages }) {
       <Modal title="Nuevo Periodo Académico">
         <Periodo
           title="Registrar Periodo"
-          onSuccess={() => queryClient.invalidateQueries({ queryKey: ["periodos"] })}
+          onSuccess={() =>
+            queryClient.invalidateQueries({ queryKey: ["periodos"] })
+          }
         />
       </Modal>
 
@@ -199,9 +208,14 @@ function PeriodoListClient({ initialData, totalPages: initialTotalPages }) {
                 <th
                   key={header.id}
                   onClick={header.column.getToggleSortingHandler()}
-                  style={{ cursor: header.column.getCanSort() ? "pointer" : "default" }}
+                  style={{
+                    cursor: header.column.getCanSort() ? "pointer" : "default",
+                  }}
                 >
-                  {flexRender(header.column.columnDef.header, header.getContext())}
+                  {flexRender(
+                    header.column.columnDef.header,
+                    header.getContext()
+                  )}
                   {{
                     asc: " 🔼",
                     desc: " 🔽",
@@ -215,7 +229,9 @@ function PeriodoListClient({ initialData, totalPages: initialTotalPages }) {
         <tbody>
           {isLoading ? (
             <tr>
-              <td colSpan={10} className="text-center"><Spinner /></td>
+              <td colSpan={10} className="text-center">
+                <Spinner />
+              </td>
             </tr>
           ) : periodos.length === 0 ? (
             <tr>

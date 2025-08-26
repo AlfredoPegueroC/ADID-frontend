@@ -31,7 +31,7 @@ function TipoDocenteListClient() {
 
   const API = process.env.NEXT_PUBLIC_API_KEY;
   const queryClient = useQueryClient();
-  const {user} = useAuth();
+  const { user } = useAuth();
   const debouncedSearch = useRef(
     debounce((value) => {
       setSearchQuery(value);
@@ -82,13 +82,14 @@ function TipoDocenteListClient() {
         id: "actions",
         cell: ({ row }) => (
           <div className="d-flex">
-            <Link
-              href={`/tipoEdit/${row.original.TipoDocenteCodigo}`}
-              className="btn btn-primary btn-sm"
-            >
-              editar
-            </Link>
-
+            {(user?.groups[0] === "admin" || user?.groups[0] === "usuario") && (
+              <Link
+                href={`/tipoEdit/${row.original.TipoDocenteCodigo}`}
+                className="btn btn-primary btn-sm"
+              >
+                editar
+              </Link>
+            )}
 
             {user?.groups[0] === "admin" && (
               <button
@@ -120,9 +121,11 @@ function TipoDocenteListClient() {
 
       <div className="d-flex justify-content-between align-items-center mb-3 mt-3">
         <div className="d-flex gap-2 flex-wrap">
-          <Link className="btn btn-primary" href="/tipodocente">
-            Nuevo Tipo
-          </Link>
+          {(user?.groups[0] === "admin" || user?.groups[0] === "usuario") && (
+            <Link className="btn btn-primary" href="/tipodocente">
+              Nuevo Tipo
+            </Link>
+          )}
 
           <Link className="btn btn-success" href={`${API}export/tipoDocente`}>
             Exportar Excel
@@ -134,14 +137,16 @@ function TipoDocenteListClient() {
             Exportar PDF
           </button>
 
-          <button
-            type="button"
-            className="btn btn-warning"
-            data-bs-toggle="modal"
-            data-bs-target="#Modal"
-          >
-            Importar Excel
-          </button>
+          {(user?.groups[0] === "admin" || user?.groups[0] === "usuario") && (
+            <button
+              type="button"
+              className="btn btn-warning"
+              data-bs-toggle="modal"
+              data-bs-target="#Modal"
+            >
+              Importar Excel
+            </button>
+          )}
 
           <Search
             SearchSubmit={handleSearchSubmit}
@@ -151,7 +156,9 @@ function TipoDocenteListClient() {
         </div>
 
         <div className="d-flex align-items-center gap-2">
-          <label className="fw-bold mb-0 text-black">Resultados por página:</label>
+          <label className="fw-bold mb-0 text-black">
+            Resultados por página:
+          </label>
           <select
             className="form-select w-auto"
             style={{ height: "38px" }}
@@ -170,7 +177,9 @@ function TipoDocenteListClient() {
       <Modal title="Importar Tipo de Docente">
         <ImportExcel
           importURL={`${API}import/tipoDocente`}
-          onSuccess={() => queryClient.invalidateQueries({ queryKey: ["tiposDocente"] })}
+          onSuccess={() =>
+            queryClient.invalidateQueries({ queryKey: ["tiposDocente"] })
+          }
         />
       </Modal>
 
@@ -182,9 +191,14 @@ function TipoDocenteListClient() {
                 <th
                   key={header.id}
                   onClick={header.column.getToggleSortingHandler()}
-                  style={{ cursor: header.column.getCanSort() ? "pointer" : "default" }}
+                  style={{
+                    cursor: header.column.getCanSort() ? "pointer" : "default",
+                  }}
                 >
-                  {flexRender(header.column.columnDef.header, header.getContext())}
+                  {flexRender(
+                    header.column.columnDef.header,
+                    header.getContext()
+                  )}
                   {{
                     asc: " 🔼",
                     desc: " 🔽",
@@ -197,11 +211,15 @@ function TipoDocenteListClient() {
         <tbody>
           {isLoading ? (
             <tr>
-              <td colSpan={6} className="text-center"><Spinner /></td>
+              <td colSpan={6} className="text-center">
+                <Spinner />
+              </td>
             </tr>
           ) : tipos.length === 0 ? (
             <tr>
-              <td colSpan={6} className="text-center">No se encontraron tipos de docente.</td>
+              <td colSpan={6} className="text-center">
+                No se encontraron tipos de docente.
+              </td>
             </tr>
           ) : (
             table.getRowModel().rows.map((row) => (
@@ -218,7 +236,11 @@ function TipoDocenteListClient() {
       </Tables>
 
       {totalPages > 1 && (
-        <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
+        />
       )}
     </div>
   );
