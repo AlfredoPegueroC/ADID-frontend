@@ -72,6 +72,60 @@ function AccionCell({ row, api }) {
   );
 }
 
+function ComentarioCell({ row, api }) {
+  const [value, setValue] = useState(row.original.comentario || "");
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  const handleSave = async () => {
+    if (value === row.original.comentario) return; // evita enviar si no hubo cambios
+
+    setIsUpdating(true);
+    try {
+      const res = await fetch(
+        `${api}api/asignacion/edit/${row.original.AsignacionID}/`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+          body: JSON.stringify({ comentario: value }),
+        }
+      );
+
+      if (!res.ok) throw new Error("No se pudo actualizar");
+      Notification.alertSuccess("Comentario actualizado correctamente");
+    } catch (err) {
+      console.error("Error al actualizar comentario:", err);
+      alert("Error al modificar el comentario");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  return (
+    <div>
+      <textarea
+        className="form-control form-control-sm"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        onBlur={handleSave} // guarda automáticamente al salir del campo
+        disabled={isUpdating}
+        placeholder="Escribir comentario..."
+      />
+      <div className="mt-2 text-end">
+        <button
+          className="btn btn-primary btn-sm"
+          onClick={handleSave} // también se puede guardar con el botón
+          disabled={isUpdating}
+        >
+          {isUpdating ? "Guardando..." : "Guardar"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function PrincipalListClient() {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
@@ -226,12 +280,28 @@ function PrincipalListClient() {
               id: "acciones",
               header: "Acción",
               cell: ({ row }) => (
-                <Link
-                  className="btn btn-primary btn-sm"
-                  href={`/asignacionEdit/${row.original.AsignacionID}?period=${selectedPeriodo}`}
-                >
-                  Editar
-                </Link>
+                <div className="d-flex gap-2">
+                  <Link
+                    className="btn btn-primary btn-sm"
+                    href={`/asignacionEdit/${row.original.AsignacionID}?period=${selectedPeriodo}`}
+                  >
+                    Editar
+                  </Link>
+
+                  <button
+                    className="btn btn-warning btn-sm text-white"
+                    data-bs-toggle="modal"
+                    data-bs-target="#modal_comment"
+                    disabled={!selectedPeriodo}
+                    title={!selectedPeriodo ? "Comentario" : ""}
+                  >
+                    Comentar
+                  </button>
+                  {/* CREAR UN COMPONENT CON ESTO */}
+                  <Modal title="Observaciones" modelName="modal_comment">
+                    <ComentarioCell row={row} api={API} />
+                  </Modal>
+                </div>
               ),
             },
           ]
