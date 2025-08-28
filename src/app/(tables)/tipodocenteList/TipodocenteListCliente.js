@@ -77,31 +77,32 @@ function TipoDocenteListClient() {
       { header: "Descripción", accessorKey: "TipoDocenteDescripcion" },
       { header: "Estado", accessorKey: "TipoDocenteEstado" },
       { header: "Universidad", accessorKey: "universidadNombre" },
-      {
-        header: "Acción",
-        id: "actions",
-        cell: ({ row }) => (
-          <div className="d-flex">
-            {(user?.groups[0] === "admin" || user?.groups[0] === "usuario") && (
-              <Link
-                href={`/tipoEdit/${row.original.TipoDocenteCodigo}`}
-                className="btn btn-primary btn-sm"
-              >
-                editar
-              </Link>
-            )}
 
-            {user?.groups[0] === "admin" && (
-              <button
-                className="btn btn-danger btn-sm mx-2"
-                onClick={() => handleDeleteTipo(row.original.TipoDocenteID)}
-              >
-                borrar
-              </button>
-            )}
-          </div>
-        ),
-      },
+      ...(user?.groups[0] === "admin" || user?.groups[0] === "usuario"
+        ? [
+            {
+              header: "Acción",
+              id: "actions",
+              cell: ({ row }) => (
+                <div className="d-flex">
+                  <Link
+                    href={`/tipoEdit/${row.original.TipoDocenteCodigo}`}
+                    className="btn btn-primary btn-sm"
+                  >
+                    editar
+                  </Link>
+
+                  <button
+                    className="btn btn-danger btn-sm mx-2"
+                    onClick={() => handleDeleteTipo(row.original.TipoDocenteID)}
+                  >
+                    borrar
+                  </button>
+                </div>
+              ),
+            },
+          ]
+        : []),
     ],
     []
   );

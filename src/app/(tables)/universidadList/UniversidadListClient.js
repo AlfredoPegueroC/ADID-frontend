@@ -84,32 +84,33 @@ function UniversidadListClient() {
       },
       { header: "Rector", accessorKey: "UniversidadRector" },
       { header: "Estado", accessorKey: "UniversidadEstado" },
-      {
-        header: "Acción",
-        id: "actions",
-        cell: ({ row }) => (
-          <div className="d-flex">
-            {(user?.groups[0] === "admin" || user?.groups[0] === "usuario") && (
-              <Link
-                href={`/universidadEdit/${row.original.UniversidadCodigo}`}
-                className="btn btn-primary btn-sm"
-              >
-                editar
-              </Link>
-            )}
-            {user?.groups[0] === "admin" && (
-              <>
-                <button
-                  className="btn btn-danger btn-sm mx-2"
-                  onClick={() => handleDelete(row.original.UniversidadID)}
-                >
-                  borrar
-                </button>
-              </>
-            )}
-          </div>
-        ),
-      },
+      ...(user?.groups[0] === "admin" || user?.groups[0] === "usuario"
+        ? [
+            {
+              header: "Acción",
+              id: "actions",
+              cell: ({ row }) => (
+                <div className="d-flex">
+                  <Link
+                    href={`/universidadEdit/${row.original.UniversidadCodigo}`}
+                    className="btn btn-primary btn-sm"
+                  >
+                    editar
+                  </Link>
+
+                  <>
+                    <button
+                      className="btn btn-danger btn-sm mx-2"
+                      onClick={() => handleDelete(row.original.UniversidadID)}
+                    >
+                      borrar
+                    </button>
+                  </>
+                </div>
+              ),
+            },
+          ]
+        : []),
     ],
     []
   );

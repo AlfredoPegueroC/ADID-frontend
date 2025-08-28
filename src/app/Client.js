@@ -210,27 +210,32 @@ function PrincipalListClient() {
       { accessorKey: "dias", header: "Días" },
       { accessorKey: "aula", header: "Aula" },
       { accessorKey: "creditos", header: "CR" },
-      {
-        accessorKey: "accion",
-        header: "Status",
-        cell: ({ row }) =>
-          (user?.groups[0] === "admin" || user?.groups[0] === "usuario") && (
-            <AccionCell row={row} api={API} />
-          ),
-      },
-      {
-        id: "acciones",
-        header: "Acción",
-        cell: ({ row }) =>
-          (user?.groups[0] === "admin" || user?.groups[0] === "usuario") && (
-            <Link
-              className="btn btn-primary btn-sm"
-              href={`/asignacionEdit/${row.original.AsignacionID}?period=${selectedPeriodo}`}
-            >
-              Editar
-            </Link>
-          ),
-      },
+
+      ...(user?.groups[0] === "admin" || user?.groups[0] === "usuario"
+        ? [
+            {
+              accessorKey: "accion",
+              header: "Status",
+              cell: ({ row }) =>
+                (user?.groups[0] === "admin" ||
+                  user?.groups[0] === "usuario") && (
+                  <AccionCell row={row} api={API} />
+                ),
+            },
+            {
+              id: "acciones",
+              header: "Acción",
+              cell: ({ row }) => (
+                <Link
+                  className="btn btn-primary btn-sm"
+                  href={`/asignacionEdit/${row.original.AsignacionID}?period=${selectedPeriodo}`}
+                >
+                  Editar
+                </Link>
+              ),
+            },
+          ]
+        : []),
     ],
     [selectedPeriodo, API]
   );

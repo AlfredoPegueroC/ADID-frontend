@@ -96,34 +96,38 @@ function CampusListClient() {
       { header: "Universidad", accessorKey: "universidadNombre" },
       { header: "Correo", accessorKey: "CampusCorreoContacto" },
       { header: "Estado", accessorKey: "CampusEstado" },
-      {
-        header: "Acción",
-        id: "actions",
-        cell: ({ row }) => (
-          <div className="d-flex">
-            {(user?.groups[0] === "admin" || user?.groups[0] === "usuario") && (
-              <Link
-                href={`/campusEdit/${row.original.CampusCodigo}`}
-                className="btn btn-primary btn-sm"
-              >
-                Editar
-              </Link>
-            )}
-            {user?.groups[0] === "admin" && (
-              <button
-                className="btn btn-danger btn-sm mx-2"
-                onClick={() => handleDeleteCampus(row.original.CampusID)}
-                disabled={mutationDelete.isLoading}
-              >
-                Borrar
-              </button>
-            )}
-          </div>
-        ),
-      },
+      ...(user?.groups[0] === "admin" || user?.groups[0] === "usuario"
+        ? [
+            {
+              header: "Acción",
+              id: "actions",
+              cell: ({ row }) => (
+                <div className="d-flex">
+                  <Link
+                    href={`/campusEdit/${row.original.CampusCodigo}`}
+                    className="btn btn-primary btn-sm"
+                  >
+                    Editar
+                  </Link>
+
+                  <button
+                    className="btn btn-danger btn-sm mx-2"
+                    onClick={() => handleDeleteCampus(row.original.CampusID)}
+                    disabled={mutationDelete.isLoading}
+                  >
+                    Borrar
+                  </button>
+                </div>
+              ),
+            },
+          ]
+        : []),
     ],
     [mutationDelete.isLoading]
   );
+
+
+// ...(user?.groups[0] === "admin" || user?.groups[0] === "usuario" ? [] : [])
 
   const table = useReactTable({
     data: campusList,

@@ -98,32 +98,33 @@ function PeriodoListClient({ initialData, totalPages: initialTotalPages }) {
         accessorKey: "universidadNombre",
         cell: ({ row }) => row.original.universidadNombre || "—",
       },
-      {
-        header: "Acción",
-        id: "actions",
-        cell: ({ row }) => (
-          <>
-            {(user?.groups[0] === "admin" || user?.groups[0] === "usuario") && (
-              <Link
-                className="btn btn-primary btn-sm"
-                href={`/periodoEdit/${row.original.PeriodoCodigo}`}
-              >
-                editar
-              </Link>
-            )}
 
-            {user?.groups[0] === "admin" && (
-              <button
-                className="btn btn-danger btn-sm mx-2"
-                onClick={() => handleDeletePeriodo(row.original.PeriodoID)}
-                disabled={mutationDelete.isLoading}
-              >
-                borrar
-              </button>
-            )}
-          </>
-        ),
-      },
+      ...(user?.groups[0] === "admin" || user?.groups[0] === "usuario"
+        ? [
+            {
+              header: "Acción",
+              id: "actions",
+              cell: ({ row }) => (
+                <>
+                  <Link
+                    className="btn btn-primary btn-sm"
+                    href={`/periodoEdit/${row.original.PeriodoCodigo}`}
+                  >
+                    editar
+                  </Link>
+
+                  <button
+                    className="btn btn-danger btn-sm mx-2"
+                    onClick={() => handleDeletePeriodo(row.original.PeriodoID)}
+                    disabled={mutationDelete.isLoading}
+                  >
+                    borrar
+                  </button>
+                </>
+              ),
+            },
+          ]
+        : []),
     ],
     [page, pageSize, mutationDelete.isLoading]
   );

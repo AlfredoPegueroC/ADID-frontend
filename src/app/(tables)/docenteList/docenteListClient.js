@@ -95,31 +95,33 @@ function DocenteListClient() {
       { header: "Universidad", accessorKey: "universidadNombre" },
       { header: "Tipo", accessorKey: "tipoDocenteNombre" },
       { header: "Categoría", accessorKey: "categoriaDocenteNombre" },
-      {
-        header: "Acción",
-        id: "actions",
-        cell: ({ row }) => (
-          <div className="d-flex gap-2">
-            {(user?.groups[0] === "admin" || user?.groups[0] === "usuario") && (
-              <Link
-                href={`/docenteEdit/${row.original.DocenteCodigo}`}
-                className="btn btn-primary btn-sm"
-              >
-                Editar
-              </Link>
-            )}
-            {user?.groups[0] === "admin" && (
-              <button
-                className="btn btn-danger btn-sm"
-                onClick={() => handleDeleteDocente(row.original.DocenteID)}
-                disabled={mutationDelete.isLoading}
-              >
-                Borrar
-              </button>
-            )}
-          </div>
-        ),
-      },
+
+      ...(user?.groups[0] === "admin" || user?.groups[0] === "usuario"
+        ? [
+            {
+              header: "Acción",
+              id: "actions",
+              cell: ({ row }) => (
+                <div className="d-flex gap-2">
+                  <Link
+                    href={`/docenteEdit/${row.original.DocenteCodigo}`}
+                    className="btn btn-primary btn-sm"
+                  >
+                    Editar
+                  </Link>
+
+                  <button
+                    className="btn btn-danger btn-sm"
+                    onClick={() => handleDeleteDocente(row.original.DocenteID)}
+                    disabled={mutationDelete.isLoading}
+                  >
+                    Borrar
+                  </button>
+                </div>
+              ),
+            },
+          ]
+        : []),
     ],
     [mutationDelete.isLoading]
   );

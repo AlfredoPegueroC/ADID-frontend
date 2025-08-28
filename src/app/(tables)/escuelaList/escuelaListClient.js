@@ -95,31 +95,33 @@ function EscuelaListClient() {
       { header: "Estado", accessorKey: "EscuelaEstado" },
       { header: "Universidad", accessorKey: "universidadNombre" },
       { header: "Facultad", accessorKey: "facultadNombre" },
-      {
-        header: "Acción",
-        id: "actions",
-        cell: ({ row }) => (
-          <div className="d-flex">
-            {(user?.groups[0] === "admin" || user?.groups[0] === "usuario") && (
-              <Link
-                href={`/escuelaEdit/${row.original.EscuelaCodigo}`}
-                className="btn btn-primary btn-sm"
-              >
-                Editar
-              </Link>
-            )}
-            {user?.groups[0] === "admin" && (
-              <button
-                className="btn btn-danger btn-sm mx-2"
-                onClick={() => handleDeleteEscuela(row.original.EscuelaId)}
-                disabled={mutationDelete.isLoading}
-              >
-                Borrar
-              </button>
-            )}
-          </div>
-        ),
-      },
+
+      ...(user?.groups[0] === "admin" || user?.groups[0] === "usuario"
+        ? [
+            {
+              header: "Acción",
+              id: "actions",
+              cell: ({ row }) => (
+                <div className="d-flex">
+                  <Link
+                    href={`/escuelaEdit/${row.original.EscuelaCodigo}`}
+                    className="btn btn-primary btn-sm"
+                  >
+                    Editar
+                  </Link>
+
+                  <button
+                    className="btn btn-danger btn-sm mx-2"
+                    onClick={() => handleDeleteEscuela(row.original.EscuelaId)}
+                    disabled={mutationDelete.isLoading}
+                  >
+                    Borrar
+                  </button>
+                </div>
+              ),
+            },
+          ]
+        : []),
     ],
     [mutationDelete.isLoading]
   );
