@@ -109,15 +109,17 @@ function FacultadListClient() {
                     Editar
                   </Link>
 
-                  <button
-                    className="btn btn-danger btn-sm mx-2"
-                    onClick={() =>
-                      handleDeleteFacultad(row.original.FacultadID)
-                    }
-                    disabled={mutationDelete.isLoading}
-                  >
-                    Borrar
-                  </button>
+                  {user?.groups[0] === "admin" && (
+                    <button
+                      className="btn btn-danger btn-sm mx-2"
+                      onClick={() =>
+                        handleDeleteFacultad(row.original.FacultadID)
+                      }
+                      disabled={mutationDelete.isLoading}
+                    >
+                      Borrar
+                    </button>
+                  )}
                 </div>
               ),
             },

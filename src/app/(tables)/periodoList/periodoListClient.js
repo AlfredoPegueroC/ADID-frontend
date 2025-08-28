@@ -113,13 +113,17 @@ function PeriodoListClient({ initialData, totalPages: initialTotalPages }) {
                     editar
                   </Link>
 
-                  <button
-                    className="btn btn-danger btn-sm mx-2"
-                    onClick={() => handleDeletePeriodo(row.original.PeriodoID)}
-                    disabled={mutationDelete.isLoading}
-                  >
-                    borrar
-                  </button>
+                  {user?.groups[0] === "admin" && (
+                    <button
+                      className="btn btn-danger btn-sm mx-2"
+                      onClick={() =>
+                        handleDeletePeriodo(row.original.PeriodoID)
+                      }
+                      disabled={mutationDelete.isLoading}
+                    >
+                      borrar
+                    </button>
+                  )}
                 </>
               ),
             },

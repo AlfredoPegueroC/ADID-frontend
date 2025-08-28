@@ -109,14 +109,17 @@ function DocenteListClient() {
                   >
                     Editar
                   </Link>
-
-                  <button
-                    className="btn btn-danger btn-sm"
-                    onClick={() => handleDeleteDocente(row.original.DocenteID)}
-                    disabled={mutationDelete.isLoading}
-                  >
-                    Borrar
-                  </button>
+                  {user?.groups[0] === "admin" && (
+                    <button
+                      className="btn btn-danger btn-sm"
+                      onClick={() =>
+                        handleDeleteDocente(row.original.DocenteID)
+                      }
+                      disabled={mutationDelete.isLoading}
+                    >
+                      Borrar
+                    </button>
+                  )}
                 </div>
               ),
             },

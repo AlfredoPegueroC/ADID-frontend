@@ -92,12 +92,16 @@ function TipoDocenteListClient() {
                     editar
                   </Link>
 
-                  <button
-                    className="btn btn-danger btn-sm mx-2"
-                    onClick={() => handleDeleteTipo(row.original.TipoDocenteID)}
-                  >
-                    borrar
-                  </button>
+                  {user?.groups[0] === "admin" && (
+                    <button
+                      className="btn btn-danger btn-sm mx-2"
+                      onClick={() =>
+                        handleDeleteTipo(row.original.TipoDocenteID)
+                      }
+                    >
+                      borrar
+                    </button>
+                  )}
                 </div>
               ),
             },

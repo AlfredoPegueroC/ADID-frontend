@@ -98,14 +98,14 @@ function UniversidadListClient() {
                     editar
                   </Link>
 
-                  <>
+                  {user?.groups[0] === "admin" && (
                     <button
                       className="btn btn-danger btn-sm mx-2"
                       onClick={() => handleDelete(row.original.UniversidadID)}
                     >
                       borrar
                     </button>
-                  </>
+                  )}
                 </div>
               ),
             },

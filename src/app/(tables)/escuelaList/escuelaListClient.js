@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useMemo, useEffect } from "react";
+import React, { useState, useRef, useMemo, useEffect, use } from "react";
 import Link from "next/link";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -109,14 +109,17 @@ function EscuelaListClient() {
                   >
                     Editar
                   </Link>
-
-                  <button
-                    className="btn btn-danger btn-sm mx-2"
-                    onClick={() => handleDeleteEscuela(row.original.EscuelaId)}
-                    disabled={mutationDelete.isLoading}
-                  >
-                    Borrar
-                  </button>
+                  {user?.groups[0] === "admin" && (
+                    <button
+                      className="btn btn-danger btn-sm mx-2"
+                      onClick={() =>
+                        handleDeleteEscuela(row.original.EscuelaId)
+                      }
+                      disabled={mutationDelete.isLoading}
+                    >
+                      Borrar
+                    </button>
+                  )}
                 </div>
               ),
             },

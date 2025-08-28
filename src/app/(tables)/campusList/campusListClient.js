@@ -109,14 +109,15 @@ function CampusListClient() {
                   >
                     Editar
                   </Link>
-
-                  <button
-                    className="btn btn-danger btn-sm mx-2"
-                    onClick={() => handleDeleteCampus(row.original.CampusID)}
-                    disabled={mutationDelete.isLoading}
-                  >
-                    Borrar
-                  </button>
+                  {user?.groups[0] === "admin" && (
+                    <button
+                      className="btn btn-danger btn-sm mx-2"
+                      onClick={() => handleDeleteCampus(row.original.CampusID)}
+                      disabled={mutationDelete.isLoading}
+                    >
+                      Borrar
+                    </button>
+                  )}
                 </div>
               ),
             },
@@ -126,8 +127,7 @@ function CampusListClient() {
     [mutationDelete.isLoading]
   );
 
-
-// ...(user?.groups[0] === "admin" || user?.groups[0] === "usuario" ? [] : [])
+  // ...(user?.groups[0] === "admin" || user?.groups[0] === "usuario" ? [] : [])
 
   const table = useReactTable({
     data: campusList,

@@ -99,16 +99,17 @@ function CategoriaListClient() {
                   >
                     Editar
                   </Link>
-
-                  <button
-                    className="btn btn-danger btn-sm"
-                    onClick={() =>
-                      handleDeleteCategoria(row.original.CategoriaID)
-                    }
-                    disabled={mutationDelete.isLoading}
-                  >
-                    Borrar
-                  </button>
+                  {user?.groups[0] === "admin" && (
+                    <button
+                      className="btn btn-danger btn-sm"
+                      onClick={() =>
+                        handleDeleteCategoria(row.original.CategoriaID)
+                      }
+                      disabled={mutationDelete.isLoading}
+                    >
+                      Borrar
+                    </button>
+                  )}
                 </div>
               ),
             },
