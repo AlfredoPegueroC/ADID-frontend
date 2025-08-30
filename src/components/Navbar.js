@@ -150,6 +150,12 @@ export default function Navbar() {
                       Docente
                     </Link>
                   </li>
+
+                  <li>
+                    <Link className="dropdown-item" href="/asignatura">
+                      Asignatura
+                    </Link>
+                  </li>
                 </ul>
               </li>
             )}
