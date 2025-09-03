@@ -291,14 +291,17 @@ function PrincipalListClient() {
                   <button
                     className="btn btn-warning btn-sm text-white"
                     data-bs-toggle="modal"
-                    data-bs-target="#modal_comment"
+                    data-bs-target={`#modal_comment_${row.original.AsignacionID}`}
                     disabled={!selectedPeriodo}
                     title={!selectedPeriodo ? "Comentario" : ""}
                   >
                     Comentar
                   </button>
-                  {/* CREAR UN COMPONENT CON ESTO */}
-                  <Modal title="Observaciones" modelName="modal_comment">
+
+                  <Modal
+                    title="Observaciones"
+                    modelName={`modal_comment_${row.original.AsignacionID}`}
+                  >
                     <ComentarioCell row={row} api={API} />
                   </Modal>
                 </div>
