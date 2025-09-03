@@ -13,6 +13,7 @@ import { fetchUniversidades } from "@api/universidadService";
 import { fetchFacultades } from "@api/facultadService";
 import { fetchEscuelas } from "@api/escuelaService";
 import { fetchPeriodos } from "@api/periodoService";
+import { fetchAsignaturas } from "@api/asignaturaService"; // 👈 NUEVO
 
 export default function AsignacionForm({ title }) {
   const router = useRouter();
@@ -24,6 +25,7 @@ export default function AsignacionForm({ title }) {
   const [facultades, setFacultades] = useState([]);
   const [escuelas, setEscuelas] = useState([]);
   const [periodos, setPeriodos] = useState([]);
+  const [asignaturas, setAsignaturas] = useState([]); // 👈 NUEVO
 
   // Estados loading
   const [loadingDocentes, setLoadingDocentes] = useState(false);
@@ -32,6 +34,7 @@ export default function AsignacionForm({ title }) {
   const [loadingFacultades, setLoadingFacultades] = useState(false);
   const [loadingEscuelas, setLoadingEscuelas] = useState(false);
   const [loadingPeriodos, setLoadingPeriodos] = useState(false);
+  const [loadingAsignaturas, setLoadingAsignaturas] = useState(false); // 👈 NUEVO
 
   // Estado del formulario
   const [formData, setFormData] = useState({
@@ -56,6 +59,7 @@ export default function AsignacionForm({ title }) {
     facultadFk: null,
     escuelaFk: null,
     periodoFk: null,
+    asignaturaFk: null, // 👈 NUEVO
   });
 
   // Carga inicial
@@ -66,18 +70,22 @@ export default function AsignacionForm({ title }) {
     cargarFacultades();
     cargarEscuelas();
     cargarPeriodos();
+    cargarAsignaturas(); // 👈 NUEVO
   }, []);
 
+  // ------------------ CARGA DE OPCIONES ------------------
   const cargarDocentes = async (search = "") => {
     setLoadingDocentes(true);
     try {
       const token = localStorage.getItem("accessToken") || "";
       const { results } = await fetchDocentes(1, search, 10, token);
-      setDocentes(results.map((d) => ({
-        value: d.DocenteID,
-        label: `${d.DocenteNombre} ${d.DocenteApellido}`,
-      })));
-    } catch (error) {
+      setDocentes(
+        results.map((d) => ({
+          value: d.DocenteID,
+          label: `${d.DocenteNombre} ${d.DocenteApellido}`,
+        }))
+      );
+    } catch {
       Notification.alertError("Error al cargar docentes");
     } finally {
       setLoadingDocentes(false);
@@ -89,11 +97,13 @@ export default function AsignacionForm({ title }) {
     try {
       const token = localStorage.getItem("accessToken") || "";
       const { results } = await fetchCampus(1, search, 10, token);
-      setCampus(results.map((c) => ({
-        value: c.CampusID,
-        label: c.CampusNombre,
-      })));
-    } catch (error) {
+      setCampus(
+        results.map((c) => ({
+          value: c.CampusID,
+          label: c.CampusNombre,
+        }))
+      );
+    } catch {
       Notification.alertError("Error al cargar campus");
     } finally {
       setLoadingCampus(false);
@@ -105,11 +115,13 @@ export default function AsignacionForm({ title }) {
     try {
       const token = localStorage.getItem("accessToken") || "";
       const { results } = await fetchUniversidades(1, search, 10, token);
-      setUniversidades(results.map((u) => ({
-        value: u.UniversidadID,
-        label: u.UniversidadNombre,
-      })));
-    } catch (error) {
+      setUniversidades(
+        results.map((u) => ({
+          value: u.UniversidadID,
+          label: u.UniversidadNombre,
+        }))
+      );
+    } catch {
       Notification.alertError("Error al cargar universidades");
     } finally {
       setLoadingUniversidades(false);
@@ -121,11 +133,13 @@ export default function AsignacionForm({ title }) {
     try {
       const token = localStorage.getItem("accessToken") || "";
       const { results } = await fetchFacultades(1, search, 10, token);
-      setFacultades(results.map((f) => ({
-        value: f.FacultadID,
-        label: f.FacultadNombre,
-      })));
-    } catch (error) {
+      setFacultades(
+        results.map((f) => ({
+          value: f.FacultadID,
+          label: f.FacultadNombre,
+        }))
+      );
+    } catch {
       Notification.alertError("Error al cargar facultades");
     } finally {
       setLoadingFacultades(false);
@@ -137,11 +151,13 @@ export default function AsignacionForm({ title }) {
     try {
       const token = localStorage.getItem("accessToken") || "";
       const { results } = await fetchEscuelas(1, search, 10, token);
-      setEscuelas(results.map((e) => ({
-        value: e.EscuelaId,
-        label: e.EscuelaNombre,
-      })));
-    } catch (error) {
+      setEscuelas(
+        results.map((e) => ({
+          value: e.EscuelaId,
+          label: e.EscuelaNombre,
+        }))
+      );
+    } catch {
       Notification.alertError("Error al cargar escuelas");
     } finally {
       setLoadingEscuelas(false);
@@ -153,18 +169,39 @@ export default function AsignacionForm({ title }) {
     try {
       const token = localStorage.getItem("accessToken") || "";
       const { results } = await fetchPeriodos(1, search, 10, token);
-      setPeriodos(results.map((p) => ({
-        value: p.PeriodoID,
-        label: p.PeriodoNombre,
-      })));
-    } catch (error) {
+      setPeriodos(
+        results.map((p) => ({
+          value: p.PeriodoID,
+          label: p.PeriodoNombre,
+        }))
+      );
+    } catch {
       Notification.alertError("Error al cargar periodos académicos");
     } finally {
       setLoadingPeriodos(false);
     }
   };
 
-  // Handlers
+  const cargarAsignaturas = async (search = "") => {
+    setLoadingAsignaturas(true);
+    try {
+      const token = localStorage.getItem("accessToken") || "";
+      const { results } = await fetchAsignaturas(1, search, 10, token);
+      setAsignaturas(
+        results.map((a) => ({
+          value: a.AsignaturaCodigo,
+          label: a.AsignaturaNombre,
+          data: a, // 👈 guardamos todo el objeto para autocompletar
+        }))
+      );
+    } catch {
+      Notification.alertError("Error al cargar asignaturas");
+    } finally {
+      setLoadingAsignaturas(false);
+    }
+  };
+
+  // ------------------ HANDLERS ------------------
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -172,10 +209,25 @@ export default function AsignacionForm({ title }) {
 
   const handleSelectChange = (selectedOption, actionMeta) => {
     const { name } = actionMeta;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: selectedOption || null,
-    }));
+
+    // Caso especial: asignatura seleccionada
+    if (name === "asignaturaFk" && selectedOption) {
+      const asignatura = selectedOption.data;
+      setFormData((prev) => ({
+        ...prev,
+        asignaturaFk: selectedOption,
+        clave: asignatura.AsignaturaCodigo,
+        nombre: asignatura.AsignaturaNombre,
+        creditos: asignatura.AsignaturaCreditos,
+        cupo: asignatura.AsignaturaHorasTeoricas, // puedes mapear como quieras
+        horario: asignatura.AsignaturaHorasPracticas,
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: selectedOption || null,
+      }));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -190,17 +242,21 @@ export default function AsignacionForm({ title }) {
       facultadFk: formData.facultadFk?.value || null,
       escuelaFk: formData.escuelaFk?.value || null,
       periodoFk: formData.periodoFk?.value || null,
+      asignaturaFk: formData.asignaturaFk?.value || null,
     };
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_KEY}api/asignacion/create`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_KEY}api/asignacion/create`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(payload),
+        }
+      );
 
       if (res.ok) {
         Notification.alertSuccess("Asignación registrada con éxito");
@@ -213,20 +269,55 @@ export default function AsignacionForm({ title }) {
     }
   };
 
+  // ------------------ RENDER ------------------
   return (
     <div className={Styles.container}>
       <form onSubmit={handleSubmit} className={Styles.form}>
         <h1 className={Styles.title}>{title}</h1>
 
+        {/* Select de Asignatura */}
+        <div className={Styles.name_group}>
+          <label>Asignatura:</label>
+          <Select
+            name="asignaturaFk"
+            options={asignaturas}
+            value={formData.asignaturaFk}
+            onChange={handleSelectChange}
+            onInputChange={(inputValue) => {
+              if (typeof inputValue === "string") {
+                cargarAsignaturas(inputValue.replace(/\s/g, ""));
+              }
+            }}
+            isLoading={loadingAsignaturas}
+            placeholder="Seleccione asignatura"
+            isClearable
+          />
+        </div>
+
+        {/* Campos de texto */}
         {[
-          "nrc", "clave", "nombre", "codigo", "seccion", "modalidad",
-          "cupo", "inscripto", "horario", "dias", "aula",
-          "creditos", "tipo"
+          "nrc",
+          "clave",
+          "nombre",
+          "codigo",
+          "seccion",
+          "modalidad",
+          "cupo",
+          "inscripto",
+          "horario",
+          "dias",
+          "aula",
+          "creditos",
+          "tipo",
         ].map((field) => (
           <div className={Styles.name_group} key={field}>
             <label htmlFor={field}>{field.toUpperCase()}:</label>
             <input
-              type={["cupo", "inscripto", "creditos"].includes(field) ? "number" : "text"}
+              type={
+                ["cupo", "inscripto", "creditos"].includes(field)
+                  ? "number"
+                  : "text"
+              }
               id={field}
               name={field}
               value={formData[field]}
@@ -237,7 +328,7 @@ export default function AsignacionForm({ title }) {
           </div>
         ))}
 
-        {/* Selects */}
+        {/* Selects de relaciones */}
         <div className={Styles.name_group}>
           <label>Docente:</label>
           <Select
