@@ -101,24 +101,21 @@ function AsignaturaListClient() {
               id: "actions",
               cell: ({ row }) => (
                 <div className="d-flex">
-                  {/* <Link
+                  <Link
                     href={`/asignaturaEdit/${row.original.AsignaturaCodigo}`}
                     className="btn btn-primary btn-sm"
                   >
                     Editar
                   </Link>
-                  {user?.groups[0] === "admin" && (
+                  {/* {user?.groups[0] === "admin" && (
                     <button
                       className="btn btn-danger btn-sm mx-2"
-                      onClick={() =>
-                        handleDeleteAsignatura(row.original.AsignaturaCodigo)
-                      }
+                      onClick={() => handleDeleteCampus(row.original.CampusID)}
                       disabled={mutationDelete.isLoading}
                     >
                       Borrar
                     </button>
                   )} */}
-                  hola
                 </div>
               ),
             },

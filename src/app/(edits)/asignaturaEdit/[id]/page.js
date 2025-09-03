@@ -48,9 +48,9 @@ function EditAsignatura({ params }) {
         setAsignatura(data);
 
         // Universidad actual
-        if (data.Asignatura_UniversidadFK) {
+        if (data.universidadCodigo) {
           const resUni = await fetch(
-            `${API}api/universidad/${data.Asignatura_UniversidadFK}/`,
+            `${API}api/universidad/${data.universidadCodigo}/`,
             { headers: { Authorization: `Bearer ${token}` } }
           );
           if (resUni.ok) {
@@ -63,9 +63,9 @@ function EditAsignatura({ params }) {
         }
 
         // Facultad actual
-        if (data.Asignatura_FacultadFK) {
+        if (data.facultadCodigo) {
           const resFac = await fetch(
-            `${API}api/facultad/${data.Asignatura_FacultadFK}/`,
+            `${API}api/facultad/${data.facultadCodigo}/`,
             { headers: { Authorization: `Bearer ${token}` } }
           );
           if (resFac.ok) {
@@ -78,15 +78,15 @@ function EditAsignatura({ params }) {
         }
 
         // Escuela actual
-        if (data.Asignatura_EscuelaFK) {
+        if (data.escuelaCodigo) {
           const resEsc = await fetch(
-            `${API}api/escuela/${data.Asignatura_EscuelaFK}/`,
+            `${API}api/escuela/${data.escuelaCodigo}/`,
             { headers: { Authorization: `Bearer ${token}` } }
           );
           if (resEsc.ok) {
             const escData = await resEsc.json();
             setSelectedEscuela({
-              value: escData.EscuelaID,
+              value: escData.EscuelaId,
               label: escData.EscuelaNombre,
             });
           }

@@ -249,6 +249,11 @@ export default function Navbar() {
                     Periodo Academico
                   </Link>
                 </li>
+                <li>
+                  <Link className="dropdown-item" href="/asignaturaList">
+                    Asignatura
+                  </Link>
+                </li>
               </ul>
             </li>
 
