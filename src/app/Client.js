@@ -236,13 +236,40 @@ function PrincipalListClient() {
 
   const columns = useMemo(
     () => [
-      { accessorKey: "nrc", header: "NRC" },
-      { accessorKey: "clave", header: "Clave" },
-      { accessorKey: "nombre", header: "Asignatura" },
-      { accessorKey: "codigo", header: "Código" },
+      {
+        accessorKey: "nrc",
+        header: "NRC",
+        size: 70,
+        minSize: 70,
+        maxSize: 200,
+      },
+      {
+        accessorKey: "clave",
+        header: "Clave",
+        size: 80,
+        minSize: 80,
+        maxSize: 150,
+      },
+      {
+        accessorKey: "nombre",
+        header: "Asignatura",
+        size: 140,
+        minSize: 120,
+        maxSize: 300,
+      },
+      {
+        accessorKey: "codigo",
+        header: "Código",
+        size: 80,
+        minSize: 80,
+        maxSize: 150,
+      },
       {
         accessorKey: "docenteNombre",
         header: "Profesor",
+        size: 150,
+        minSize: 100,
+        maxSize: 250,
         cell: ({ row }) => (
           <Link
             href={`/DocenteDetalle/?docente=${row.original.docenteFk}&periodo=${selectedPeriodo}`}
@@ -252,33 +279,35 @@ function PrincipalListClient() {
           </Link>
         ),
       },
-      { accessorKey: "seccion", header: "Sección" },
-      { accessorKey: "modalidad", header: "Modalidad" },
-      { accessorKey: "campusNombre", header: "Campus" },
-      { accessorKey: "facultadNombre", header: "Facultad" },
-      { accessorKey: "escuelaNombre", header: "Escuela" },
-      { accessorKey: "tipo", header: "Tipo" },
-      { accessorKey: "cupo", header: "Cupo" },
-      { accessorKey: "inscripto", header: "Inscripto" },
-      { accessorKey: "horario", header: "Horario" },
-      { accessorKey: "dias", header: "Días" },
-      { accessorKey: "aula", header: "Aula" },
-      { accessorKey: "creditos", header: "CR" },
+      { accessorKey: "seccion", header: "Sección", size: 80, minSize: 80, maxSize: 150 },
+      { accessorKey: "modalidad", header: "Modalidad", size: 100, minSize: 100, maxSize: 150 },
+      { accessorKey: "campusNombre", header: "Campus", size: 120, minSize: 120, maxSize: 150 },
+      { accessorKey: "facultadNombre", header: "Facultad", size: 150, minSize: 150, maxSize: 200 },
+      { accessorKey: "escuelaNombre", header: "Escuela", size: 150, minSize: 150, maxSize: 200 },
+      { accessorKey: "tipo", header: "Tipo", size: 100, minSize: 100, maxSize: 150 },
+      { accessorKey: "cupo", header: "Cupo", size: 50, minSize: 50, maxSize: 150 },
+      { accessorKey: "inscripto", header: "Inscripto", size: 30, minSize: 30, maxSize: 150 },
+      { accessorKey: "horario", header: "Horario", size: 120, minSize: 100, maxSize: 200 },
+      { accessorKey: "dias", header: "Días", size: 120, minSize: 120, maxSize: 150 },
+      { accessorKey: "aula", header: "Aula", size: 100, minSize: 100, maxSize: 150 },
+      { accessorKey: "creditos", header: "CR", size: 50 },
 
       ...(user?.groups[0] === "admin" || user?.groups[0] === "usuario"
         ? [
             {
               accessorKey: "accion",
               header: "Status",
-              cell: ({ row }) =>
-                (user?.groups[0] === "admin" ||
-                  user?.groups[0] === "usuario") && (
-                  <AccionCell row={row} api={API} />
-                ),
+              size: 170,
+              minSize: 120,
+              maxSize: 200,
+              cell: ({ row }) => <AccionCell row={row} api={API} />,
             },
             {
               id: "acciones",
               header: "Acción",
+              size: 150,
+              minSize: 100,
+              maxSize: 200,
               cell: ({ row }) => (
                 <div className="d-flex gap-2">
                   <Link
@@ -310,7 +339,7 @@ function PrincipalListClient() {
           ]
         : []),
     ],
-    [selectedPeriodo, API]
+    [selectedPeriodo, API, user]
   );
 
   const table = useReactTable({
@@ -483,7 +512,7 @@ function PrincipalListClient() {
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
-                <th key={header.id}>
+                <th key={header.id} style={{ width: header.getSize() }}>
                   {flexRender(
                     header.column.columnDef.header,
                     header.getContext()

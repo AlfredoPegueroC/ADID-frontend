@@ -7,7 +7,7 @@ import {
   flexRender,
 } from "@tanstack/react-table";
 
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useMemo } from "react";
 import Link from "next/link";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { debounce } from "lodash";
@@ -34,18 +34,13 @@ export default function UsuarioPage() {
     }, 500)
   ).current;
 
-  const {
-    data,
-    isLoading,
-    isError,
-  } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["usuarios", { page, pageSize, searchQuery }],
     queryFn: async () => {
-      const res = await fetch(`${API}api/usuarios?page=${page}&page_size=${pageSize}&search=${searchQuery}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const res = await fetch(
+        `${API}api/usuarios?page=${page}&page_size=${pageSize}&search=${searchQuery}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
       const data = await res.json();
       const formateados = data.results.map((user) => ({
         id: user.id,
@@ -54,6 +49,9 @@ export default function UsuarioPage() {
         email: user.email,
         role: user.groups.includes("admin") ? "Admin" : "User",
         is_active: user.is_active,
+        universidad: user.profile?.universidad || "-",
+        facultad: user.profile?.facultad || "-",
+        escuela: user.profile?.escuela || "-",
       }));
       return {
         results: formateados,
@@ -86,34 +84,42 @@ export default function UsuarioPage() {
     }
   };
 
+  // --- Definir tamaños fijos como programador ---
   const columns = useMemo(
-    () => [
-      { accessorKey: "username", header: () => "Usuario" },
-      { accessorKey: "name", header: () => "Nombre" },
-      { accessorKey: "email", header: () => "Email" },
-      { accessorKey: "role", header: () => "Rol" },
-      {
-        accessorKey: "is_active",
-        header: () => "Estado",
-        cell: ({ row }) => {
-          const user = row.original;
-          return (
-            <select
-              className="form-select form-select-sm"
-              value={user.is_active.toString()}
-              onChange={(e) =>
-                handleEstadoChange(user.id, user.username, e.target.value === "true")
-              }
-            >
-              <option value="true">Activo</option>
-              <option value="false">Inactivo</option>
-            </select>
-          );
-        },
+  () => [
+    { accessorKey: "username", header: "Usuario", size: 120, minSize: 80, maxSize: 200 },
+    { accessorKey: "name", header: "Nombre", size: 180, minSize: 120, maxSize: 300 },
+    { accessorKey: "email", header: "Email", size: 200, minSize: 150, maxSize: 350 },
+    { accessorKey: "role", header: "Rol", size: 100, minSize: 80, maxSize: 150 },
+    { accessorKey: "universidad", header: "Universidad", size: 180, minSize: 120, maxSize: 300 },
+    { accessorKey: "facultad", header: "Facultad", size: 150, minSize: 100, maxSize: 250 },
+    { accessorKey: "escuela", header: "Escuela", size: 180, minSize: 120, maxSize: 300 },
+    {
+      accessorKey: "is_active",
+      header: "Estado",
+      size: 100,
+      minSize: 80,
+      maxSize: 150,
+      cell: ({ row }) => {
+        const user = row.original;
+        return (
+          <select
+            className="form-select form-select-sm"
+            value={user.is_active.toString()}
+            onChange={(e) =>
+              handleEstadoChange(user.id, user.username, e.target.value === "true")
+            }
+          >
+            <option value="true">Activo</option>
+            <option value="false">Inactivo</option>
+          </select>
+        );
       },
-    ],
-    []
-  );
+    },
+  ],
+  []
+);
+
 
   const table = useReactTable({
     data: data?.results || [],
@@ -122,7 +128,7 @@ export default function UsuarioPage() {
     onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    manualPagination: true,
+    // manualPagination: true,
   });
 
   return (
@@ -168,15 +174,9 @@ export default function UsuarioPage() {
                 {headerGroup.headers.map((header) => (
                   <th
                     key={header.id}
-                    onClick={header.column.getToggleSortingHandler()}
-                    style={{ cursor: "pointer" }}
+                    style={{ width: header.getSize() }}
                   >
                     {flexRender(header.column.columnDef.header, header.getContext())}
-                    {header.column.getIsSorted() === "asc"
-                      ? " 🔼"
-                      : header.column.getIsSorted() === "desc"
-                      ? " 🔽"
-                      : null}
                   </th>
                 ))}
               </tr>
@@ -185,13 +185,13 @@ export default function UsuarioPage() {
           <tbody>
             {isLoading ? (
               <tr>
-                <td colSpan="5" className="text-center">
+                <td colSpan={8} className="text-center">
                   <Spinner />
                 </td>
               </tr>
             ) : table.getRowModel().rows.length === 0 ? (
               <tr>
-                <td colSpan="5" className="text-center">No se encontraron usuarios.</td>
+                <td colSpan={8} className="text-center">No se encontraron usuarios.</td>
               </tr>
             ) : (
               table.getRowModel().rows.map((row) => (
