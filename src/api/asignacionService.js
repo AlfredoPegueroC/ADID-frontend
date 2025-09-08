@@ -17,11 +17,10 @@ export async function fetchAsignacionData(
       method: "GET",
       cache: "no-store",
     });
-    console.log("Fetching asignaciones with params:", params.toString());
+    
     if (!response.ok) throw new Error("Failed to fetch asignaciones");
 
     const data = await response.json();
-    console.log("Asignaciones fetched successfully:", data.results.length, "items found");
     return {
       asignaciones: data.results || [],
       totalPages: Math.ceil(data.count / pageSize),

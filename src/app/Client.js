@@ -287,7 +287,7 @@ function PrincipalListClient() {
       { accessorKey: "tipo", header: "Tipo", size: 100, minSize: 100, maxSize: 150 },
       { accessorKey: "cupo", header: "Cupo", size: 50, minSize: 50, maxSize: 150 },
       { accessorKey: "inscripto", header: "Inscripto", size: 30, minSize: 30, maxSize: 150 },
-      { accessorKey: "horario", header: "Horario", size: 120, minSize: 100, maxSize: 200 },
+      { accessorKey: "horario", header: "Horario", size: 100, minSize: 100, maxSize: 200 },
       { accessorKey: "dias", header: "Días", size: 120, minSize: 120, maxSize: 150 },
       { accessorKey: "aula", header: "Aula", size: 100, minSize: 100, maxSize: 150 },
       { accessorKey: "creditos", header: "CR", size: 50 },
