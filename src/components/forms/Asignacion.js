@@ -13,8 +13,7 @@ import { fetchUniversidades } from "@api/universidadService";
 import { fetchFacultades } from "@api/facultadService";
 import { fetchEscuelas } from "@api/escuelaService";
 import { fetchPeriodos } from "@api/periodoService";
-import { fetchAsignaturas } from "@api/asignaturaService"; // 👈 NUEVO
-
+import { fetchAsignaturas } from "@api/asignaturaService";
 export default function AsignacionForm({ title }) {
   const router = useRouter();
 
@@ -59,7 +58,7 @@ export default function AsignacionForm({ title }) {
     facultadFk: null,
     escuelaFk: null,
     periodoFk: null,
-    asignaturaFk: null, // 👈 NUEVO
+    asignaturaFk: null,
   });
 
   // Carga inicial
@@ -70,7 +69,7 @@ export default function AsignacionForm({ title }) {
     cargarFacultades();
     cargarEscuelas();
     cargarPeriodos();
-    cargarAsignaturas(); // 👈 NUEVO
+    cargarAsignaturas(); 
   }, []);
 
   // ------------------ CARGA DE OPCIONES ------------------

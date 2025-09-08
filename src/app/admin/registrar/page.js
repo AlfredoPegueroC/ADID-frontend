@@ -1,8 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import Select from "react-select";
+
+import Notification from "@components/Notification";
+import { fetchUniversidades } from "@api/universidadService";
+import { fetchFacultades } from "@api/facultadService";
+import { fetchEscuelas } from "@api/escuelaService";
 
 export default function RegisterPage() {
+  const router = useRouter();
+
+  const [universidades, setUniversidades] = useState([]);
+  const [facultades, setFacultades] = useState([]);
+  const [escuelas, setEscuelas] = useState([]);
+
   const [formData, setFormData] = useState({
     username: "",
     email: "",
@@ -12,19 +25,70 @@ export default function RegisterPage() {
     confirmPassword: "",
     is_staff: false,
     groups: [],
+    universidad: null,
+    facultad: null,
+    escuela: null,
   });
 
   const [message, setMessage] = useState("");
 
+  // --- Cargar universidades ---
+  const cargarUniversidades = async (search = "", page = 1) => {
+    try {
+      const token = localStorage.getItem("accessToken") || "";
+      const { results } = await fetchUniversidades(page, search, 10, token);
+      setUniversidades(
+        results.map((u) => ({ value: u.UniversidadID, label: u.UniversidadNombre }))
+      );
+    } catch (error) {
+      console.error(error);
+      Notification.alertError("No se pudieron cargar las universidades");
+    }
+  };
+
+  // --- Cargar facultades ---
+  const cargarFacultades = async (search = "", page = 1) => {
+    try {
+      const token = localStorage.getItem("accessToken") || "";
+      const { results } = await fetchFacultades(page, search, 10, token);
+      setFacultades(
+        results.map((f) => ({ value: f.FacultadID, label: f.FacultadNombre }))
+      );
+    } catch (error) {
+      console.error(error);
+      Notification.alertError("No se pudieron cargar las facultades");
+    }
+  };
+
+  // --- Cargar escuelas ---
+  const cargarEscuelas = async (search = "", page = 1) => {
+    try {
+      const token = localStorage.getItem("accessToken") || "";
+      const { results } = await fetchEscuelas(page, search, 10, token);
+      setEscuelas(
+        results.map((e) => ({ value: e.EscuelaId, label: e.EscuelaNombre }))
+      );
+    } catch (error) {
+      console.error(error);
+      Notification.alertError("No se pudieron cargar las escuelas");
+    }
+  };
+
+  // Carga inicial
+  useEffect(() => {
+    cargarUniversidades();
+    cargarFacultades();
+    cargarEscuelas();
+  }, []);
+
   const handleChange = (e) => {
     const { name, value, type } = e.target;
-
     if (name === "role") {
       const isAdmin = value === "admin";
       setFormData((prev) => ({
         ...prev,
         is_staff: isAdmin,
-        groups: [isAdmin ? "admin" : "usuario"], // Admin = grupo "admin", Usuario = grupo "usuario"
+        groups: [isAdmin ? "admin" : "usuario"],
       }));
     } else {
       setFormData((prev) => ({
@@ -45,25 +109,25 @@ export default function RegisterPage() {
     setMessage("Registrando...");
 
     try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_KEY}api/usuarios/`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
-          body: JSON.stringify({
-            username: formData.username,
-            email: formData.email,
-            first_name: formData.first_name,
-            last_name: formData.last_name,
-            password: formData.password,
-            is_staff: formData.is_staff,
-            groups: formData.groups,
-          }),
-        }
-      );
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_KEY}api/usuarios/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+        body: JSON.stringify({
+          username: formData.username,
+          email: formData.email,
+          first_name: formData.first_name,
+          last_name: formData.last_name,
+          password: formData.password,
+          is_staff: formData.is_staff,
+          groups: formData.groups,
+          universidad: formData.universidad?.value || null,
+          facultad: formData.facultad?.value || null,
+          escuela: formData.escuela?.value || null,
+        }),
+      });
 
       const data = await res.json();
 
@@ -78,7 +142,11 @@ export default function RegisterPage() {
           confirmPassword: "",
           is_staff: false,
           groups: [],
+          universidad: null,
+          facultad: null,
+          escuela: null,
         });
+        // router.push("/usuariosList");
       } else {
         setMessage(`❌ Error: ${JSON.stringify(data)}`);
       }
@@ -91,89 +159,55 @@ export default function RegisterPage() {
     <div className="container mt-5" style={{ maxWidth: "500px" }}>
       <h2 className="mb-4">Registro de Usuario</h2>
       <form onSubmit={handleSubmit}>
+        {/* Campos de usuario */}
         <div className="mb-3">
-          <label className="form-label">Nombre de usuario</label>
-          <input
-            className="form-control"
-            name="username"
-            value={formData.username}
-            onChange={handleChange}
-            required
-          />
+          <label>Nombre de usuario</label>
+          <input className="form-control" name="username" value={formData.username} onChange={handleChange} required />
         </div>
         <div className="mb-3">
-          <label className="form-label">Correo</label>
-          <input
-            className="form-control"
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-          />
+          <label>Correo</label>
+          <input type="email" className="form-control" name="email" value={formData.email} onChange={handleChange} required />
         </div>
         <div className="mb-3">
-          <label className="form-label">Nombre</label>
-          <input
-            className="form-control"
-            name="first_name"
-            value={formData.first_name}
-            onChange={handleChange}
-          />
+          <label>Nombre</label>
+          <input className="form-control" name="first_name" value={formData.first_name} onChange={handleChange} />
         </div>
         <div className="mb-3">
-          <label className="form-label">Apellido</label>
-          <input
-            className="form-control"
-            name="last_name"
-            value={formData.last_name}
-            onChange={handleChange}
-          />
+          <label>Apellido</label>
+          <input className="form-control" name="last_name" value={formData.last_name} onChange={handleChange} />
         </div>
         <div className="mb-3">
-          <label className="form-label">Contraseña</label>
-          <input
-            className="form-control"
-            type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            required
-          />
+          <label>Contraseña</label>
+          <input type="password" className="form-control" name="password" value={formData.password} onChange={handleChange} required />
         </div>
         <div className="mb-3">
-          <label className="form-label">Confirmar Contraseña</label>
-          <input
-            className="form-control"
-            type="password"
-            name="confirmPassword"
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            required
-          />
+          <label>Confirmar Contraseña</label>
+          <input type="password" className="form-control" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} required />
         </div>
         <div className="mb-3">
-          <label className="form-label">Rol</label>
-          <select
-            className="form-select"
-            name="role"
-            value={
-              formData.is_staff
-                ? "admin"
-                : formData.role === "usuario"
-                ? "usuario"
-                : "" // consultador por defecto
-            }
-            onChange={handleChange}
-          >
+          <label>Rol</label>
+          <select className="form-select" name="role" value={formData.is_staff ? "admin" : "usuario"} onChange={handleChange}>
             <option value="">Solo lectura</option>
             <option value="usuario">Usuario</option>
             <option value="admin">Administrador</option>
           </select>
         </div>
-        <button className="btn btn-primary w-100" type="submit">
-          Registrar
-        </button>
+
+        {/* Campos independientes */}
+        <div className="mb-3">
+          <label>Universidad</label>
+          <Select options={universidades} value={formData.universidad} onChange={(opt) => setFormData((prev) => ({ ...prev, universidad: opt }))} placeholder="Seleccione universidad" isClearable />
+        </div>
+        <div className="mb-3">
+          <label>Facultad</label>
+          <Select options={facultades} value={formData.facultad} onChange={(opt) => setFormData((prev) => ({ ...prev, facultad: opt }))} placeholder="Seleccione facultad" isClearable />
+        </div>
+        <div className="mb-3">
+          <label>Escuela</label>
+          <Select options={escuelas} value={formData.escuela} onChange={(opt) => setFormData((prev) => ({ ...prev, escuela: opt }))} placeholder="Seleccione escuela" isClearable />
+        </div>
+
+        <button className="btn btn-primary w-100" type="submit">Registrar</button>
       </form>
       {message && <div className="alert alert-info mt-3">{message}</div>}
     </div>
