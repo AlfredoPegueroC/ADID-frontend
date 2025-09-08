@@ -165,7 +165,7 @@ function AsignaturaListClient() {
             Exportar PDF
           </button>
 
-          {(user?.groups[0] === "admin" || user?.groups[0] === "usuario") && (
+          {/* {(user?.groups[0] === "admin" || user?.groups[0] === "usuario") && (
             <button
               type="button"
               className="btn btn-warning"
@@ -174,7 +174,7 @@ function AsignaturaListClient() {
             >
               Importar Excel
             </button>
-          )}
+          )} */}
 
           <Search
             SearchSubmit={handleSearchSubmit}
