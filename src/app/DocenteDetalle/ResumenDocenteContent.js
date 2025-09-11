@@ -107,6 +107,7 @@ export default function ResumenDocenteContent({ docenteID, periodoParam }) {
                   <th>Clave</th>
                   <th>Código</th>
                   <th>Nombre</th>
+                  <th>Observaciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -116,6 +117,7 @@ export default function ResumenDocenteContent({ docenteID, periodoParam }) {
                     <td>{asig.clave}</td>
                     <td>{asig.codigo}</td>
                     <td>{asig.nombre}</td>
+                    <td>{asig.comentario || '-'}</td>
                   </tr>
                 ))}
               </tbody>
