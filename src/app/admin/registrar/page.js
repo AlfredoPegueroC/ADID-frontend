@@ -25,9 +25,11 @@ export default function RegisterPage() {
     confirmPassword: "",
     is_staff: false,
     groups: [],
-    universidad: null,
-    facultad: null,
-    escuela: null,
+    profile: {
+      universidad: null,
+      facultad: null,
+      escuela: null,
+    },
   });
 
   const [message, setMessage] = useState("");
@@ -74,7 +76,6 @@ export default function RegisterPage() {
     }
   };
 
-  // Carga inicial
   useEffect(() => {
     cargarUniversidades();
     cargarFacultades();
@@ -84,11 +85,12 @@ export default function RegisterPage() {
   const handleChange = (e) => {
     const { name, value, type } = e.target;
     if (name === "role") {
+      // Actualizamos is_staff y groups según el rol
       const isAdmin = value === "admin";
       setFormData((prev) => ({
         ...prev,
         is_staff: isAdmin,
-        groups: [isAdmin ? "admin" : "usuario"],
+        groups: [value],
       }));
     } else {
       setFormData((prev) => ({
@@ -123,9 +125,11 @@ export default function RegisterPage() {
           password: formData.password,
           is_staff: formData.is_staff,
           groups: formData.groups,
-          universidad: formData.universidad?.value || null,
-          facultad: formData.facultad?.value || null,
-          escuela: formData.escuela?.value || null,
+          profile: {
+            universidad: formData.profile.universidad?.value || null,
+            facultad: formData.profile.facultad?.value || null,
+            escuela: formData.profile.escuela?.value || null,
+          },
         }),
       });
 
@@ -142,11 +146,8 @@ export default function RegisterPage() {
           confirmPassword: "",
           is_staff: false,
           groups: [],
-          universidad: null,
-          facultad: null,
-          escuela: null,
+          profile: { universidad: null, facultad: null, escuela: null },
         });
-        // router.push("/usuariosList");
       } else {
         setMessage(`❌ Error: ${JSON.stringify(data)}`);
       }
@@ -162,53 +163,140 @@ export default function RegisterPage() {
         {/* Campos de usuario */}
         <div className="mb-3">
           <label>Nombre de usuario</label>
-          <input className="form-control" name="username" value={formData.username} onChange={handleChange} required />
+          <input
+            className="form-control"
+            name="username"
+            value={formData.username}
+            onChange={handleChange}
+            required
+          />
         </div>
+
         <div className="mb-3">
           <label>Correo</label>
-          <input type="email" className="form-control" name="email" value={formData.email} onChange={handleChange} required />
+          <input
+            type="email"
+            className="form-control"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            required
+          />
         </div>
+
         <div className="mb-3">
           <label>Nombre</label>
-          <input className="form-control" name="first_name" value={formData.first_name} onChange={handleChange} />
+          <input
+            className="form-control"
+            name="first_name"
+            value={formData.first_name}
+            onChange={handleChange}
+          />
         </div>
+
         <div className="mb-3">
           <label>Apellido</label>
-          <input className="form-control" name="last_name" value={formData.last_name} onChange={handleChange} />
+          <input
+            className="form-control"
+            name="last_name"
+            value={formData.last_name}
+            onChange={handleChange}
+          />
         </div>
+
         <div className="mb-3">
           <label>Contraseña</label>
-          <input type="password" className="form-control" name="password" value={formData.password} onChange={handleChange} required />
+          <input
+            type="password"
+            className="form-control"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+            required
+          />
         </div>
+
         <div className="mb-3">
           <label>Confirmar Contraseña</label>
-          <input type="password" className="form-control" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} required />
+          <input
+            type="password"
+            className="form-control"
+            name="confirmPassword"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            required
+          />
         </div>
+
+        {/* Select de Rol */}
         <div className="mb-3">
           <label>Rol</label>
-          <select className="form-select" name="role" value={formData.is_staff ? "admin" : "usuario"} onChange={handleChange}>
-            <option value="">Solo lectura</option>
+          <select
+            className="form-select"
+            name="role"
+            value={formData.is_staff}
+            onChange={handleChange}
+          >
+            <option value="solo_lectura">Solo lectura</option>
             <option value="usuario">Usuario</option>
             <option value="admin">Administrador</option>
           </select>
         </div>
 
-        {/* Campos independientes */}
+        {/* Campos de Profile */}
         <div className="mb-3">
           <label>Universidad</label>
-          <Select options={universidades} value={formData.universidad} onChange={(opt) => setFormData((prev) => ({ ...prev, universidad: opt }))} placeholder="Seleccione universidad" isClearable />
-        </div>
-        <div className="mb-3">
-          <label>Facultad</label>
-          <Select options={facultades} value={formData.facultad} onChange={(opt) => setFormData((prev) => ({ ...prev, facultad: opt }))} placeholder="Seleccione facultad" isClearable />
-        </div>
-        <div className="mb-3">
-          <label>Escuela</label>
-          <Select options={escuelas} value={formData.escuela} onChange={(opt) => setFormData((prev) => ({ ...prev, escuela: opt }))} placeholder="Seleccione escuela" isClearable />
+          <Select
+            options={universidades}
+            value={formData.profile.universidad}
+            onChange={(opt) =>
+              setFormData((prev) => ({
+                ...prev,
+                profile: { ...prev.profile, universidad: opt },
+              }))
+            }
+            placeholder="Seleccione universidad"
+            isClearable
+          />
         </div>
 
-        <button className="btn btn-primary w-100" type="submit">Registrar</button>
+        <div className="mb-3">
+          <label>Facultad</label>
+          <Select
+            options={facultades}
+            value={formData.profile.facultad}
+            onChange={(opt) =>
+              setFormData((prev) => ({
+                ...prev,
+                profile: { ...prev.profile, facultad: opt },
+              }))
+            }
+            placeholder="Seleccione facultad"
+            isClearable
+          />
+        </div>
+
+        <div className="mb-3">
+          <label>Escuela</label>
+          <Select
+            options={escuelas}
+            value={formData.profile.escuela}
+            onChange={(opt) =>
+              setFormData((prev) => ({
+                ...prev,
+                profile: { ...prev.profile, escuela: opt },
+              }))
+            }
+            placeholder="Seleccione escuela"
+            isClearable
+          />
+        </div>
+
+        <button className="btn btn-primary w-100" type="submit">
+          Registrar
+        </button>
       </form>
+
       {message && <div className="alert alert-info mt-3">{message}</div>}
     </div>
   );

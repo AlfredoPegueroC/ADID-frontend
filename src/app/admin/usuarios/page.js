@@ -25,7 +25,8 @@ export default function UsuarioPage() {
 
   const queryClient = useQueryClient();
   const API = process.env.NEXT_PUBLIC_API_KEY;
-  const token = typeof window !== "undefined" ? localStorage.getItem("accessToken") : "";
+  const token =
+    typeof window !== "undefined" ? localStorage.getItem("accessToken") : "";
 
   const debouncedSearch = useRef(
     debounce((value) => {
@@ -49,9 +50,9 @@ export default function UsuarioPage() {
         email: user.email,
         role: user.groups.includes("admin") ? "Admin" : "User",
         is_active: user.is_active,
-        universidad: user.profile?.universidad || "-",
-        facultad: user.profile?.facultad || "-",
-        escuela: user.profile?.escuela || "-",
+        universidad: user.profile?.universidad_name || "-",
+        facultad: user.profile?.facultad_name || "-",
+        escuela: user.profile?.escuela_name || "-",
       }));
       return {
         results: formateados,
@@ -86,40 +87,85 @@ export default function UsuarioPage() {
 
   // --- Definir tamaños fijos como programador ---
   const columns = useMemo(
-  () => [
-    { accessorKey: "username", header: "Usuario", size: 120, minSize: 80, maxSize: 200 },
-    { accessorKey: "name", header: "Nombre", size: 180, minSize: 120, maxSize: 300 },
-    { accessorKey: "email", header: "Email", size: 200, minSize: 150, maxSize: 350 },
-    { accessorKey: "role", header: "Rol", size: 100, minSize: 80, maxSize: 150 },
-    { accessorKey: "universidad", header: "Universidad", size: 180, minSize: 120, maxSize: 300 },
-    { accessorKey: "facultad", header: "Facultad", size: 150, minSize: 100, maxSize: 250 },
-    { accessorKey: "escuela", header: "Escuela", size: 180, minSize: 120, maxSize: 300 },
-    {
-      accessorKey: "is_active",
-      header: "Estado",
-      size: 100,
-      minSize: 80,
-      maxSize: 150,
-      cell: ({ row }) => {
-        const user = row.original;
-        return (
-          <select
-            className="form-select form-select-sm"
-            value={user.is_active.toString()}
-            onChange={(e) =>
-              handleEstadoChange(user.id, user.username, e.target.value === "true")
-            }
-          >
-            <option value="true">Activo</option>
-            <option value="false">Inactivo</option>
-          </select>
-        );
+    () => [
+      {
+        accessorKey: "username",
+        header: "Usuario",
+        size: 120,
+        minSize: 80,
+        maxSize: 200,
       },
-    },
-  ],
-  []
-);
-
+      {
+        accessorKey: "name",
+        header: "Nombre",
+        size: 180,
+        minSize: 120,
+        maxSize: 300,
+      },
+      {
+        accessorKey: "email",
+        header: "Email",
+        size: 200,
+        minSize: 150,
+        maxSize: 350,
+      },
+      {
+        accessorKey: "role",
+        header: "Rol",
+        size: 100,
+        minSize: 80,
+        maxSize: 150,
+      },
+      {
+        accessorKey: "universidad",
+        header: "Universidad",
+        size: 180,
+        minSize: 120,
+        maxSize: 300,
+      },
+      {
+        accessorKey: "facultad",
+        header: "Facultad",
+        size: 150,
+        minSize: 100,
+        maxSize: 250,
+      },
+      {
+        accessorKey: "escuela",
+        header: "Escuela",
+        size: 180,
+        minSize: 120,
+        maxSize: 300,
+      },
+      {
+        accessorKey: "is_active",
+        header: "Estado",
+        size: 100,
+        minSize: 80,
+        maxSize: 150,
+        cell: ({ row }) => {
+          const user = row.original;
+          return (
+            <select
+              className="form-select form-select-sm"
+              value={user.is_active.toString()}
+              onChange={(e) =>
+                handleEstadoChange(
+                  user.id,
+                  user.username,
+                  e.target.value === "true"
+                )
+              }
+            >
+              <option value="true">Activo</option>
+              <option value="false">Inactivo</option>
+            </select>
+          );
+        },
+      },
+    ],
+    []
+  );
 
   const table = useReactTable({
     data: data?.results || [],
@@ -137,7 +183,11 @@ export default function UsuarioPage() {
 
       <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
         <div className="d-flex gap-2">
-          <Link className="btn btn-primary" href="/admin/registrar" style={{ width: "200px" }}>
+          <Link
+            className="btn btn-primary"
+            href="/admin/registrar"
+            style={{ width: "200px" }}
+          >
             Nuevo Usuario
           </Link>
           <input
@@ -150,7 +200,9 @@ export default function UsuarioPage() {
         </div>
 
         <div className="d-flex align-items-center gap-2">
-          <label className="fw-bold mb-0 text-black">Resultados por página:</label>
+          <label className="fw-bold mb-0 text-black">
+            Resultados por página:
+          </label>
           <select
             className="form-select w-auto"
             value={pageSize}
@@ -172,11 +224,11 @@ export default function UsuarioPage() {
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
-                  <th
-                    key={header.id}
-                    style={{ width: header.getSize() }}
-                  >
-                    {flexRender(header.column.columnDef.header, header.getContext())}
+                  <th key={header.id} style={{ width: header.getSize() }}>
+                    {flexRender(
+                      header.column.columnDef.header,
+                      header.getContext()
+                    )}
                   </th>
                 ))}
               </tr>
@@ -191,14 +243,19 @@ export default function UsuarioPage() {
               </tr>
             ) : table.getRowModel().rows.length === 0 ? (
               <tr>
-                <td colSpan={8} className="text-center">No se encontraron usuarios.</td>
+                <td colSpan={8} className="text-center">
+                  No se encontraron usuarios.
+                </td>
               </tr>
             ) : (
               table.getRowModel().rows.map((row) => (
                 <tr key={row.id}>
                   {row.getVisibleCells().map((cell) => (
                     <td key={cell.id}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
                     </td>
                   ))}
                 </tr>
@@ -209,7 +266,11 @@ export default function UsuarioPage() {
       </div>
 
       {data?.totalPages > 1 && (
-        <Pagination page={page} totalPages={data.totalPages} onPageChange={setPage} />
+        <Pagination
+          page={page}
+          totalPages={data.totalPages}
+          onPageChange={setPage}
+        />
       )}
     </div>
   );
