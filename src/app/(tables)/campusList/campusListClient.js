@@ -51,7 +51,7 @@ function CampusListClient() {
   // Traemos datos sin incluir sorting porque el ordenamiento será local (frontend)
   const { data, isLoading } = useQuery({
     queryKey: ["campus", { page, searchQuery, pageSize }],
-    queryFn: () => fetchCampus(page, searchQuery, pageSize, token),
+    queryFn: () => fetchCampus(page, searchQuery, pageSize),
     keepPreviousData: true,
   });
 

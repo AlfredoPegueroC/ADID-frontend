@@ -10,7 +10,7 @@ export async function fetchCampus(
   params.append("page", page);
   params.append("page_size", pageSize);
   if (searchQuery) params.append("search", searchQuery);
-  if (universidadId) params.append("universidad", universidadId); // Cambia 'universidad' según tu API
+  if (universidadId) params.append("universidad", universidadId); 
 
   try {
     const response = await fetch(`${API}api/campus?${params.toString()}`, {

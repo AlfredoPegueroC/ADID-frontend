@@ -8,8 +8,6 @@ import Notification from "../Notification";
 import Styles from "@styles/form.module.css";
 
 import { fetchUniversidades } from "@api/universidadService";
-import { fetchFacultades } from "@api/facultadService";
-import { fetchEscuelas } from "@api/escuelaService";
 
 export default function AsignaturaForm({ title }) {
   const router = useRouter();
@@ -34,10 +32,10 @@ export default function AsignaturaForm({ title }) {
   });
 
   // 🔹 Cargar universidades
-  const cargarUniversidades = async (search = "", page = 1) => {
+  const cargarUniversidades = async () => {
     try {
       const token = localStorage.getItem("accessToken") || "";
-      const { results } = await fetchUniversidades(page, search, 10, token);
+      const { results } = await fetchUniversidades(1, "", 10, token);
       const opciones = results.map((u) => ({
         value: u.UniversidadID,
         label: u.UniversidadNombre,
@@ -49,13 +47,19 @@ export default function AsignaturaForm({ title }) {
   };
 
   // 🔹 Cargar facultades filtradas por universidad
-  const cargarFacultades = async (universidadId, search = "", page = 1) => {
+  const cargarFacultades = async (universidadId) => {
     if (!universidadId) return setFacultades([]);
     setLoadingFacultades(true);
     try {
       const token = localStorage.getItem("accessToken") || "";
-      const { results } = await fetchFacultades(page, search, 10, token, universidadId);
-      const opciones = results.map((f) => ({
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_KEY}facultades?Facultad_UniversidadFK=${universidadId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      const data = await res.json();
+      const opciones = data.map((f) => ({
         value: f.FacultadID,
         label: f.FacultadNombre,
       }));
@@ -68,13 +72,19 @@ export default function AsignaturaForm({ title }) {
   };
 
   // 🔹 Cargar escuelas filtradas por facultad
-  const cargarEscuelas = async (facultadId, search = "", page = 1) => {
+  const cargarEscuelas = async (facultadId) => {
     if (!facultadId) return setEscuelas([]);
     setLoadingEscuelas(true);
     try {
       const token = localStorage.getItem("accessToken") || "";
-      const { results } = await fetchEscuelas(page, search, 10, token, facultadId);
-      const opciones = results.map((e) => ({
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_KEY}escuelas?Escuela_facultadFK=${facultadId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      const data = await res.json();
+      const opciones = data.map((e) => ({
         value: e.EscuelaId,
         label: e.EscuelaNombre,
       }));
@@ -86,9 +96,8 @@ export default function AsignaturaForm({ title }) {
     }
   };
 
-  // 🔹 carga inicial universidades
   useEffect(() => {
-    cargarUniversidades("", 1);
+    cargarUniversidades();
   }, []);
 
   // Inputs normales
@@ -107,7 +116,7 @@ export default function AsignaturaForm({ title }) {
     }));
     setFacultades([]);
     setEscuelas([]);
-    if (selectedOption) cargarFacultades(selectedOption.value, "", 1);
+    if (selectedOption) cargarFacultades(selectedOption.value);
   };
 
   const handleFacultadChange = (selectedOption) => {
@@ -117,7 +126,7 @@ export default function AsignaturaForm({ title }) {
       Asignatura_EscuelaFK: null,
     }));
     setEscuelas([]);
-    if (selectedOption) cargarEscuelas(selectedOption.value, "", 1);
+    if (selectedOption) cargarEscuelas(selectedOption.value);
   };
 
   const handleEscuelaChange = (selectedOption) => {
@@ -127,6 +136,7 @@ export default function AsignaturaForm({ title }) {
     }));
   };
 
+  // Submit
   const handleSubmit = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem("accessToken");
@@ -150,7 +160,7 @@ export default function AsignaturaForm({ title }) {
           body: JSON.stringify(payload),
         }
       );
-      console.log(formData);
+
       if (response.ok) {
         const result = await response.json();
         Notification.alertSuccess(`Asignatura creada: ${result.AsignaturaNombre}`);

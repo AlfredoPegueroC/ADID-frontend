@@ -400,6 +400,7 @@ export default function AsignacionForm({ title }) {
             }}
             isLoading={loadingUniversidades}
             placeholder="Seleccione universidad"
+            isDisabled
             isClearable
           />
         </div>
@@ -418,6 +419,8 @@ export default function AsignacionForm({ title }) {
             }}
             isLoading={loadingFacultades}
             placeholder="Seleccione facultad"
+            isDisabled
+
             isClearable
           />
         </div>
@@ -436,6 +439,7 @@ export default function AsignacionForm({ title }) {
             }}
             isLoading={loadingEscuelas}
             placeholder="Seleccione escuela"
+            isDisabled
             isClearable
           />
         </div>
@@ -455,6 +459,7 @@ export default function AsignacionForm({ title }) {
             isLoading={loadingPeriodos}
             placeholder="Seleccione periodo"
             isClearable
+
           />
         </div>
 

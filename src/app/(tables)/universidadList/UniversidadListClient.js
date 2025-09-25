@@ -44,7 +44,7 @@ function UniversidadListClient() {
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["universidades", { page, searchQuery, pageSize }],
-    queryFn: () => fetchUniversidades(page, searchQuery, pageSize, token),
+    queryFn: () => fetchUniversidades(page, searchQuery, pageSize),
     keepPreviousData: true,
   });
 
