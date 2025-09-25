@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Select from "react-select";
-import Styles from "@styles/test.module.css";
+import Styles from "@styles/form.module.css";
 import Notification from "../Notification";
 import { fetchUniversidades } from "@api/universidadService";
 
@@ -25,7 +25,7 @@ export default function Periodo({ title, onSuccess }) {
   });
 
   useEffect(() => {
-    cargarUniversidades(""); // carga inicial
+    cargarUniversidades("");
   }, []);
 
   const cargarUniversidades = async (search = "") => {

@@ -13,7 +13,7 @@ import {
 import { useAuth } from "@contexts/AuthContext";
 import Pagination from "@components/Pagination";
 import Tables from "@components/Tables";
-import Modal from "@components/Modal";
+import ModalForm from "@components/ModalForm";
 import Search from "@components/search";
 import Spinner from "@components/Spinner";
 import Periodo from "@components/forms/Periodo";
@@ -196,14 +196,14 @@ function PeriodoListClient({ initialData, totalPages: initialTotalPages }) {
         </div>
       </div>
 
-      <Modal title="Nuevo Periodo Académico">
+      <ModalForm title="Nuevo Periodo Académico">
         <Periodo
           title="Registrar Periodo"
           onSuccess={() =>
             queryClient.invalidateQueries({ queryKey: ["periodos"] })
           }
         />
-      </Modal>
+      </ModalForm>
 
       <Tables>
         <thead>
