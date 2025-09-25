@@ -30,7 +30,7 @@ export function exportEscuelasToPDF(escuelas, page, pageSize) {
 
   // Encabezados
   const headers = [
-    ["#", "Código", "Nombre", "Directora", "Teléfono", "Correo", "Universidad", "Facultad"]
+    ["#", "Código", "Nombre", "Director", "Teléfono", "Correo", "Universidad", "Facultad"]
   ];
 
   // Datos
