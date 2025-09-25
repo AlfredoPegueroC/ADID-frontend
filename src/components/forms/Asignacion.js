@@ -69,10 +69,9 @@ export default function AsignacionForm({ title }) {
     cargarFacultades();
     cargarEscuelas();
     cargarPeriodos();
-    cargarAsignaturas(); 
+    cargarAsignaturas();
   }, []);
 
-  // ------------------ CARGA DE OPCIONES ------------------
   const cargarDocentes = async (search = "") => {
     setLoadingDocentes(true);
     try {
@@ -212,14 +211,37 @@ export default function AsignacionForm({ title }) {
     // Caso especial: asignatura seleccionada
     if (name === "asignaturaFk" && selectedOption) {
       const asignatura = selectedOption.data;
+
       setFormData((prev) => ({
         ...prev,
         asignaturaFk: selectedOption,
         clave: asignatura.AsignaturaCodigo,
         nombre: asignatura.AsignaturaNombre,
         creditos: asignatura.AsignaturaCreditos,
-        cupo: asignatura.AsignaturaHorasTeoricas, // puedes mapear como quieras
+        cupo: asignatura.AsignaturaHorasTeoricas,
         horario: asignatura.AsignaturaHorasPracticas,
+
+        
+        universidadFk: asignatura.Asignatura_UniversidadFK
+          ? {
+              value: asignatura.Asignatura_UniversidadFK,
+              label: asignatura.universidadNombre,
+            }
+          : null,
+
+        facultadFk: asignatura.Asignatura_FacultadFK
+          ? {
+              value: asignatura.Asignatura_FacultadFK,
+              label: asignatura.facultadNombre,
+            }
+          : null,
+
+        escuelaFk: asignatura.Asignatura_EscuelaFK
+          ? {
+              value: asignatura.Asignatura_EscuelaFK,
+              label: asignatura.escuelaNombre,
+            }
+          : null,
       }));
     } else {
       setFormData((prev) => ({

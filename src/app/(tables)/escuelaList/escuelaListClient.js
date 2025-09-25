@@ -89,7 +89,7 @@ function EscuelaListClient() {
     () => [
       { header: "Código", accessorKey: "EscuelaCodigo" },
       { header: "Nombre", accessorKey: "EscuelaNombre" },
-      { header: "Directora", accessorKey: "EscuelaDirectora" },
+      { header: "Director", accessorKey: "EscuelaDirectora" },
       { header: "Teléfono", accessorKey: "EscuelaTelefono" },
       { header: "Correo", accessorKey: "EscuelaCorreo" },
       { header: "Estado", accessorKey: "EscuelaEstado" },

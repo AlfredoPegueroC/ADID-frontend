@@ -60,6 +60,8 @@ export function exportFacultadesToPDF(facultades, page, pageSize) {
     styles: {
       fontSize: 9,
       cellPadding: 2,
+      lineWidth: 0.001,          
+      lineColor: [0, 0, 0, 0.2], 
     },
     columnStyles: {
       0: { cellWidth: 20 }, // Código

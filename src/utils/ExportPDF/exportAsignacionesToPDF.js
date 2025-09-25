@@ -61,15 +61,17 @@ export function exportAsignacionesToPDF(columns, rows, selectedPeriodo, currentP
     styles: {
       fontSize: 8,
       cellPadding: 2,
-      halign: "center", // 💡 Centra el contenido
+      halign: "center",
       valign: "middle",
+      lineWidth: 0.001,          
+      lineColor: [0, 0, 0, 0.2], 
     },
     headStyles: {
       fillColor: [41, 128, 185],
       halign: "center",
     },
     columnStyles: {
-      0: { cellWidth: 10, halign: "center" }, // Columna #
+      0: { cellWidth: 10, halign: "center" },
     },
   });
 

@@ -45,6 +45,8 @@ export function exportCategoriasToPDF(categorias, currentPage, pageSize) {
     styles: {
       fontSize: 9,
       cellPadding: 2,
+      lineWidth: 0.001,          
+      lineColor: [0, 0, 0, 0.2], 
     },
     columnStyles: {
       0: { cellWidth: 10 },  // #

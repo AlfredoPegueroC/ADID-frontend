@@ -46,10 +46,12 @@ export function exportUniversidadesToPDF(universidades, page, pageSize) {
   autoTable(doc, {
     head: headers,
     body: data,
-    startY: 36, // ajuste para dejar espacio suficiente arriba
+    startY: 36,
     styles: {
       fontSize: 8,
       cellPadding: 2,
+      lineWidth: 0.001,          
+      lineColor: [0, 0, 0, 0.2], 
     },
     columnStyles: {
       0: { cellWidth: 10 },

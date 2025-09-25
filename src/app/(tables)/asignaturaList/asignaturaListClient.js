@@ -107,15 +107,15 @@ function AsignaturaListClient() {
                   >
                     Editar
                   </Link>
-                  {/* {user?.groups[0] === "admin" && (
+                  {user?.groups[0] === "admin" && (
                     <button
                       className="btn btn-danger btn-sm mx-2"
-                      onClick={() => handleDeleteCampus(row.original.CampusID)}
+                      onClick={() => handleDeleteAsignatura(row.original.AsignaturaCodigo)}
                       disabled={mutationDelete.isLoading}
                     >
                       Borrar
                     </button>
-                  )} */}
+                  )}
                 </div>
               ),
             },

@@ -57,6 +57,8 @@ export function exportDocentesToPDF(docentes, currentPage, pageSize) {
     styles: {
       fontSize: 8,
       cellPadding: 2,
+      lineWidth: 0.001,          
+      lineColor: [0, 0, 0, 0.2], 
     },
     columnStyles: {
       0: { cellWidth: 8 },
