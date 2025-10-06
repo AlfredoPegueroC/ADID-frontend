@@ -50,7 +50,7 @@ function AsignaturaListClient() {
   // Query asignaturas
   const { data, isLoading } = useQuery({
     queryKey: ["asignaturas", { page, searchQuery, pageSize }],
-    queryFn: () => fetchAsignaturas(page, searchQuery, pageSize, token),
+    queryFn: () => fetchAsignaturas(page, searchQuery, pageSize),
     keepPreviousData: true,
   });
 
@@ -165,7 +165,7 @@ function AsignaturaListClient() {
             Exportar PDF
           </button>
 
-          {/* {(user?.groups[0] === "admin" || user?.groups[0] === "usuario") && (
+          {(user?.groups[0] === "admin" || user?.groups[0] === "usuario") && (
             <button
               type="button"
               className="btn btn-warning"
@@ -174,7 +174,7 @@ function AsignaturaListClient() {
             >
               Importar Excel
             </button>
-          )} */}
+          )}
 
           <Search
             SearchSubmit={handleSearchSubmit}

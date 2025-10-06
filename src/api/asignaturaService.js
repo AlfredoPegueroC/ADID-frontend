@@ -1,15 +1,14 @@
 export async function fetchAsignaturas(
   page = 1,
   searchQuery = "",
-  pageSize = 10,
-  accessToken = ""
+  pageSize = 10
 ) {
   const API = process.env.NEXT_PUBLIC_API_KEY;
 
   const params = new URLSearchParams();
   params.append("page", page);
-  params.append("pageSize", pageSize);
-
+  // params.append("pageSize", pageSize);
+  params.append("page_size", pageSize);
   if (searchQuery) {
     params.append("search", searchQuery);
   }
@@ -17,6 +16,7 @@ export async function fetchAsignaturas(
   try {
     const response = await fetch(`${API}api/asignatura?${params.toString()}`, {
       cache: "no-store",
+      method: "GET",
       headers: {
         "Content-Type": "application/json",
         // Authorization: `Bearer ${accessToken}`, // Incluye el token de acceso
