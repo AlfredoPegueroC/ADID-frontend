@@ -68,6 +68,7 @@ function AccionCell({ row, api }) {
       <option value="Pendiente Asignacion">Pendiente Asignacion</option>
       <option value="Asignar">Asignar</option>
       <option value="Eliminar">Eliminar</option>
+      <option value="Nuevo">Nuevo</option>
     </select>
   );
 }
@@ -112,8 +113,9 @@ function ComentarioCell({ row, api }) {
         onBlur={handleSave} // guarda automáticamente al salir del campo
         disabled={isUpdating}
         placeholder="Escribir comentario..."
+        rows={1}
       />
-      <div className="mt-2 text-end">
+      {/* <div className="mt-2 text-end">
         <button
           className="btn btn-primary btn-sm"
           onClick={handleSave} // también se puede guardar con el botón
@@ -121,8 +123,58 @@ function ComentarioCell({ row, api }) {
         >
           {isUpdating ? "Guardando..." : "Guardar"}
         </button>
-      </div>
+      </div> */}
     </div>
+  );
+}
+
+function ModificacionesCell({ row, api }) {
+  const [value, setValue] = useState(
+    row.original.modificacion || "Modificar"
+  );
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  const handleChange = async (e) => {
+    const newValue = e.target.value;
+    setValue(newValue);
+    setIsUpdating(true);
+
+    try {
+      const res = await fetch(
+        `${api}api/asignacion/edit/${row.original.AsignacionID}/`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+          body: JSON.stringify({ modificacion: newValue }),
+        }
+      );
+
+      if (!res.ok) throw new Error("No se pudo actualizar");
+      Notification.alertSuccess("Acción modificada correctamente");
+    } catch (err) {
+      console.error("Error al actualizar modificaciones:", err);
+      alert("Error al modificar la acción");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  return (
+    <select
+      className="form-select form-select-sm"
+      value={value}
+      onChange={handleChange}
+      disabled={isUpdating}
+    >
+      <option value="Pendiente Modificar">Pendiente Modificar</option>
+      <option value="Modificar">Modificar</option>
+      <option value="Deasignar">Deasignar</option>
+      <option value="Eliminar">Eliminar</option>
+      <option value="Crear">Crear</option>
+    </select>
   );
 }
 
@@ -241,7 +293,7 @@ function PrincipalListClient() {
         header: "NRC",
         size: 70,
         minSize: 70,
-        maxSize: 200,
+        maxSize: 70,
       },
       {
         accessorKey: "clave",
@@ -255,7 +307,7 @@ function PrincipalListClient() {
         header: "Asignatura",
         size: 140,
         minSize: 120,
-        maxSize: 300,
+        maxSize: 120,
       },
       {
         accessorKey: "codigo",
@@ -267,9 +319,9 @@ function PrincipalListClient() {
       {
         accessorKey: "docenteNombre",
         header: "Profesor",
-        size: 150,
+        size: 120,
         minSize: 100,
-        maxSize: 250,
+        maxSize: 150,
         cell: ({ row }) => (
           <Link
             href={`/DocenteDetalle/?docente=${row.original.docenteFk}&periodo=${selectedPeriodo}`}
@@ -279,17 +331,83 @@ function PrincipalListClient() {
           </Link>
         ),
       },
-      { accessorKey: "seccion", header: "Sección", size: 80, minSize: 80, maxSize: 150 },
-      { accessorKey: "modalidad", header: "Modalidad", size: 100, minSize: 100, maxSize: 150 },
-      { accessorKey: "campusNombre", header: "Campus", size: 120, minSize: 120, maxSize: 150 },
-      { accessorKey: "facultadNombre", header: "Facultad", size: 150, minSize: 150, maxSize: 200 },
-      { accessorKey: "escuelaNombre", header: "Escuela", size: 150, minSize: 150, maxSize: 200 },
-      { accessorKey: "tipo", header: "Tipo", size: 100, minSize: 100, maxSize: 150 },
-      { accessorKey: "cupo", header: "Cupo", size: 50, minSize: 50, maxSize: 150 },
-      { accessorKey: "inscripto", header: "Inscripto", size: 30, minSize: 30, maxSize: 150 },
-      { accessorKey: "horario", header: "Horario", size: 100, minSize: 100, maxSize: 200 },
-      { accessorKey: "dias", header: "Días", size: 120, minSize: 120, maxSize: 150 },
-      { accessorKey: "aula", header: "Aula", size: 100, minSize: 100, maxSize: 150 },
+      {
+        accessorKey: "seccion",
+        header: "Sección",
+        size: 20,
+        minSize: 80,
+        maxSize: 30,
+      },
+      {
+        accessorKey: "modalidad",
+        header: "Modalidad",
+        size: 50,
+        minSize: 50,
+        maxSize: 70,
+      },
+      {
+        accessorKey: "campusNombre",
+        header: "Campus",
+        size: 90,
+        minSize: 90,
+        maxSize: 110,
+      },
+      {
+        accessorKey: "facultadNombre",
+        header: "Facultad",
+        size: 150,
+        minSize: 150,
+        maxSize: 200,
+      },
+      {
+        accessorKey: "escuelaNombre",
+        header: "Escuela",
+        size: 150,
+        minSize: 150,
+        maxSize: 200,
+      },
+      {
+        accessorKey: "tipo",
+        header: "Tipo",
+        size: 100,
+        minSize: 100,
+        maxSize: 70,
+      },
+      {
+        accessorKey: "cupo",
+        header: "Cupo",
+        size: 50,
+        minSize: 50,
+        maxSize: 150,
+      },
+      {
+        accessorKey: "inscripto",
+        header: "Inscripto",
+        size: 30,
+        minSize: 30,
+        maxSize: 150,
+      },
+      {
+        accessorKey: "horario",
+        header: "Horario",
+        size: 100,
+        minSize: 100,
+        maxSize: 110,
+      },
+      {
+        accessorKey: "dias",
+        header: "Días",
+        size: 120,
+        minSize: 120,
+        maxSize: 80,
+      },
+      {
+        accessorKey: "aula",
+        header: "Aula",
+        size: 100,
+        minSize: 100,
+        maxSize: 80,
+      },
       { accessorKey: "creditos", header: "CR", size: 50 },
 
       ...(user?.groups[0] === "admin" || user?.groups[0] === "usuario"
@@ -297,44 +415,61 @@ function PrincipalListClient() {
             {
               accessorKey: "accion",
               header: "Status",
-              size: 170,
+              size: 100,
               minSize: 120,
-              maxSize: 200,
+              maxSize: 110,
               cell: ({ row }) => <AccionCell row={row} api={API} />,
             },
+            // {
+            //   id: "acciones",
+            //   header: "Acción",
+            //   size: 200,
+            //   minSize: 100,
+            //   maxSize: 200,
+            //   cell: ({ row }) => (
+            //     <div className="d-flex gap-2">
+            //       {/* <Link
+            //         className="btn btn-primary btn-sm"
+            //         href={`/asignacionEdit/${row.original.AsignacionID}?period=${selectedPeriodo}`}
+            //       >
+            //         Editar
+            //       </Link> */}
+
+            //       {/* <button
+            //         className="btn btn-warning btn-sm text-white"
+            //         data-bs-toggle="modal"
+            //         data-bs-target={`#modal_comment_${row.original.AsignacionID}`}
+            //         disabled={!selectedPeriodo}
+            //         title={!selectedPeriodo ? "Comentario" : ""}
+            //       >
+            //         Comentar
+            //       </button> */}
+
+            //       {/* <Modal
+            //         title="Observaciones"
+            //         modelName={`modal_comment_${row.original.AsignacionID}`}
+            //       >
+            //         <ComentarioCell row={row} api={API} />
+            //       </Modal> */}
+            //     </div>
+            //   ),
+            // },
             {
-              id: "acciones",
+              accessorKey: "modificaciones",
               header: "Acción",
-              size: 150,
-              minSize: 100,
-              maxSize: 200,
-              cell: ({ row }) => (
-                <div className="d-flex gap-2">
-                  <Link
-                    className="btn btn-primary btn-sm"
-                    href={`/asignacionEdit/${row.original.AsignacionID}?period=${selectedPeriodo}`}
-                  >
-                    Editar
-                  </Link>
+              size: 140,
+              minSize: 120,
+              maxSize: 180,
+              cell: ({ row }) => <ModificacionesCell row={row} api={API} />,
+            },
 
-                  <button
-                    className="btn btn-warning btn-sm text-white"
-                    data-bs-toggle="modal"
-                    data-bs-target={`#modal_comment_${row.original.AsignacionID}`}
-                    disabled={!selectedPeriodo}
-                    title={!selectedPeriodo ? "Comentario" : ""}
-                  >
-                    Comentar
-                  </button>
-
-                  <Modal
-                    title="Observaciones"
-                    modelName={`modal_comment_${row.original.AsignacionID}`}
-                  >
-                    <ComentarioCell row={row} api={API} />
-                  </Modal>
-                </div>
-              ),
+            {
+              accessorKey: "comentario",
+              header: "Comentario",
+              size: 120, // ajusta ancho a tu gusto
+              minSize: 250,
+              maxSize: 500,
+              cell: ({ row }) => <ComentarioCell row={row} api={API} />,
             },
           ]
         : []),
