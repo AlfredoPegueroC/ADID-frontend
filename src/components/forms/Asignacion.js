@@ -62,21 +62,21 @@ export default function AsignacionForm({ title }) {
     asignaturaFk: null,
   });
 
-  // Carga inicial
+  // No son necesario los campos de universidad, facultad y escuela porque se obtienen de la asignatura seleccionada
   useEffect(() => {
     cargarDocentes();
     cargarCampus();
-    cargarUniversidades();
-    cargarFacultades();
-    cargarEscuelas();
+    // cargarUniversidades();
+    // cargarFacultades();
+    // cargarEscuelas();
     cargarPeriodos();
     cargarAsignaturas();
   }, []);
 
+
   const cargarDocentes = async (search = "") => {
     setLoadingDocentes(true);
     try {
-      // const token = localStorage.getItem("accessToken") || "";
       const { results } = await fetchDocentes(1, search, 10);
       setDocentes(
         results.map((d) => ({
@@ -95,8 +95,7 @@ export default function AsignacionForm({ title }) {
   const cargarCampus = async (search = "") => {
     setLoadingCampus(true);
     try {
-      const token = localStorage.getItem("accessToken") || "";
-      const { results } = await fetchCampus(1, search, 10, token);
+      const { results } = await fetchCampus(1, search, 10);
       setCampus(
         results.map((c) => ({
           value: c.CampusID,
@@ -113,8 +112,7 @@ export default function AsignacionForm({ title }) {
   const cargarUniversidades = async (search = "") => {
     setLoadingUniversidades(true);
     try {
-      const token = localStorage.getItem("accessToken") || "";
-      const { results } = await fetchUniversidades(1, search, 10, token);
+      const { results } = await fetchUniversidades(1, search, 10);
       setUniversidades(
         results.map((u) => ({
           value: u.UniversidadID,
@@ -131,8 +129,7 @@ export default function AsignacionForm({ title }) {
   const cargarFacultades = async (search = "") => {
     setLoadingFacultades(true);
     try {
-      const token = localStorage.getItem("accessToken") || "";
-      const { results } = await fetchFacultades(1, search, 10, token);
+      const { results } = await fetchFacultades(1, search, 10);
       setFacultades(
         results.map((f) => ({
           value: f.FacultadID,
@@ -149,8 +146,7 @@ export default function AsignacionForm({ title }) {
   const cargarEscuelas = async (search = "") => {
     setLoadingEscuelas(true);
     try {
-      const token = localStorage.getItem("accessToken") || "";
-      const { results } = await fetchEscuelas(1, search, 10, token);
+      const { results } = await fetchEscuelas(1, search, 10);
       setEscuelas(
         results.map((e) => ({
           value: e.EscuelaId,
@@ -167,8 +163,8 @@ export default function AsignacionForm({ title }) {
   const cargarPeriodos = async (search = "") => {
     setLoadingPeriodos(true);
     try {
-      const token = localStorage.getItem("accessToken") || "";
-      const { results } = await fetchPeriodos(1, search, 10, token);
+     
+      const { results } = await fetchPeriodos(1, search, 10);
       setPeriodos(
         results.map((p) => ({
           value: p.PeriodoID,
@@ -185,13 +181,13 @@ export default function AsignacionForm({ title }) {
   const cargarAsignaturas = async (search = "") => {
     setLoadingAsignaturas(true);
     try {
-      const token = localStorage.getItem("accessToken") || "";
-      const { results } = await fetchAsignaturas(1, search, 10, token);
+      
+      const { results } = await fetchAsignaturas(1, search, 10);
       setAsignaturas(
         results.map((a) => ({
           value: a.AsignaturaCodigo,
           label: a.AsignaturaNombre,
-          data: a, // 👈 guardamos todo el objeto para autocompletar
+          data: a,
         }))
       );
     } catch {

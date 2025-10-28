@@ -4,9 +4,7 @@ export async function fetchDashboardData() {
   
   // Obtén el token guardado en localStorage o donde lo tengas
   const accessToken = localStorage.getItem('accessToken');
-  console.log("🔑 Token de acceso:", accessToken);
   try {
-    console.log("📡 Llamando a:", url);
     const response = await fetch(url, {
       headers: {
         'Authorization': `Bearer ${accessToken}`,  // <== Aquí va el token
@@ -19,7 +17,7 @@ export async function fetchDashboardData() {
     }
 
     const data = await response.json();
-    console.log("✅ Datos recibidos:", data);
+    
     return data;
   } catch (error) {
     console.error("❌ Error al cargar dashboard:", error);
