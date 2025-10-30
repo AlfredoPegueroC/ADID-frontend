@@ -301,6 +301,7 @@ function PrincipalListClient() {
         size: 80,
         minSize: 80,
         maxSize: 150,
+        enableSorting: true,
       },
       {
         accessorKey: "nombre",
@@ -315,6 +316,7 @@ function PrincipalListClient() {
         size: 80,
         minSize: 80,
         maxSize: 150,
+        enableSorting: true,
       },
       {
         accessorKey: "docenteNombre",
@@ -337,6 +339,7 @@ function PrincipalListClient() {
         size: 20,
         minSize: 80,
         maxSize: 30,
+        enableSorting: true,
       },
       {
         accessorKey: "modalidad",
@@ -351,6 +354,7 @@ function PrincipalListClient() {
         size: 90,
         minSize: 90,
         maxSize: 110,
+        enableSorting: true,
       },
       {
         accessorKey: "facultadNombre",
@@ -455,7 +459,7 @@ function PrincipalListClient() {
             //   ),
             // },
             {
-              accessorKey: "modificaciones",
+              accessorKey: "modificacion",
               header: "Acción",
               size: 140,
               minSize: 120,
