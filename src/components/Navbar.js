@@ -267,6 +267,18 @@ export default function Navbar() {
                     Asignatura
                   </Link>
                 </li>
+                
+                 <li>
+                  <Link className="dropdown-item" href="/accionList">
+                    Accion
+                  </Link>
+                </li>
+                
+                <li>
+                  <Link className="dropdown-item" href="/statusList">
+                    Status
+                  </Link>
+                </li>
               </ul>
             </li>
 

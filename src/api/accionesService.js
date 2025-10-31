@@ -1,7 +1,7 @@
 export async function fetchAcciones(page = 1, searchQuery = "", pageSize = 10) 
 {
   const API = process.env.NEXT_PUBLIC_API_KEY;
-  params = new URLSearchParams();
+  const params = new URLSearchParams();
   params.append("page", page);
   params.append("page_size", pageSize);
   if (searchQuery) params.append("search", searchQuery);
