@@ -37,14 +37,14 @@ export default function AsignacionForm({ title }) {
 
   // Estado del formulario
   const [formData, setFormData] = useState({
-    nrc: "",
+    nrc: "N/A",
     clave: "",
     nombre: "",
     codigo: "",
     seccion: "",
     modalidad: "",
-    cupo: "",
-    inscripto: "",
+    cupo: "0",
+    inscripto: "0",
     horario: "",
     dias: "",
     aula: "",
@@ -72,7 +72,6 @@ export default function AsignacionForm({ title }) {
     cargarPeriodos();
     cargarAsignaturas();
   }, []);
-
 
   const cargarDocentes = async (search = "") => {
     setLoadingDocentes(true);
@@ -163,7 +162,6 @@ export default function AsignacionForm({ title }) {
   const cargarPeriodos = async (search = "") => {
     setLoadingPeriodos(true);
     try {
-     
       const { results } = await fetchPeriodos(1, search, 10);
       setPeriodos(
         results.map((p) => ({
@@ -181,7 +179,6 @@ export default function AsignacionForm({ title }) {
   const cargarAsignaturas = async (search = "") => {
     setLoadingAsignaturas(true);
     try {
-      
       const { results } = await fetchAsignaturas(1, search, 10);
       setAsignaturas(
         results.map((a) => ({
@@ -302,35 +299,33 @@ export default function AsignacionForm({ title }) {
       <form onSubmit={handleSubmit} className={Styles.form}>
         <h1 className={Styles.title}>{title}</h1>
 
-        {/* Select de Asignatura */}
         <div className={Styles.name_group}>
-          <label>Asignatura:</label>
+          <label>Docente:</label>
           <Select
-            name="asignaturaFk"
-            options={asignaturas}
-            value={formData.asignaturaFk}
+            name="docenteFk"
+            options={docentes}
+            value={formData.docenteFk}
             onChange={handleSelectChange}
             onInputChange={(inputValue) => {
               if (typeof inputValue === "string") {
-                cargarAsignaturas(inputValue.replace(/\s/g, ""));
+                cargarDocentes(inputValue.replace(/\s/g, ""));
               }
             }}
-            isLoading={loadingAsignaturas}
-            placeholder="Seleccione asignatura"
+            isLoading={loadingDocentes}
+            placeholder="Seleccione docente"
             isClearable
           />
         </div>
 
-        {/* Campos de texto */}
-        {[
-          "nrc",
+        {/* {[
+          // "nrc",
           // "clave",
           // "nombre",
-          // "codigo", // hace referenncia al codigo del maestro
+          "codigo", // hace referenncia al codigo del maestro
           "seccion",
           // "modalidad",
-          "cupo",
-          "inscripto",
+          // "cupo",
+          // "inscripto",
           "horario",
           "dias",
           "aula",
@@ -350,10 +345,116 @@ export default function AsignacionForm({ title }) {
               value={formData[field]}
               onChange={handleChange}
               placeholder={`Ingrese ${field}`}
+              disabled={field === "codigo"}
               required
             />
           </div>
-        ))}
+        ))} */}
+
+        <div className={Styles.name_group}>
+          <label htmlFor="codigo">CÓDIGO:</label>
+          <input
+            type="text"
+            id="codigo"
+            name="codigo"
+            value={formData.codigo}
+            onChange={handleChange}
+            placeholder="Ingrese código"
+            disabled // ← 🔹 deshabilitado
+            required
+          />
+        </div>
+
+        {/* Select de Asignatura */}
+        <div className={Styles.name_group}>
+          <label>Asignatura:</label>
+          <Select
+            name="asignaturaFk"
+            options={asignaturas}
+            value={formData.asignaturaFk}
+            onChange={handleSelectChange}
+            onInputChange={(inputValue) => {
+              if (typeof inputValue === "string") {
+                cargarAsignaturas(inputValue.replace(/\s/g, ""));
+              }
+            }}
+            isLoading={loadingAsignaturas}
+            placeholder="Seleccione asignatura"
+            isClearable
+          />
+        </div>
+
+        <div className={Styles.name_group}>
+          <label>Campus:</label>
+          <Select
+            name="campusFk"
+            options={campus}
+            value={formData.campusFk}
+            onChange={handleSelectChange}
+            onInputChange={(inputValue) => {
+              if (typeof inputValue === "string") {
+                cargarCampus(inputValue.replace(/\s/g, ""));
+              }
+            }}
+            isLoading={loadingCampus}
+            placeholder="Seleccione campus"
+            isClearable
+          />
+        </div>
+
+        <div className={Styles.name_group}>
+          <label htmlFor="seccion">SECCIÓN:</label>
+          <input
+            type="text"
+            id="seccion"
+            name="seccion"
+            value={formData.seccion}
+            onChange={handleChange}
+            placeholder="Ingrese sección"
+            required
+          />
+        </div>
+
+        <div className={Styles.name_group}>
+          <label htmlFor="horario">HORARIO:</label>
+          <input
+            type="text"
+            id="horario"
+            name="horario"
+            value={formData.horario}
+            onChange={handleChange}
+            placeholder="Ingrese horario"
+            required
+          />
+        </div>
+
+        <div className={Styles.name_group}>
+          <label htmlFor="dias">DÍAS:</label>
+          <input
+            type="text"
+            id="dias"
+            name="dias"
+            value={formData.dias}
+            onChange={handleChange}
+            placeholder="Ingrese días"
+            required
+          />
+        </div>
+
+        <div className={Styles.name_group}>
+          <label htmlFor="aula">AULA:</label>
+          <input
+            type="text"
+            id="aula"
+            name="aula"
+            value={formData.aula}
+            onChange={handleChange}
+            placeholder="Ingrese aula"
+            required
+          />
+        </div>
+        {/* Campos de texto */}
+
         <div className={Styles.name_group}>
           <label htmlFor="modalidad">Modalidad:</label>
           <select
@@ -387,41 +488,8 @@ export default function AsignacionForm({ title }) {
           </select>
         </div>
         {/* Selects de relaciones */}
-        <div className={Styles.name_group}>
-          <label>Docente:</label>
-          <Select
-            name="docenteFk"
-            options={docentes}
-            value={formData.docenteFk}
-            onChange={handleSelectChange}
-            onInputChange={(inputValue) => {
-              if (typeof inputValue === "string") {
-                cargarDocentes(inputValue.replace(/\s/g, ""));
-              }
-            }}
-            isLoading={loadingDocentes}
-            placeholder="Seleccione docente"
-            isClearable
-          />
-        </div>
 
-        <div className={Styles.name_group}>
-          <label>Campus:</label>
-          <Select
-            name="campusFk"
-            options={campus}
-            value={formData.campusFk}
-            onChange={handleSelectChange}
-            onInputChange={(inputValue) => {
-              if (typeof inputValue === "string") {
-                cargarCampus(inputValue.replace(/\s/g, ""));
-              }
-            }}
-            isLoading={loadingCampus}
-            placeholder="Seleccione campus"
-            isClearable
-          />
-        </div>
+        
 
         {false && (
           <div className={Styles.name_group}>
