@@ -17,6 +17,7 @@ function EditCampus({ params }) {
     CampusCodigo: "",
     CampusNombre: "",
     CampusDireccion: "",
+    CampusDirector: "",
     CampusCiudad: "",
     CampusProvincia: "",
     CampusPais: "",
@@ -168,6 +169,18 @@ function EditCampus({ params }) {
             onChange={handleChange}
             required
             placeholder="Nombre del campus"
+          />
+        </div>
+
+        <div className={Styles.name_group}>
+          <label htmlFor="CampusDirector">Nombre</label>
+          <input
+            id="CampusDirector"
+            type="text"
+            value={campus.CampusDirector}
+            onChange={handleChange}
+            required
+            placeholder="Director del campus"
           />
         </div>
 

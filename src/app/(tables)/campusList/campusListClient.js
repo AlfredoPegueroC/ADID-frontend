@@ -88,6 +88,7 @@ function CampusListClient() {
     () => [
       { header: "Código", accessorKey: "CampusCodigo" },
       { header: "Nombre", accessorKey: "CampusNombre" },
+      { header: "Director", accessorKey: "CampusDirector" },
       { header: "Dirección", accessorKey: "CampusDireccion" },
       { header: "Ciudad", accessorKey: "CampusCiudad" },
       { header: "Provincia", accessorKey: "CampusProvincia" },

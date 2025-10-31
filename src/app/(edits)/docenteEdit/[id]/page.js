@@ -431,7 +431,11 @@ function DocenteEdit({ params }) {
           >
             <option value="">-- Seleccione el estado --</option>
             <option value="Activo">Activo</option>
-            <option value="Inactivo">Inactivo</option>
+            <option value="Licencia">Licencia</option>
+            <option value="Sabático">Sabático</option>
+            <option value="Jubilado">Jubilado</option>
+            <option value="Contratado">Contratado</option>
+            <option value="Desmontado">Desmontado</option>
           </select>
         </div>
 

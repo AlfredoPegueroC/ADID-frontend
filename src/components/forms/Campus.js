@@ -20,6 +20,7 @@ export default function CampusForm({ title }) {
     CampusPais: "",
     CampusProvincia: "",
     CampusCiudad: "",
+    CampusDirector: "",
     CampusTelefono: "",
     CampusCorreoContacto: "",
     CampusEstado: "",
@@ -99,6 +100,7 @@ export default function CampusForm({ title }) {
           CampusPais: "",
           CampusProvincia: "",
           CampusCiudad: "",
+          CampusDirector: "",
           CampusTelefono: "",
           CampusCorreoContacto: "",
           CampusEstado: "",
@@ -141,6 +143,19 @@ export default function CampusForm({ title }) {
             value={formData.CampusNombre}
             onChange={handleChange}
             placeholder="Ingrese el nombre del campus"
+            required
+          />
+        </div>
+
+        <div className={Styles.name_group}>
+          <label htmlFor="CampusDirector">Nombre del Director:</label>
+          <input
+            type="text"
+            id="CampusDirector"
+            name="CampusDirector"
+            value={formData.CampusDirector}
+            onChange={handleChange}
+            placeholder="Ingrese el Director del campus"
             required
           />
         </div>
