@@ -24,6 +24,8 @@ import Select from "react-select";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { deleteEntity } from "@utils/delete";
 import { fetchAsignacionData } from "@api/asignacionService";
+import { fetchAcciones } from "@api/accionesService";
+import { fetchStatus } from "@api/statusService";
 import { debounce } from "lodash";
 import { exportAsignacionesToPDF } from "@utils/ExportPDF/exportAsignacionesToPDF";
 
@@ -52,7 +54,20 @@ function AccionCell({ row, api }) {
   const [isUpdating, setIsUpdating] = useState(false);
   const queryClient = useQueryClient();
 
-  // Resync cuando cambia la fila/valor original
+  // Traer ACCIONES desde el servicio (página 1, sin filtro, tamaño 100)
+  const { data: accionesData, isLoading: accionesLoading } = useQuery({
+    queryKey: ["acciones-options"],
+    queryFn: () => fetchAcciones(1, "", 100),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const opciones = (accionesData?.results || []).map((a) => a.AccionNombre);
+
+  // Si el valor actual no está en el catálogo (por datos viejos), lo añadimos visualmente
+  const opcionesFinal = value && !opciones.includes(value)
+    ? [value, ...opciones]
+    : opciones;
+
   useEffect(() => {
     setValue(row.original.accion || "");
   }, [row.original.AsignacionID, row.original.accion]);
@@ -77,7 +92,6 @@ function AccionCell({ row, api }) {
 
       if (!res.ok) throw new Error("No se pudo actualizar");
 
-      // Refleja de inmediato en cache todas las variantes de la lista
       queryClient.setQueriesData(
         { queryKey: ["asignaciones"], exact: false },
         (old) => {
@@ -96,7 +110,6 @@ function AccionCell({ row, api }) {
       );
 
       Notification.alertSuccess("Modificado correctamente");
-      // Trae verdad del servidor
       queryClient.invalidateQueries({ queryKey: ["asignaciones"] });
     } catch (err) {
       console.error("Error al actualizar:", err);
@@ -111,15 +124,22 @@ function AccionCell({ row, api }) {
       className="form-select form-select-sm"
       value={value}
       onChange={handleChange}
-      disabled={isUpdating}
+      disabled={isUpdating || accionesLoading}
     >
-      <option value="Pendiente Asignacion">Pendiente Asignacion</option>
-      <option value="Asignar">Asignar</option>
-      <option value="Eliminar">Eliminar</option>
-      <option value="Nuevo">Nuevo</option>
+      {accionesLoading && <option>Cargando...</option>}
+      {!accionesLoading && opcionesFinal.length === 0 && (
+        <option value="">(Sin opciones)</option>
+      )}
+      {!accionesLoading &&
+        opcionesFinal.map((opt) => (
+          <option key={opt} value={opt}>
+            {opt}
+          </option>
+        ))}
     </select>
   );
 }
+
 
 function ComentarioCell({ row, api }) {
   const [value, setValue] = useState(row.original.comentario || "");
@@ -193,13 +213,26 @@ function ComentarioCell({ row, api }) {
 }
 
 function ModificacionesCell({ row, api }) {
-  const [value, setValue] = useState(row.original.modificacion || "Modificar");
+  const [value, setValue] = useState(row.original.modificacion || "");
   const [isUpdating, setIsUpdating] = useState(false);
   const queryClient = useQueryClient();
 
-  // Resync cuando cambia la fila/valor original
+  // Traer STATUS desde el servicio (página 1, sin filtro, tamaño 100)
+  const { data: statusData, isLoading: statusLoading } = useQuery({
+    queryKey: ["status-options"],
+    queryFn: () => fetchStatus(1, "", 100),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const opciones = (statusData?.results || []).map((s) => s.StatusNombre);
+
+  // Si el valor actual no está en el catálogo, lo añadimos visualmente
+  const opcionesFinal = value && !opciones.includes(value)
+    ? [value, ...opciones]
+    : opciones;
+
   useEffect(() => {
-    setValue(row.original.modificacion || "Modificar");
+    setValue(row.original.modificacion || "");
   }, [row.original.AsignacionID, row.original.modificacion]);
 
   const handleChange = async (e) => {
@@ -254,16 +287,22 @@ function ModificacionesCell({ row, api }) {
       className="form-select form-select-sm"
       value={value}
       onChange={handleChange}
-      disabled={isUpdating}
+      disabled={isUpdating || statusLoading}
     >
-      <option value="Pendiente Modificar">Pendiente Modificar</option>
-      <option value="Modificar">Modificar</option>
-      <option value="Deasignar">Deasignar</option>
-      <option value="Eliminar">Eliminar</option>
-      <option value="Crear">Crear</option>
+      {statusLoading && <option>Cargando...</option>}
+      {!statusLoading && opcionesFinal.length === 0 && (
+        <option value="">---------</option>
+      )}
+      {!statusLoading &&
+        opcionesFinal.map((opt) => (
+          <option key={opt} value={opt}>
+            {opt}
+          </option>
+        ))}
     </select>
   );
 }
+
 
 
 function PrincipalListClient() {
