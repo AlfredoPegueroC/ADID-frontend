@@ -122,7 +122,7 @@ function TipoDocenteListClient() {
 
   return (
     <div className="mt-5">
-      <h1 className="text-dark">Lista Tipos de Docente</h1>
+      <h1 className="text-dark">Lista Tipos de Asignatura</h1>
 
       <div className="d-flex justify-content-between align-items-center mb-3 mt-3">
         <div className="d-flex gap-2 flex-wrap">

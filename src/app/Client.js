@@ -17,6 +17,7 @@ import ImportPage from "@components/forms/ImportAsignacion";
 import Notification from "@components/Notification";
 import Spinner from "@components/Spinner";
 
+
 import { useAuth } from "@contexts/AuthContext";
 import withAuth from "@utils/withAuth";
 import Select from "react-select";
@@ -26,9 +27,35 @@ import { fetchAsignacionData } from "@api/asignacionService";
 import { debounce } from "lodash";
 import { exportAsignacionesToPDF } from "@utils/ExportPDF/exportAsignacionesToPDF";
 
+/* ------------------------ Utilidades de orden ------------------------ */
+// Normaliza para ordenar bien en español (quita acentos y case)
+const normalize = (v) =>
+  (v ?? "")
+    .toString()
+    .toLocaleLowerCase("es")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+
+// Orden de texto (locale-aware)
+const compareText = (a, b) => normalize(a).localeCompare(normalize(b), "es");
+
+// Orden numérico (para NRC que puede venir como string)
+const toNumber = (v) => {
+  const n = Number((v ?? "").toString().replace(/\D+/g, ""));
+  return Number.isFinite(n) ? n : 0;
+};
+const compareNumber = (a, b) => toNumber(a) - toNumber(b);
+
+/* ------------------------ Celdas editables ------------------------ */
 function AccionCell({ row, api }) {
   const [value, setValue] = useState(row.original.accion || "");
   const [isUpdating, setIsUpdating] = useState(false);
+  const queryClient = useQueryClient();
+
+  // Resync cuando cambia la fila/valor original
+  useEffect(() => {
+    setValue(row.original.accion || "");
+  }, [row.original.AsignacionID, row.original.accion]);
 
   const handleChange = async (e) => {
     const newValue = e.target.value;
@@ -49,7 +76,28 @@ function AccionCell({ row, api }) {
       );
 
       if (!res.ok) throw new Error("No se pudo actualizar");
+
+      // Refleja de inmediato en cache todas las variantes de la lista
+      queryClient.setQueriesData(
+        { queryKey: ["asignaciones"], exact: false },
+        (old) => {
+          if (!old) return old;
+          const listKey = Array.isArray(old?.results) ? "results" : "asignaciones";
+          if (!Array.isArray(old?.[listKey])) return old;
+          return {
+            ...old,
+            [listKey]: old[listKey].map((r) =>
+              r.AsignacionID === row.original.AsignacionID
+                ? { ...r, accion: newValue }
+                : r
+            ),
+          };
+        }
+      );
+
       Notification.alertSuccess("Modificado correctamente");
+      // Trae verdad del servidor
+      queryClient.invalidateQueries({ queryKey: ["asignaciones"] });
     } catch (err) {
       console.error("Error al actualizar:", err);
       alert("Error al modificar el campo");
@@ -76,9 +124,15 @@ function AccionCell({ row, api }) {
 function ComentarioCell({ row, api }) {
   const [value, setValue] = useState(row.original.comentario || "");
   const [isUpdating, setIsUpdating] = useState(false);
+  const queryClient = useQueryClient();
+
+  // Resync cuando cambia la fila/valor original
+  useEffect(() => {
+    setValue(row.original.comentario || "");
+  }, [row.original.AsignacionID, row.original.comentario]);
 
   const handleSave = async () => {
-    if (value === row.original.comentario) return; // evita enviar si no hubo cambios
+    if (value === row.original.comentario) return;
 
     setIsUpdating(true);
     try {
@@ -95,7 +149,26 @@ function ComentarioCell({ row, api }) {
       );
 
       if (!res.ok) throw new Error("No se pudo actualizar");
+
+      queryClient.setQueriesData(
+        { queryKey: ["asignaciones"], exact: false },
+        (old) => {
+          if (!old) return old;
+          const listKey = Array.isArray(old?.results) ? "results" : "asignaciones";
+          if (!Array.isArray(old?.[listKey])) return old;
+          return {
+            ...old,
+            [listKey]: old[listKey].map((r) =>
+              r.AsignacionID === row.original.AsignacionID
+                ? { ...r, comentario: value }
+                : r
+            ),
+          };
+        }
+      );
+
       Notification.alertSuccess("Comentario actualizado correctamente");
+      queryClient.invalidateQueries({ queryKey: ["asignaciones"] });
     } catch (err) {
       console.error("Error al actualizar comentario:", err);
       alert("Error al modificar el comentario");
@@ -110,29 +183,24 @@ function ComentarioCell({ row, api }) {
         className="form-control form-control-sm"
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        onBlur={handleSave} // guarda automáticamente al salir del campo
+        onBlur={handleSave}
         disabled={isUpdating}
         placeholder="Escribir comentario..."
         rows={1}
       />
-      {/* <div className="mt-2 text-end">
-        <button
-          className="btn btn-primary btn-sm"
-          onClick={handleSave} // también se puede guardar con el botón
-          disabled={isUpdating}
-        >
-          {isUpdating ? "Guardando..." : "Guardar"}
-        </button>
-      </div> */}
     </div>
   );
 }
 
 function ModificacionesCell({ row, api }) {
-  const [value, setValue] = useState(
-    row.original.modificacion || "Modificar"
-  );
+  const [value, setValue] = useState(row.original.modificacion || "Modificar");
   const [isUpdating, setIsUpdating] = useState(false);
+  const queryClient = useQueryClient();
+
+  // Resync cuando cambia la fila/valor original
+  useEffect(() => {
+    setValue(row.original.modificacion || "Modificar");
+  }, [row.original.AsignacionID, row.original.modificacion]);
 
   const handleChange = async (e) => {
     const newValue = e.target.value;
@@ -153,7 +221,26 @@ function ModificacionesCell({ row, api }) {
       );
 
       if (!res.ok) throw new Error("No se pudo actualizar");
+
+      queryClient.setQueriesData(
+        { queryKey: ["asignaciones"], exact: false },
+        (old) => {
+          if (!old) return old;
+          const listKey = Array.isArray(old?.results) ? "results" : "asignaciones";
+          if (!Array.isArray(old?.[listKey])) return old;
+          return {
+            ...old,
+            [listKey]: old[listKey].map((r) =>
+              r.AsignacionID === row.original.AsignacionID
+                ? { ...r, modificacion: newValue }
+                : r
+            ),
+          };
+        }
+      );
+
       Notification.alertSuccess("Acción modificada correctamente");
+      queryClient.invalidateQueries({ queryKey: ["asignaciones"] });
     } catch (err) {
       console.error("Error al actualizar modificaciones:", err);
       alert("Error al modificar la acción");
@@ -178,6 +265,7 @@ function ModificacionesCell({ row, api }) {
   );
 }
 
+
 function PrincipalListClient() {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
@@ -188,19 +276,39 @@ function PrincipalListClient() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [loadingPeriodos, setLoadingPeriodos] = useState(true);
   const [periodos, setPeriodos] = useState([]);
-  const [sorting, setSorting] = useState([]);
+
+
+  // Sorting inicial por Profesor asc (client-side)
+  const [sorting, setSorting] = useState([{ id: "docenteNombre", desc: false }]);
+
   const [columnVisibility, setColumnVisibility] = useState({
     facultadNombre: false,
     escuelaNombre: false,
     cupo: false,
     inscripto: false,
   });
+
   const dropdownRef = useRef(null);
   const API = process.env.NEXT_PUBLIC_API_KEY;
   const Api_import_URL = `${API}import/asignacion`;
   const queryClient = useQueryClient();
   const { user } = useAuth();
 
+  /* ------ Restaurar/Guardar periodo en localStorage (por usuario) ------ */
+  useEffect(() => {
+    const key = user?.username ? `selectedPeriodo_${user.username}` : "selectedPeriodo";
+    const savedPeriodo = localStorage.getItem(key);
+    if (savedPeriodo) setSelectedPeriodo(savedPeriodo);
+  }, [user]);
+
+  useEffect(() => {
+    if (selectedPeriodo) {
+      const key = user?.username ? `selectedPeriodo_${user.username}` : "selectedPeriodo";
+      localStorage.setItem(key, selectedPeriodo);
+    }
+  }, [selectedPeriodo, user]);
+
+  /* ------------------------ Cargar periodos ------------------------ */
   useEffect(() => {
     const cargarPeriodos = async () => {
       setLoadingPeriodos(true);
@@ -210,7 +318,7 @@ function PrincipalListClient() {
 
         const periodosData = await res.json();
         const nombres = periodosData.map((p) => p.PeriodoNombre);
-        const periodosFinal = nombres.sort((a, b) => b.localeCompare(a));
+        const periodosFinal = nombres.sort((a, b) => b.localeCompare(a, "es"));
 
         setPeriodos(periodosFinal);
         if (!selectedPeriodo && periodosFinal.length > 0) {
@@ -226,33 +334,19 @@ function PrincipalListClient() {
     cargarPeriodos();
   }, [API, selectedPeriodo]);
 
+  /* ------------------------ Data query ------------------------ */
   const { data, isLoading } = useQuery({
-    queryKey: [
-      "asignaciones",
-      currentPage,
-      searchQuery,
-      selectedPeriodo,
-      pageSize,
-    ],
-    queryFn: () =>
-      fetchAsignacionData(selectedPeriodo, currentPage, searchQuery, pageSize),
+    queryKey: ["asignaciones", currentPage, searchQuery, selectedPeriodo, pageSize],
+    queryFn: () => fetchAsignacionData(selectedPeriodo, currentPage, searchQuery, pageSize),
     enabled: !!selectedPeriodo && !loadingPeriodos,
-    keepPreviousData: true,
+    keepPreviousData: false,
+    staleTime: 0,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    gcTime: 5 * 60 * 1000,
   });
 
   const totalPages = data?.totalPages || 1;
-
-  const deleteAsignacion = useCallback(
-    (id) => {
-      deleteEntity(
-        `${API}api/asignacion/delete`,
-        id,
-        data?.asignaciones,
-        "AsignacionID"
-      );
-    },
-    [API, data]
-  );
 
   const handleCopiarPeriodo = async () => {
     setCopiando(true);
@@ -286,44 +380,52 @@ function PrincipalListClient() {
 
   const opciones = periodos.map((p) => ({ value: p, label: p }));
 
+  /* ------------------------ Columnas (con sortingFn) ------------------------ */
   const columns = useMemo(
     () => [
       {
         accessorKey: "nrc",
         header: "NRC",
         size: 70,
-        minSize: 70,
-        maxSize: 70,
+        enableSorting: true,
+        sortingFn: (a, b, id) => compareNumber(a.getValue(id), b.getValue(id)),
       },
       {
         accessorKey: "clave",
         header: "Clave",
         size: 80,
-        minSize: 80,
-        maxSize: 150,
         enableSorting: true,
+        sortingFn: (a, b, id) => compareText(a.getValue(id), b.getValue(id)),
       },
       {
         accessorKey: "nombre",
         header: "Asignatura",
         size: 140,
-        minSize: 120,
-        maxSize: 120,
+        enableSorting: true,
+        sortingFn: (a, b, id) => compareText(a.getValue(id), b.getValue(id)),
       },
       {
         accessorKey: "codigo",
         header: "Código",
         size: 80,
-        minSize: 80,
-        maxSize: 150,
         enableSorting: true,
+        sortingFn: (a, b, id) => compareText(a.getValue(id), b.getValue(id)),
       },
       {
         accessorKey: "docenteNombre",
         header: "Profesor",
         size: 120,
-        minSize: 100,
-        maxSize: 150,
+        enableSorting: true,
+        sortingFn: (rowA, rowB, id) => {
+          // Ordena por Profesor; desempata por Asignatura, Sección y NRC
+          const r = compareText(rowA.getValue(id), rowB.getValue(id));
+          if (r !== 0) return r;
+          const r2 = compareText(rowA.getValue("nombre"), rowB.getValue("nombre"));
+          if (r2 !== 0) return r2;
+          const r3 = compareText(rowA.getValue("seccion"), rowB.getValue("seccion"));
+          if (r3 !== 0) return r3;
+          return compareNumber(rowA.getValue("nrc"), rowB.getValue("nrc"));
+        },
         cell: ({ row }) => (
           <Link
             href={`/DocenteDetalle/?docente=${row.original.docenteFk}&periodo=${selectedPeriodo}`}
@@ -336,82 +438,40 @@ function PrincipalListClient() {
       {
         accessorKey: "seccion",
         header: "Sección",
-        size: 20,
-        minSize: 80,
-        maxSize: 30,
+        size: 80,
         enableSorting: true,
+        sortingFn: (a, b, id) => compareText(a.getValue(id), b.getValue(id)),
       },
       {
         accessorKey: "modalidad",
         header: "Modalidad",
         size: 50,
-        minSize: 50,
-        maxSize: 70,
+        enableSorting: true,
+        sortingFn: (a, b, id) => compareText(a.getValue(id), b.getValue(id)),
       },
       {
         accessorKey: "campusNombre",
         header: "Campus",
         size: 90,
-        minSize: 90,
-        maxSize: 110,
         enableSorting: true,
-      },
-      {
-        accessorKey: "facultadNombre",
-        header: "Facultad",
-        size: 150,
-        minSize: 150,
-        maxSize: 200,
-      },
-      {
-        accessorKey: "escuelaNombre",
-        header: "Escuela",
-        size: 150,
-        minSize: 150,
-        maxSize: 200,
+        sortingFn: (a, b, id) => compareText(a.getValue(id), b.getValue(id)),
       },
       {
         accessorKey: "tipo",
         header: "Tipo",
         size: 100,
-        minSize: 100,
-        maxSize: 70,
+        enableSorting: true,
+        sortingFn: (a, b, id) => compareText(a.getValue(id), b.getValue(id)),
       },
-      {
-        accessorKey: "cupo",
-        header: "Cupo",
-        size: 50,
-        minSize: 50,
-        maxSize: 150,
-      },
-      {
-        accessorKey: "inscripto",
-        header: "Inscripto",
-        size: 30,
-        minSize: 30,
-        maxSize: 150,
-      },
-      {
-        accessorKey: "horario",
-        header: "Horario",
-        size: 100,
-        minSize: 100,
-        maxSize: 110,
-      },
-      {
-        accessorKey: "dias",
-        header: "Días",
-        size: 120,
-        minSize: 120,
-        maxSize: 80,
-      },
-      {
-        accessorKey: "aula",
-        header: "Aula",
-        size: 100,
-        minSize: 100,
-        maxSize: 80,
-      },
+
+      // Visibilidad por defecto de algunas columnas
+      { accessorKey: "facultadNombre", header: "Facultad", size: 150 },
+      { accessorKey: "escuelaNombre", header: "Escuela", size: 150 },
+      { accessorKey: "cupo", header: "Cupo", size: 50 },
+      { accessorKey: "inscripto", header: "Inscripto", size: 30 },
+      { accessorKey: "horario", header: "Horario", size: 100 },
+      { accessorKey: "dias", header: "Días", size: 120 },
+      { accessorKey: "aula", header: "Aula", size: 100 },
       { accessorKey: "creditos", header: "CR", size: 50 },
 
       ...(user?.groups[0] === "admin" || user?.groups[0] === "usuario"
@@ -420,59 +480,18 @@ function PrincipalListClient() {
               accessorKey: "accion",
               header: "Status",
               size: 100,
-              minSize: 120,
-              maxSize: 110,
               cell: ({ row }) => <AccionCell row={row} api={API} />,
             },
-            // {
-            //   id: "acciones",
-            //   header: "Acción",
-            //   size: 200,
-            //   minSize: 100,
-            //   maxSize: 200,
-            //   cell: ({ row }) => (
-            //     <div className="d-flex gap-2">
-            //       {/* <Link
-            //         className="btn btn-primary btn-sm"
-            //         href={`/asignacionEdit/${row.original.AsignacionID}?period=${selectedPeriodo}`}
-            //       >
-            //         Editar
-            //       </Link> */}
-
-            //       {/* <button
-            //         className="btn btn-warning btn-sm text-white"
-            //         data-bs-toggle="modal"
-            //         data-bs-target={`#modal_comment_${row.original.AsignacionID}`}
-            //         disabled={!selectedPeriodo}
-            //         title={!selectedPeriodo ? "Comentario" : ""}
-            //       >
-            //         Comentar
-            //       </button> */}
-
-            //       {/* <Modal
-            //         title="Observaciones"
-            //         modelName={`modal_comment_${row.original.AsignacionID}`}
-            //       >
-            //         <ComentarioCell row={row} api={API} />
-            //       </Modal> */}
-            //     </div>
-            //   ),
-            // },
             {
               accessorKey: "modificacion",
               header: "Acción",
               size: 140,
-              minSize: 120,
-              maxSize: 180,
               cell: ({ row }) => <ModificacionesCell row={row} api={API} />,
             },
-
             {
               accessorKey: "comentario",
               header: "Comentario",
-              size: 120, // ajusta ancho a tu gusto
-              minSize: 250,
-              maxSize: 500,
+              size: 250,
               cell: ({ row }) => <ComentarioCell row={row} api={API} />,
             },
           ]
@@ -481,6 +500,7 @@ function PrincipalListClient() {
     [selectedPeriodo, API, user]
   );
 
+  /* ------------------------ Tabla ------------------------ */
   const table = useReactTable({
     data: data?.asignaciones || [],
     columns,
@@ -488,9 +508,11 @@ function PrincipalListClient() {
     onColumnVisibilityChange: setColumnVisibility,
     onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
+    getSortedRowModel: getSortedRowModel(), // client-side sorting activo
+    getRowId: (row) => String(row.AsignacionID), // ID estable por fila
   });
 
+  /* ------------------------ Cerrar dropdown fuera ------------------------ */
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -501,6 +523,7 @@ function PrincipalListClient() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  /* ------------------------ Render ------------------------ */
   return (
     <div className="mt-4">
       <div className="d-flex flex-wrap gap-2 align-items-center mb-3">
@@ -517,9 +540,7 @@ function PrincipalListClient() {
             </button>
 
             <Link
-              className={`btn btn-success ${
-                !selectedPeriodo ? "disabled" : ""
-              }`}
+              className={`btn btn-success ${!selectedPeriodo ? "disabled" : ""}`}
               href={selectedPeriodo ? "/asignacion" : "#"}
               tabIndex={!selectedPeriodo ? -1 : 0}
               aria-disabled={!selectedPeriodo}
@@ -604,10 +625,7 @@ function PrincipalListClient() {
                   checked={column.getIsVisible()}
                   onChange={column.getToggleVisibilityHandler()}
                 />
-                <label
-                  className="form-check-label"
-                  htmlFor={`col-${column.id}`}
-                >
+                <label className="form-check-label" htmlFor={`col-${column.id}`}>
                   {column.columnDef.header}
                 </label>
               </div>
@@ -625,9 +643,7 @@ function PrincipalListClient() {
         />
 
         <div className="d-flex align-items-center gap-2 ms-auto">
-          <label className="fw-bold mb-0 text-black">
-            Resultados por página:
-          </label>
+          <label className="fw-bold mb-0 text-black">Resultados por página:</label>
           <select
             className="form-select w-auto"
             style={{ height: "38px" }}
@@ -650,42 +666,50 @@ function PrincipalListClient() {
         <thead>
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <th key={header.id} style={{ width: header.getSize() }}>
-                  {flexRender(
-                    header.column.columnDef.header,
-                    header.getContext()
-                  )}
-                </th>
-              ))}
+              {headerGroup.headers.map((header) => {
+                const canSort = header.column.getCanSort?.();
+                const sortState = header.column.getIsSorted?.(); // 'asc' | 'desc' | false
+                return (
+                  <th
+                    key={header.id}
+                    style={{
+                      width: header.getSize(),
+                      cursor: canSort ? "pointer" : "default",
+                      userSelect: "none",
+                    }}
+                    onClick={canSort ? header.column.getToggleSortingHandler() : undefined}
+                    title={canSort ? "Ordenar" : undefined}
+                  >
+                    <div className="d-flex align-items-center gap-1">
+                      {flexRender(header.column.columnDef.header, header.getContext())}
+                      {canSort && (
+                        <span aria-hidden>
+                          {sortState === "asc" ? "▲" : sortState === "desc" ? "▼" : ""}
+                        </span>
+                      )}
+                    </div>
+                  </th>
+                );
+              })}
             </tr>
           ))}
         </thead>
         <tbody>
           {isLoading ? (
             <tr>
-              <td
-                colSpan={table.getAllLeafColumns().length}
-                className="text-center py-5"
-              >
+              <td colSpan={table.getAllLeafColumns().length} className="text-center py-5">
                 <Spinner />
               </td>
             </tr>
           ) : !selectedPeriodo ? (
             <tr>
-              <td
-                colSpan={table.getAllLeafColumns().length}
-                className="text-center py-4 text-danger"
-              >
+              <td colSpan={table.getAllLeafColumns().length} className="text-center py-4 text-danger">
                 Selecciona un periodo para mostrar las asignaciones.
               </td>
             </tr>
           ) : table.getRowModel().rows.length === 0 ? (
             <tr>
-              <td
-                colSpan={table.getAllLeafColumns().length}
-                className="text-center py-4"
-              >
+              <td colSpan={table.getAllLeafColumns().length} className="text-center py-4">
                 No se encontraron resultados.
               </td>
             </tr>
@@ -704,26 +728,17 @@ function PrincipalListClient() {
       </Tables>
 
       {totalPages > 1 && (
-        <Pagination
-          page={currentPage}
-          totalPages={totalPages}
-          onPageChange={setCurrentPage}
-        />
+        <Pagination page={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
       )}
 
       <Modal title="Importar Asignación">
         <ImportPage
           importURL={Api_import_URL}
-          onSuccess={() =>
-            queryClient.invalidateQueries({ queryKey: ["asignaciones"] })
-          }
+          onSuccess={() => queryClient.invalidateQueries({ queryKey: ["asignaciones"] })}
         />
       </Modal>
 
-      <Modal
-        title="Editar asignaciones desde otro periodo"
-        modelName="modalcopiar"
-      >
+      <Modal title="Editar asignaciones desde otro periodo" modelName="modalcopiar">
         <div className="d-flex flex-column gap-4 my-4 border rounded p-3 bg-light text-black">
           <div>
             <h5>📄 Editar asignaciones desde otro periodo</h5>

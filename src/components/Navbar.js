@@ -175,7 +175,7 @@ export default function Navbar() {
                     href="/universidadList"
                     onMouseEnter={() =>
                       handlePrefetch("universidades", () =>
-                        fetchUniversidades(1, "", 10, token)
+                        fetchUniversidades(1, "", 10)
                       )
                     }
                   >
@@ -188,7 +188,7 @@ export default function Navbar() {
                     href="/campusList"
                     onMouseEnter={() =>
                       handlePrefetch("campus", () =>
-                        fetchCampus(1, "", 10, token)
+                        fetchCampus(1, "", 10)
                       )
                     }
                   >
@@ -201,7 +201,7 @@ export default function Navbar() {
                     href="/facultadList"
                     onMouseEnter={() =>
                       handlePrefetch("facultades", () =>
-                        fetchFacultades(1, "", 10, token)
+                        fetchFacultades(1, "", 10)
                       )
                     }
                   >
@@ -214,7 +214,7 @@ export default function Navbar() {
                     href="/escuelaList"
                     onMouseEnter={() =>
                       handlePrefetch("escuelas", () =>
-                        fetchEscuelas(1, "", 10, token)
+                        fetchEscuelas(1, "", 10)
                       )
                     }
                   >
@@ -237,7 +237,7 @@ export default function Navbar() {
                     href="/docenteList"
                     onMouseEnter={() =>
                       handlePrefetch("docentes", () =>
-                        fetchDocentes(1, "", 10, token)
+                        fetchDocentes(1, "", 10)
                       )
                     }
                   >

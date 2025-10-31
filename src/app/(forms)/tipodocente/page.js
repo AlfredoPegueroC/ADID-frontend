@@ -7,7 +7,7 @@ import withAuth from "@utils/withAuth";
 function TipoDocenteFormPage(){
     return (
         <FormLayout>
-            <TipoDocenteForm title={"Definir Tipo de Docente"}/>
+            <TipoDocenteForm title={"Definir Tipo de Asignatura"}/>
         </FormLayout>
     )
 }

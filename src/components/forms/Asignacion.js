@@ -51,7 +51,7 @@ export default function AsignacionForm({ title }) {
     creditos: "",
     tipo: "",
     accion: "Nuevo",
-    modificacion: "Pendiente Modificar",
+    modificacion: "Crear",
     usuario_registro: "",
     docenteFk: null,
     campusFk: null,

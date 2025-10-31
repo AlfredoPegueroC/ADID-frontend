@@ -87,8 +87,9 @@ function DocenteListClient() {
       { header: "Sexo", accessorKey: "DocenteSexo" },
       { header: "Estado Civil", accessorKey: "DocenteEstadoCivil" },
       { header: "Nacimiento", accessorKey: "DocenteFechaNacimiento" },
-      { header: "Ingreso", accessorKey: "DocenteFechaIngreso" },
+      { header: "Fec. Ingreso", accessorKey: "DocenteFechaIngreso" },
       { header: "Nacionalidad", accessorKey: "DocenteNacionalidad" },
+      {header: "Direccion", accessorKey: "DocenteDireccion"},
       { header: "Teléfono", accessorKey: "DocenteTelefono" },
       { header: "Correo", accessorKey: "DocenteCorreoElectronico" },
       { header: "Estado", accessorKey: "DocenteEstado" },
@@ -234,8 +235,8 @@ function DocenteListClient() {
                     header.getContext()
                   )}
                   {{
-                    asc: " 🔼",
-                    desc: " 🔽",
+                    asc: "▲",
+                    desc: " ▼",
                   }[header.column.getIsSorted()] ?? null}
                 </th>
               ))}
