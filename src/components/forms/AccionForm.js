@@ -7,22 +7,20 @@ import Styles from "@styles/form.module.css";
 import Select from "react-select";
 import { fetchUniversidades } from "@api/universidadService";
 
-export default function AccionForm({ title = "Crear Acción" }) {
+export default function AccionForm({ title }) {
   const router = useRouter();
-
   const [universidades, setUniversidades] = useState([]);
   const [loadingUniversidades, setLoadingUniversidades] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
     AccionCodigo: "",
     AccionNombre: "",
-    AccionEstado: "Activo",
-    Accion_UniversidadFK: null, // { value, label }
+    AccionEstado: "",
+    Accion_UniversidadFK: null,
   });
 
   useEffect(() => {
-    cargarUniversidades(""); // carga inicial
+    cargarUniversidades("");
   }, []);
 
   const cargarUniversidades = async (search = "") => {
@@ -44,52 +42,27 @@ export default function AccionForm({ title = "Crear Acción" }) {
   };
 
   const handleInputChange = (inputValue) => {
-    // Puedes limpiar espacios si lo prefieres:
-    // const cleaned = (inputValue || "").replace(/\s+/g, " ").trim();
     cargarUniversidades(inputValue || "");
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSelectChange = (selectedOption) => {
-    setFormData((prev) => ({
-      ...prev,
-      Accion_UniversidadFK: selectedOption,
-    }));
+    setFormData((prev) => ({ ...prev, Accion_UniversidadFK: selectedOption }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validación mínima
-    if (!formData.AccionCodigo.trim()) {
-      Notification.alertError("El código de la Acción es requerido");
-      return;
-    }
-    if (!formData.AccionNombre.trim()) {
-      Notification.alertError("El nombre de la Acción es requerido");
-      return;
-    }
-    if (!formData.Accion_UniversidadFK) {
-      Notification.alertError("Seleccione una Universidad");
-      return;
-    }
-
     const payload = {
-      AccionCodigo: formData.AccionCodigo.trim(),
-      AccionNombre: formData.AccionNombre.trim(),
-      AccionEstado: formData.AccionEstado,
-      Accion_UniversidadFK: formData.Accion_UniversidadFK.value, // solo el ID
+      ...formData,
+      Accion_UniversidadFK: formData.Accion_UniversidadFK?.value || null,
     };
+    const accessToken = localStorage.getItem("accessToken");
 
-    const accessToken = localStorage.getItem("accessToken") || "";
-    setSubmitting(true);
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_KEY}api/accion/create`,
@@ -104,115 +77,92 @@ export default function AccionForm({ title = "Crear Acción" }) {
       );
 
       if (response.ok) {
-        Notification.alertSuccess("Acción creada exitosamente");
-        // Reset rápido por si el usuario vuelve hacia atrás
+        await response.json();
+        Notification.alertSuccess("Acción creada correctamente");
+        router.push("/accionList");
         setFormData({
           AccionCodigo: "",
           AccionNombre: "",
-          AccionEstado: "Activo",
+          AccionEstado: "",
           Accion_UniversidadFK: null,
         });
-        router.push("/accionList");
       } else {
-        let errorMsg = "Desconocido";
-        try {
-          const error = await response.json();
-          errorMsg = error?.message || JSON.stringify(error);
-        } catch (_) {}
-        Notification.alertError(`Error al crear la Acción: ${errorMsg}`);
+        const error = await response.json();
+        Notification.alertError(
+          "Error al crear la Acción. Ya existe o faltan datos."
+        );
+        console.error("Error:", error);
       }
     } catch (error) {
-      console.error("Error al crear la Acción:", error);
-      Notification.alertError("Error al crear la Acción");
-    } finally {
-      setSubmitting(false);
+      Notification.alertError("Error de conexión con el servidor.");
     }
   };
 
-  const handleCancel = () => {
-    router.back();
-  };
-
   return (
-    <div className={Styles.form_container}>
-      <h2 className={Styles.title}>{title}</h2>
+    <div className={Styles.container}>
       <form onSubmit={handleSubmit} className={Styles.form}>
-        <div className={Styles.row}>
-          <div className={Styles.name_group}>
-            <label htmlFor="AccionCodigo">Código *</label>
-            <input
-              id="AccionCodigo"
-              name="AccionCodigo"
-              type="text"
-              value={formData.AccionCodigo}
-              onChange={handleChange}
-              placeholder="Ej: ACT-001"
-              className={Styles.input}
-              autoComplete="off"
-            />
-          </div>
+        <h1 className={Styles.title}>{title}</h1>
 
-          <div className={Styles.name_group}>
-            <label htmlFor="AccionNombre">Nombre *</label>
-            <input
-              id="AccionNombre"
-              name="AccionNombre"
-              type="text"
-              value={formData.AccionNombre}
-              onChange={handleChange}
-              placeholder="Ej: Asignar / Eliminar / Modificar"
-              className={Styles.input}
-              autoComplete="off"
-            />
-          </div>
+        <div className={Styles.name_group}>
+          <label htmlFor="AccionCodigo">Código:</label>
+          <input
+            type="text"
+            id="AccionCodigo"
+            name="AccionCodigo"
+            value={formData.AccionCodigo}
+            onChange={handleChange}
+            placeholder="Ej. AC001"
+            required
+          />
         </div>
 
-        <div className={Styles.row}>
-          <div className={Styles.name_group}>
-            <label htmlFor="AccionEstado">Estado</label>
-            <select
-              id="AccionEstado"
-              name="AccionEstado"
-              value={formData.AccionEstado}
-              onChange={handleChange}
-              className={Styles.select}
-            >
-              <option value="Activo">Activo</option>
-              <option value="Inactivo">Inactivo</option>
-            </select>
-          </div>
-
-          <div className={Styles.name_group}>
-            <label>Universidad *</label>
-            <Select
-              name="Accion_UniversidadFK"
-              options={universidades}
-              value={formData.Accion_UniversidadFK}
-              onChange={handleSelectChange}
-              onInputChange={handleInputChange}
-              isLoading={loadingUniversidades}
-              placeholder="Seleccione universidad"
-              isClearable
-              classNamePrefix="react-select"
-            />
-          </div>
+        <div className={Styles.name_group}>
+          <label htmlFor="AccionNombre">Nombre:</label>
+          <input
+            type="text"
+            id="AccionNombre"
+            name="AccionNombre"
+            value={formData.AccionNombre}
+            onChange={handleChange}
+            placeholder="Ej. Asignar / Eliminar / Modificar"
+            required
+          />
         </div>
 
-        <div className={Styles.actions}>
-          <button
-            type="button"
-            className={Styles.btn_secondary}
-            onClick={handleCancel}
-            disabled={submitting}
+        <div className={Styles.name_group}>
+          <label htmlFor="AccionEstado">Estado:</label>
+          <select
+            id="AccionEstado"
+            name="AccionEstado"
+            value={formData.AccionEstado}
+            onChange={handleChange}
+            required
           >
-            Cancelar
-          </button>
-          <button
-            type="submit"
-            className={Styles.btn_primary}
-            disabled={submitting}
-          >
-            {submitting ? "Guardando..." : "Guardar"}
+            <option value="">-- Seleccione el estado --</option>
+            <option value="Activo">Activo</option>
+            <option value="Inactivo">Inactivo</option>
+          </select>
+        </div>
+
+        <div className={Styles.name_group}>
+          <label htmlFor="Accion_UniversidadFK">Universidad:</label>
+          <Select
+            id="Accion_UniversidadFK"
+            name="Accion_UniversidadFK"
+            options={universidades}
+            value={formData.Accion_UniversidadFK}
+            onChange={handleSelectChange}
+            onInputChange={handleInputChange}
+            placeholder="Seleccione una universidad"
+            isClearable
+            isLoading={loadingUniversidades}
+            noOptionsMessage={() => "No se encontraron universidades"}
+          />
+        </div>
+
+        <div className={Styles.btn_group}>
+          <button type="submit" className={Styles.btn}>
+            Enviar
           </button>
         </div>
       </form>

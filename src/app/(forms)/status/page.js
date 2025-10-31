@@ -1,4 +1,4 @@
-"use"
+"use client"
 
 import StatusForm from "@components/forms/StatusForm"
 import FormLayout from "@components/layouts/FormLayout"

@@ -138,7 +138,7 @@ function TipoEdit({ params }) {
   return (
     <div className={Styles.container}>
       <form onSubmit={handleSubmit} className={Styles.form}>
-        <h1 className={Styles.title}>Editar Tipo Docente</h1>
+        <h1 className={Styles.title}>Editar Tipo de asignatura</h1>
 
         <div className={Styles.name_group}>
           <label htmlFor="TipoDocenteCodigo">Código</label>

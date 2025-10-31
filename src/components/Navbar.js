@@ -13,6 +13,7 @@ import { fetchCampus } from "@api/campusService";
 import { fetchEscuelas } from "@api/escuelaService";
 import { fetchDocentes } from "@api/docenteService";
 
+
 export default function Navbar() {
   const router = useRouter();
   const API = process.env.NEXT_PUBLIC_API_KEY;
@@ -154,6 +155,18 @@ export default function Navbar() {
                   <li>
                     <Link className="dropdown-item" href="/asignatura">
                       Asignatura
+                    </Link>
+                  </li>
+
+                   <li>
+                    <Link className="dropdown-item" href="/accion">
+                      Accion
+                    </Link>
+                  </li>
+                  
+                   <li>
+                    <Link className="dropdown-item" href="/status">
+                      status
                     </Link>
                   </li>
                 </ul>

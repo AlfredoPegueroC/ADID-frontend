@@ -7,18 +7,16 @@ import Styles from "@styles/form.module.css";
 import Select from "react-select";
 import { fetchUniversidades } from "@api/universidadService";
 
-export default function StatusForm({ title = "Crear Status" }) {
+export default function StatusForm({ title }) {
   const router = useRouter();
-
   const [universidades, setUniversidades] = useState([]);
   const [loadingUniversidades, setLoadingUniversidades] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
     StatusCodigo: "",
     StatusNombre: "",
-    StatusEstado: "Activo",
-    Status_UniversidadFK: null, // { value, label }
+    StatusEstado: "",
+    Status_UniversidadFK: null,
   });
 
   useEffect(() => {
@@ -43,7 +41,7 @@ export default function StatusForm({ title = "Crear Status" }) {
     }
   };
 
-  const handleUniversidadInput = (inputValue) => {
+  const handleInputChange = (inputValue) => {
     cargarUniversidades(inputValue || "");
   };
 
@@ -59,28 +57,12 @@ export default function StatusForm({ title = "Crear Status" }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.StatusCodigo.trim()) {
-      Notification.alertError("El código del Status es requerido");
-      return;
-    }
-    if (!formData.StatusNombre.trim()) {
-      Notification.alertError("El nombre del Status es requerido");
-      return;
-    }
-    if (!formData.Status_UniversidadFK) {
-      Notification.alertError("Seleccione una Universidad");
-      return;
-    }
-
     const payload = {
-      StatusCodigo: formData.StatusCodigo.trim(),
-      StatusNombre: formData.StatusNombre.trim(),
-      StatusEstado: formData.StatusEstado,
-      Status_UniversidadFK: formData.Status_UniversidadFK.value,
+      ...formData,
+      Status_UniversidadFK: formData.Status_UniversidadFK?.value || null,
     };
+    const accessToken = localStorage.getItem("accessToken");
 
-    const accessToken = localStorage.getItem("accessToken") || "";
-    setSubmitting(true);
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_KEY}api/status/create`,
@@ -95,112 +77,92 @@ export default function StatusForm({ title = "Crear Status" }) {
       );
 
       if (response.ok) {
-        Notification.alertSuccess("Status creado exitosamente");
+        await response.json();
+        Notification.alertSuccess("Status creado correctamente");
+        router.push("/statusList");
         setFormData({
           StatusCodigo: "",
           StatusNombre: "",
-          StatusEstado: "Activo",
+          StatusEstado: "",
           Status_UniversidadFK: null,
         });
-        router.push("/statusList");
       } else {
-        let errorMsg = "Desconocido";
-        try {
-          const err = await response.json();
-          errorMsg = err?.message || JSON.stringify(err);
-        } catch {}
-        Notification.alertError(`Error al crear el Status: ${errorMsg}`);
+        const error = await response.json();
+        Notification.alertError(
+          "Error al crear el Status. Ya existe o faltan datos."
+        );
+        console.error("Error:", error);
       }
     } catch (error) {
-      console.error("Error al crear el Status:", error);
-      Notification.alertError("Error al crear el Status");
-    } finally {
-      setSubmitting(false);
+      Notification.alertError("Error de conexión con el servidor.");
     }
   };
 
-  const handleCancel = () => router.back();
-
   return (
-    <div className={Styles.form_container}>
-      <h2 className={Styles.title}>{title}</h2>
+    <div className={Styles.container}>
       <form onSubmit={handleSubmit} className={Styles.form}>
-        <div className={Styles.row}>
-          <div className={Styles.name_group}>
-            <label htmlFor="StatusCodigo">Código *</label>
-            <input
-              id="StatusCodigo"
-              name="StatusCodigo"
-              type="text"
-              value={formData.StatusCodigo}
-              onChange={handleChange}
-              placeholder="Ej: ST-001"
-              className={Styles.input}
-              autoComplete="off"
-            />
-          </div>
+        <h1 className={Styles.title}>{title}</h1>
 
-          <div className={Styles.name_group}>
-            <label htmlFor="StatusNombre">Nombre *</label>
-            <input
-              id="StatusNombre"
-              name="StatusNombre"
-              type="text"
-              value={formData.StatusNombre}
-              onChange={handleChange}
-              placeholder="Ej: Contratado / Licencia / Jubilado"
-              className={Styles.input}
-              autoComplete="off"
-            />
-          </div>
+        <div className={Styles.name_group}>
+          <label htmlFor="StatusCodigo">Código:</label>
+          <input
+            type="text"
+            id="StatusCodigo"
+            name="StatusCodigo"
+            value={formData.StatusCodigo}
+            onChange={handleChange}
+            placeholder="Ej. ST001"
+            required
+          />
         </div>
 
-        <div className={Styles.row}>
-          <div className={Styles.name_group}>
-            <label htmlFor="StatusEstado">Estado</label>
-            <select
-              id="StatusEstado"
-              name="StatusEstado"
-              value={formData.StatusEstado}
-              onChange={handleChange}
-              className={Styles.select}
-            >
-              <option value="Activo">Activo</option>
-              <option value="Inactivo">Inactivo</option>
-            </select>
-          </div>
-
-          <div className={Styles.name_group}>
-            <label>Universidad *</label>
-            <Select
-              name="Status_UniversidadFK"
-              options={universidades}
-              value={formData.Status_UniversidadFK}
-              onChange={handleSelectChange}
-              onInputChange={handleUniversidadInput}
-              isLoading={loadingUniversidades}
-              placeholder="Seleccione universidad"
-              isClearable
-              classNamePrefix="react-select"
-            />
-          </div>
+        <div className={Styles.name_group}>
+          <label htmlFor="StatusNombre">Nombre:</label>
+          <input
+            type="text"
+            id="StatusNombre"
+            name="StatusNombre"
+            value={formData.StatusNombre}
+            onChange={handleChange}
+            placeholder="Ej. Contratado / Licencia / Jubilado"
+            required
+          />
         </div>
 
-        <div className={Styles.actions}>
-          <button
-            type="button"
-            className={Styles.btn_secondary}
-            onClick={handleCancel}
-            disabled={submitting}
+        <div className={Styles.name_group}>
+          <label htmlFor="StatusEstado">Estado:</label>
+          <select
+            id="StatusEstado"
+            name="StatusEstado"
+            value={formData.StatusEstado}
+            onChange={handleChange}
+            required
           >
-            Cancelar
-          </button>
-          <button
-            type="submit"
-            className={Styles.btn_primary}
-            disabled={submitting}
-          >
-            {submitting ? "Guardando..." : "Guardar"}
+            <option value="">-- Seleccione el estado --</option>
+            <option value="Activo">Activo</option>
+            <option value="Inactivo">Inactivo</option>
+          </select>
+        </div>
+
+        <div className={Styles.name_group}>
+          <label htmlFor="Status_UniversidadFK">Universidad:</label>
+          <Select
+            id="Status_UniversidadFK"
+            name="Status_UniversidadFK"
+            options={universidades}
+            value={formData.Status_UniversidadFK}
+            onChange={handleSelectChange}
+            onInputChange={handleInputChange}
+            placeholder="Seleccione una universidad"
+            isClearable
+            isLoading={loadingUniversidades}
+            noOptionsMessage={() => "No se encontraron universidades"}
+          />
+        </div>
+
+        <div className={Styles.btn_group}>
+          <button type="submit" className={Styles.btn}>
+            Enviar
           </button>
         </div>
       </form>
