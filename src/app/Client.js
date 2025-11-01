@@ -57,7 +57,7 @@ function AccionCell({ row, api }) {
   // Traer ACCIONES desde el servicio (página 1, sin filtro, tamaño 100)
   const { data: accionesData, isLoading: accionesLoading } = useQuery({
     queryKey: ["acciones-options"],
-    queryFn: () => fetchAcciones(1, "", 100),
+    queryFn: () => fetchStatus(1, "", 100),
     staleTime: 5 * 60 * 1000,
   });
 
@@ -220,7 +220,7 @@ function ModificacionesCell({ row, api }) {
   // Traer STATUS desde el servicio (página 1, sin filtro, tamaño 100)
   const { data: statusData, isLoading: statusLoading } = useQuery({
     queryKey: ["status-options"],
-    queryFn: () => fetchStatus(1, "", 100),
+    queryFn: () => fetchAcciones(1, "", 100),
     staleTime: 5 * 60 * 1000,
   });
 
