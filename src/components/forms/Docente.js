@@ -326,6 +326,19 @@ export default function DocenteForm({ title }) {
           />
         </div>
 
+         <div className={Styles.name_group}>
+          <label htmlFor="DocenteCelular">Teléfono:</label>
+          <input
+            type="text"
+            name="DocenteCelular"
+            id="DocenteCelular"
+            placeholder="Ej. 8090000000"
+            value={formData.DocenteCelular}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
         <div className={Styles.name_group}>
           <label htmlFor="DocenteCorreoElectronico">Correo Electrónico:</label>
           <input

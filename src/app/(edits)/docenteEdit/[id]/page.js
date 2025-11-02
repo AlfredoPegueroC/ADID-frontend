@@ -29,6 +29,7 @@ function DocenteEdit({ params }) {
     DocenteFechaIngreso: "",
     DocenteNacionalidad: "",
     DocenteTelefono: "",
+    DocenteCelular: "",
     DocenteCorreoElectronico: "",
     DocenteDireccion: "",
     DocenteEstado: "",
@@ -397,6 +398,16 @@ function DocenteEdit({ params }) {
             type="text"
             name="DocenteTelefono"
             value={docente.DocenteTelefono}
+            onChange={handleChange}
+          />
+        </div>
+
+        <div className={Styles.name_group}>
+          <label>Celular:</label>
+          <input
+            type="text"
+            name="DocenteCelular"
+            value={docente.DocenteCelular}
             onChange={handleChange}
           />
         </div>

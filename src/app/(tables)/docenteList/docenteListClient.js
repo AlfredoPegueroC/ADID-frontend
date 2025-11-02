@@ -91,6 +91,7 @@ function DocenteListClient() {
       { header: "Nacionalidad", accessorKey: "DocenteNacionalidad" },
       {header: "Direccion", accessorKey: "DocenteDireccion"},
       { header: "Teléfono", accessorKey: "DocenteTelefono" },
+      { header: "Celular", accessorKey: "DocenteCelular" },
       { header: "Correo", accessorKey: "DocenteCorreoElectronico" },
       { header: "Estado", accessorKey: "DocenteEstado" },
       { header: "Universidad", accessorKey: "universidadNombre" },
