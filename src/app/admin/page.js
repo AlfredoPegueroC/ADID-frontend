@@ -163,6 +163,12 @@ export default function DashboardPage() {
         />
         <DashboardCard
           icon="bi-building"
+          title="Total Asignaturas"
+          value={data.totalAsignaturas}
+          link="/facultadList"
+        />
+        <DashboardCard
+          icon="bi-building"
           title="Total Facultades"
           value={data.totalFacultades}
           link="/facultadList"
