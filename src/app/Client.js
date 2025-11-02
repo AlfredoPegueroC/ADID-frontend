@@ -6,7 +6,6 @@ import {
   getSortedRowModel,
   flexRender,
 } from "@tanstack/react-table";
-
 import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import Link from "next/link";
 import Pagination from "@components/Pagination";
@@ -14,22 +13,20 @@ import Tables from "@components/Tables";
 import Search from "@components/search";
 import Modal from "@components/Modal";
 import ImportPage from "@components/forms/ImportAsignacion";
-// import Notification from "@components/Notification";
 import Spinner from "@components/Spinner";
-
-
 import { useAuth } from "@contexts/AuthContext";
 import withAuth from "@utils/withAuth";
 import Select from "react-select";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-// import { deleteEntity } from "@utils/delete";
 import { fetchAsignacionData } from "@api/asignacionService";
-import { debounce } from "lodash";
 import { exportAsignacionesToPDF } from "@utils/ExportPDF/exportAsignacionesToPDF";
+import {
+  AccionCell,
+  ModificacionesCell,
+  ComentarioCell,
+} from "@utils/camposAsignacion";
 
-import {AccionCell, ModificacionesCell, ComentarioCell} from "@utils/camposAsignacion";
 /* ------------------------ Utilidades de orden ------------------------ */
-// Normaliza para ordenar bien en español (quita acentos y case)
 const normalize = (v) =>
   (v ?? "")
     .toString()
@@ -37,16 +34,13 @@ const normalize = (v) =>
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "");
 
-// Orden de texto (locale-aware)
 const compareText = (a, b) => normalize(a).localeCompare(normalize(b), "es");
 
-// Orden numérico (para NRC que puede venir como string)
 const toNumber = (v) => {
   const n = Number((v ?? "").toString().replace(/\D+/g, ""));
   return Number.isFinite(n) ? n : 0;
 };
 const compareNumber = (a, b) => toNumber(a) - toNumber(b);
-
 
 function PrincipalListClient() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -59,9 +53,9 @@ function PrincipalListClient() {
   const [loadingPeriodos, setLoadingPeriodos] = useState(true);
   const [periodos, setPeriodos] = useState([]);
 
-
-  // Sorting inicial por Profesor asc (client-side)
-  const [sorting, setSorting] = useState([{ id: "docenteNombre", desc: false }]);
+  const [sorting, setSorting] = useState([
+    { id: "docenteNombre", desc: false },
+  ]);
 
   const [columnVisibility, setColumnVisibility] = useState({
     facultadNombre: false,
@@ -77,18 +71,31 @@ function PrincipalListClient() {
   const { user } = useAuth();
 
   /* ------ Restaurar/Guardar periodo en localStorage (por usuario) ------ */
+  const restoredPeriodoRef = useRef(false);
+  const [isPeriodoHydrated, setIsPeriodoHydrated] = useState(false);
+
+  // Restaurar SOLO una vez cuando el user esté disponible
   useEffect(() => {
-    const key = user?.username ? `selectedPeriodo_${user.username}` : "selectedPeriodo";
+    if (!user || restoredPeriodoRef.current) return;
+    const key = user?.username
+      ? `selectedPeriodo_${user.username}`
+      : "selectedPeriodo";
     const savedPeriodo = localStorage.getItem(key);
-    if (savedPeriodo) setSelectedPeriodo(savedPeriodo);
+    if (savedPeriodo) {
+      setSelectedPeriodo(savedPeriodo);
+    }
+    restoredPeriodoRef.current = true;
+    setIsPeriodoHydrated(true);
   }, [user]);
 
+  // Guardar cada vez que cambie selectedPeriodo
   useEffect(() => {
-    if (selectedPeriodo) {
-      const key = user?.username ? `selectedPeriodo_${user.username}` : "selectedPeriodo";
-      localStorage.setItem(key, selectedPeriodo);
-    }
-  }, [selectedPeriodo, user]);
+    if (!isPeriodoHydrated || !selectedPeriodo) return;
+    const key = user?.username
+      ? `selectedPeriodo_${user.username}`
+      : "selectedPeriodo";
+    localStorage.setItem(key, selectedPeriodo);
+  }, [selectedPeriodo, user, isPeriodoHydrated]);
 
   /* ------------------------ Cargar periodos ------------------------ */
   useEffect(() => {
@@ -101,10 +108,15 @@ function PrincipalListClient() {
         const periodosData = await res.json();
         const nombres = periodosData.map((p) => p.PeriodoNombre);
         const periodosFinal = nombres.sort((a, b) => b.localeCompare(a, "es"));
-
         setPeriodos(periodosFinal);
-        if (!selectedPeriodo && periodosFinal.length > 0) {
-          setSelectedPeriodo(periodosFinal[0]);
+
+        // ✅ Solo establecer por defecto si ya se hidrató y no hay seleccionado
+        if (isPeriodoHydrated && !selectedPeriodo && periodosFinal.length > 0) {
+          const key = user?.username
+            ? `selectedPeriodo_${user.username}`
+            : "selectedPeriodo";
+          const saved = localStorage.getItem(key);
+          setSelectedPeriodo(saved || periodosFinal[0]);
         }
       } catch (error) {
         console.error("Error al cargar periodos:", error);
@@ -114,12 +126,19 @@ function PrincipalListClient() {
       }
     };
     cargarPeriodos();
-  }, [API, selectedPeriodo]);
+  }, [API, isPeriodoHydrated, selectedPeriodo, user]);
 
   /* ------------------------ Data query ------------------------ */
   const { data, isLoading } = useQuery({
-    queryKey: ["asignaciones", currentPage, searchQuery, selectedPeriodo, pageSize],
-    queryFn: () => fetchAsignacionData(selectedPeriodo, currentPage, searchQuery, pageSize),
+    queryKey: [
+      "asignaciones",
+      currentPage,
+      searchQuery,
+      selectedPeriodo,
+      pageSize,
+    ],
+    queryFn: () =>
+      fetchAsignacionData(selectedPeriodo, currentPage, searchQuery, pageSize),
     enabled: !!selectedPeriodo && !loadingPeriodos,
     keepPreviousData: false,
     staleTime: 0,
@@ -155,14 +174,16 @@ function PrincipalListClient() {
     }
   };
 
-  const debouncedSearchChange = useCallback(
-    debounce((e) => setSearchQuery(e.target.value), 500),
-    []
-  );
+  /* ------------------------ Cambio de búsqueda ------------------------ */
+  const onSearchChange = useCallback((e) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+    setCurrentPage(1); // reset solo al escribir
+  }, []);
 
   const opciones = periodos.map((p) => ({ value: p, label: p }));
 
-  /* ------------------------ Columnas (con sortingFn) ------------------------ */
+  /* ------------------------ Columnas ------------------------ */
   const columns = useMemo(
     () => [
       {
@@ -199,12 +220,17 @@ function PrincipalListClient() {
         size: 120,
         enableSorting: true,
         sortingFn: (rowA, rowB, id) => {
-          // Ordena por Profesor; desempata por Asignatura, Sección y NRC
           const r = compareText(rowA.getValue(id), rowB.getValue(id));
           if (r !== 0) return r;
-          const r2 = compareText(rowA.getValue("nombre"), rowB.getValue("nombre"));
+          const r2 = compareText(
+            rowA.getValue("nombre"),
+            rowB.getValue("nombre")
+          );
           if (r2 !== 0) return r2;
-          const r3 = compareText(rowA.getValue("seccion"), rowB.getValue("seccion"));
+          const r3 = compareText(
+            rowA.getValue("seccion"),
+            rowB.getValue("seccion")
+          );
           if (r3 !== 0) return r3;
           return compareNumber(rowA.getValue("nrc"), rowB.getValue("nrc"));
         },
@@ -217,36 +243,10 @@ function PrincipalListClient() {
           </Link>
         ),
       },
-      {
-        accessorKey: "seccion",
-        header: "Sección",
-        size: 80,
-        enableSorting: true,
-        sortingFn: (a, b, id) => compareText(a.getValue(id), b.getValue(id)),
-      },
-      {
-        accessorKey: "modalidad",
-        header: "Modalidad",
-        size: 50,
-        enableSorting: true,
-        sortingFn: (a, b, id) => compareText(a.getValue(id), b.getValue(id)),
-      },
-      {
-        accessorKey: "campusNombre",
-        header: "Campus",
-        size: 90,
-        enableSorting: true,
-        sortingFn: (a, b, id) => compareText(a.getValue(id), b.getValue(id)),
-      },
-      {
-        accessorKey: "tipo",
-        header: "Tipo",
-        size: 100,
-        enableSorting: true,
-        sortingFn: (a, b, id) => compareText(a.getValue(id), b.getValue(id)),
-      },
-
-      // Visibilidad por defecto de algunas columnas
+      { accessorKey: "seccion", header: "Sección", size: 80 },
+      { accessorKey: "modalidad", header: "Modalidad", size: 50 },
+      { accessorKey: "campusNombre", header: "Campus", size: 90 },
+      { accessorKey: "tipo", header: "Tipo", size: 100 },
       { accessorKey: "facultadNombre", header: "Facultad", size: 150 },
       { accessorKey: "escuelaNombre", header: "Escuela", size: 150 },
       { accessorKey: "cupo", header: "Cupo", size: 50 },
@@ -255,7 +255,6 @@ function PrincipalListClient() {
       { accessorKey: "dias", header: "Días", size: 120 },
       { accessorKey: "aula", header: "Aula", size: 100 },
       { accessorKey: "creditos", header: "CR", size: 50 },
-
       ...(user?.groups[0] === "admin" || user?.groups[0] === "usuario"
         ? [
             {
@@ -290,8 +289,8 @@ function PrincipalListClient() {
     onColumnVisibilityChange: setColumnVisibility,
     onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(), // client-side sorting activo
-    getRowId: (row) => String(row.AsignacionID), // ID estable por fila
+    getSortedRowModel: getSortedRowModel(),
+    getRowId: (row) => String(row.AsignacionID),
   });
 
   /* ------------------------ Cerrar dropdown fuera ------------------------ */
@@ -322,7 +321,9 @@ function PrincipalListClient() {
             </button>
 
             <Link
-              className={`btn btn-success ${!selectedPeriodo ? "disabled" : ""}`}
+              className={`btn btn-success ${
+                !selectedPeriodo ? "disabled" : ""
+              }`}
               href={selectedPeriodo ? "/asignacion" : "#"}
               tabIndex={!selectedPeriodo ? -1 : 0}
               aria-disabled={!selectedPeriodo}
@@ -349,11 +350,10 @@ function PrincipalListClient() {
               ? `${API}export/asignacionDocenteExport?period=${selectedPeriodo}`
               : "#"
           }
-          tabIndex={!selectedPeriodo ? -1 : 0}
-          aria-disabled={!selectedPeriodo}
         >
           Exportar Excel
         </Link>
+
         <button
           className="btn btn-danger"
           onClick={() =>
@@ -366,7 +366,6 @@ function PrincipalListClient() {
             )
           }
           disabled={!selectedPeriodo}
-          title={!selectedPeriodo ? "Selecciona un periodo primero" : ""}
         >
           Exportar PDF
         </button>
@@ -379,7 +378,10 @@ function PrincipalListClient() {
           <Select
             className="w-60 text-black"
             value={opciones.find((opt) => opt.value === selectedPeriodo)}
-            onChange={(e) => setSelectedPeriodo(e.value)}
+            onChange={(e) => {
+              setSelectedPeriodo(e.value);
+              setCurrentPage(1);
+            }}
             options={opciones}
             placeholder="Selecciona un periodo"
             isSearchable
@@ -407,7 +409,10 @@ function PrincipalListClient() {
                   checked={column.getIsVisible()}
                   onChange={column.getToggleVisibilityHandler()}
                 />
-                <label className="form-check-label" htmlFor={`col-${column.id}`}>
+                <label
+                  className="form-check-label"
+                  htmlFor={`col-${column.id}`}
+                >
                   {column.columnDef.header}
                 </label>
               </div>
@@ -420,12 +425,14 @@ function PrincipalListClient() {
             e.preventDefault();
             setCurrentPage(1);
           }}
-          SearchChange={debouncedSearchChange}
+          SearchChange={onSearchChange}
           searchQuery={searchQuery}
         />
 
         <div className="d-flex align-items-center gap-2 ms-auto">
-          <label className="fw-bold mb-0 text-black">Resultados por página:</label>
+          <label className="fw-bold mb-0 text-black">
+            Resultados por página:
+          </label>
           <select
             className="form-select w-auto"
             style={{ height: "38px" }}
@@ -440,6 +447,7 @@ function PrincipalListClient() {
             <option value={50}>50</option>
             <option value={75}>75</option>
             <option value={100}>100</option>
+            <option value={200}>200</option>
           </select>
         </div>
       </div>
@@ -450,23 +458,32 @@ function PrincipalListClient() {
             <tr key={headerGroup.id}>
               {headerGroup.headers.map((header) => {
                 const canSort = header.column.getCanSort?.();
-                const sortState = header.column.getIsSorted?.(); // 'asc' | 'desc' | false
+                const sortState = header.column.getIsSorted?.();
                 return (
                   <th
                     key={header.id}
                     style={{
                       width: header.getSize(),
                       cursor: canSort ? "pointer" : "default",
-                      userSelect: "none",
                     }}
-                    onClick={canSort ? header.column.getToggleSortingHandler() : undefined}
-                    title={canSort ? "Ordenar" : undefined}
+                    onClick={
+                      canSort
+                        ? header.column.getToggleSortingHandler()
+                        : undefined
+                    }
                   >
                     <div className="d-flex align-items-center gap-1">
-                      {flexRender(header.column.columnDef.header, header.getContext())}
+                      {flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
                       {canSort && (
                         <span aria-hidden>
-                          {sortState === "asc" ? "▲" : sortState === "desc" ? "▼" : ""}
+                          {sortState === "asc"
+                            ? "▲"
+                            : sortState === "desc"
+                            ? "▼"
+                            : ""}
                         </span>
                       )}
                     </div>
@@ -479,19 +496,28 @@ function PrincipalListClient() {
         <tbody>
           {isLoading ? (
             <tr>
-              <td colSpan={table.getAllLeafColumns().length} className="text-center py-5">
+              <td
+                colSpan={table.getAllLeafColumns().length}
+                className="text-center py-5"
+              >
                 <Spinner />
               </td>
             </tr>
           ) : !selectedPeriodo ? (
             <tr>
-              <td colSpan={table.getAllLeafColumns().length} className="text-center py-4 text-danger">
+              <td
+                colSpan={table.getAllLeafColumns().length}
+                className="text-center py-4 text-danger"
+              >
                 Selecciona un periodo para mostrar las asignaciones.
               </td>
             </tr>
           ) : table.getRowModel().rows.length === 0 ? (
             <tr>
-              <td colSpan={table.getAllLeafColumns().length} className="text-center py-4">
+              <td
+                colSpan={table.getAllLeafColumns().length}
+                className="text-center py-4"
+              >
                 No se encontraron resultados.
               </td>
             </tr>
@@ -510,17 +536,26 @@ function PrincipalListClient() {
       </Tables>
 
       {totalPages > 1 && (
-        <Pagination page={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+        <Pagination
+          page={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
       )}
 
       <Modal title="Importar Asignación">
         <ImportPage
           importURL={Api_import_URL}
-          onSuccess={() => queryClient.invalidateQueries({ queryKey: ["asignaciones"] })}
+          onSuccess={() =>
+            queryClient.invalidateQueries({ queryKey: ["asignaciones"] })
+          }
         />
       </Modal>
 
-      <Modal title="Editar asignaciones desde otro periodo" modelName="modalcopiar">
+      <Modal
+        title="Editar asignaciones desde otro periodo"
+        modelName="modalcopiar"
+      >
         <div className="d-flex flex-column gap-4 my-4 border rounded p-3 bg-light text-black">
           <div>
             <h5>📄 Editar asignaciones desde otro periodo</h5>

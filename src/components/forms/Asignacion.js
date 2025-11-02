@@ -76,7 +76,7 @@ export default function AsignacionForm({ title }) {
   const cargarDocentes = async (search = "") => {
     setLoadingDocentes(true);
     try {
-      const { results } = await fetchDocentes(1, search, 10);
+      const { results } = await fetchDocentes(1, search, 100);
       setDocentes(
         results.map((d) => ({
           value: d.DocenteID,
@@ -94,7 +94,7 @@ export default function AsignacionForm({ title }) {
   const cargarCampus = async (search = "") => {
     setLoadingCampus(true);
     try {
-      const { results } = await fetchCampus(1, search, 10);
+      const { results } = await fetchCampus(1, search, 25);
       setCampus(
         results.map((c) => ({
           value: c.CampusID,
@@ -128,7 +128,7 @@ export default function AsignacionForm({ title }) {
   const cargarFacultades = async (search = "") => {
     setLoadingFacultades(true);
     try {
-      const { results } = await fetchFacultades(1, search, 10);
+      const { results } = await fetchFacultades(1, search, 25);
       setFacultades(
         results.map((f) => ({
           value: f.FacultadID,
@@ -145,7 +145,7 @@ export default function AsignacionForm({ title }) {
   const cargarEscuelas = async (search = "") => {
     setLoadingEscuelas(true);
     try {
-      const { results } = await fetchEscuelas(1, search, 10);
+      const { results } = await fetchEscuelas(1, search, 25);
       setEscuelas(
         results.map((e) => ({
           value: e.EscuelaId,
@@ -179,7 +179,7 @@ export default function AsignacionForm({ title }) {
   const cargarAsignaturas = async (search = "") => {
     setLoadingAsignaturas(true);
     try {
-      const { results } = await fetchAsignaturas(1, search, 10);
+      const { results } = await fetchAsignaturas(1, search, 100);
       setAsignaturas(
         results.map((a) => ({
           value: a.AsignaturaCodigo,
