@@ -126,7 +126,7 @@ export default function DashboardPage() {
             value={selectedPeriodo}
             onChange={(e) => setSelectedPeriodo(e.target.value)}
           >
-            <option value="">(Automático)</option>
+            <option value={data.periodoActual}>Periodo Actual</option>
             {periodos.map((p) => (
               <option key={p} value={p}>
                 {p}
@@ -229,7 +229,7 @@ export default function DashboardPage() {
         {profesoresPorCampus.length === 0 ? (
           <p className="text-muted m-0">Sin datos</p>
         ) : (
-          <div className="table-responsive flex-grow-1">
+          <div className="table-responsive grow">
             <table className="table table-sm align-middle">
               <thead>
                 <tr>
@@ -270,7 +270,7 @@ export default function DashboardPage() {
         {profesoresPCSFiltrado.length === 0 ? (
           <p className="text-muted m-0">Sin datos</p>
         ) : (
-          <div className="table-responsive flex-grow-1">
+          <div className="table-responsive grow">
             <table className="table table-sm align-middle">
               <thead>
                 <tr>
