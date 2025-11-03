@@ -12,7 +12,7 @@ import {
 } from "chart.js";
 import DashboardCard from "@components/DashboardCard";
 import { fetchDashboardData } from "@api/dashboardService";
-import { fetchPeriodos } from "@api/periodoService"; // tu fetch de periodos
+import { fetchPeriodos } from "@api/periodoService";
 import Spinner from "@components/Spinner";
 
 ChartJS.register(
@@ -46,10 +46,10 @@ export default function DashboardPage() {
           ? raw
           : [];
 
-        // Extraer nombre del periodo (ajusta si tu API usa otro campo)
+        // Extraer nombre del período (ajusta si tu API usa otro campo)
         const nombres = list
           .map((p) => p?.PeriodoNombre ?? p?.nombre ?? p)
-          .filter(Boolean);
+        .filter(Boolean);
 
         if (!mounted) return;
         setPeriodos(nombres);
@@ -58,7 +58,7 @@ export default function DashboardPage() {
         if (saved && nombres.includes(saved)) {
           setSelectedPeriodo(saved);
         } else {
-          setSelectedPeriodo(""); // Automático (deja que el backend elija)
+          setSelectedPeriodo(""); // Automático (usa el último en backend)
         }
       } catch (e) {
         console.error("Error cargando periodos:", e);
@@ -73,7 +73,7 @@ export default function DashboardPage() {
     };
   }, []);
 
-  // Cargar datos del dashboard cuando cambie el periodo
+  // Cargar datos del dashboard cuando cambie el período (afecta cards, gráficos y "por campus")
   useEffect(() => {
     let mounted = true;
     (async () => {
@@ -100,20 +100,21 @@ export default function DashboardPage() {
     };
   }, [selectedPeriodo]);
 
-  // Derivados SIN useMemo (para no cambiar el orden de hooks)
+  if (loading || loadingPeriodos || !data) return <Spinner />;
+
+  // Derivados SIN useMemo
   const profesoresPorCampus = Array.isArray(data?.profesoresPorCampus)
     ? data.profesoresPorCampus
     : [];
 
-  const todosPCS = Array.isArray(data?.profesoresPorCampusYSemestre)
-    ? data.profesoresPorCampusYSemestre
+  // *** NUEVO: Docentes por Semestre (GLOBAL, NO filtrado por selectedPeriodo) ***
+  const docentesPorSemestre = Array.isArray(data?.docentesPorSemestre)
+    ? data.docentesPorSemestre
     : [];
-
-  const profesoresPCSFiltrado = selectedPeriodo
-    ? todosPCS.filter((r) => r.periodo === selectedPeriodo)
-    : todosPCS;
-
-  if (loading || loadingPeriodos || !data) return <Spinner />;
+  // Orden sugerido: descendente por nombre de período (ajústalo si usas otro formato)
+  const docentesPorSemestreOrdenado = [...docentesPorSemestre].sort((a, b) =>
+    (b.periodo || "").localeCompare(a.periodo || "")
+  );
 
   return (
     <div className="container py-4">
@@ -126,7 +127,7 @@ export default function DashboardPage() {
             value={selectedPeriodo}
             onChange={(e) => setSelectedPeriodo(e.target.value)}
           >
-            <option value={data.periodoActual}>Periodo Actual</option>
+            <option value="">Período actual (automático)</option>
             {periodos.map((p) => (
               <option key={p} value={p}>
                 {p}
@@ -135,8 +136,8 @@ export default function DashboardPage() {
           </select>
           <small className="text-muted">
             {selectedPeriodo
-              ? "Filtrando con el período seleccionado (enviado al backend)."
-              : "Usando el período por defecto del backend."}
+              ? "Filtrando con el período seleccionado"
+              : "Usando el período por defecto"}
           </small>
         </div>
       </div>
@@ -162,10 +163,10 @@ export default function DashboardPage() {
           link="/periodoList"
         />
         <DashboardCard
-          icon="bi-building"
+          icon="bi-collection"
           title="Total Asignaturas"
           value={data.totalAsignaturas}
-          link="/facultadList"
+          link="/asignaturaList"
         />
         <DashboardCard
           icon="bi-building"
@@ -174,19 +175,19 @@ export default function DashboardPage() {
           link="/facultadList"
         />
         <DashboardCard
-          icon="bi-building"
+          icon="bi-geo-alt"
           title="Total Campus"
           value={data.totalCampus}
           link="/campusList"
         />
         <DashboardCard
-          icon="bi-building"
+          icon="bi-people"
           title="Total Tipos de Docente"
           value={data.totalTiposDocente}
           link="/tipodocenteList"
         />
         <DashboardCard
-          icon="bi-building"
+          icon="bi-award"
           title="Total Categorías"
           value={data.totalCategorias}
           link="/categoriadocenteList"
@@ -217,101 +218,102 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
-      
-      <h3>comparativa de profesores por semestre </h3>
+
+      <h3 className="mt-3">Dato de profesores por campus y semestre</h3>
+
       {/* NUEVAS MÉTRICAS (números) */}
       <div className="row g-4 mb-4 align-items-stretch">
-  {/* Profesores por Campus (lista -> tabla) */}
-  <div className="col-md-6">
-    <div className="card h-100 d-flex flex-column">
-      <div className="card-body d-flex flex-column">
-        <div className="d-flex align-items-center justify-content-between mb-3">
-          <h5 className="card-title mb-0">Profesores por Campus</h5>
-          <span className="badge bg-primary">
-            Período Actual: {(selectedPeriodo || data.periodoActual) ?? "—"}
-          </span>
+        {/* Profesores por Campus (tabla, período activo) */}
+        <div className="col-md-6">
+          <div className="card h-100 d-flex flex-column">
+            <div className="card-body d-flex flex-column">
+              <div className="d-flex align-items-center justify-content-between mb-2">
+                <h5 className="card-title mb-0">Profesores por Campus</h5>
+                <span className="badge bg-primary">
+                  Período: {(selectedPeriodo || data.periodoActual) ?? "—"}
+                </span>
+              </div>
+
+              {profesoresPorCampus.length === 0 ? (
+                <p className="text-muted m-0">Sin datos</p>
+              ) : (
+                <div className="table-responsive flex-grow-1" style={{ maxHeight: 360 }}>
+                  <table className="table table-sm align-middle">
+                    <thead className="table-light">
+                      <tr>
+                        <th style={{ width: "60%" }}>Campus</th>
+                        <th style={{ width: "40%" }} className="text-end">
+                          Profesores
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {profesoresPorCampus.map(({ campus, total }) => (
+                        <tr key={campus}>
+                          <td className="text-truncate" title={campus}>{campus}</td>
+                          <td className="text-end">
+                            <span className="badge bg-success rounded-pill">
+                              {total}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
-        {profesoresPorCampus.length === 0 ? (
-          <p className="text-muted m-0">Sin datos</p>
-        ) : (
-          <div className="table-responsive grow">
-            <table className="table table-sm align-middle">
-              <thead>
-                <tr>
-                  <th style={{ width: "60%" }}>Campus</th>
-                  <th style={{ width: "40%" }} className="text-end">
-                    Profesores
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {profesoresPorCampus.map(({ campus, total }) => (
-                  <tr key={campus}>
-                    <td>{campus}</td>
-                    <td className="text-end">
-                      <span className="badge bg-success rounded-pill">{total}</span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-    </div>
-  </div>
+        {/* Docentes por Semestre (GLOBAL, fijo; tabla compacta) */}
+        <div className="col-md-6">
+          <div className="card h-100 d-flex flex-column">
+            <div className="card-body d-flex flex-column">
+              <div className="d-flex align-items-center justify-content-between mb-2">
+                <h5 className="card-title mb-0">Docentes por Semestre</h5>
+                <span className="badge bg-info">Todos los semestres</span>
+              </div>
 
-  {/* Profesores por Campus y Semestre (tabla filtrada por período) */}
-  <div className="col-md-6">
-    <div className="card h-100 d-flex flex-column">
-      <div className="card-body d-flex flex-column">
-        <div className="d-flex align-items-center justify-content-between mb-3">
-          <h5 className="card-title mb-0">Profesores por Campus y Semestre</h5>
-          <span className="badge bg-primary">
-            Período: {(selectedPeriodo || data.periodoActual) ?? "—"}
-          </span>
+              {docentesPorSemestreOrdenado.length === 0 ? (
+                <p className="text-muted m-0">Sin datos</p>
+              ) : (
+                <div className="table-responsive flex-grow-1" style={{ maxHeight: 360 }}>
+                  <table className="table table-sm align-middle">
+                    <thead className="table-light">
+                      <tr>
+                        <th style={{ width: "60%" }}>Semestre</th>
+                        <th style={{ width: "40%" }} className="text-end">
+                          Docentes
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {docentesPorSemestreOrdenado.map(({ periodo, total }) => (
+                        <tr key={periodo}>
+                          <td className="text-truncate" title={periodo}>{periodo}</td>
+                          <td className="text-end">
+                            <span className="badge bg-secondary rounded-pill">
+                              {total}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              {/* Nota fija, no depende del periodo seleccionado */}
+              <div className="text-muted small mt-2">
+                Esta tabla muestra el total de docentes únicos por semestre.
+              </div>
+            </div>
+          </div>
         </div>
-
-        {profesoresPCSFiltrado.length === 0 ? (
-          <p className="text-muted m-0">Sin datos</p>
-        ) : (
-          <div className="table-responsive grow">
-            <table className="table table-sm align-middle">
-              <thead>
-                <tr>
-                  <th style={{ width: "60%" }}>Campus</th>
-                  <th style={{ width: "40%" }} className="text-end">
-                    Profesores
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {profesoresPCSFiltrado.map((r, idx) => (
-                  <tr key={`${r.periodo}-${r.campus}-${idx}`}>
-                    <td>{r.campus}</td>
-                    <td className="text-end">
-                      <span className="badge bg-secondary">{r.total}</span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {!selectedPeriodo && (
-          <div className="text-muted small mt-2">
-            Sugerencia: selecciona un período para filtrar esta tabla.
-          </div>
-        )}
       </div>
-    </div>
-  </div>
-</div>
 
-
-      {/* “Asignaturas por Semestre” fue removido */}
+      {/* Fin nuevas métricas */}
     </div>
   );
 }

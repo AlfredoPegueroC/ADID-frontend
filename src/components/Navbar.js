@@ -143,7 +143,7 @@ export default function Navbar() {
                   </li>
                   <li>
                     <Link className="dropdown-item" href="/tipodocente">
-                      Tipo docente
+                      Tipo de asignatura
                     </Link>
                   </li>
                   <li>
@@ -241,7 +241,7 @@ export default function Navbar() {
                 </li>
                 <li>
                   <Link className="dropdown-item" href="/tipodocenteList">
-                    Tipo docente
+                    Tipo de asignatura
                   </Link>
                 </li>
                 <li>
