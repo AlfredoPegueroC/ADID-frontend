@@ -48,7 +48,12 @@ export default function UsuarioPage() {
         username: user.username,
         name: `${user.first_name} ${user.last_name}`,
         email: user.email,
-        role: user.groups.includes("admin") ? "Admin" : "User",
+        role:
+          user.groups.length === 0
+            ? "Solo Lectura"
+            : user.groups.includes("admin")
+            ? "Admin"
+            : "Usuario",
         is_active: user.is_active,
         universidad: user.profile?.universidad_name || "-",
         facultad: user.profile?.facultad_name || "-",
@@ -85,7 +90,6 @@ export default function UsuarioPage() {
     }
   };
 
-  // --- Definir tamaños fijos como programador ---
   const columns = useMemo(
     () => [
       {
