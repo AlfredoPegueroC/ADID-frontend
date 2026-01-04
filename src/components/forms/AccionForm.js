@@ -15,7 +15,7 @@ export default function AccionForm({ title }) {
   const [formData, setFormData] = useState({
     AccionCodigo: "",
     AccionNombre: "",
-    AccionEstado: "",
+    AccionStatus: "",
     Accion_UniversidadFK: null,
   });
 

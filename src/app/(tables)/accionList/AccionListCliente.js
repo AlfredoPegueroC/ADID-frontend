@@ -69,7 +69,7 @@ function AccionListClient() {
     () => [
       { header: "Código", accessorKey: "AccionCodigo" },
       { header: "Nombre", accessorKey: "AccionNombre" },
-      // { header: "Estado", accessorKey: "AccionEstado" },
+      { header: "Estado", accessorKey: "AccionStatus" },
       { header: "Universidad", accessorKey: "universidadNombre" },
       ...(user?.groups?.[0] === "admin" || user?.groups?.[0] === "usuario"
         ? [

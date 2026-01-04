@@ -16,7 +16,7 @@ function AccionEdit({ params }) {
   const [accion, setAccion] = useState({
     AccionCodigo: "",
     AccionNombre: "",
-    AccionEstado: "",
+    AccionStatus: "",
     Accion_UniversidadFK: "", // ID
   });
 
@@ -38,7 +38,7 @@ function AccionEdit({ params }) {
         setAccion({
           AccionCodigo: data.AccionCodigo ?? "",
           AccionNombre: data.AccionNombre ?? "",
-          AccionEstado: data.AccionEstado ?? "",
+          AccionStatus: data.AccionStatus ?? "",
           Accion_UniversidadFK:
             data.Accion_UniversidadFK ?? data.universidadId ?? "",
         });
@@ -176,7 +176,7 @@ function AccionEdit({ params }) {
           <label htmlFor="AccionEstado">Estado</label>
           <select
             id="AccionEstado"
-            value={accion.AccionEstado}
+            value={accion.AccionStatus}
             onChange={handleChange}
             required
           >

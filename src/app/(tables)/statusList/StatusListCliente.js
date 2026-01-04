@@ -78,7 +78,7 @@ function StatusListClient() {
     () => [
       { header: "Código", accessorKey: "StatusCodigo" },
       { header: "Nombre", accessorKey: "StatusNombre" },
-      // { header: "Estado", accessorKey: "StatusEstado" },
+      { header: "Estado", accessorKey: "StatusEstado" },
       { header: "Universidad", accessorKey: "universidadNombre" },
 
       ...(user?.groups?.[0] === "admin" || user?.groups?.[0] === "usuario"
