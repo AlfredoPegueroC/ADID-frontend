@@ -14,6 +14,8 @@ import DashboardCard from "@components/DashboardCard";
 import { fetchDashboardData } from "@api/dashboardService";
 import { fetchPeriodos } from "@api/periodoService";
 import Spinner from "@components/Spinner";
+import { exportDashboardPdf } from "@utils/ExportPDF/exportToPDF.js";
+import { useRef } from "react";
 
 ChartJS.register(
   CategoryScale,
@@ -32,7 +34,7 @@ export default function DashboardPage() {
   const [selectedPeriodo, setSelectedPeriodo] = useState("");
   const [loading, setLoading] = useState(true);
   const [loadingPeriodos, setLoadingPeriodos] = useState(true);
-
+  const dashboardRef = useRef(null);
   // Cargar periodos y restaurar selección
   useEffect(() => {
     let mounted = true;
@@ -49,7 +51,7 @@ export default function DashboardPage() {
         // Extraer nombre del período (ajusta si tu API usa otro campo)
         const nombres = list
           .map((p) => p?.PeriodoNombre ?? p?.nombre ?? p)
-        .filter(Boolean);
+          .filter(Boolean);
 
         if (!mounted) return;
         setPeriodos(nombres);
@@ -117,7 +119,7 @@ export default function DashboardPage() {
   );
 
   return (
-    <div className="container py-4">
+    <div ref={dashboardRef} className="container py-4">
       {/* Selector de período */}
       <div className="row g-3 align-items-end mb-3">
         <div className="col-md-4">
@@ -140,6 +142,18 @@ export default function DashboardPage() {
               : "Usando el período por defecto"}
           </small>
         </div>
+
+        <button
+          className="btn btn-danger"
+          onClick={() =>
+            exportDashboardPdf({
+              element: dashboardRef.current,
+              filename: `dashboard_${selectedPeriodo || "actual"}.pdf`,
+            })
+          }
+        >
+          Exportar PDF
+        </button>
       </div>
 
       {/* Cards principales */}
@@ -237,7 +251,10 @@ export default function DashboardPage() {
               {profesoresPorCampus.length === 0 ? (
                 <p className="text-muted m-0">Sin datos</p>
               ) : (
-                <div className="table-responsive flex-grow-1" style={{ maxHeight: 360 }}>
+                <div
+                  className="table-responsive flex-grow-1"
+                  style={{ maxHeight: 360 }}
+                >
                   <table className="table table-sm align-middle">
                     <thead className="table-light">
                       <tr>
@@ -250,7 +267,9 @@ export default function DashboardPage() {
                     <tbody>
                       {profesoresPorCampus.map(({ campus, total }) => (
                         <tr key={campus}>
-                          <td className="text-truncate" title={campus}>{campus}</td>
+                          <td className="text-truncate" title={campus}>
+                            {campus}
+                          </td>
                           <td className="text-end">
                             <span className="badge bg-success rounded-pill">
                               {total}
@@ -278,7 +297,10 @@ export default function DashboardPage() {
               {docentesPorSemestreOrdenado.length === 0 ? (
                 <p className="text-muted m-0">Sin datos</p>
               ) : (
-                <div className="table-responsive flex-grow-1" style={{ maxHeight: 360 }}>
+                <div
+                  className="table-responsive flex-grow-1"
+                  style={{ maxHeight: 360 }}
+                >
                   <table className="table table-sm align-middle">
                     <thead className="table-light">
                       <tr>
@@ -291,7 +313,9 @@ export default function DashboardPage() {
                     <tbody>
                       {docentesPorSemestreOrdenado.map(({ periodo, total }) => (
                         <tr key={periodo}>
-                          <td className="text-truncate" title={periodo}>{periodo}</td>
+                          <td className="text-truncate" title={periodo}>
+                            {periodo}
+                          </td>
                           <td className="text-end">
                             <span className="badge bg-secondary rounded-pill">
                               {total}
