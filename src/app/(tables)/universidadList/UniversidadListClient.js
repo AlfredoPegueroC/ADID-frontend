@@ -23,7 +23,7 @@ import withAuth from "@utils/withAuth";
 import { fetchUniversidades } from "@api/universidadService";
 import { deleteEntity } from "@utils/delete";
 import Tables from "@/src/components/Tables";
-
+import Styles from "@styles/table.module.css";
 function UniversidadListClient() {
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
@@ -125,7 +125,7 @@ function UniversidadListClient() {
   });
 
   return (
-    <div>
+    <div className={`${Styles.containerScale}`}>
       <h1 className="text-dark mt-5">Lista de Universidades</h1>
 
       <div className="d-flex justify-content-between align-items-center mb-3 mt-3">

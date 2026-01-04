@@ -17,7 +17,7 @@ import Search from "@components/search";
 import ImportExcel from "@components/forms/Import";
 import Modal from "@components/Modal";
 import Spinner from "@components/Spinner";
-
+import Styles from "@styles/table.module.css";
 import withAuth from "@utils/withAuth";
 import { fetchFacultades } from "@api/facultadService";
 import { deleteEntity } from "@utils/delete";
@@ -139,7 +139,7 @@ function FacultadListClient() {
   });
 
   return (
-    <div className="mt-5">
+    <div className={`${Styles.containerScale}`}>
       <h1 className="text-dark">Lista de Facultades</h1>
 
       <div className="d-flex justify-content-between align-items-center mb-3 mt-3 flex-wrap">

@@ -21,6 +21,7 @@ import withAuth from "@utils/withAuth";
 import { deleteEntity } from "@utils/delete";
 import { exportCategoriasToPDF } from "@utils/ExportPDF/exportCategoriaPDF";
 import { fetchCategorias } from "@api/categoriaService";
+import Styles from "@styles/table.module.css";
 
 function CategoriaListClient() {
   const [page, setPage] = useState(1);
@@ -129,7 +130,7 @@ function CategoriaListClient() {
   });
 
   return (
-    <div className="mt-5">
+    <div className={`${Styles.containerScale}`}>
       <h1 className="text-dark">Lista Categorías de Docente</h1>
 
       <div className="d-flex justify-content-between align-items-center mb-3 mt-3 flex-wrap">

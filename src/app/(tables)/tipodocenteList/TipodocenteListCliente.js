@@ -22,7 +22,7 @@ import { exportTipoDocenteToPDF } from "@utils/ExportPDF/exportTipoPDF";
 import withAuth from "@utils/withAuth";
 import { deleteEntity } from "@utils/delete";
 import { fetchTipoDocentes } from "@api/tipoDocenteService";
-
+import Styles from "@styles/table.module.css";
 function TipoDocenteListClient() {
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
@@ -121,7 +121,7 @@ function TipoDocenteListClient() {
   });
 
   return (
-    <div className="mt-5">
+    <div className={`${Styles.containerScale}`}>
       <h1 className="text-dark">Lista Tipos de Asignatura</h1>
 
       <div className="d-flex justify-content-between align-items-center mb-3 mt-3">

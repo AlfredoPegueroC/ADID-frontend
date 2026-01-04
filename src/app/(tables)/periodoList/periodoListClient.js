@@ -17,7 +17,7 @@ import ModalForm from "@components/ModalForm";
 import Search from "@components/search";
 import Spinner from "@components/Spinner";
 import Periodo from "@components/forms/Periodo";
-
+import Styles from "@styles/table.module.css";
 import withAuth from "@utils/withAuth";
 import { fetchPeriodos } from "@api/periodoService";
 import { deleteEntity } from "@utils/delete";
@@ -143,7 +143,7 @@ function PeriodoListClient({ initialData, totalPages: initialTotalPages }) {
   });
 
   return (
-    <div className="mt-5">
+    <div className={`${Styles.containerScale}`}>
       <h1 className="text-dark">Lista Periodo Académico</h1>
 
       {isError && (

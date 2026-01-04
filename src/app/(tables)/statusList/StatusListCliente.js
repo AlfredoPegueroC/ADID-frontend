@@ -20,7 +20,7 @@ import Pagination from "@components/Pagination";
 import Spinner from "@components/Spinner";
 import withAuth from "@utils/withAuth";
 import { deleteEntity } from "@utils/delete";
-
+import Styles from "@styles/table.module.css";
 // Cambia estos imports si tus rutas reales difieren
 import { fetchStatus } from "@api/statusService";
 // import { exportStatusToPDF } from "@utils/ExportPDF/exportStatusPDF";
@@ -122,7 +122,7 @@ function StatusListClient() {
   });
 
   return (
-    <div className="mt-5">
+    <div className={`${Styles.containerScale}`}>
       <h1 className="text-dark">Lista Status</h1>
 
       <div className="d-flex justify-content-between align-items-center mb-3 mt-3">

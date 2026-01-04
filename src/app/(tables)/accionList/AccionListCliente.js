@@ -20,7 +20,7 @@ import Pagination from "@components/Pagination";
 import Spinner from "@components/Spinner";
 import withAuth from "@utils/withAuth";
 import { deleteEntity } from "@utils/delete";
-
+import Styles from "@styles/table.module.css";
 // Ajusta estos imports a tus rutas reales
 import { fetchAcciones } from "@api/accionesService";
 // import { exportAccionToPDF } from "@utils/ExportPDF/exportAccionPDF";
@@ -111,7 +111,7 @@ function AccionListClient() {
   });
 
   return (
-    <div className="mt-5">
+    <div className={`${Styles.containerScale}`}>
       <h1 className="text-dark">Lista de Acciones</h1>
 
       <div className="d-flex justify-content-between align-items-center mb-3 mt-3">

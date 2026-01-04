@@ -17,7 +17,7 @@ import Modal from "@components/Modal";
 import ImportExcel from "@components/forms/Import";
 import Search from "@components/search";
 import Spinner from "@components/Spinner";
-
+import Styles from "@styles/table.module.css";
 import withAuth from "@utils/withAuth";
 import { deleteEntity } from "@utils/delete";
 
@@ -135,7 +135,7 @@ function AsignaturaListClient() {
   });
 
   return (
-    <div className="mt-5">
+    <div className={`${Styles.containerScale}`}>
       <h1 className="text-dark">Lista de Asignaturas</h1>
 
       <div className="d-flex justify-content-between align-items-center mb-3 mt-3 flex-wrap">

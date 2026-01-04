@@ -21,6 +21,7 @@ import withAuth from "@utils/withAuth";
 import { fetchDocentes } from "@api/docenteService";
 import { exportDocentesToPDF } from "@utils/ExportPDF/exportDocentePDF";
 import { deleteEntity } from "@utils/delete";
+import Styles from "@styles/table.module.css";
 
 function DocenteListClient() {
   const [page, setPage] = useState(1);
@@ -141,7 +142,7 @@ function DocenteListClient() {
   });
 
   return (
-    <div className="mt-5">
+    <div className={`${Styles.containerScale}`}>
       <h1 className="text-dark">Lista de Docentes</h1>
 
       {isError && (

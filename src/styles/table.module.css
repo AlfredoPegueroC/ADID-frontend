@@ -39,3 +39,11 @@
   border-bottom: 2px solid #16a1d8;
   outline: none;
 }
+
+@media (max-width: 1399px) {
+  .containerScale {
+    transform: scale(0.8);
+    transform-origin: top left;
+    width: 125%;
+  }
+}
