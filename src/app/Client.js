@@ -52,7 +52,7 @@ function PrincipalListClient() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [loadingPeriodos, setLoadingPeriodos] = useState(true);
   const [periodos, setPeriodos] = useState([]);
-
+  const [scale, setScale] = useState(1);
   const [sorting, setSorting] = useState([
     { id: "docenteNombre", desc: false },
   ]);
@@ -73,6 +73,17 @@ function PrincipalListClient() {
   /* ------ Restaurar/Guardar periodo en localStorage (por usuario) ------ */
   const restoredPeriodoRef = useRef(false);
   const [isPeriodoHydrated, setIsPeriodoHydrated] = useState(false);
+
+
+   useEffect(() => {
+    const handleResize = () => {
+      setScale(window.innerWidth < 1400 ? 0.8 : 1);
+    };
+
+    handleResize(); // inicial
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   // Restaurar SOLO una vez cuando el user esté disponible
   useEffect(() => {
@@ -110,7 +121,6 @@ function PrincipalListClient() {
         const periodosFinal = nombres.sort((a, b) => b.localeCompare(a, "es"));
         setPeriodos(periodosFinal);
 
-        // ✅ Solo establecer por defecto si ya se hidrató y no hay seleccionado
         if (isPeriodoHydrated && !selectedPeriodo && periodosFinal.length > 0) {
           const key = user?.username
             ? `selectedPeriodo_${user.username}`
@@ -306,7 +316,14 @@ function PrincipalListClient() {
 
   /* ------------------------ Render ------------------------ */
   return (
-    <div className="mt-4">
+    <div
+      className="mt-4"
+      style={{
+          transform: `scale(${scale})`,
+          transformOrigin: "top left",
+          width: scale < 1 ? `${100 / scale}%` : "100%",
+        }}
+    >
       <div className="d-flex flex-wrap gap-2 align-items-center mb-3">
         {(user?.groups[0] === "admin" || user?.groups[0] === "usuario") && (
           <>
