@@ -18,7 +18,7 @@ import {
   fetchDashboardAsignaturas,
 } from "@api/dashboardService";
 
-import { exportDashboardPdf } from "@utils/ExportPDF/exportToPDF.js";
+import { exportDashboardDataPdf } from "@utils/ExportPDF/exportpdf.js";
 import { useRef } from "react";
 
 ChartJS.register(
@@ -61,15 +61,16 @@ export default function ReportesDashboardPage() {
     <div ref={dashboardRef} className="container py-4">
       <h2 className="mb-4">📊 Reportes Académicos</h2>
       <button
-        className="btn btn-primary mb-4"
+        className="btn btn-danger mb-4"
         onClick={() =>
-          exportDashboardPdf({
-            element: dashboardRef.current,
-            filename: "reportes_academicos.pdf",
+          exportDashboardDataPdf({
+            profesores,
+            secciones,
+            asignaturas,
           })
         }
       >
-        Exportar Reportes a PDF
+       Exportar reportes a PDF
       </button>
       {/* PROFESORES */}
       <section className="mb-5">
@@ -96,7 +97,18 @@ export default function ReportesDashboardPage() {
                 <h6>Profesores por Asignatura (Top 10)</h6>
                 <div style={{ height: 300 }}>
                   <Bar
-                    data={profesores.profesoresPorAsignatura}
+                    data={{
+                      labels: profesores.profesoresPorAsignatura.labels.slice(
+                        0,
+                        10
+                      ),
+                      datasets: profesores.profesoresPorAsignatura.datasets.map(
+                        (ds) => ({
+                          ...ds,
+                          data: ds.data.slice(0, 10),
+                        })
+                      ),
+                    }}
                     options={options}
                   />
                 </div>
@@ -106,7 +118,7 @@ export default function ReportesDashboardPage() {
         </div>
       </section>
 
-            {/* SECCIONES */}
+      {/* SECCIONES */}
       <section className="mb-5">
         <h4 className="mb-3">🏫 Secciones</h4>
 
@@ -116,10 +128,7 @@ export default function ReportesDashboardPage() {
               <div className="card-body">
                 <h6>Secciones por Campus</h6>
                 <div style={{ height: 300 }}>
-                  <Bar
-                    data={secciones.seccionesPorCampus}
-                    options={options}
-                  />
+                  <Bar data={secciones.seccionesPorCampus} options={options} />
                 </div>
               </div>
             </div>
@@ -141,7 +150,7 @@ export default function ReportesDashboardPage() {
         </div>
       </section>
 
-            {/* ASIGNATURAS */}
+      {/* ASIGNATURAS */}
       <section className="mb-5">
         <h4 className="mb-3">📚 Asignaturas</h4>
 
@@ -178,4 +187,3 @@ export default function ReportesDashboardPage() {
     </div>
   );
 }
-

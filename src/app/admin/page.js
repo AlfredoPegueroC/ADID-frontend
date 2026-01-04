@@ -119,7 +119,7 @@ export default function DashboardPage() {
   );
 
   return (
-    <div ref={dashboardRef} className="container py-4">
+    <div className="container py-1">
       {/* Selector de período */}
       <div className="row g-3 align-items-end mb-3">
         <div className="col-md-4">
@@ -143,19 +143,19 @@ export default function DashboardPage() {
           </small>
         </div>
 
-        <button
-          className="btn btn-danger"
+        
+      </div>
+      <button
+          className="btn btn-danger mb-4"
           onClick={() =>
             exportDashboardPdf({
-              element: dashboardRef.current,
               filename: `dashboard_${selectedPeriodo || "actual"}.pdf`,
+              data,
             })
           }
         >
-          Exportar PDF
+          Exportar Reporte PDF
         </button>
-      </div>
-
       {/* Cards principales */}
       <div className="row g-3 mb-4">
         <DashboardCard
@@ -225,7 +225,7 @@ export default function DashboardPage() {
           <div className="card h-100">
             <div className="card-body">
               <h5 className="card-title">Docentes por Categoría</h5>
-              <div style={{ height: 300, width: 380 }}>
+              <div style={{ height: 300 }}>
                 <Pie data={data.docentesPorCategoria} options={options} />
               </div>
             </div>

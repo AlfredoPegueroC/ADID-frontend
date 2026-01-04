@@ -4,15 +4,15 @@ import autoTable from "jspdf-autotable";
 export function exportFacultadesToPDF(facultades, page, pageSize) {
   const doc = new jsPDF({ orientation: "landscape" });
 
-  // 🖼️ Logo en la parte superior derecha
+  //  Logo en la parte superior derecha
   doc.addImage("/LogoUASD.jpg", "jpg", 250, 11, 20, 20); // x, y, width, height
 
-  // 🏫 Nombre de la universidad alineado con el logo
+  // Nombre de la universidad alineado con el logo
   doc.setFontSize(14);
   doc.setFont("helvetica", "bold");
   doc.text("Universidad Autónoma de Santo Domingo", 14, 15);
 
-  // 📅 Fecha de creación
+  // Fecha de creación
   const fecha = new Date();
   const fechaVisible = fecha.toLocaleDateString();
   const fechaArchivo = `${fecha.getDate().toString().padStart(2, "0")}-${(fecha.getMonth() + 1)

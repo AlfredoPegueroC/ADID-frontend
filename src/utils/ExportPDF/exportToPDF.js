@@ -1,41 +1,109 @@
 import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
+import autoTable from "jspdf-autotable";
 
-export async function exportDashboardPdf({
-  element,
-  filename = "dashboard.pdf",
-  scale = 2,
-}) {
-  if (!element) return;
+export function exportDashboardPdf({ filename = "dashboard.pdf", data }) {
+  const doc = new jsPDF("p", "mm", "a4");
 
-  const canvas = await html2canvas(element, {
-    scale,
-    useCORS: true,
-    backgroundColor: "#ffffff",
+  const pageWidth = doc.internal.pageSize.getWidth();
+
+
+  const drawHeader = () => {
+    // Logo
+    doc.addImage("/LogoUASD.jpg", "jpg", pageWidth - 30, 10, 20, 20);
+
+    // Universidad
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(14);
+    doc.text("Universidad Autónoma de Santo Domingo", 14, 16);
+
+    // Fecha
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.text(`Fecha de creación: ${new Date().toLocaleDateString()}`, 14, 22);
+
+    // Línea
+    doc.setLineWidth(0.5);
+    doc.line(14, 32, pageWidth - 14, 32);
+  };
+
+  drawHeader();
+
+  let y = 45;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(16);
+  doc.text("Dashboard Académico", 14, y);
+
+  y += 8;
+  doc.setFontSize(11);
+  doc.setFont("helvetica", "normal");
+  doc.text(`Período: ${data.periodoActual ?? "Actual"}`, 14, y);
+
+  y += 16;
+
+
+  doc.text("Resumen General", 14, y);
+  y += 4;
+  autoTable(doc, {
+    startY: y,
+    head: [["Indicador", "Total"]],
+    body: [
+      ["Asignaciones", data.totalAsignaciones],
+      ["Docentes", data.totalDocentes],
+      ["Asignaturas", data.totalAsignaturas],
+      ["Facultades", data.totalFacultades],
+      ["Campus", data.totalCampus],
+      ["Categorías", data.totalCategorias],
+      ["Tipos de Asignaturas", data.totalTiposDocente]
+    ],
+    margin: { top: 45 },
+    headStyles: { fillColor: [41, 128, 185] },
   });
 
-  const imgData = canvas.toDataURL("image/png");
+  y = doc.lastAutoTable.finalY + 12;
 
-  const pdf = new jsPDF("p", "mm", "a4");
+  // =========================
+  // PROFESORES POR CAMPUS
+  // =========================
 
-  const pageWidth = pdf.internal.pageSize.getWidth();
-  const pageHeight = pdf.internal.pageSize.getHeight();
+  y += 4;
+  autoTable(doc, {
+    startY: y,
+    head: [["Campus", "Profesores"]],
+    pageBreak: "always",
+    body: data.profesoresPorCampus.map((r) => [
+      r.campus || "No definido",
+      r.total,
+    ]),
+    margin: { top: 45 },
+    didDrawPage: () => {
+      drawHeader();
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(13);
+      doc.text("Profesores por Campus", 14, 38);
+    },
+  });
 
-  const imgWidth = pageWidth;
-  const imgHeight = (canvas.height * imgWidth) / canvas.width;
+  // =========================
+  // DOCENTES POR SEMESTRE
+  // =========================
+ 
+  y += 4;
+  autoTable(doc, {
+    startY: y,
+    pageBreak: "always",
+    head: [["Semestre", "Docentes"]],
+    body: data.docentesPorSemestre.map((r) => [
+      r.periodo || "No definido",
+      r.total,
+    ]),
+    margin: { top: 45 },
+    didDrawPage: () => {
+      drawHeader();
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(13);
+      doc.text("Docentes por Semestre", 14, 38);
+    },
+  });
 
-  let heightLeft = imgHeight;
-  let position = 0;
-
-  pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-  heightLeft -= pageHeight;
-
-  while (heightLeft > 0) {
-    position = heightLeft - imgHeight;
-    pdf.addPage();
-    pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-    heightLeft -= pageHeight;
-  }
-
-  pdf.save(filename);
+  doc.save(filename);
 }
