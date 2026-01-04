@@ -252,7 +252,7 @@ export default function DashboardPage() {
                 <p className="text-muted m-0">Sin datos</p>
               ) : (
                 <div
-                  className="table-responsive flex-grow-1"
+                  className="table-responsive grow"
                   style={{ maxHeight: 360 }}
                 >
                   <table className="table table-sm align-middle">
@@ -298,7 +298,7 @@ export default function DashboardPage() {
                 <p className="text-muted m-0">Sin datos</p>
               ) : (
                 <div
-                  className="table-responsive flex-grow-1"
+                  className="table-responsive grow"
                   style={{ maxHeight: 360 }}
                 >
                   <table className="table table-sm align-middle">
