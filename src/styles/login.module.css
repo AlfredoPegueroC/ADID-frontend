@@ -96,3 +96,11 @@
   margin-top: 32.3px;
   color: #fff;
 } 
+
+/* @media (max-width: 1399px) {
+  .containerScale {
+    transform: scale(0.8);
+    transform-origin: top left;
+    width: 125%;
+  }
+} */
