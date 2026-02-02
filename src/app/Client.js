@@ -318,11 +318,7 @@ function PrincipalListClient() {
   return (
     <div
       className="mt-4"
-      style={{
-          transform: `scale(${scale})`,
-          transformOrigin: "top left",
-          width: scale < 1 ? `${100 / scale}%` : "100%",
-        }}
+      
     >
       <div className="d-flex flex-wrap gap-2 align-items-center mb-3">
         {(user?.groups[0] === "admin" || user?.groups[0] === "usuario") && (
