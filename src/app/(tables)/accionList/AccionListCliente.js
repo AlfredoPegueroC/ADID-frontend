@@ -21,9 +21,9 @@ import Spinner from "@components/Spinner";
 import withAuth from "@utils/withAuth";
 import { deleteEntity } from "@utils/delete";
 import Styles from "@styles/table.module.css";
-// Ajusta estos imports a tus rutas reales
+
 import { fetchAcciones } from "@api/accionesService";
-// import { exportAccionToPDF } from "@utils/ExportPDF/exportAccionPDF";
+
 
 function AccionListClient() {
   const [page, setPage] = useState(1);
